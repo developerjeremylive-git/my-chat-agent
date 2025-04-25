@@ -4,6 +4,7 @@ import { useAgentChat } from "agents/ai-react";
 import type { Message } from "@ai-sdk/react";
 import { APPROVAL } from "./shared";
 import type { tools } from "./tools";
+import { availableModels, updateModel } from "./server";
 
 // Component imports
 import { Button } from "@/components/button/Button";
@@ -12,6 +13,7 @@ import { Input } from "@/components/input/Input";
 import { Avatar } from "@/components/avatar/Avatar";
 import { Toggle } from "@/components/toggle/Toggle";
 import { Tooltip } from "@/components/tooltip/Tooltip";
+import { Select } from "@/components/select/Select";
 
 // Icon imports
 import {
@@ -29,6 +31,12 @@ const toolsRequiringConfirmation: (keyof typeof tools)[] = [
 ];
 
 export default function Chat() {
+  const [selectedModel, setSelectedModel] = useState(availableModels[11].id);
+
+  const handleModelChange = (modelId: string) => {
+    setSelectedModel(modelId);
+    updateModel(modelId);
+  };
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     // Check localStorage first, default to dark if not found
     const savedTheme = localStorage.getItem("theme");
@@ -128,13 +136,24 @@ export default function Chat() {
             <h2 className="font-semibold text-base">AI Chat Agent</h2>
           </div>
 
-          <div className="flex items-center gap-2 mr-2">
-            <Bug size={16} />
-            <Toggle
-              toggled={showDebug}
-              aria-label="Toggle debug mode"
-              onClick={() => setShowDebug((prev) => !prev)}
+          <div className="flex items-center gap-4 mr-2">
+            <Select
+              value={selectedModel}
+              onChange={handleModelChange}
+              options={availableModels.filter(m => m.status === "active").map(m => ({
+                value: m.id,
+                label: m.name
+              }))}
+              className="w-48"
             />
+            <div className="flex items-center gap-2">
+              <Bug size={16} />
+              <Toggle
+                toggled={showDebug}
+                aria-label="Toggle debug mode"
+                onClick={() => setShowDebug((prev) => !prev)}
+              />
+            </div>
           </div>
 
           <Button
