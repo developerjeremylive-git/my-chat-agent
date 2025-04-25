@@ -15,7 +15,8 @@ import { tools, executions } from "./tools";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { env } from "cloudflare:workers";
 const workersai = createWorkersAI({ binding: env.AI });
-const model = workersai("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b")
+// const model = workersai("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b")
+const model = workersai("@cf/meta/llama-3-8b-instruct")
 // Cloudflare AI Gateway
 // const openai = createOpenAI({
 //   apiKey: env.OPENAI_API_KEY,
