@@ -74,16 +74,41 @@ If the user asks to schedule a task, use the schedule tool to schedule the task.
       return dataStreamResponse;
     });
   }
+  private scheduledTasks: Map<string, { description: string; task: Schedule<string>; executionTime: Date }> = new Map();
+
   async executeTask(description: string, task: Schedule<string>) {
+    const taskId = generateId();
+    const executionTime = new Date();
+    
+    // Almacenar la tarea programada
+    this.scheduledTasks.set(taskId, {
+      description,
+      task,
+      executionTime
+    });
+
+    // Registrar la ejecución de la tarea
     await this.saveMessages([
       ...this.messages,
       {
-        id: generateId(),
+        id: taskId,
         role: "user",
         content: `Running scheduled task: ${description}`,
-        createdAt: new Date(),
+        createdAt: executionTime,
       },
     ]);
+
+    // Ejecutar la lógica específica de la tarea aquí
+    try {
+      // Implementar la lógica de notificación o acción específica
+      console.log(`Executing task: ${description} at ${executionTime}`);
+      
+      // Limpiar la tarea después de la ejecución
+      this.scheduledTasks.delete(taskId);
+    } catch (error) {
+      console.error(`Error executing task ${taskId}:`, error);
+      throw error;
+    }
   }
 }
 
