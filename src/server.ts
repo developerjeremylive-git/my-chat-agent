@@ -15,8 +15,31 @@ import { tools, executions } from "./tools";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { env } from "cloudflare:workers";
 const workersai = createWorkersAI({ binding: env.AI });
+
+// error
+// const model = workersai("@cf/meta/llama-4-scout-17b-16e-instruct");
+// const model = workersai("@cf/mistralai/mistral-small-3.1-24b-instruct");
+// const model = workersai("@cf/meta/llama-guard-3-8b");
+// const model = workersai("@cf/meta/llama-3.2-11b-vision-instruct");
+// const model = workersai("@cf/qwen/qwen2.5-coder-32b-instruct");
+// const model = workersai("@cf/qwen/qwq-32b");
+
+//funcionando
 // const model = workersai("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b");
-const model = workersai("@cf/meta/llama-4-scout-17b-16e-instruct");
+// const model = workersai("@cf/google/gemma-7b-it-lora");
+// const model = workersai("@hf/mistral/mistral-7b-instruct-v0.2");
+// const model = workersai("@cf/fblgit/una-cybertron-7b-v2-bf16");
+// const model = workersai("@cf/meta/llama-3-8b-instruct");
+// const model = workersai("@cf/meta/llama-3-8b-instruct-awq");
+// const model = workersai("@hf/meta-llama/meta-llama-3-8b-instruct");
+// const model = workersai("@cf/meta/llama-3.1-8b-instruct");
+// const model = workersai("@cf/meta/llama-3.1-8b-instruct-fp8");
+// const model = workersai("@cf/meta/llama-3.1-8b-instruct-awq");
+// const model = workersai("@cf/meta/llama-3.2-3b-instruct");
+const model = workersai("@cf/meta/llama-3.2-1b-instruct");
+// const model = workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+
+
 // Cloudflare AI Gateway
 // const openai = createOpenAI({
 //   apiKey: env.OPENAI_API_KEY,
