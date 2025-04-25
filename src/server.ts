@@ -48,30 +48,20 @@ export class Chat extends AIChatAgent<Env> {
             executions,
           });
 
-          // Stream the AI response using the model
+          // Stream the AI response using GPT-4
           const result = streamText({
             model,
-            system: `You are a helpful assistant that can perform various tasks.
+            system: `You are a helpful assistant that can do various tasks... 
 
 ${unstable_getSchedulePrompt({ date: new Date() })}
 
-If the user requests to schedule a task, use the scheduling tool to schedule the task.
-
-Remember:
-- Provide clear and concise responses
-- Do not repeat information unnecessarily
-- Maintain a professional and friendly tone
+If the user asks to schedule a task, use the schedule tool to schedule the task.
 `,
             messages: processedMessages,
             tools,
-            onFinish: (result) => {
-              // Asegurarse de que solo se envíe una respuesta
-              if (onFinish && !result.isPartial) {
-                onFinish(result);
-              }
-            },
+            onFinish,
             onError: (error) => {
-              console.error("Error durante el streaming:", error);
+              console.error("Error while streaming:", error);
             },
             maxSteps: 10,
           });
