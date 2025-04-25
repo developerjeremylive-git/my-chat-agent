@@ -14,9 +14,11 @@ import { processToolCalls } from "./utils";
 import { tools, executions } from "./tools";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { env } from "cloudflare:workers";
+
+type TextGenerationModels = "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b" | "@cf/google/gemma-7b-it-lora" | "@hf/mistral/mistral-7b-instruct-v0.2" | "@cf/fblgit/una-cybertron-7b-v2-bf16" | "@cf/meta/llama-3-8b-instruct" | "@cf/meta/llama-3-8b-instruct-awq" | "@hf/meta-llama/meta-llama-3-8b-instruct" | "@cf/meta/llama-3.1-8b-instruct" | "@cf/meta/llama-3.1-8b-instruct-fp8" | "@cf/meta/llama-3.1-8b-instruct-awq" | "@cf/meta/llama-3.2-3b-instruct" | "@cf/meta/llama-3.2-1b-instruct" | "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 const workersai = createWorkersAI({ binding: env.AI });
 
-export const availableModels = [
+export const availableModels: { id: TextGenerationModels; name: string; status: string; }[] = [
   // Modelos con error
   // { id: "@cf/meta/llama-4-scout-17b-16e-instruct", name: "Llama 4 Scout 17B", status: "error" },
   // { id: "@cf/mistralai/mistral-small-3.1-24b-instruct", name: "Mistral Small 3.1 24B", status: "error" },
@@ -41,9 +43,9 @@ export const availableModels = [
   { id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", name: "Llama 3.3 70B Instruct FP8 Fast", status: "active" },
 ];
 
-export let model = workersai(availableModels[11].id); // Default model
+export let model = workersai(availableModels[11].id as TextGenerationModels); // Default model
 
-export function updateModel(modelId: string) {
+export function updateModel(modelId: TextGenerationModels) {
   model = workersai(modelId);
 }
 

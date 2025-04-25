@@ -31,9 +31,12 @@ const toolsRequiringConfirmation: (keyof typeof tools)[] = [
 ];
 
 export default function Chat() {
-  const [selectedModel, setSelectedModel] = useState(availableModels[11].id);
+  const [selectedModel, setSelectedModel] = useState<TextGenerationModels>(availableModels[11].id);
 
-  const handleModelChange = (modelId: string) => {
+  type TextGenerationModels = "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b" | "@cf/google/gemma-7b-it-lora" | "@hf/mistral/mistral-7b-instruct-v0.2" | "@cf/fblgit/una-cybertron-7b-v2-bf16" | "@cf/meta/llama-3-8b-instruct" | "@cf/meta/llama-3-8b-instruct-awq" | "@hf/meta-llama/meta-llama-3-8b-instruct" | "@cf/meta/llama-3.1-8b-instruct" | "@cf/meta/llama-3.1-8b-instruct-fp8" | "@cf/meta/llama-3.1-8b-instruct-awq" | "@cf/meta/llama-3.2-3b-instruct" | "@cf/meta/llama-3.2-1b-instruct" | "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+
+
+  const handleModelChange = (modelId: TextGenerationModels) => {
     setSelectedModel(modelId);
     updateModel(modelId);
   };
