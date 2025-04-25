@@ -12,16 +12,18 @@ export default defineConfig({
     },
   },
   build: {
-    rollupOptions: {
-      external: [
-        'node:async_hooks',
-        'cloudflare:workers'
-      ]
-    },
     target: 'esnext',
-    modulePreload: false
+    modulePreload: false,
+    rollupOptions: {
+      output: {
+        format: 'es'
+      }
+    }
   },
   optimizeDeps: {
     exclude: ['node:async_hooks', 'cloudflare:workers']
+  },
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
   }
 });
