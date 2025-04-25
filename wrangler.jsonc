@@ -23,4 +23,7 @@
       "new_sqlite_classes": ["Chat"],
     },
   ],
+  "ai": {
+    "binding": "AI"
+  }
 }

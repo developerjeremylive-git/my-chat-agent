@@ -9,13 +9,13 @@ import {
   streamText,
   type StreamTextOnFinishCallback,
 } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { createWorkersAI } from 'workers-ai-provider';
 import { processToolCalls } from "./utils";
 import { tools, executions } from "./tools";
 import { AsyncLocalStorage } from "node:async_hooks";
-// import { env } from "cloudflare:workers";
-
-const model = openai("gpt-4o-2024-11-20");
+import { env } from "cloudflare:workers";
+const workersai = createWorkersAI({ binding: env.AI });
+const model = workersai("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b")
 // Cloudflare AI Gateway
 // const openai = createOpenAI({
 //   apiKey: env.OPENAI_API_KEY,
