@@ -36,7 +36,8 @@ const workersai = createWorkersAI({ binding: env.AI });
 // const model = workersai("@cf/meta/llama-3.1-8b-instruct-fp8");
 // const model = workersai("@cf/meta/llama-3.1-8b-instruct-awq");
 // const model = workersai("@cf/meta/llama-3.2-3b-instruct");
-const model = workersai("@cf/meta/llama-3.2-1b-instruct");
+let currentModel = "@cf/meta/llama-3.2-1b-instruct";
+let model = workersai(currentModel);
 // const model = workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
 
 
@@ -117,6 +118,16 @@ If the user asks to schedule a task, use the schedule tool to schedule the task.
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const url = new URL(request.url);
+
+    if (url.pathname === "/api/set-model") {
+      if (request.method !== "POST") {
+        return new Response("Method not allowed", { status: 405 });
+      }
+      const body = await request.json();
+      currentModel = body.model;
+      model = workersai(currentModel);
+      return Response.json({ success: true });
+    }
 
     if (url.pathname === "/check-open-ai-key") {
       const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
