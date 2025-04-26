@@ -4,8 +4,7 @@ import { useAgentChat } from "agents/ai-react";
 import type { Message } from "@ai-sdk/react";
 import { APPROVAL } from "./shared";
 import type { tools } from "./tools";
-import { ModelConfig } from "@/components/model-config/ModelConfig";
-import { ModelConfigProvider } from "@/providers/ModelConfigProvider";
+
 // Component imports
 import { Button } from "@/components/button/Button";
 import { Card } from "@/components/card/Card";
@@ -22,7 +21,6 @@ import {
   Robot,
   Sun,
   Trash,
-  Gear,
 } from "@phosphor-icons/react";
 
 // List of tools that require human confirmation
@@ -37,13 +35,7 @@ export default function Chat() {
     return (savedTheme as "dark" | "light") || "dark";
   });
   const [showDebug, setShowDebug] = useState(false);
-  const [showModelConfig, setShowModelConfig] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const handleModelConfigSave = (config: any) => {
-    // Aquí implementaremos la lógica para actualizar la configuración del modelo
-    console.log('Nueva configuración:', config);
-  };
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -110,8 +102,7 @@ export default function Chat() {
   };
 
   return (
-    <ModelConfigProvider>
-      <div className="h-[100vh] w-full p-4 flex justify-center items-center bg-fixed overflow-hidden">
+    <div className="h-[100vh] w-full p-4 flex justify-center items-center bg-fixed overflow-hidden">
       {/* <HasOpenAIKey /> */}
       <div className="h-[calc(100vh-2rem)] w-full mx-auto max-w-lg flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800">
         <div className="px-4 py-3 border-b border-neutral-300 dark:border-neutral-800 flex items-center gap-3 sticky top-0 z-10">
@@ -140,30 +131,21 @@ export default function Chat() {
           <div className="flex items-center gap-2 mr-2">
             <Bug size={16} />
             <Toggle
-              pressed={showDebug}
-              onPressedChange={setShowDebug}
-              tooltip="Show Debug"
+              toggled={showDebug}
               aria-label="Toggle debug mode"
+              onClick={() => setShowDebug((prev) => !prev)}
             />
           </div>
 
-          <Toggle
-            pressed={theme === "dark"}
-            onPressedChange={toggleTheme}
-            tooltip={theme === "dark" ? "Light Mode" : "Dark Mode"}
-            icon={theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-          />
-          <Toggle
-            pressed={showModelConfig}
-            onPressedChange={setShowModelConfig}
-            tooltip="AI Model Config"
-            icon={<Gear size={20} />}
-          />
-          <ModelConfig
-            isOpen={showModelConfig}
-            onClose={() => setShowModelConfig(false)}
-            onSave={handleModelConfigSave}
-          />
+          <Button
+            variant="ghost"
+            size="md"
+            shape="square"
+            className="rounded-full h-9 w-9"
+            onClick={toggleTheme}
+          >
+            {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+          </Button>
 
           <Button
             variant="ghost"
@@ -410,7 +392,6 @@ export default function Chat() {
         </form>
       </div>
     </div>
-    </ModelConfigProvider>
   );
 }
 
