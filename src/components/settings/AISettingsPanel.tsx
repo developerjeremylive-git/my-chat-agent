@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/button/Button';
 import { Card } from '@/components/card/Card';
-import { Gear, X } from '@phosphor-icons/react';
+import { X } from '@phosphor-icons/react';
+import { useAIConfig } from '@/contexts/AIConfigContext';
 
 interface AIModelConfig {
   temperature: number;
@@ -70,21 +70,14 @@ interface AISettingsPanelProps {
 }
 
 export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
-  const [config, setConfig] = useState<AIModelConfig>(() => {
-    const savedConfig = localStorage.getItem('modelConfig');
-    return savedConfig ? JSON.parse(savedConfig) : presets[3].config; // Balanceado por defecto
-  });
-
-  useEffect(() => {
-    localStorage.setItem('modelConfig', JSON.stringify(config));
-  }, [config]);
+  const { config, setConfig } = useAIConfig();
 
   const handlePresetSelect = (preset: PresetConfig) => {
     setConfig(preset.config);
   };
 
   const handleSliderChange = (key: keyof AIModelConfig, value: number) => {
-    setConfig(prev => ({ ...prev, [key]: value }));
+    setConfig({ ...config, [key]: value });
   };
 
   if (!isOpen) return null;

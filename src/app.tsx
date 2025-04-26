@@ -4,6 +4,7 @@ import { useAgentChat } from "agents/ai-react";
 import type { Message } from "@ai-sdk/react";
 import { APPROVAL } from "./shared";
 import type { tools } from "./tools";
+import { AIConfigProvider, useAIConfig } from "@/contexts/AIConfigContext";
 
 // Component imports
 import { Button } from "@/components/button/Button";
@@ -30,7 +31,8 @@ const toolsRequiringConfirmation: (keyof typeof tools)[] = [
   "getWeatherInformation",
 ];
 
-export default function Chat() {
+function ChatComponent() {
+  const { config } = useAIConfig();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     // Check localStorage first, default to dark if not found
@@ -70,6 +72,13 @@ export default function Chat() {
 
   const agent = useAgent({
     agent: "chat",
+    config: {
+      temperature: config.temperature,
+      maxTokens: config.maxTokens,
+      topP: config.topP,
+      frequencyPenalty: config.frequencyPenalty,
+      presencePenalty: config.presencePenalty
+    }
   });
 
   const {
@@ -410,6 +419,14 @@ export default function Chat() {
         onClose={() => setIsSettingsOpen(false)}
       />
     </div>
+  );
+}
+
+export default function Chat() {
+  return (
+    <AIConfigProvider>
+      <ChatComponent />
+    </AIConfigProvider>
   );
 }
 
