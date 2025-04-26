@@ -21,7 +21,7 @@ type ModelConfig = {
 };
 
 const defaultConfig: ModelConfig = {
-  max_tokens: 3256,
+  max_tokens: 256,
   temperature: 0.6,
   top_p: 1,
   top_k: 40,
