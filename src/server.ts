@@ -73,8 +73,28 @@ export class Chat extends AIChatAgent<Env> {
           });
 
           // Stream the AI response using GPT-4
+          // Obtener la configuración guardada del modelo
+          const savedConfig = localStorage.getItem('modelConfig');
+          const modelConfig = savedConfig ? JSON.parse(savedConfig) : {
+            temperature: 0.7,
+            maxTokens: 2048,
+            topP: 0.95,
+            frequencyPenalty: 0.0,
+            presencePenalty: 0.0
+          };
+
+          // Mapear los nombres de las propiedades al formato esperado por el modelo
+          const mappedConfig = {
+            temperature: modelConfig.temperature,
+            maxTokens: modelConfig.max_tokens,
+            topP: modelConfig.top_p,
+            frequencyPenalty: modelConfig.frequency_penalty,
+            presencePenalty: modelConfig.presence_penalty
+          };
+
           const result = streamText({
             model,
+            ...mappedConfig,
             system: `You are a helpful assistant that can do various tasks... 
 
 ${unstable_getSchedulePrompt({ date: new Date() })}
