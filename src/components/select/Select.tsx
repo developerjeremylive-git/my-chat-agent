@@ -3,26 +3,25 @@ import { useState } from "react";
 
 export type OptionProps = {
   value: string;
-  label: string;
 };
 
-export type SelectProps<T = string> = {
+export type SelectProps = {
   className?: string;
-  options: { value: T; label: string }[];
+  options: OptionProps[];
   placeholder?: string;
-  onChange: (value: T) => void;
+  setValue: (value: string) => void;
   size?: "sm" | "md" | "base";
-  value: T;
+  value: string;
 };
 
-export const Select = <T extends string = string>({
+export const Select = ({
   className,
   options,
   placeholder,
+  setValue,
   size = "base",
   value,
-  onChange,
-}: SelectProps<T>) => {
+}: SelectProps) => {
   const [isPointer, setIsPointer] = useState(false); // if user is using a pointer device
 
   return (
@@ -50,8 +49,8 @@ export const Select = <T extends string = string>({
           size === "base" ? "16px" : size === "md" ? "14px" : "12px",
       }}
       onChange={(e) => {
+        setValue(e.target.value);
         e.target.blur();
-        onChange(e.target.value as T);
       }}
       value={value}
     >
@@ -59,7 +58,7 @@ export const Select = <T extends string = string>({
       {options.map((option, index) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: TODO
         <option value={option.value} key={index}>
-          {option.label}
+          {option.value}
         </option>
       ))}
     </select>
