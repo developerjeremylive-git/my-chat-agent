@@ -80,6 +80,7 @@ function ChatComponent() {
       presencePenalty: config.presencePenalty
     }
   });
+  console.log('Configuración del agente tokens:', config.maxTokens);
 
   const {
     messages: agentMessages,

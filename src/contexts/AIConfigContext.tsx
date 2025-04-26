@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
 
-interface AIModelConfig {
+export interface AIModelConfig {
   temperature: number;
   maxTokens: number;
   topP: number;
@@ -9,39 +9,43 @@ interface AIModelConfig {
   presencePenalty: number;
 }
 
-interface AIConfigContextType {
+export interface AIConfigContextType {
   config: AIModelConfig;
   setConfig: (config: AIModelConfig) => void;
 }
 
-const AIConfigContext = createContext<AIConfigContextType | undefined>(undefined);
+const AIConfigContext = createContext<AIConfigContextType | undefined>(
+  undefined
+);
 
 export function useAIConfig() {
   const context = useContext(AIConfigContext);
   if (!context) {
-    throw new Error('useAIConfig debe ser usado dentro de un AIConfigProvider');
+    throw new Error("useAIConfig debe ser usado dentro de un AIConfigProvider");
   }
   return context;
 }
 
-interface AIConfigProviderProps {
+export interface AIConfigProviderProps {
   children: ReactNode;
 }
 
 export function AIConfigProvider({ children }: AIConfigProviderProps) {
   const [config, setConfig] = useState<AIModelConfig>(() => {
-    const savedConfig = localStorage.getItem('modelConfig');
-    return savedConfig ? JSON.parse(savedConfig) : {
-      temperature: 0.7,
-      maxTokens: 2048,
-      topP: 0.9,
-      frequencyPenalty: 0.3,
-      presencePenalty: 0.3
-    };
+    const savedConfig = localStorage.getItem("modelConfig");
+    return savedConfig
+      ? JSON.parse(savedConfig)
+      : {
+          temperature: 0.7,
+          maxTokens: 2048,
+          topP: 0.9,
+          frequencyPenalty: 0.3,
+          presencePenalty: 0.3,
+        };
   });
 
   useEffect(() => {
-    localStorage.setItem('modelConfig', JSON.stringify(config));
+    localStorage.setItem("modelConfig", JSON.stringify(config));
   }, [config]);
 
   return (
