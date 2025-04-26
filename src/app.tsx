@@ -78,6 +78,11 @@ function ChatComponent() {
       topP: config.topP,
       frequencyPenalty: config.frequencyPenalty,
       presencePenalty: config.presencePenalty
+    },
+    stream: true,
+    onStreamEnd: () => {
+      // Manejar el final del stream solo cuando se alcanza el límite de tokens
+      console.log('Stream finalizado por límite de tokens');
     }
   });
   console.log('Configuración del agente tokens:', config.maxTokens);
