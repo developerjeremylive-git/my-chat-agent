@@ -17,11 +17,6 @@ export default defineConfig({
         'node:async_hooks',
         'cloudflare:workers'
       ]
-    },
-    target: 'esnext',
-    modulePreload: false
-  },
-  optimizeDeps: {
-    exclude: ['node:async_hooks', 'cloudflare:workers']
+    }
   }
 });
