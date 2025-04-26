@@ -16,36 +16,28 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { env } from "cloudflare:workers";
 const workersai = createWorkersAI({ binding: env.AI });
 
-export const availableModels = [
-  // Modelos con error
-  // { id: "@cf/meta/llama-4-scout-17b-16e-instruct", name: "Llama 4 Scout 17B", status: "error" },
-  // { id: "@cf/mistralai/mistral-small-3.1-24b-instruct", name: "Mistral Small 3.1 24B", status: "error" },
-  // { id: "@cf/meta/llama-guard-3-8b", name: "Llama Guard 3.8B", status: "error" },
-  // { id: "@cf/meta/llama-3.2-11b-vision-instruct", name: "Llama 3.2 11B Vision", status: "error" },
-  // { id: "@cf/qwen/qwen2.5-coder-32b-instruct", name: "Qwen 2.5 Coder 32B", status: "error" },
-  // { id: "@cf/qwen/qwq-32b", name: "QWQ 32B", status: "error" },
+// error
+// const model = workersai("@cf/meta/llama-4-scout-17b-16e-instruct");
+// const model = workersai("@cf/mistralai/mistral-small-3.1-24b-instruct");
+// const model = workersai("@cf/meta/llama-guard-3-8b");
+// const model = workersai("@cf/meta/llama-3.2-11b-vision-instruct");
+// const model = workersai("@cf/qwen/qwen2.5-coder-32b-instruct");
+// const model = workersai("@cf/qwen/qwq-32b");
 
-  // Modelos funcionando
-  { id: "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b", name: "Deepseek R1 Distill Qwen 32B", status: "active" },
-  { id: "@cf/google/gemma-7b-it-lora", name: "Gemma 7B IT LoRA", status: "active" },
-  { id: "@hf/mistral/mistral-7b-instruct-v0.2", name: "Mistral 7B Instruct v0.2", status: "active" },
-  { id: "@cf/fblgit/una-cybertron-7b-v2-bf16", name: "Una Cybertron 7B v2", status: "active" },
-  { id: "@cf/meta/llama-3-8b-instruct", name: "Llama 3 8B Instruct", status: "active" },
-  { id: "@cf/meta/llama-3-8b-instruct-awq", name: "Llama 3 8B Instruct AWQ", status: "active" },
-  { id: "@hf/meta-llama/meta-llama-3-8b-instruct", name: "Meta Llama 3 8B Instruct", status: "active" },
-  { id: "@cf/meta/llama-3.1-8b-instruct", name: "Llama 3.1 8B Instruct", status: "active" },
-  { id: "@cf/meta/llama-3.1-8b-instruct-fp8", name: "Llama 3.1 8B Instruct FP8", status: "active" },
-  { id: "@cf/meta/llama-3.1-8b-instruct-awq", name: "Llama 3.1 8B Instruct AWQ", status: "active" },
-  { id: "@cf/meta/llama-3.2-3b-instruct", name: "Llama 3.2 3B Instruct", status: "active" },
-  { id: "@cf/meta/llama-3.2-1b-instruct", name: "Llama 3.2 1B Instruct", status: "active" },
-  { id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", name: "Llama 3.3 70B Instruct FP8 Fast", status: "active" },
-];
-
-export let model = workersai(availableModels[11].id); // Default model
-
-export function updateModel(modelId: string) {
-  model = workersai(modelId);
-}
+//funcionando
+// const model = workersai("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b");
+// const model = workersai("@cf/google/gemma-7b-it-lora");
+// const model = workersai("@hf/mistral/mistral-7b-instruct-v0.2");
+// const model = workersai("@cf/fblgit/una-cybertron-7b-v2-bf16");
+// const model = workersai("@cf/meta/llama-3-8b-instruct");
+// const model = workersai("@cf/meta/llama-3-8b-instruct-awq");
+// const model = workersai("@hf/meta-llama/meta-llama-3-8b-instruct");
+// const model = workersai("@cf/meta/llama-3.1-8b-instruct");
+// const model = workersai("@cf/meta/llama-3.1-8b-instruct-fp8");
+// const model = workersai("@cf/meta/llama-3.1-8b-instruct-awq");
+// const model = workersai("@cf/meta/llama-3.2-3b-instruct");
+const model = workersai("@cf/meta/llama-3.2-1b-instruct");
+// const model = workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
 
 
 // Cloudflare AI Gateway
