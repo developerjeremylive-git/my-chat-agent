@@ -12,6 +12,7 @@ import { Input } from "@/components/input/Input";
 import { Avatar } from "@/components/avatar/Avatar";
 import { Toggle } from "@/components/toggle/Toggle";
 import { Tooltip } from "@/components/tooltip/Tooltip";
+import { AISettingsPanel } from "@/components/settings/AISettingsPanel";
 
 // Icon imports
 import {
@@ -21,6 +22,7 @@ import {
   Robot,
   Sun,
   Trash,
+  Gear,
 } from "@phosphor-icons/react";
 
 // List of tools that require human confirmation
@@ -29,6 +31,7 @@ const toolsRequiringConfirmation: (keyof typeof tools)[] = [
 ];
 
 export default function Chat() {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     // Check localStorage first, default to dark if not found
     const savedTheme = localStorage.getItem("theme");
@@ -136,6 +139,16 @@ export default function Chat() {
               onClick={() => setShowDebug((prev) => !prev)}
             />
           </div>
+
+          <Button
+            variant="ghost"
+            size="md"
+            shape="square"
+            className="rounded-full h-9 w-9"
+            onClick={() => setIsSettingsOpen(true)}
+          >
+            <Gear size={20} />
+          </Button>
 
           <Button
             variant="ghost"
@@ -391,6 +404,11 @@ export default function Chat() {
           </div>
         </form>
       </div>
+
+      <AISettingsPanel
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </div>
   );
 }
