@@ -16,6 +16,8 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { env } from "cloudflare:workers";
 const workersai = createWorkersAI({ binding: env.AI });
 
+// Stream the AI response using GPT-4
+import { config } from './contexts/config';
 // error
 // const model = workersai("@cf/meta/llama-4-scout-17b-16e-instruct");
 // const model = workersai("@cf/mistralai/mistral-small-3.1-24b-instruct");
@@ -72,9 +74,9 @@ export class Chat extends AIChatAgent<Env> {
             executions,
           });
 
-          // Stream the AI response using GPT-4
           const result = streamText({
             model,
+            maxTokens: config.maxTokens,
             system: `You are a helpful assistant that can do various tasks... 
 
 ${unstable_getSchedulePrompt({ date: new Date() })}
@@ -86,8 +88,7 @@ If the user asks to schedule a task, use the schedule tool to schedule the task.
             onFinish,
             onError: (error) => {
               console.error("Error while streaming:", error);
-            },
-            maxSteps: 10,
+            }
           });
 
           // Merge the AI response stream with tool execution outputs
