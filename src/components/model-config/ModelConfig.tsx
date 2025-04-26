@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Modal } from '@/components/modal/Modal';
 import { Input } from '@/components/input/Input';
 import { Button } from '@/components/button/Button';
+import { useModelConfig } from '@/providers/ModelConfigProvider';
 
 type ModelConfigProps = {
   isOpen: boolean;
@@ -30,9 +31,10 @@ const defaultConfig: ModelConfig = {
 };
 
 export function ModelConfig({ isOpen, onClose, onSave }: ModelConfigProps) {
-  const [config, setConfig] = useState<ModelConfig>(defaultConfig);
+  const { config, updateConfig } = useModelConfig();
 
   const handleSave = () => {
+    updateConfig(config);
     onSave(config);
     onClose();
   };
@@ -44,22 +46,22 @@ export function ModelConfig({ isOpen, onClose, onSave }: ModelConfigProps) {
         <div>
           <label className="text-sm font-medium">Tokens Máximos</label>
           <Input
-            onValueChange={(value) => setConfig({ ...config, max_tokens: Number(value) })}
+            onValueChange={(value) => updateConfig({ ...config, max_tokens: Number(value) })}
             type="number"
             value={config.max_tokens}
-            onChange={(e) => setConfig({ ...config, max_tokens: Number(e.target.value) })}
+            onChange={(e) => updateConfig({ ...config, max_tokens: Number(e.target.value) })}
             min={1}
-            max={2048}
+            max={32000}
           />
         </div>
         
         <div>
           <label className="text-sm font-medium">Temperatura</label>
           <Input
-            onValueChange={(value) => setConfig({ ...config, temperature: Number(value) })}
+            onValueChange={(value) => updateConfig({ ...config, temperature: Number(value) })}
             type="number"
             value={config.temperature}
-            onChange={(e) => setConfig({ ...config, temperature: Number(e.target.value) })}
+            onChange={(e) => updateConfig({ ...config, temperature: Number(e.target.value) })}
             min={0}
             max={5}
             step={0.1}
@@ -69,10 +71,10 @@ export function ModelConfig({ isOpen, onClose, onSave }: ModelConfigProps) {
         <div>
           <label className="text-sm font-medium">Top P</label>
           <Input
-            onValueChange={(value) => setConfig({ ...config, top_p: Number(value) })}
+            onValueChange={(value) => updateConfig({ ...config, top_p: Number(value) })}
             type="number"
             value={config.top_p}
-            onChange={(e) => setConfig({ ...config, top_p: Number(e.target.value) })}
+            onChange={(e) => updateConfig({ ...config, top_p: Number(e.target.value) })}
             min={0}
             max={2}
             step={0.1}
@@ -82,10 +84,10 @@ export function ModelConfig({ isOpen, onClose, onSave }: ModelConfigProps) {
         <div>
           <label className="text-sm font-medium">Top K</label>
           <Input
-            onValueChange={(value) => setConfig({ ...config, top_k: Number(value) })}
+            onValueChange={(value) => updateConfig({ ...config, top_k: Number(value) })}
             type="number"
             value={config.top_k}
-            onChange={(e) => setConfig({ ...config, top_k: Number(e.target.value) })}
+            onChange={(e) => updateConfig({ ...config, top_k: Number(e.target.value) })}
             min={1}
             max={50}
           />
@@ -94,10 +96,10 @@ export function ModelConfig({ isOpen, onClose, onSave }: ModelConfigProps) {
         <div>
           <label className="text-sm font-medium">Penalización por Repetición</label>
           <Input
-            onValueChange={(value) => setConfig({ ...config, repetition_penalty: Number(value) })}
+            onValueChange={(value) => updateConfig({ ...config, repetition_penalty: Number(value) })}
             type="number"
             value={config.repetition_penalty}
-            onChange={(e) => setConfig({ ...config, repetition_penalty: Number(e.target.value) })}
+            onChange={(e) => updateConfig({ ...config, repetition_penalty: Number(e.target.value) })}
             min={0}
             max={2}
             step={0.1}
@@ -107,10 +109,10 @@ export function ModelConfig({ isOpen, onClose, onSave }: ModelConfigProps) {
         <div>
           <label className="text-sm font-medium">Penalización por Frecuencia</label>
           <Input
-            onValueChange={(value) => setConfig({ ...config, frequency_penalty: Number(value) })}
+            onValueChange={(value) => updateConfig({ ...config, frequency_penalty: Number(value) })}
             type="number"
             value={config.frequency_penalty}
-            onChange={(e) => setConfig({ ...config, frequency_penalty: Number(e.target.value) })}
+            onChange={(e) => updateConfig({ ...config, frequency_penalty: Number(e.target.value) })}
             min={0}
             max={2}
             step={0.1}
@@ -120,10 +122,10 @@ export function ModelConfig({ isOpen, onClose, onSave }: ModelConfigProps) {
         <div>
           <label className="text-sm font-medium">Penalización por Presencia</label>
           <Input
-            onValueChange={(value) => setConfig({ ...config, presence_penalty: Number(value) })}
+            onValueChange={(value) => updateConfig({ ...config, presence_penalty: Number(value) })}
             type="number"
             value={config.presence_penalty}
-            onChange={(e) => setConfig({ ...config, presence_penalty: Number(e.target.value) })}
+            onChange={(e) => updateConfig({ ...config, presence_penalty: Number(e.target.value) })}
             min={0}
             max={2}
             step={0.1}
