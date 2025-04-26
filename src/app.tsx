@@ -4,7 +4,7 @@ import { useAgentChat } from "agents/ai-react";
 import type { Message } from "@ai-sdk/react";
 import { APPROVAL } from "./shared";
 import type { tools } from "./tools";
-
+import { ModelConfig } from "@/components/model-config/ModelConfig";
 // Component imports
 import { Button } from "@/components/button/Button";
 import { Card } from "@/components/card/Card";
@@ -21,6 +21,7 @@ import {
   Robot,
   Sun,
   Trash,
+  Gear,
 } from "@phosphor-icons/react";
 
 // List of tools that require human confirmation
@@ -35,7 +36,13 @@ export default function Chat() {
     return (savedTheme as "dark" | "light") || "dark";
   });
   const [showDebug, setShowDebug] = useState(false);
+  const [showModelConfig, setShowModelConfig] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleModelConfigSave = (config: any) => {
+    // Aquí implementaremos la lógica para actualizar la configuración del modelo
+    console.log('Nueva configuración:', config);
+  };
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -131,21 +138,30 @@ export default function Chat() {
           <div className="flex items-center gap-2 mr-2">
             <Bug size={16} />
             <Toggle
-              toggled={showDebug}
+              pressed={showDebug}
+              onPressedChange={setShowDebug}
+              tooltip="Show Debug"
               aria-label="Toggle debug mode"
-              onClick={() => setShowDebug((prev) => !prev)}
             />
           </div>
 
-          <Button
-            variant="ghost"
-            size="md"
-            shape="square"
-            className="rounded-full h-9 w-9"
-            onClick={toggleTheme}
-          >
-            {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-          </Button>
+          <Toggle
+            pressed={theme === "dark"}
+            onPressedChange={toggleTheme}
+            tooltip={theme === "dark" ? "Light Mode" : "Dark Mode"}
+            icon={theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+          />
+          <Toggle
+            pressed={showModelConfig}
+            onPressedChange={setShowModelConfig}
+            tooltip="AI Model Config"
+            icon={<Gear size={20} />}
+          />
+          <ModelConfig
+            isOpen={showModelConfig}
+            onClose={() => setShowModelConfig(false)}
+            onSave={handleModelConfigSave}
+          />
 
           <Button
             variant="ghost"
