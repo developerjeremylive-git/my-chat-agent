@@ -25,7 +25,7 @@ const workersai = createWorkersAI({ binding: env.AI });
 // const model = workersai("@cf/qwen/qwq-32b");
 
 //funcionando
-// const model = workersai("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b");
+const model = workersai("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b");
 // const model = workersai("@cf/google/gemma-7b-it-lora");
 // const model = workersai("@hf/mistral/mistral-7b-instruct-v0.2");
 // const model = workersai("@cf/fblgit/una-cybertron-7b-v2-bf16");
@@ -36,7 +36,7 @@ const workersai = createWorkersAI({ binding: env.AI });
 // const model = workersai("@cf/meta/llama-3.1-8b-instruct-fp8");
 // const model = workersai("@cf/meta/llama-3.1-8b-instruct-awq");
 // const model = workersai("@cf/meta/llama-3.2-3b-instruct");
-const model = workersai("@cf/meta/llama-3.2-1b-instruct");
+// const model = workersai("@cf/meta/llama-3.2-1b-instruct");
 // const model = workersai("@cf/meta/llama-3.3-70b-instruct-fp8-fast");
 
 
