@@ -11,12 +11,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
-    rollupOptions: {
-      external: [
-        'node:async_hooks',
-        'cloudflare:workers'
-      ]
-    }
-  }
 });
