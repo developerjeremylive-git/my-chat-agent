@@ -5,6 +5,7 @@ declare module 'agents/react' {
     agent: string;
     config?: AIModelConfig;
     stream?: boolean;
+    onToken?: (token: string) => void;
     onStreamEnd?: () => void;
   }
 

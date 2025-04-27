@@ -70,7 +70,9 @@ function ChatComponent() {
     setTheme(newTheme);
   };
 
-const agent = useAgent({
+const [streamingText, setStreamingText] = useState("");
+
+  const agent = useAgent({
     agent: "chat",
     config: {
       temperature: config.temperature,
@@ -81,9 +83,12 @@ const agent = useAgent({
       presencePenalty: config.presencePenalty
     },
     stream: true,
+    onToken: (token) => {
+      setStreamingText((prev) => prev + token);
+    },
     onStreamEnd: () => {
-      // Manejar el final del stream solo cuando se alcanza el límite de tokens
-      console.log('Stream finalizado por límite de tokens');
+      setStreamingText("");
+      console.log('Stream finalizado');
     }
   });
   console.log('Configuración:', config);
@@ -272,6 +277,9 @@ const agent = useAgent({
                                     {part.text.replace(
                                       /^scheduled message: /,
                                       ""
+                                    )}
+                                    {!isUser && m.parts && i === m.parts.length - 1 && streamingText && (
+                                      <span className="animate-pulse">{streamingText}</span>
                                     )}
                                   </p>
                                 </Card>
