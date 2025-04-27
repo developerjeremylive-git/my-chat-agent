@@ -9,24 +9,11 @@ import {
 } from "ai";
 
 // Función para procesar etiquetas think en el contenido
-export function processThinkTags(content: string): string {
-  // Maneja etiquetas think anidadas y escapa caracteres especiales
-  const thinkRegex = /<think>([\s\S]*?)<\/think>/gs;
-  let processedContent = content;
-  
-  // Procesa todas las etiquetas think en el contenido
-  processedContent = processedContent.replace(thinkRegex, (_, thoughtContent) => {
-    // Escapa caracteres especiales en el contenido
-    const escapedContent = thoughtContent
-      .trim()
-      .replace(/"/g, '&quot;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-    
-    return `<ThinkBox content="${escapedContent}"/>`;
+function processThinkTags(content: string): string {
+  const thinkRegex = /<think>(.*?)<\/think>/gs;
+  return content.replace(thinkRegex, (_, thoughtContent) => {
+    return `<ThinkBox content="${thoughtContent.trim()}"/>`;
   });
-
-  return processedContent;
 }
 import type { z } from "zod";
 import { APPROVAL } from "./shared";
