@@ -8,13 +8,6 @@ import {
   type ToolSet,
 } from "ai";
 
-// Función para procesar etiquetas think en el contenido
-function processThinkTags(content: string): string {
-  const thinkRegex = /<think>(.*?)<\/think>/gs;
-  return content.replace(thinkRegex, (_, thoughtContent) => {
-    return `<ThinkBox content="${thoughtContent.trim()}"/>`;
-  });
-}
 import type { z } from "zod";
 import { APPROVAL } from "./shared";
 

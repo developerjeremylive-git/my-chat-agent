@@ -5,7 +5,6 @@ import type { Message } from "@ai-sdk/react";
 import { APPROVAL } from "./shared";
 import type { tools } from "./tools";
 import { AIConfigProvider, useAIConfig } from "@/contexts/AIConfigContext";
-import { ThinkBox } from "@/components/think-box/ThinkBox";
 
 // Component imports
 import { Button } from "@/components/button/Button";
@@ -70,33 +69,6 @@ function ChatComponent() {
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
   };
-
-  // Función para procesar el contenido del mensaje y renderizar ThinkBox
-const processMessageContent = (content: string) => {
-  if (typeof content !== 'string') return content;
-  
-  const thinkRegex = /<think>(.*?)<\/think>/gs;
-  const parts = [];
-  let lastIndex = 0;
-  let match;
-
-  while ((match = thinkRegex.exec(content)) !== null) {
-    // Añadir texto antes del think
-    if (match.index > lastIndex) {
-      parts.push(content.slice(lastIndex, match.index));
-    }
-    // Añadir componente ThinkBox
-    parts.push(<ThinkBox key={match.index} content={match[1].trim()} />);
-    lastIndex = match.index + match[0].length;
-  }
-
-  // Añadir el resto del texto
-  if (lastIndex < content.length) {
-    parts.push(content.slice(lastIndex));
-  }
-
-  return parts.length > 0 ? <>{parts}</> : content;
-};
 
 const agent = useAgent({
     agent: "chat",
@@ -249,7 +221,6 @@ const agent = useAgent({
             const showAvatar =
               index === 0 || agentMessages[index - 1]?.role !== m.role;
             const showRole = showAvatar && !isUser;
-            const processedContent = processMessageContent(m.content);
 
             return (
               <div key={m.id}>
