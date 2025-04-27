@@ -79,6 +79,7 @@ export class Chat extends AIChatAgent<Env> {
             temperature: config.temperature,
             maxTokens: config.maxTokens,
             topP: config.topP,
+            toolCallStreaming: true,
             frequencyPenalty: config.frequencyPenalty,
             presencePenalty: config.presencePenalty,
             system: `You are a helpful assistant that can do various tasks... 
