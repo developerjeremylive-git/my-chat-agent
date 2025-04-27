@@ -10,7 +10,7 @@ import {
   type StreamTextOnFinishCallback,
 } from "ai";
 import { createWorkersAI } from 'workers-ai-provider';
-import { processToolCalls } from "./utils";
+import { processThinkTags, processToolCalls } from "./utils";
 import { tools, executions } from "./tools";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { env } from "cloudflare:workers";
@@ -88,7 +88,10 @@ ${unstable_getSchedulePrompt({ date: new Date() })}
 
 If the user asks to schedule a task, use the schedule tool to schedule the task.
 `,
-            messages: processedMessages,
+            messages: processedMessages.map(msg => ({
+              ...msg,
+              content: typeof msg.content === 'string' ? processThinkTags(msg.content) : msg.content
+            })),
             tools,
             onFinish,
             onError: (error) => {
