@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CaretDown, CaretUp } from '@phosphor-icons/react';
+import { Brain, CaretDown } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 
 interface ThinkBoxProps {
   content: string;
@@ -36,18 +37,32 @@ export const ThinkBox: React.FC<ThinkBoxProps> = ({ content }) => {
   }, [content]);
 
   return (
-    <div className="my-4 w-full">
-      <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-md transition-all duration-300">
-        <div className="flex justify-between items-center cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            Pensamiento del Asistente
+    <div className="my-2 w-full">
+      <div className="bg-[#F48120]/10 rounded-lg overflow-hidden border border-[#F48120]/20 transition-all duration-300">
+        <div 
+          className="p-3 flex items-center justify-between cursor-pointer hover:bg-[#F48120]/5 transition-colors"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex items-center gap-2">
+            <Brain size={18} weight="duotone" className="text-[#F48120]" />
+            <span className="text-[#F48120] text-sm font-medium">
+              {isTyping ? 'Pensando...' : 'Pensamiento'}
+            </span>
           </div>
-          <button className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-            {isExpanded ? <CaretDown size={20} /> : <CaretUp size={20} />}
-          </button>
+          <CaretDown
+            size={16}
+            weight="bold"
+            className={cn(
+              'text-[#F48120] transition-transform duration-200',
+              isExpanded ? 'rotate-180' : ''
+            )}
+          />
         </div>
         
-        <div className={`mt-2 overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-96' : 'max-h-0'}`}>
+        <div className={cn(
+          'overflow-hidden transition-[max-height] duration-200 ease-in-out',
+          isExpanded ? 'max-h-96' : 'max-h-0'
+        )}>
           <div className="text-gray-700 dark:text-gray-300 text-sm">
             {displayedText}
             {isTyping && <span className="animate-pulse">|</span>}
