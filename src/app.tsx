@@ -72,33 +72,33 @@ function ChatComponent() {
   };
 
   // Función para procesar el contenido del mensaje y renderizar ThinkBox
-const processMessageContent = (content: string) => {
-  if (typeof content !== 'string') return content;
-  
-  const thinkRegex = /<think>(.*?)<\/think>/gs;
-  const parts = [];
-  let lastIndex = 0;
-  let match;
+  const processMessageContent = (content: string) => {
+    if (typeof content !== 'string') return content;
 
-  while ((match = thinkRegex.exec(content)) !== null) {
-    // Añadir texto antes del think
-    if (match.index > lastIndex) {
-      parts.push(content.slice(lastIndex, match.index));
+    const thinkRegex = /<think>(.*?)<\/think>/gs;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = thinkRegex.exec(content)) !== null) {
+      // Añadir texto antes del think
+      if (match.index > lastIndex) {
+        parts.push(content.slice(lastIndex, match.index));
+      }
+      // Añadir componente ThinkBox
+      parts.push(<ThinkBox key={match.index} content={match[1].trim()} />);
+      lastIndex = match.index + match[0].length;
     }
-    // Añadir componente ThinkBox
-    parts.push(<ThinkBox key={match.index} content={match[1].trim()} />);
-    lastIndex = match.index + match[0].length;
-  }
 
-  // Añadir el resto del texto
-  if (lastIndex < content.length) {
-    parts.push(content.slice(lastIndex));
-  }
+    // Añadir el resto del texto
+    if (lastIndex < content.length) {
+      parts.push(content.slice(lastIndex));
+    }
 
-  return parts.length > 0 ? <>{parts}</> : content;
-};
+    return parts.length > 0 ? <>{parts}</> : content;
+  };
 
-const agent = useAgent({
+  const agent = useAgent({
     agent: "chat",
     config: {
       temperature: config.temperature,
@@ -262,9 +262,8 @@ const agent = useAgent({
                   className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`flex gap-2 max-w-[85%] ${
-                      isUser ? "flex-row-reverse" : "flex-row"
-                    }`}
+                    className={`flex gap-2 max-w-[85%] ${isUser ? "flex-row-reverse" : "flex-row"
+                      }`}
                   >
                     {showAvatar && !isUser ? (
                       <Avatar username={"AI"} />
@@ -274,29 +273,28 @@ const agent = useAgent({
 
                     <div>
                       <div>
+                        {processedContent}
                         {m.parts?.map((part, i) => {
                           if (part.type === "text") {
                             return (
                               // biome-ignore lint/suspicious/noArrayIndexKey: it's fine here
                               <div key={i}>
                                 <Card
-                                  className={`p-3 rounded-md bg-neutral-100 dark:bg-neutral-900 ${
-                                    isUser
+                                  className={`p-3 rounded-md bg-neutral-100 dark:bg-neutral-900 ${isUser
                                       ? "rounded-br-none"
                                       : "rounded-bl-none border-assistant-border"
-                                  } ${
-                                    part.text.startsWith("scheduled message")
+                                    } ${part.text.startsWith("scheduled message")
                                       ? "border-accent/50"
                                       : ""
-                                  } relative`}
+                                    } relative`}
                                 >
                                   {part.text.startsWith(
                                     "scheduled message"
                                   ) && (
-                                    <span className="absolute -top-3 -left-2 text-base">
-                                      🕒
-                                    </span>
-                                  )}
+                                      <span className="absolute -top-3 -left-2 text-base">
+                                        🕒
+                                      </span>
+                                    )}
                                   <p className="text-sm whitespace-pre-wrap">
                                     {part.text.replace(
                                       /^scheduled message: /,
@@ -305,9 +303,8 @@ const agent = useAgent({
                                   </p>
                                 </Card>
                                 <p
-                                  className={`text-xs text-muted-foreground mt-1 ${
-                                    isUser ? "text-right" : "text-left"
-                                  }`}
+                                  className={`text-xs text-muted-foreground mt-1 ${isUser ? "text-right" : "text-left"
+                                    }`}
                                 >
                                   {formatTime(
                                     new Date(m.createdAt as unknown as string)
