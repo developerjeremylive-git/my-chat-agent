@@ -7,6 +7,7 @@ interface AIModelConfig {
   temperature: number;
   maxTokens: number;
   topP: number;
+  topK: number;
   frequencyPenalty: number;
   presencePenalty: number;
 }
@@ -25,6 +26,7 @@ const presets: PresetConfig[] = [
       temperature: 0.9,
       maxTokens: 2048,
       topP: 0.95,
+      topK: 40,
       frequencyPenalty: 0.5,
       presencePenalty: 0.5
     }
@@ -36,6 +38,7 @@ const presets: PresetConfig[] = [
       temperature: 0.3,
       maxTokens: 1024,
       topP: 0.8,
+      topK: 5,
       frequencyPenalty: 0.1,
       presencePenalty: 0.1
     }
@@ -47,6 +50,7 @@ const presets: PresetConfig[] = [
       temperature: 0.5,
       maxTokens: 4096,
       topP: 0.9,
+      topK: 25,
       frequencyPenalty: 0.2,
       presencePenalty: 0.2
     }
@@ -58,6 +62,7 @@ const presets: PresetConfig[] = [
       temperature: 0.7,
       maxTokens: 2048,
       topP: 0.9,
+      topK: 15,
       frequencyPenalty: 0.3,
       presencePenalty: 0.3
     }
@@ -160,6 +165,21 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                 step="0.05"
                 value={config.topP}
                 onChange={(e) => handleSliderChange('topP', parseFloat(e.target.value))}
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm flex justify-between">
+                Top K: {config.topK}
+              </label>
+              <input
+                type="range"
+                min="1"
+                max="50"
+                step="1"
+                value={config.topK}
+                onChange={(e) => handleSliderChange('topK', parseInt(e.target.value))}
                 className="w-full"
               />
             </div>

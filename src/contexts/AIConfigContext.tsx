@@ -5,6 +5,7 @@ export interface AIModelConfig {
   temperature: number;
   maxTokens: number;
   topP: number;
+  topK: number;
   frequencyPenalty: number;
   presencePenalty: number;
 }
@@ -39,6 +40,7 @@ export function AIConfigProvider({ children }: AIConfigProviderProps) {
           temperature: 0.7,
           maxTokens: 2048,
           topP: 0.9,
+          topK: 1,
           frequencyPenalty: 0.3,
           presencePenalty: 0.3,
         };
