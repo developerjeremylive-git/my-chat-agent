@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { CaretDown, CaretUp } from '@phosphor-icons/react';
 
 interface ThinkBoxProps {
@@ -7,33 +7,6 @@ interface ThinkBoxProps {
 
 export const ThinkBox: React.FC<ThinkBoxProps> = ({ content }) => {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [displayedText, setDisplayedText] = useState('');
-  const [isTyping, setIsTyping] = useState(true);
-  const textRef = useRef(content);
-  
-  useEffect(() => {
-    let currentIndex = 0;
-    const typingSpeed = 30; // Velocidad de escritura en milisegundos
-    
-    if (content !== textRef.current) {
-      setDisplayedText('');
-      currentIndex = 0;
-      textRef.current = content;
-      setIsTyping(true);
-    }
-
-    const typingInterval = setInterval(() => {
-      if (currentIndex < content.length) {
-        setDisplayedText(prev => prev + content[currentIndex]);
-        currentIndex++;
-      } else {
-        clearInterval(typingInterval);
-        setIsTyping(false);
-      }
-    }, typingSpeed);
-
-    return () => clearInterval(typingInterval);
-  }, [content]);
 
   return (
     <div className="my-4 w-full">
@@ -49,8 +22,7 @@ export const ThinkBox: React.FC<ThinkBoxProps> = ({ content }) => {
         
         <div className={`mt-2 overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-96' : 'max-h-0'}`}>
           <div className="text-gray-700 dark:text-gray-300 text-sm">
-            {displayedText}
-            {isTyping && <span className="animate-pulse">|</span>}
+            {content}
           </div>
         </div>
       </div>
