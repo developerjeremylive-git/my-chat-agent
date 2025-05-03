@@ -5,7 +5,6 @@ import type { Message } from "@ai-sdk/react";
 import { APPROVAL } from "./shared";
 import type { tools } from "./tools";
 import { AIConfigProvider, useAIConfig } from "@/contexts/AIConfigContext";
-import { LoginModal } from '@/components/auth/LoginModal';
 
 // Component imports
 import { Button } from "@/components/button/Button";
@@ -28,6 +27,7 @@ import {
   Gear,
   List
 } from "@phosphor-icons/react";
+import AuthPopup from "./components/AuthPopup";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -441,7 +441,7 @@ function ChatComponent() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
       />
-      <LoginModal isOpen={false} onClose={() => {}} />
+      <AuthPopup/>
     </div>
   );
 }

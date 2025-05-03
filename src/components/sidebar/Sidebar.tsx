@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { LoginModal } from '@/components/auth/LoginModal';
 import { Button } from '@/components/button/Button';
 import { cn } from '@/lib/utils';
 import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun } from '@phosphor-icons/react';
+import AuthPopup from '../AuthPopup';
+import AuthButton from '../AuthButton';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -12,8 +13,6 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose, theme, onThemeChange }: SidebarProps) {
-  const [showLoginModal, setShowLoginModal] = useState(false);
-
   return (
     <>
       <div
@@ -46,14 +45,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange }: SidebarProps)
             <div className="space-y-2">
               <div className="cn('text-xs uppercase tracking-wider', theme === 'dark' ? 'text-neutral-400' : 'text-gray-500')">Principal</div>
               <div className="space-y-1">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start cn('hover:bg-opacity-50', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-neutral-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200')"
-                  onClick={() => setShowLoginModal(true)}
-                >
-                  <Brain className="mr-2" />
-                  Iniciar Sesión
-                </Button>
+                  <AuthButton className="hidden sm:flex" />
               </div>
             </div>
 
@@ -110,7 +102,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange }: SidebarProps)
         />
       )}
 
-      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+      <AuthPopup/> 
     </>
   );
 }
