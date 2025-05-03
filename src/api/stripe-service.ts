@@ -1,4 +1,4 @@
-import { SubscriptionPlan } from '../context/AuthContext';
+import type { SubscriptionPlan } from '../contexts/AuthContext';
 import { PLAN_TO_PRICE_MAP, PRICE_TO_PLAN_MAP } from '../utils/subscriptionConstants';
 import Stripe from 'stripe';
 
@@ -146,7 +146,7 @@ class StripeService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to update Stripe customer');
+      // throw new Error(error.message || 'Failed to update Stripe customer');
     }
 
     return response.json();
@@ -169,7 +169,7 @@ class StripeService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to create checkout session');
+      // throw new Error(error.message || 'Failed to create checkout session');
     }
 
     return response.json();
@@ -186,7 +186,7 @@ class StripeService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to retrieve checkout session');
+      // throw new Error(error.message || 'Failed to retrieve checkout session');
     }
 
     return response.json();
@@ -266,7 +266,7 @@ class StripeService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to retrieve subscription');
+      // throw new Error(error.message || 'Failed to retrieve subscription');
     }
 
     return response.json();
@@ -283,7 +283,7 @@ class StripeService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to retrieve customer subscriptions');
+      // throw new Error(error.message || 'Failed to retrieve customer subscriptions');
     }
 
     return response.json();
@@ -303,7 +303,7 @@ class StripeService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to update subscription');
+      // throw new Error(error.message || 'Failed to update subscription');
     }
 
     return response.json();
@@ -320,7 +320,7 @@ class StripeService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to cancel subscription');
+      // throw new Error(error.message || 'Failed to cancel subscription');
     }
 
     return response.json();
@@ -337,7 +337,7 @@ class StripeService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to retrieve checkout session');
+      // throw new Error(error.message || 'Failed to retrieve checkout session');
     }
 
     return response.json();
