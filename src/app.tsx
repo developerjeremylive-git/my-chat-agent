@@ -441,7 +441,7 @@ function ChatComponent() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
       />
-      <LoginModal />
+      <LoginModal isOpen={false} onClose={() => {}} />
     </div>
   );
 }

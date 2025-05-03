@@ -2,6 +2,7 @@ import { Button } from '@/components/button/Button';
 import { Card } from '@/components/card/Card';
 import { X } from '@phosphor-icons/react';
 import { useAIConfig } from '@/contexts/AIConfigContext';
+import { cn } from '@/lib/utils';
 
 interface AIModelConfig {
   temperature: number;
@@ -85,10 +86,15 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
     setConfig({ ...config, [key]: value });
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-y-0 right-0 w-80 bg-white dark:bg-neutral-900 shadow-xl transform transition-transform duration-300 ease-in-out border-l border-neutral-200 dark:border-neutral-800 overflow-y-auto">
+    <>
+      <div
+        className={cn(
+          'fixed inset-y-0 right-0 z-50 w-80 transform transition-transform duration-300 ease-in-out shadow-2xl',
+          'bg-white dark:bg-neutral-900 border-l border-neutral-200 dark:border-neutral-800 overflow-y-auto',
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        )}
+      >
       <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center sticky top-0 bg-white dark:bg-neutral-900 z-10">
         <h2 className="text-lg font-semibold">Configuración del Modelo AI</h2>
         <Button
@@ -216,6 +222,15 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+
+      {/* Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40"
+          onClick={onClose}
+        />
+      )}
+    </>
   );
 }

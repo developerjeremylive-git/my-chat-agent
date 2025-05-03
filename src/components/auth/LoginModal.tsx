@@ -27,7 +27,8 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       if (error) {
         setError('Error al iniciar sesión. Por favor, verifica tus credenciales.');
       } else {
-        setIsLoginOpen(false);
+        onClose();
+        // setIsLoginOpen(false);
       }
     } catch (err) {
       setError('Ocurrió un error inesperado. Por favor, intenta de nuevo.');
