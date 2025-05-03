@@ -687,18 +687,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Create or get Stripe customer
       let customerId = stripeCustomerId;
       
-      if (!customerId && profile) {
+      if (!customerId) {
+        // && profile) {
         // Create a new customer in Stripe
-        const customerResponse = await stripeService.createCustomer({
-          email: user.email || '',
-          name: profile.username || user.email?.split('@')[0],
-          metadata: {
-            user_id: user.id
-          }
-        });
+        // const customerResponse = await stripeService.createCustomer({
+        //   email: user.email || '',
+        //   name: profile.username || user.email?.split('@')[0],
+        //   metadata: {
+        //     user_id: user.id
+        //   }
+        // });
         
-        if (customerResponse && customerResponse.id) {
-          customerId = customerResponse.id;
+        // if (customerResponse && customerResponse.id) {
+          // customerId = customerResponse.id;
           
           // Update profile with Stripe customer ID
           const { error } = await supabase
@@ -712,7 +713,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setStripeCustomerId(customerId);
           }
         }
-      }
+      // }
       
       if (!customerId) {
         throw new Error('Could not create or retrieve Stripe customer');

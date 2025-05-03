@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import { FiX, FiUser, FiMail, FiLock, FiLogIn } from 'react-icons/fi';
 import stripeService from '../api/stripe-service';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -16,7 +15,6 @@ export interface AuthPopupProps {
 export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupProps = {}) {
   const { isLoginOpen, setIsLoginOpen, signIn, signUp, resetPassword, updatePassword, userSubscription } = useAuth();
   const navigate = useNavigate();
-  const { t } = useLanguage();
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,8 +32,8 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
       const hashParams = new URLSearchParams(hash.substring(1));
       if (hashParams.get('error') === 'access_denied' && hashParams.get('error_code') === 'otp_expired') {
         createPopup(
-          t('invalid_reset_link'),
-          t('reset_link_expired'),
+          'Enlace de restablecimiento inválido',
+          'El enlace de restablecimiento ha expirado',
           '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />'
         );
         navigate('/');
@@ -47,13 +45,13 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
         }
       }
     }
-  }, [location, navigate, t]);
+  }, [location, navigate]);
 
   // Add a title message based on trigger reason
   const getTriggerMessage = () => {
     switch (triggerReason) {
       case 'send_button':
-        return t('auth_required_to_use_ai');
+        return 'Se requiere autenticación para usar la IA';
       default:
         return '';
     }
@@ -100,7 +98,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
           </div>
           <h3 class="text-2xl font-bold text-white mb-4">${title}</h3>
           <p class="text-violet-200 mb-6">${message}</p>
-          <button class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium shadow-lg shadow-purple-500/30 hover:shadow-pink-500/30 transition-all duration-300 hover:scale-105">${t('got_it')}</button>
+          <button class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium shadow-lg shadow-purple-500/30 hover:shadow-pink-500/30 transition-all duration-300 hover:scale-105">Entendido</button>
         </div>
       </div>
     `;
@@ -130,53 +128,52 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
     try {
       if (mode === 'update_password') {
         if (password !== confirmPassword) {
-          setError(t('passwords_do_not_match'));
+          setError('Las contraseñas no coinciden');
           return;
         }
   
         if (!accessToken) {
-          setError(t('invalid_reset_link'));
+          setError('Enlace de restablecimiento inválido');
           return;
         }
   
         const { error } = await updatePassword(password, accessToken);
         if (error) {
-          setError(t('password_update_error'));
+          setError('Error al actualizar la contraseña');
         } else {
           setIsLoginOpen(false);
           resetForm();
           navigate('/');
           createPopup(
-            t('password_updated'),
-            t('password_updated_message'),
+            'Contraseña actualizada',
+            'Tu contraseña ha sido actualizada exitosamente',
             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />'
           );
         }
       } else if (mode === 'login') {
         const result = await signIn(email, password);
         if (result.error) {
-          setError(t('login_error'));
+          setError('Error al iniciar sesión');
         } else {
           setIsLoginOpen(false);
           resetForm();
-          handleRedirect();
           if (onAuthComplete) onAuthComplete();
         }
       } else if (mode === 'reset') {
         if (!email.trim()) {
-          setError(t('email_required'));
+          setError('El correo electrónico es requerido');
           return;
         }
   
         const { error } = await resetPassword(email);
         if (error) {
-          setError(t('reset_password_error'));
+          setError('Error al restablecer la contraseña');
         } else {
           setIsLoginOpen(false);
           resetForm();
           createPopup(
-            t('reset_password_email_sent'),
-            t('reset_password_check_email'),
+            'Correo de restablecimiento enviado',
+            'Revisa tu correo electrónico para restablecer tu contraseña',
             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />'
           );
         }
@@ -184,20 +181,20 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
         // Registration mode
         const { error, user } = await signUp(email, password, username);
         if (error) {
-          setError(t('registration_error'));
+          setError('Error en el registro');
         } else {
           setIsLoginOpen(false);
           resetForm();
           createPopup(
-            t('email_verification'),
-            t('email_verification_message'),
+            'Verificación de correo',
+            'Te hemos enviado un correo de verificación. Por favor, verifica tu cuenta.',
             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />'
           );
         }
       }
     } catch (error) {
       console.error('Authentication error:', error);
-      setError(t('general_error'));
+      setError('Error general del sistema');
     } finally {
       setIsLoading(false);
     }
@@ -279,17 +276,17 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                 className="absolute top-4 right-4 p-2 rounded-xl text-[var(--theme-text-secondary)] hover:text-purple-500 hover:bg-purple-500/10 transition-all duration-300"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                aria-label="Close"
+                aria-label="Cerrar"
               >
                 <FiX className="w-6 h-6" />
               </motion.button>
 
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent mb-3">
-                  {mode === 'login' ? t('login') : mode === 'register' ? t('register') : t('reset_password')}
+                  {mode === 'login' ? 'Iniciar sesión' : mode === 'register' ? 'Registrarse' : 'Restablecer contraseña'}
                 </h2>
                 <p className="text-[var(--theme-text-secondary)]">
-                  {mode === 'login' ? t('login_subtitle') : mode === 'register' ? t('register_subtitle') : t('reset_password_subtitle')}
+                  {mode === 'login' ? 'Bienvenido de nuevo' : mode === 'register' ? 'Crea tu cuenta' : 'Ingresa tu correo para restablecer tu contraseña'}
                 </p>
                 {getTriggerMessage() && (
                   <div className="mt-4 p-4 bg-purple-500/10 rounded-xl border border-purple-500/20">
@@ -309,7 +306,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                   <>
                     <div>
                       <label className="block text-[var(--theme-text-secondary)] mb-2 font-medium">
-                        {t('new_password')}
+                        Nueva contraseña
                       </label>
                       <div className="relative">
                         <FiLock className="absolute left-4 top-3.5 text-purple-500" />
@@ -319,13 +316,13 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="w-full pl-11 pr-4 py-3 bg-purple-500/5 border border-purple-500/20 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 text-white"
-                          placeholder={t('new_password_placeholder')}
+                          placeholder="Ingresa tu nueva contraseña"
                         />
                       </div>
                     </div>
                     <div>
                       <label className="block text-[var(--theme-text-secondary)] mb-2 font-medium">
-                        {t('confirm_password')}
+                        Confirmar contraseña
                       </label>
                       <div className="relative">
                         <FiLock className="absolute left-4 top-3.5 text-purple-500" />
@@ -335,7 +332,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           className="w-full pl-11 pr-4 py-3 bg-purple-500/5 border border-purple-500/20 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 text-white"
-                          placeholder={t('confirm_password_placeholder')}
+                          placeholder="Confirma tu nueva contraseña"
                         />
                       </div>
                     </div>
@@ -344,7 +341,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
 
                 <div>
                   <label className="block text-[var(--theme-text-secondary)] mb-2 font-medium">
-                    {t('auth_email')}
+                    Correo electrónico
                   </label>
                   <div className="relative">
                     <FiMail className="absolute left-4 top-3.5 text-purple-500" />
@@ -354,7 +351,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full pl-11 pr-4 py-3 bg-purple-500/5 border border-purple-500/20 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 text-white"
-                      placeholder={t('auth_email_placeholder')}
+                      placeholder="Ingresa tu correo electrónico"
                     />
                   </div>
                 </div>
@@ -362,7 +359,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                 {(mode === 'login' || mode === 'register') && (
                   <div>
                     <label htmlFor="password" className="block text-[var(--theme-text-secondary)] mb-2 font-medium">
-                      {t('password')}
+                      Contraseña
                     </label>
                     <div className="relative">
                       <FiLock className="absolute left-4 top-3.5 text-purple-500" />
@@ -372,7 +369,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full pl-11 pr-4 py-3 bg-purple-500/5 border border-purple-500/20 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 text-white"
-                        placeholder={t('password_placeholder')}
+                        placeholder="Ingresa tu contraseña"
                       />
                     </div>
                   </div>
@@ -394,12 +391,12 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      {t('processing')}
+                      Procesando...
                     </span>
                   ) : (
                     <span className="flex items-center justify-center">
                       <FiLogIn className="w-5 h-5 mr-2" />
-                      {mode === 'login' ? t('login') : t('send_reset_password_email')}
+                      {mode === 'login' ? 'Iniciar sesión' : 'Enviar correo de restablecimiento'}
                     </span>
                   )}
                 </motion.button>
@@ -410,7 +407,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                     onClick={toggleMode}
                     className="text-purple-500 hover:text-pink-500 transition-colors duration-300"
                   >
-                    {mode === 'login' ? t('need_account') : mode === 'register' ? t('have_account') : t('back_to_login')}
+                    {mode === 'login' ? '¿No tienes cuenta? Regístrate' : mode === 'register' ? '¿Ya tienes cuenta? Inicia sesión' : 'Volver al inicio de sesión'}
                   </button>
                   {mode === 'login' && (
                     <button
@@ -418,7 +415,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                       onClick={() => setMode('reset')}
                       className="block w-full text-purple-500 hover:text-pink-500 transition-colors duration-300"
                     >
-                      {t('forgot_password')}
+                      ¿Olvidaste tu contraseña?
                     </button>
                   )}
                 </div>
