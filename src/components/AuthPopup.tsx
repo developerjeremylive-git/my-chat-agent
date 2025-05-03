@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { FiX, FiUser, FiMail, FiLock, FiLogIn } from 'react-icons/fi';
-import stripeService from '../api/stripe-service';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 type AuthMode = 'login' | 'register' | 'reset' | 'update_password';

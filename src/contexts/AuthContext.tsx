@@ -10,7 +10,6 @@ import {
   getNextPlan,
   type PlanType
 } from '../utils/subscriptionHelpers';
-import stripeService from '../api/stripe-service';
 import { PLAN_IDS, PLAN_TO_PRICE_MAP, PRICE_TO_PLAN_MAP } from '../utils/subscriptionConstants';
 
 // Define tipos para las suscripciones
@@ -85,6 +84,7 @@ export type AuthContextType = {
   isLoading: boolean;
   supabase: SupabaseClient;
   stripeCustomerId: string | null;
+  paypalCustomerId: string | null;
   isLoginOpen: boolean;
   setIsLoginOpen: (isOpen: boolean) => void;
   redirectToCheckout: (planId: string) => Promise<void>;
@@ -568,9 +568,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       // Cancel subscription in Stripe
-      if (userSubscription.subscription_id) {
-        await stripeService.cancelSubscription(userSubscription.subscription_id);
-      }
+      // if (userSubscription.subscription_id) {
+      //   await stripeService.cancelSubscription(userSubscription.subscription_id);
+      // }
       
       // Update subscription in database
       const { error } = await supabase
@@ -720,18 +720,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       // Create checkout session and redirect
-      const session = await stripeService.createCheckoutSession({
-        customerId,
-        priceId,
-        successUrl: `${window.location.origin}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${window.location.origin}/pricing`
-      });
+      // const session = await stripeService.createCheckoutSession({
+      //   customerId,
+      //   priceId,
+      //   successUrl: `${window.location.origin}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
+      //   cancelUrl: `${window.location.origin}/pricing`
+      // });
       
-      if (session && session.url) {
-        window.location.href = session.url;
-      } else {
-        throw new Error('Failed to create checkout session');
-      }
+      // if (session && session.url) {
+      //   window.location.href = session.url;
+      // } else {
+      //   throw new Error('Failed to create checkout session');
+      // }
     } catch (error) {
       console.error('Error redirecting to checkout:', error);
       throw error;
@@ -748,18 +748,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!customerId) {
         throw new Error('Customer ID is required');
       }
+      return { url: `${window.location.origin}/subscription` };
+      // // Create customer portal session and return URL
+      // const session = await stripeService.createCustomerPortalSession({
+      //   customerId,
+      //   returnUrl: `${window.location.origin}/subscription`
+      // });
       
-      // Create customer portal session and return URL
-      const session = await stripeService.createCustomerPortalSession({
-        customerId,
-        returnUrl: `${window.location.origin}/subscription`
-      });
-      
-      if (session && session.url) {
-        return { url: session.url };
-      } else {
-        throw new Error('Failed to create customer portal session');
-      }
+      // if (session && session.url) {
+      //   return { url: session.url };
+      // } else {
+      //   throw new Error('Failed to create customer portal session');
+      // }
     } catch (error) {
       console.error('Error redirecting to customer portal:', error);
       throw error;
@@ -805,13 +805,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function createStripeCustomer(email: string, name?: string): Promise<string> {
     try {
-      const customer = await stripeService.createCustomer({
-        email,
-        name,
-        metadata: {
-          supabase_user_id: user?.id || ''
-        }
-      });
+      // const customer = await stripeService.createCustomer({
+      //   email,
+      //   name,
+      //   metadata: {
+      //     supabase_user_id: user?.id || ''
+      //   }
+      // });
       
       // Check if user exists in public.users table before creating
       if (user) {
@@ -834,7 +834,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               id: user.id,
               username: name,
               email: email,
-              stripe_customer_id: customer.id
+              // stripe_customer_id: customer.id
             });
         
         if (error) {
@@ -843,14 +843,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Update local user state only after successful creation
-        setStripeCustomerId(customer.id);
-      } else {
-        // If user already exists, just update the local state
-        setStripeCustomerId(customer.id);
-      }
+        // setStripeCustomerId(customer.id);
+      } 
+      // else {
+      //   // If user already exists, just update the local state
+      //   setStripeCustomerId(customer.id);
+      // }
+      return user.id;
     }
-      
-      return customer.id;
+      return '';
     } catch (error: any) {
       console.error('Error creating Stripe customer:', error);
       console.error('Stripe customer creation error details:', error.message, error.stack);
