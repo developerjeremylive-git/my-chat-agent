@@ -5,17 +5,17 @@ import type { Message } from "@ai-sdk/react";
 import { APPROVAL } from "./shared";
 import type { tools } from "./tools";
 import { AIConfigProvider, useAIConfig } from "@/contexts/AIConfigContext";
+import { LoginModal } from '@/components/auth/LoginModal';
 
 // Component imports
 import { Button } from "@/components/button/Button";
-import { LoginModal } from "@/components/auth/LoginModal";
-import Header from "@/components/Header";
 import { Card } from "@/components/card/Card";
 import { Input } from "@/components/input/Input";
 import { Avatar } from "@/components/avatar/Avatar";
 import { Toggle } from "@/components/toggle/Toggle";
 import { Tooltip } from "@/components/tooltip/Tooltip";
 import { AISettingsPanel } from "@/components/settings/AISettingsPanel";
+import { Sidebar } from "@/components/sidebar/Sidebar";
 
 // Icon imports
 import {
@@ -26,6 +26,7 @@ import {
   Sun,
   Trash,
   Gear,
+  List
 } from "@phosphor-icons/react";
 
 // List of tools that require human confirmation
@@ -36,6 +37,7 @@ const toolsRequiringConfirmation: (keyof typeof tools)[] = [
 function ChatComponent() {
   const { config } = useAIConfig();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">(() => {
 
     // Check localStorage first, default to dark if not found
@@ -124,11 +126,25 @@ function ChatComponent() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8 mt-4">
+    <div className="flex flex-col min-h-screen bg-background text-foreground overflow-hidden">
+      <Sidebar 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
+        theme={theme}
+        onThemeChange={toggleTheme}
+      />
+      <main className="flex-1 container mx-auto px-4 py-4">
         <div className="h-[calc(100vh-2rem)] w-full mx-auto max-w-lg flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800 mt-4">
           <div className="px-4 py-3 border-b border-neutral-300 dark:border-neutral-800 flex items-center gap-3 sticky top-0 z-10">
+            <Button
+              variant="ghost"
+              size="md"
+              shape="square"
+              className="rounded-full h-9 w-9"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <List size={20} />
+            </Button>
             <div className="flex items-center justify-center h-8 w-8">
               <svg
                 width="28px"

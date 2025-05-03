@@ -5,8 +5,13 @@ import { Card } from '@/components/card/Card';
 import { Input } from '@/components/input/Input';
 import { X } from '@phosphor-icons/react';
 
-export function LoginModal() {
-  const { signIn, isLoginOpen, setIsLoginOpen } = useAuth();
+interface LoginModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function LoginModal({ isOpen, onClose }: LoginModalProps) {
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -31,13 +36,13 @@ export function LoginModal() {
     }
   };
 
-  if (!isLoginOpen) return null;
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <Card className="w-full max-w-md p-6 relative">
         <button
-          onClick={() => setIsLoginOpen(false)}
+          onClick={onClose}
           className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
         >
           <X size={20} />
