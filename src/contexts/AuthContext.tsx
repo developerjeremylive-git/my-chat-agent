@@ -158,8 +158,8 @@ async function getPayPalAccessToken(): Promise<string> {
 }
 
 // Create Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
+const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL;
+const supabaseKey = (import.meta as any).env.VITE_SUPABASE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_KEY environment variables.');
