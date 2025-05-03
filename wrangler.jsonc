@@ -4,26 +4,30 @@
   "compatibility_date": "2025-02-04",
   "compatibility_flags": [
     "nodejs_compat",
-    "nodejs_compat_populate_process_env",
+    "nodejs_compat_populate_process_env"
   ],
   "assets": {
-    "directory": "public",
+    "directory": "public"
   },
   "durable_objects": {
     "bindings": [
       {
         "name": "Chat",
-        "class_name": "Chat",
-      },
-    ],
+        "class_name": "Chat"
+      }
+    ]
   },
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": ["Chat"],
-    },
+      "new_sqlite_classes": ["Chat"]
+    }
   ],
   "ai": {
     "binding": "AI"
+  },
+  "vars": {
+    "VITE_SUPABASE_URL": "https://enryddelkevswwawmkyx.supabase.co",
+    "VITE_SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVucnlkZGVsa2V2c3d3YXdta3l4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEzMDEwNzUsImV4cCI6MjA1Njg3NzA3NX0.qLMdHoQaD47thhpV-Eq3U0Hyr1fYDbygf0SKfGphKx0"
   }
 }
