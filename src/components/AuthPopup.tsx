@@ -88,16 +88,16 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
     const popup = document.createElement('div');
     popup.className = 'fixed inset-0 bg-black/80 z-[200] flex items-center justify-center auth-status-popup';
     popup.innerHTML = `
-      <div class="relative w-full max-w-md p-8 mx-4 rounded-2xl bg-[var(--theme-background)] border border-purple-500/20 shadow-2xl shadow-purple-500/20 transform transition-all duration-300 scale-100 opacity-100">
+      <div class="relative w-full max-w-md p-8 mx-4 rounded-2xl bg-[var(--theme-background)] border border-[var(--theme-border)] shadow-2xl shadow-[var(--theme-shadow)] transform transition-all duration-300 scale-100 opacity-100">
         <div class="text-center">
-          <div class="w-16 h-16 mx-auto mb-4 bg-purple-500/20 rounded-full flex items-center justify-center">
-            <svg class="w-8 h-8 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="w-16 h-16 mx-auto mb-4 bg-[var(--theme-accent)]/20 rounded-full flex items-center justify-center">
+            <svg class="w-8 h-8 text-[var(--theme-accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               ${icon}
             </svg>
           </div>
-          <h3 class="text-2xl font-bold text-white mb-4">${title}</h3>
-          <p class="text-violet-200 mb-6">${message}</p>
-          <button class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium shadow-lg shadow-purple-500/30 hover:shadow-pink-500/30 transition-all duration-300 hover:scale-105">Entendido</button>
+          <h3 class="text-2xl font-bold text-[var(--theme-text-primary)] mb-4">${title}</h3>
+          <p class="text-[var(--theme-text-secondary)] mb-6">${message}</p>
+          <button class="px-6 py-3 bg-gradient-to-r from-[var(--theme-accent)] to-[var(--theme-accent-secondary)] text-white rounded-xl font-medium shadow-lg shadow-[var(--theme-accent)]/30 hover:shadow-[var(--theme-accent-secondary)]/30 transition-all duration-300 hover:scale-105">Entendido</button>
         </div>
       </div>
     `;
@@ -255,7 +255,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
       {isLoginOpen && (
         <>
           <motion.div
-            className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center"
+            className="fixed inset-0 bg-black/60 dark:bg-black/80 z-[100] flex items-center justify-center backdrop-blur-sm"
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -263,7 +263,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
             onClick={() => setIsLoginOpen(false)}
           >
             <motion.div
-              className="relative w-full max-w-md p-8 mx-4 rounded-2xl bg-[var(--theme-background)] border border-purple-500/20 shadow-2xl shadow-purple-500/20 z-[101]"
+              className="relative w-full max-w-md p-8 mx-4 rounded-2xl bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 shadow-2xl shadow-black/10 dark:shadow-black/30 z-[101]"
               initial="hidden"
               animate="visible"
               exit="exit"
@@ -272,7 +272,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
             >
               <motion.button
                 onClick={() => setIsLoginOpen(false)}
-                className="absolute top-4 right-4 p-2 rounded-xl text-[var(--theme-text-secondary)] hover:text-purple-500 hover:bg-purple-500/10 transition-all duration-300"
+                className="absolute top-4 right-4 p-2 rounded-xl text-gray-500 dark:text-neutral-400 hover:text-purple-500 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all duration-300"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 aria-label="Cerrar"
@@ -284,18 +284,18 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent mb-3">
                   {mode === 'login' ? 'Iniciar sesión' : mode === 'register' ? 'Registrarse' : 'Restablecer contraseña'}
                 </h2>
-                <p className="text-[var(--theme-text-secondary)]">
+                <p className="text-gray-600 dark:text-neutral-400">
                   {mode === 'login' ? 'Bienvenido de nuevo' : mode === 'register' ? 'Crea tu cuenta' : 'Ingresa tu correo para restablecer tu contraseña'}
                 </p>
                 {getTriggerMessage() && (
-                  <div className="mt-4 p-4 bg-purple-500/10 rounded-xl border border-purple-500/20">
-                    <p className="text-[var(--theme-text-primary)]">{getTriggerMessage()}</p>
+                  <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800/30">
+                    <p className="text-gray-900 dark:text-white">{getTriggerMessage()}</p>
                   </div>
                 )}
               </div>
 
               {error && (
-                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500">
+                <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 rounded-xl text-red-500 dark:text-red-400">
                   {error}
                 </div>
               )}
@@ -304,33 +304,33 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                 {mode === 'update_password' && (
                   <>
                     <div>
-                      <label className="block text-[var(--theme-text-secondary)] mb-2 font-medium">
+                      <label className="block text-gray-700 dark:text-neutral-300 mb-2 font-medium">
                         Nueva contraseña
                       </label>
                       <div className="relative">
-                        <FiLock className="absolute left-4 top-3.5 text-purple-500" />
+                        <FiLock className="absolute left-4 top-3.5 text-purple-500 dark:text-purple-400" />
                         <input
                           type="password"
                           id="new-password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="w-full pl-11 pr-4 py-3 bg-purple-500/5 border border-purple-500/20 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 text-white"
+                          className="w-full pl-11 pr-4 py-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800/30 rounded-xl focus:outline-none focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 dark:focus:ring-purple-400/20 transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-neutral-400"
                           placeholder="Ingresa tu nueva contraseña"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-[var(--theme-text-secondary)] mb-2 font-medium">
+                      <label className="block text-gray-700 dark:text-neutral-300 mb-2 font-medium">
                         Confirmar contraseña
                       </label>
                       <div className="relative">
-                        <FiLock className="absolute left-4 top-3.5 text-purple-500" />
+                        <FiLock className="absolute left-4 top-3.5 text-purple-500 dark:text-purple-400" />
                         <input
                           type="password"
                           id="confirm-new-password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full pl-11 pr-4 py-3 bg-purple-500/5 border border-purple-500/20 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 text-white"
+                          className="w-full pl-11 pr-4 py-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800/30 rounded-xl focus:outline-none focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 dark:focus:ring-purple-400/20 transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-neutral-400"
                           placeholder="Confirma tu nueva contraseña"
                         />
                       </div>
@@ -343,13 +343,13 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                     Correo electrónico
                   </label>
                   <div className="relative">
-                    <FiMail className="absolute left-4 top-3.5 text-purple-500" />
+                    <FiMail className="absolute left-4 top-3.5 text-[var(--theme-accent)]" />
                     <input
                       type="email"
                       id="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3 bg-purple-500/5 border border-purple-500/20 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 text-white"
+                      className="w-full pl-11 pr-4 py-3 bg-[var(--theme-accent)]/5 border border-[var(--theme-accent)]/20 rounded-xl focus:outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all duration-300 text-[var(--theme-text-primary)]"
                       placeholder="Ingresa tu correo electrónico"
                     />
                   </div>
@@ -361,13 +361,13 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                       Contraseña
                     </label>
                     <div className="relative">
-                      <FiLock className="absolute left-4 top-3.5 text-purple-500" />
+                      <FiLock className="absolute left-4 top-3.5 text-[var(--theme-accent)]" />
                       <input
                         type="password"
                         id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-purple-500/5 border border-purple-500/20 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 text-white"
+                        className="w-full pl-11 pr-4 py-3 bg-[var(--theme-accent)]/5 border border-[var(--theme-accent)]/20 rounded-xl focus:outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all duration-300 text-[var(--theme-text-primary)]"
                         placeholder="Ingresa tu contraseña"
                       />
                     </div>
@@ -377,10 +377,9 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                 <motion.button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full py-3 px-6 mt-2 rounded-xl font-medium text-white shadow-lg shadow-purple-500/30 
-                    ${isLoading
-                      ? 'bg-purple-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 transform hover:scale-[1.02] transition-all duration-300'
+                  className={`w-full py-3 px-6 mt-2 rounded-xl font-medium text-white shadow-lg ${isLoading
+                      ? 'bg-purple-400 dark:bg-purple-500/70 cursor-not-allowed shadow-purple-500/20 dark:shadow-purple-500/10'
+                      : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 shadow-purple-500/30 dark:shadow-purple-500/20 transform hover:scale-[1.02] transition-all duration-300'
                     }`}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -404,7 +403,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                   <button
                     type="button"
                     onClick={toggleMode}
-                    className="text-purple-500 hover:text-pink-500 transition-colors duration-300"
+                    className="text-purple-500 dark:text-purple-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors duration-300"
                   >
                     {mode === 'login' ? '¿No tienes cuenta? Regístrate' : mode === 'register' ? '¿Ya tienes cuenta? Inicia sesión' : 'Volver al inicio de sesión'}
                   </button>
@@ -412,7 +411,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                     <button
                       type="button"
                       onClick={() => setMode('reset')}
-                      className="block w-full text-purple-500 hover:text-pink-500 transition-colors duration-300"
+                      className="block w-full text-purple-500 dark:text-purple-400 hover:text-pink-500 dark:hover:text-pink-400 transition-colors duration-300"
                     >
                       ¿Olvidaste tu contraseña?
                     </button>
