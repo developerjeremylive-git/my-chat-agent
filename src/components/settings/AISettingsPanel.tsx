@@ -492,9 +492,9 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                 </Tooltip.Provider>
                 <span className="text-xs text-[#F48120] ml-2">Próximamente</span>
               </div>
-              <div className="mt-4 text-xs text-neutral-500 text-center">
+              {/* <div className="mt-4 text-xs text-neutral-500 text-center">
                 Potenciado por Tecnología IA Avanzada
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
