@@ -5,6 +5,8 @@ import type { Message } from "@ai-sdk/react";
 import { APPROVAL } from "./shared";
 import type { tools } from "./tools";
 import { AIConfigProvider, useAIConfig } from "@/contexts/AIConfigContext";
+import "@/styles/markdown.css";
+import { MessageView } from "@/components/message/MessageView";
 
 // Component imports
 import { Button } from "@/components/button/Button";
@@ -28,6 +30,9 @@ import {
   List
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
+import ReactMarkdown from "react-markdown";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -285,12 +290,62 @@ function ChatComponent() {
                                           🕒
                                         </span>
                                       )}
-                                    <p className="text-sm whitespace-pre-wrap">
-                                      {part.text.replace(
-                                        /^scheduled message: /,
-                                        ""
-                                      )}
-                                    </p>
+                                    <div className="flex justify-between items-start mb-2">
+                                      <div className="flex items-center gap-2">
+                                        <MessageView
+                                          key={`${m.id}-${i}`}
+                                          text={part.text.replace(/^scheduled message: /, "")}
+                                          onCopy={() => navigator.clipboard.writeText(part.text.replace(/^scheduled message: /, ""))}
+                                        />
+                                      </div>
+                                    </div>
+                                    {/* <div
+                                      id={`message-${m.id}-${i}`}
+                                      className="markdown-content"
+                                    >
+                                      <div className="text-sm">
+                                        {document.getElementById(`message-${m.id}-${i}`)?.classList.contains('markdown-view') ? (
+                                          <ReactMarkdown
+                                            components={{
+                                              code({node, inline, className, children, ...props}: any) {
+                                                const match = /language-(\w+)/.exec(className || '');
+                                                return !inline && match ? (
+                                                  <SyntaxHighlighter
+                                                    style={vscDarkPlus}
+                                                    language={match[1]}
+                                                    PreTag="div"
+                                                    {...props}
+                                                  >
+                                                    {String(children).replace(/\n$/, '')}
+                                                  </SyntaxHighlighter>
+                                                ) : (
+                                                  <code className={className} {...props}>
+                                                    {children}
+                                                  </code>
+                                                );
+                                              },
+                                              h1: ({node, ...props}) => <h1 className="text-2xl font-bold my-4" {...props} />,
+                                              h2: ({node, ...props}) => <h2 className="text-xl font-bold my-3" {...props} />,
+                                              h3: ({node, ...props}) => <h3 className="text-lg font-bold my-2" {...props} />,
+                                              p: ({node, ...props}) => <p className="my-2" {...props} />,
+                                              ul: ({node, ...props}) => <ul className="list-disc list-inside my-2" {...props} />,
+                                              ol: ({node, ...props}) => <ol className="list-decimal list-inside my-2" {...props} />,
+                                              li: ({node, ...props}) => <li className="my-1" {...props} />,
+                                              blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 pl-4 my-2 italic" {...props} />,
+                                              em: ({node, ...props}) => <em className="italic" {...props} />,
+                                              strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                              a: ({node, ...props}) => <a className="text-blue-500 hover:underline" {...props} />
+                                            }}
+                                          >
+                                            {part.text.replace(/^scheduled message: /, "")}
+                                          </ReactMarkdown>
+                                        ) : (
+                                          <p className="whitespace-pre-wrap">
+                                            {part.text.replace(/^scheduled message: /, "")}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div> */}
                                   </Card>
                                   <p
                                     className={`text-xs text-muted-foreground mt-1 ${isUser ? "text-right" : "text-left"
