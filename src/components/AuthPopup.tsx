@@ -394,7 +394,7 @@ export default function AuthPopup({ triggerReason, onAuthComplete }: AuthPopupPr
                   ) : (
                     <span className="flex items-center justify-center">
                       <FiLogIn className="w-5 h-5 mr-2" />
-                      {mode === 'login' ? 'Iniciar sesión' : 'Enviar correo de restablecimiento'}
+                      {mode === 'login' ? 'Iniciar sesión' : mode === 'register' ? 'Registrarse' : 'Enviar correo de restablecimiento'}
                     </span>
                   )}
                 </motion.button>
