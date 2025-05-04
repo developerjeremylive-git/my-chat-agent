@@ -88,12 +88,14 @@ function ChatComponent() {
       topP: config.topP,
       topK: config.topK,
       frequencyPenalty: config.frequencyPenalty,
-      presencePenalty: config.presencePenalty
+      presencePenalty: config.presencePenalty,
+      seed: config.seed,
+      stream: config.stream,
     },
-    stream: true,
+    stream: config.stream,
     onStreamEnd: () => {
-      // Manejar el final del stream solo cuando se alcanza el límite de tokens
-      console.log('Stream finalizado por límite de tokens');
+      scrollToBottom();
+      console.log('Stream finalizado');
     }
   });
   console.log('Configuración:', config);

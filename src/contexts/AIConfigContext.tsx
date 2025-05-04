@@ -8,6 +8,8 @@ export interface AIModelConfig {
   topK: number;
   frequencyPenalty: number;
   presencePenalty: number;
+  seed: number;
+  stream: boolean;
 }
 
 export interface AIConfigContextType {
@@ -43,6 +45,8 @@ export function AIConfigProvider({ children }: AIConfigProviderProps) {
           topK: 1,
           frequencyPenalty: 0.3,
           presencePenalty: 0.3,
+          seed: 1,
+          stream: true,
         };
   });
 

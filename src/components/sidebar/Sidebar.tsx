@@ -73,6 +73,14 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange }: SidebarProps)
                   <ChartLine className="mr-2" />
                   Análisis Avanzado
                 </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start opacity-50 cursor-not-allowed cn('hover:bg-opacity-50', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-neutral-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200')"
+                  disabled
+                >
+                  <Brain className="mr-2" />
+                  Multi-Agente (Próximamente)
+                </Button>
               </div>
             </div>
           </nav>
