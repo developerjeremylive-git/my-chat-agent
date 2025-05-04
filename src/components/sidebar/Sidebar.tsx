@@ -45,7 +45,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange }: SidebarProps)
             <div className="space-y-2">
               <div className="cn('text-xs uppercase tracking-wider', theme === 'dark' ? 'text-neutral-400' : 'text-gray-500')">Principal</div>
               <div className="space-y-1">
-                  <AuthButton className="hidden sm:flex" />
+                  <AuthButton className="flex" />
               </div>
             </div>
 
