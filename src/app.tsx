@@ -205,7 +205,19 @@ function ChatComponent() {
                             <span className="text-sm text-neutral-500 dark:text-neutral-400">Consulta el clima, pronósticos y condiciones atmosféricas</span>
                           </div>
                           <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 bg-neutral-800 dark:bg-neutral-700 text-white p-3 rounded-lg shadow-xl -top-24 left-0 right-0 mx-4 transition-all duration-200 z-10">
-                            <p className="text-sm font-medium mb-2">Ejemplo de uso:</p>
+                            <div className="flex justify-between items-start mb-2">
+                              <p className="text-sm font-medium">Ejemplo de uso:</p>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs hover:bg-white/10 rounded-lg p-1"
+                                onClick={() => handleAgentInputChange({ target: { value: "¿Cuál es el pronóstico del tiempo para Madrid este fin de semana? Incluye temperatura y probabilidad de lluvia." } } as any)}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                              </Button>
+                            </div>
                             <p className="text-xs italic">"¿Cuál es el pronóstico del tiempo para Madrid este fin de semana? Incluye temperatura y probabilidad de lluvia."</p>
                           </div>
                         </li>
@@ -218,7 +230,19 @@ function ChatComponent() {
                             <span className="text-sm text-neutral-500 dark:text-neutral-400">Coordina reuniones y eventos internacionales sin complicaciones</span>
                           </div>
                           <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 bg-neutral-800 dark:bg-neutral-700 text-white p-3 rounded-lg shadow-xl -top-24 left-0 right-0 mx-4 transition-all duration-200 z-10">
-                            <p className="text-sm font-medium mb-2">Ejemplo de uso:</p>
+                            <div className="flex justify-between items-start mb-2">
+                              <p className="text-sm font-medium">Ejemplo de uso:</p>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs hover:bg-white/10 rounded-lg p-1"
+                                onClick={() => handleAgentInputChange({ target: { value: "¿Qué hora será en Tokyo cuando sean las 15:00 en Madrid? Programa una reunión considerando el horario laboral de ambas ciudades." } } as any)}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                              </Button>
+                            </div>
                             <p className="text-xs italic">"¿Qué hora será en Tokyo cuando sean las 15:00 en Madrid? Programa una reunión considerando el horario laboral de ambas ciudades."</p>
                           </div>
                         </li>
@@ -231,7 +255,19 @@ function ChatComponent() {
                             <span className="text-sm text-neutral-500 dark:text-neutral-400">Obtén respuestas adaptadas a tus necesidades específicas</span>
                           </div>
                           <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 bg-neutral-800 dark:bg-neutral-700 text-white p-3 rounded-lg shadow-xl -top-24 left-0 right-0 mx-4 transition-all duration-200 z-10">
-                            <p className="text-sm font-medium mb-2">Ejemplo de uso:</p>
+                            <div className="flex justify-between items-start mb-2">
+                              <p className="text-sm font-medium">Ejemplo de uso:</p>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs hover:bg-white/10 rounded-lg p-1"
+                                onClick={() => handleAgentInputChange({ target: { value: "¿Podrías ayudarme a crear un plan de estudio personalizado para aprender desarrollo web en 3 meses? Tengo conocimientos básicos de HTML y CSS." } } as any)}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                              </Button>
+                            </div>
                             <p className="text-xs italic">"¿Podrías ayudarme a crear un plan de estudio personalizado para aprender desarrollo web en 3 meses? Tengo conocimientos básicos de HTML y CSS."</p>
                           </div>
                         </li>
