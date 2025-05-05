@@ -125,8 +125,8 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
       >
         <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 border-opacity-10 flex justify-between items-center sticky top-0 bg-white dark:bg-neutral-900 z-10">
           <div className="flex items-center space-x-2">
-            <Gear className="text-[#F48120] h-6 w-6" />
-            <h2 className="font-semibold text-base">Configuración del Asistente IA</h2>
+            <Gear weight="duotone" className="text-[#F48120] h-7 w-6" />
+            <span className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Configuración Asistente IA</span>
           </div>
           <Button
             variant="ghost"

@@ -134,9 +134,9 @@ function ChatComponent() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground overflow-hidden">
-      <Sidebar 
-        isOpen={isSidebarOpen} 
-        onClose={() => setIsSidebarOpen(false)} 
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
         theme={theme}
         onThemeChange={toggleTheme}
       />
@@ -171,7 +171,7 @@ function ChatComponent() {
             </div>
 
             <div className="flex-1">
-              <h2 className="font-semibold text-base">Asistente de Chat IA</h2>
+              <h2 className="font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Asistente Inteligente</h2>
             </div>
 
             <div className="flex items-center gap-2 mr-2">
@@ -536,7 +536,7 @@ function ChatComponent() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
       />
-      <AuthPopup/>
+      <AuthPopup />
     </div>
   );
 }

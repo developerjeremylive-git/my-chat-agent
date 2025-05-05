@@ -23,62 +23,61 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange }: SidebarProps)
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b cn('border-opacity-10', theme === 'dark' ? 'border-neutral-800' : 'border-gray-200')">
-            <div className="flex items-center space-x-2">
-              <Robot className="text-[#F48120] h-6 w-6" />
-              <span className="cn('font-semibold', theme === 'dark' ? 'text-white' : 'text-gray-900')">Asistente Inteligente</span>
+          <div className="p-4 border-b cn('border-opacity-10', theme === 'dark' ? 'border-neutral-800' : 'border-gray-200')">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-3">
+                <Robot weight="duotone" className="text-[#F48120] h-7 w-7" />
+                <span className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Asistente IA</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                shape="square"
+                className="rounded-xl hover:bg-white/10 text-neutral-400 hover:text-white transition-all duration-300 transform hover:rotate-90"
+                onClick={onClose}
+              >
+                <X weight="bold" size={20} />
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              shape="square"
-              className="text-neutral-400 hover:text-white"
-              onClick={onClose}
-            >
-              <X size={20} />
-            </Button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-4">
-            <div className="space-y-2">
-              <div className="cn('text-xs uppercase tracking-wider', theme === 'dark' ? 'text-neutral-400' : 'text-gray-500')">Principal</div>
-              <div className="space-y-1">
-                  <AuthButton className="flex" />
+          <nav className="flex-1 p-4">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <AuthButton 
+                  className="w-full bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-purple-500 hover:to-[#F48120] text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
+                />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <div className="cn('text-xs uppercase tracking-wider', theme === 'dark' ? 'text-neutral-400' : 'text-gray-500')">Características</div>
-              <div className="space-y-1">
+              <div className="space-y-3">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start cn('hover:bg-opacity-50', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-neutral-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200')"
+                  className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
                 >
-                  <Code className="mr-2" />
+                  <Code weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
                   Asistente de Código
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start cn('hover:bg-opacity-50', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-neutral-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200')"
+                  className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
                 >
-                  <Lightbulb className="mr-2" />
+                  <Lightbulb weight="duotone" className="mr-3 h-5 w-5 text-purple-500" />
                   Investigación IA
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start cn('hover:bg-opacity-50', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-neutral-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200')"
+                  className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
                 >
-                  <ChartLine className="mr-2" />
+                  <ChartLine weight="duotone" className="mr-3 h-5 w-5 text-green-500" />
                   Análisis Avanzado
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start opacity-50 cursor-not-allowed cn('hover:bg-opacity-50', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-neutral-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200')"
+                  className="w-full justify-start rounded-xl py-3 opacity-50 cursor-not-allowed cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300' : 'text-gray-700')"
                   disabled
                 >
-                  <Brain className="mr-2" />
+                  <Brain weight="duotone" className="mr-3 h-5 w-5" />
                   Multi-Agente (Próximamente)
                 </Button>
               </div>
@@ -86,16 +85,19 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange }: SidebarProps)
           </nav>
 
           {/* Theme Toggle */}
-          <div className="p-4 border-t cn('border-opacity-10', theme === 'dark' ? 'border-neutral-800' : 'border-gray-200')">
+          <div className="p-4 mt-auto border-t cn('border-opacity-10', theme === 'dark' ? 'border-neutral-800' : 'border-gray-200')">
             <Button
               variant="ghost"
-              className="w-full justify-start cn('hover:bg-opacity-50', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-neutral-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-200')"
+              className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
               onClick={onThemeChange}
             >
-              {theme === "dark" ? <Sun className="mr-2" /> : <Moon className="mr-2" />}
+              {theme === "dark" ? 
+                <Sun weight="duotone" className="mr-3 h-5 w-5 text-amber-400" /> : 
+                <Moon weight="duotone" className="mr-3 h-5 w-5 text-blue-400" />
+              }
               {theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
             </Button>
-            <div className="mt-4 text-xs text-neutral-500 text-center">
+            <div className="mt-4 text-xs text-center cn('text-neutral-500 hover:text-neutral-400 transition-colors duration-300', theme === 'dark' ? 'text-neutral-500' : 'text-gray-500')">
               Potenciado por Tecnología IA Avanzada
             </div>
           </div>
