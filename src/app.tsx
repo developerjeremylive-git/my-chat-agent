@@ -141,6 +141,7 @@ function ChatComponent() {
         onClose={() => setIsSidebarOpen(false)}
         theme={theme}
         onThemeChange={toggleTheme}
+        onPromptSelect={(prompt) => handleAgentInputChange({ target: { value: prompt } } as any)}
       />
       <main className="flex-1 container mx-auto px-4 py-4">
         <div className="h-[calc(100vh-2rem)] w-full mx-auto max-w-lg flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800">

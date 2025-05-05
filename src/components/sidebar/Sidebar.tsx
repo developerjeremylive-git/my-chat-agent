@@ -1,18 +1,239 @@
 import { useState } from 'react';
 import { Button } from '@/components/button/Button';
+import { Card } from '@/components/card/Card';
 import { cn } from '@/lib/utils';
-import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun } from '@phosphor-icons/react';
+import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun, GraduationCap, Pencil, Palette, Leaf, Camera, MusicNotes } from '@phosphor-icons/react';
 import AuthPopup from '../AuthPopup';
 import AuthButton from '../AuthButton';
+
+interface PromptTemplate {
+  title: string;
+  description: string;
+  prompt: string;
+}
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   theme: "dark" | "light";
   onThemeChange: () => void;
+  onPromptSelect?: (prompt: string) => void;
 }
 
-export function Sidebar({ isOpen, onClose, theme, onThemeChange }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect }: SidebarProps) {
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+
+  const promptTemplates = {
+    "exploracion-ideas": [
+      {
+        title: "Ideas de regalos creativos",
+        description: "Ideas de regalos no muy caras y creativas para el cumple de mi amiga.",
+        prompt: "Necesito ideas de regalos creativos y económicos para el cumpleaños de mi amiga que le encanta el arte y la naturaleza. Presupuesto máximo de 50€."
+      },
+      {
+        title: "Decoración de oficina",
+        description: "¿Cómo puedo decorar mi oficina para que sea más acogedora sin que deje de ser profesional?",
+        prompt: "Sugiere ideas para decorar una oficina pequeña de 3x4 metros para que sea más acogedora manteniendo un ambiente profesional. Incluye sugerencias de colores, plantas y disposición del mobiliario."
+      },
+      {
+        title: "Planificación de reunión",
+        description: "Ayúdame a planificar una reunión familiar en mi casa.",
+        prompt: "Necesito ayuda para planificar una reunión familiar de 10 personas en mi casa. Incluye sugerencias de menú, actividades y disposición del espacio."
+      },
+      {
+        title: "Ideas para picnic",
+        description: "¿Me das ideas de platos divertidos para llevar a un picnic con niños?",
+        prompt: "Necesito ideas de platos divertidos y saludables para un picnic con 4 niños de entre 5-8 años. Los platos deben ser fáciles de transportar y comer al aire libre."
+      }
+    ],
+    "orientacion-profesional": [
+      {
+        title: "Hablar en público",
+        description: "Me gustaría aprender a hablar en público.",
+        prompt: "Necesito consejos prácticos y ejercicios para mejorar mis habilidades de hablar en público, especialmente para presentaciones profesionales."
+      },
+      {
+        title: "Pedir ascenso",
+        description: "Ayúdame a plantearle a mi jefe un ascenso.",
+        prompt: "¿Cómo puedo preparar una conversación efectiva con mi jefe para solicitar un ascenso? Llevo 2 años en la empresa con buenos resultados."
+      },
+      {
+        title: "Entrevista conductual",
+        description: "¿Cómo me preparo para una entrevista con preguntas conductuales?",
+        prompt: "Ayúdame a preparar respuestas para preguntas conductuales comunes en entrevistas de trabajo, usando el método STAR."
+      },
+      {
+        title: "Encontrar mentor",
+        description: "Aconséjame cómo puedo encontrar un mentor.",
+        prompt: "¿Cuáles son las mejores estrategias para encontrar y aproximarse a un potencial mentor en mi campo profesional?"
+      }
+    ],
+    "asistente-programacion": [
+      {
+        title: "Revisar código",
+        description: "Comprueba que mis deberes de programación están bien.",
+        prompt: "¿Podrías revisar mi código para asegurar que cumple con las mejores prácticas y no tiene errores? Necesito una revisión detallada."
+      },
+      {
+        title: "Actualizar sitio web",
+        description: "Ayúdame a actualizar el código de seguimiento de mi sitio web.",
+        prompt: "Necesito ayuda para implementar y actualizar el código de seguimiento en mi sitio web. ¿Podrías guiarme en el proceso?"
+      },
+      {
+        title: "Crear aplicación",
+        description: "Crea una aplicación sencilla para mi empresa.",
+        prompt: "Necesito crear una aplicación básica para mi empresa. ¿Podrías ayudarme con la estructura y el code inicial?"
+      },
+      {
+        title: "Bucle en Python",
+        description: "¿Cómo puedo crear un bucle en una lista de elementos en Python?",
+        prompt: "Necesito ayuda para entender y crear un bucle que procese elementos en una lista usando Python. ¿Podrías explicarme las diferentes opciones?"
+      }
+    ],
+    "tutor-personal": [
+      {
+        title: "Números binarios",
+        description: "¿Qué son los números binarios?",
+        prompt: "¿Podrías explicarme qué son los números binarios, cómo funcionan y para qué se utilizan en la computación?"
+      },
+      {
+        title: "Caída Imperio Romano",
+        description: "Explica qué factores llevaron a la caída del Imperio romano.",
+        prompt: "¿Cuáles fueron los principales factores políticos, económicos y sociales que contribuyeron a la caída del Imperio Romano?"
+      },
+      {
+        title: "Fotosíntesis",
+        description: "¿Cómo funciona la fotosíntesis?",
+        prompt: "¿Podrías explicar el proceso de la fotosíntesis, sus etapas y su importancia para la vida en la Tierra?"
+      },
+      {
+        title: "Orgullo y prejuicio",
+        description: "He terminado de leer Orgullo y prejuicio. ¿Me ayudas a repasar los temas y personajes clave?",
+        prompt: "Necesito analizar los temas principales, personajes y simbolismo en Orgullo y prejuicio de Jane Austen. ¿Podrías ayudarme con un análisis detallado?"
+      }
+    ],
+    "revision-escritura": [
+      {
+        title: "Corrección gramatical",
+        description: "Corrige los errores gramaticales.",
+        prompt: "¿Podrías revisar este texto y corregir cualquier error gramatical, ortográfico o de puntuación?"
+      },
+      {
+        title: "Adaptar estilo",
+        description: "Adapta este texto a una guía de estilo específica.",
+        prompt: "Necesito adaptar este texto para que cumpla con una guía de estilo específica. ¿Podrías ayudarme a reformularlo?"
+      },
+      {
+        title: "Clarificar frase",
+        description: "Reescribe esta frase para hacerla más clara.",
+        prompt: "¿Podrías ayudarme a reescribir esta frase para mejorar su claridad y comprensión?"
+      },
+      {
+        title: "Mejorar fluidez",
+        description: "Mejora la fluidez de las frases, la elección de palabras y la coherencia de estilo general de este artículo.",
+        prompt: "¿Podrías revisar este artículo para mejorar su fluidez, elección de palabras y mantener una coherencia estilística?"
+      }
+    ],
+    "arte-diseno": [
+      {
+        title: "Paleta de colores",
+        description: "Ayúdame a crear una paleta de colores armoniosa.",
+        prompt: "Necesito crear una paleta de colores para un proyecto de diseño con temática minimalista y moderna. ¿Podrías sugerir una combinación de colores y explicar por qué funcionarían bien juntos?"
+      },
+      {
+        title: "Composición fotográfica",
+        description: "Consejos para mejorar mis fotografías.",
+        prompt: "¿Podrías darme consejos avanzados sobre composición fotográfica para mejorar mis fotos de paisajes urbanos? Me interesa especialmente aprender sobre la regla de los tercios y las líneas principales."
+      },
+      {
+        title: "Diseño de logo",
+        description: "Ideas para crear un logo memorable.",
+        prompt: "Necesito ideas para diseñar un logo para mi startup de tecnología sostenible. Busco algo moderno pero que transmita compromiso con el medio ambiente."
+      },
+      {
+        title: "Ilustración digital",
+        description: "Técnicas de ilustración digital para principiantes.",
+        prompt: "Soy principiante en ilustración digital. ¿Podrías guiarme sobre las técnicas básicas, herramientas recomendadas y primeros pasos para crear ilustraciones atractivas?"
+      }
+    ],
+    "sostenibilidad-ambiental": [
+      {
+        title: "Huerto urbano",
+        description: "Cómo crear un huerto en casa.",
+        prompt: "Quiero empezar un huerto urbano en mi balcón de 2x3 metros. ¿Qué plantas son ideales para principiantes y qué necesito para comenzar?"
+      },
+      {
+        title: "Reciclaje creativo",
+        description: "Ideas para reutilizar objetos cotidianos.",
+        prompt: "Busco ideas creativas para reutilizar envases de plástico y vidrio. ¿Qué proyectos de upcycling recomiendas para principiantes?"
+      },
+      {
+        title: "Consumo responsable",
+        description: "Guía para un estilo de vida más sostenible.",
+        prompt: "¿Podrías sugerir cambios prácticos en mi rutina diaria para reducir mi huella de carbono y vivir de manera más sostenible?"
+      },
+      {
+        title: "Energía renovable",
+        description: "Opciones de energía limpia para el hogar.",
+        prompt: "Me interesa implementar energía solar en mi casa. ¿Podrías explicar las opciones disponibles, costos aproximados y beneficios a largo plazo?"
+      }
+    ],
+    "musica-audio": [
+      {
+        title: "Producción musical",
+        description: "Consejos para mejorar mis mezclas.",
+        prompt: "Soy productor musical principiante. ¿Podrías darme consejos sobre ecualización y mezcla para lograr un sonido más profesional?"
+      },
+      {
+        title: "Composición musical",
+        description: "Ayuda para crear melodías originales.",
+        prompt: "Quiero componer mi primera canción. ¿Podrías guiarme sobre estructura musical básica, progresiones de acordes comunes y consejos para crear melodías memorables?"
+      },
+      {
+        title: "Selección de equipo",
+        description: "Recomendaciones de equipamiento de audio.",
+        prompt: "Busco montar un pequeño estudio de grabación casero. ¿Qué equipo básico necesito para empezar (interfaz de audio, micrófono, monitores) con un presupuesto limitado?"
+      },
+      {
+        title: "Técnicas vocales",
+        description: "Ejercicios para mejorar el canto.",
+        prompt: "¿Podrías sugerir ejercicios diarios de calentamiento vocal y técnicas para mejorar mi rango vocal y control de la respiración?"
+      }
+    ],
+    "fotografia-visual": [
+      {
+        title: "Fotografía nocturna",
+        description: "Tips para fotos nocturnas impresionantes.",
+        prompt: "Quiero mejorar mis fotografías nocturnas. ¿Podrías explicar las configuraciones de cámara ideales y técnicas para capturar la luz de la ciudad y las estrellas?"
+      },
+      {
+        title: "Edición de fotos",
+        description: "Guía de post-procesamiento fotográfico.",
+        prompt: "Necesito consejos para editar mis fotos de manera profesional. ¿Qué ajustes básicos debería hacer para mejorar el color, contraste y nitidez sin sobre-procesar las images?"
+      },
+      {
+        title: "Retratos naturales",
+        description: "Cómo capturar retratos auténticos.",
+        prompt: "Busco consejos para hacer retratos más naturales y expresivos. ¿Qué técnicas de iluminación y poses recomiendas para capturar la personalidad del sujeto?"
+      },
+      {
+        title: "Fotografía de productos",
+        description: "Técnicas para fotografía comercial.",
+        prompt: "Necesito fotografiar productos para mi tienda online. ¿Podrías explicar cómo crear un setup básico de iluminación y consejos para destacar los detalles del producto?"
+      }
+    ]
+  };
+
+  const handleSectionClick = (section: string) => {
+    setSelectedSection(selectedSection === section ? null : section);
+  };
+
+  const handlePromptSelect = (prompt: string) => {
+    if (onPromptSelect) {
+      onPromptSelect(prompt);
+      onClose();
+    }
+  };
   return (
     <>
       <div
@@ -51,35 +272,230 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange }: SidebarProps)
               </div>
 
               <div className="space-y-3">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                >
-                  <Code weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
-                  Asistente de Código
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                >
-                  <Lightbulb weight="duotone" className="mr-3 h-5 w-5 text-purple-500" />
-                  Investigación IA
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                >
-                  <ChartLine weight="duotone" className="mr-3 h-5 w-5 text-green-500" />
-                  Análisis Avanzado
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start rounded-xl py-3 opacity-50 cursor-not-allowed cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300' : 'text-gray-700')"
-                  disabled
-                >
-                  <Brain weight="duotone" className="mr-3 h-5 w-5" />
-                  Multi-Agente (Próximamente)
-                </Button>
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('exploracion-ideas')}
+                  >
+                    <Lightbulb weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
+                    Exploración de ideas
+                  </Button>
+                  {selectedSection === 'exploracion-ideas' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['exploracion-ideas'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('orientacion-profesional')}
+                  >
+                    <GraduationCap weight="duotone" className="mr-3 h-5 w-5 text-purple-500" />
+                    Orientación profesional
+                  </Button>
+                  {selectedSection === 'orientacion-profesional' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['orientacion-profesional'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('asistente-programacion')}
+                  >
+                    <Code weight="duotone" className="mr-3 h-5 w-5 text-green-500" />
+                    Asistente de programación
+                  </Button>
+                  {selectedSection === 'asistente-programacion' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['asistente-programacion'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('tutor-personal')}
+                  >
+                    <Brain weight="duotone" className="mr-3 h-5 w-5 text-blue-500" />
+                    Tutor personal
+                  </Button>
+                  {selectedSection === 'tutor-personal' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['tutor-personal'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('revision-escritura')}
+                  >
+                    <Pencil weight="duotone" className="mr-3 h-5 w-5 text-pink-500" />
+                    Revisión de escritura
+                  </Button>
+                  {selectedSection === 'revision-escritura' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['revision-escritura'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('arte-diseno')}
+                  >
+                    <Palette weight="duotone" className="mr-3 h-5 w-5 text-yellow-500" />
+                    Arte y Diseño
+                  </Button>
+                  {selectedSection === 'arte-diseno' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['arte-diseno'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('sostenibilidad-ambiental')}
+                  >
+                    <Leaf weight="duotone" className="mr-3 h-5 w-5 text-green-400" />
+                    Sostenibilidad Ambiental
+                  </Button>
+                  {selectedSection === 'sostenibilidad-ambiental' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['sostenibilidad-ambiental'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('musica-audio')}
+                  >
+                    <MusicNotes weight="duotone" className="mr-3 h-5 w-5 text-purple-400" />
+                    Música y Audio
+                  </Button>
+                  {selectedSection === 'musica-audio' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['musica-audio'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('fotografia-visual')}
+                  >
+                    <Camera weight="duotone" className="mr-3 h-5 w-5 text-blue-400" />
+                    Fotografía y Visual
+                  </Button>
+                  {selectedSection === 'fotografia-visual' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['fotografia-visual'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </nav>
