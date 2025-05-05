@@ -7,4 +7,6 @@ export const config: AIModelConfig = {
   topK: 1,
   frequencyPenalty: 0.3,
   presencePenalty: 0.3,
+  seed: 1,
+  stream: true
 };

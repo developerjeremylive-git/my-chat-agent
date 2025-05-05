@@ -151,7 +151,7 @@ function ChatComponent() {
             onToggleDebug={() => setShowDebug((prev) => !prev)}
           />
 
-            {/* <Button
+          {/* <Button
               variant="ghost"
               size="md"
               shape="square"
@@ -161,20 +161,20 @@ function ChatComponent() {
               {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
             </Button> */}
 
-            <div className="flex items-center gap-2">
-              <Tooltip content="Limpiar historial">
-                <Button
-                  variant="ghost"
-                  size="md"
-                  shape="square"
-                  className="rounded-full h-9 w-9 hover:bg-red-100/10 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors duration-200"
-                  onClick={() => setShowClearDialog(true)}
-                >
-                  <Trash size={20} weight="duotone" />
-                </Button>
-              </Tooltip>
-            </div>
-         
+          <div className="flex items-center gap-2">
+            <Tooltip content="Limpiar historial">
+              <Button
+                variant="ghost"
+                size="md"
+                shape="square"
+                className="rounded-full h-9 w-9 hover:bg-red-100/10 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors duration-200"
+                onClick={() => setShowClearDialog(true)}
+              >
+                <Trash size={20} weight="duotone" />
+              </Button>
+            </Tooltip>
+          </div>
+
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24 max-h-[calc(100vh-10rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {agentMessages.length === 0 && (
@@ -490,7 +490,7 @@ function ChatComponent() {
                 <PaperPlaneRight size={16} />
               </Button>
 
-              <ModelSelect className="flex-shrink-0" />
+              {/* <ModelSelect className="flex-shrink-0" /> */}
             </div>
           </form>
         </div>

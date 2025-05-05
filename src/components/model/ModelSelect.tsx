@@ -112,9 +112,9 @@ export function ModelSelect({ className }: ModelSelectProps) {
                 'hover:bg-neutral-50 dark:hover:bg-neutral-800',
                 'focus:bg-neutral-50 dark:focus:bg-neutral-800',
                 'transition-all duration-200 hover:scale-[0.99]',
-                selectedModel.name === model.name && 'bg-neutral-100/80 dark:bg-neutral-800 shadow-sm dark:shadow-neutral-950'
+                selectedModel.name === model.name && 'bg-neutral-100/80 dark:bg-neutral-800 shadow-sm dark:shadow-neutral-950', model.provider !== 'DeepSeek / Meta' && 'opacity-50 cursor-not-allowed'
               )}
-              onClick={() => setSelectedModel(model)}
+              onClick={model.provider === 'DeepSeek / Meta' ? () => setSelectedModel(model) : undefined}
             >
               <Tooltip.Root>
                 <Tooltip.Trigger asChild>

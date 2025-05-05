@@ -24,7 +24,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
         >
           <List size={20} />
         </Button>
-        
+
         <div className="flex items-center justify-center h-8 w-8">
           <svg
             width="28px"
@@ -47,6 +47,10 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
           <h2 className="font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Asistente Inteligente</h2>
         </div>
 
+        <div className="flex justify-between gap-2 mr-2">
+          <ModelSelect className="flex-1" />
+        </div>
+
         <div className="flex items-center gap-2 mr-2">
           <Bug size={16} />
           <Toggle
@@ -66,7 +70,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
           <Gear size={20} />
         </Button>
       </div>
-{/* 
+      {/* 
       <div className="flex items-center justify-between gap-2">
         <ModelSelect className="flex-1" />
       </div> */}
