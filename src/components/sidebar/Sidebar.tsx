@@ -27,7 +27,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange }: SidebarProps)
           <div className="flex items-center justify-between p-4 border-b cn('border-opacity-10', theme === 'dark' ? 'border-neutral-800' : 'border-gray-200')">
             <div className="flex items-center space-x-2">
               <Robot className="text-[#F48120] h-6 w-6" />
-              <span className="cn('font-semibold', theme === 'dark' ? 'text-white' : 'text-gray-900')">AI Assistant</span>
+              <span className="cn('font-semibold', theme === 'dark' ? 'text-white' : 'text-gray-900')">Asistente Inteligente</span>
             </div>
             <Button
               variant="ghost"
