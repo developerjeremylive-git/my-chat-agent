@@ -89,8 +89,9 @@ interface AISettingsPanelProps {
 
 export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
   const { config, setConfig } = useAIConfig();
-  const [showAdvanced, setShowAdvanced] = useState(true);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [showPresets, setShowPresets] = useState(true);
+  const [showBasic, setShowBasic] = useState(true);
 
   const handlePresetSelect = (preset: PresetConfig) => {
     setConfig({ ...preset.config, stream: config.stream });
@@ -136,29 +137,31 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
 
         <div className="p-4 space-y-6 border-t cn('border-opacity-10', theme === 'dark' ? 'border-neutral-800' : 'border-gray-200')">
           <div className="space-y-4">
-            <div className="flex items-center justify-between cursor-pointer" onClick={togglePresets}>
-              <h3 className="text-sm font-medium">Configuraciones Predefinidas</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                shape="square"
-                className="rounded-full"
-              >
-                <svg
-                  className={`w-4 h-4 transition-transform duration-200 ${showPresets ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+            <div className="space-y-4">
+              <div className="flex items-center justify-between cursor-pointer" onClick={togglePresets}>
+                <h3 className="text-sm font-medium">Configuraciones Predefinidas</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  shape="square"
+                  className="rounded-full"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </Button>
+                  <svg
+                    className={`w-4 h-4 transition-transform duration-200 ${showPresets ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </Button>
+              </div>
             </div>
             <div className={`grid gap-3 transition-all duration-300 ${showPresets ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
               {presets.map((preset) => (
@@ -203,8 +206,8 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between cursor-pointer" onClick={toggleAdvanced}>
-              <h3 className="text-sm font-medium">Configuración Avanzada</h3>
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowBasic(!showBasic)}>
+              <h3 className="text-sm font-medium">Configuración Básica</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -212,7 +215,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                 className="rounded-full"
               >
                 <svg
-                  className={`w-4 h-4 transition-transform duration-200 ${showAdvanced ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 transition-transform duration-200 ${showBasic ? 'rotate-180' : ''}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -227,7 +230,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                 </svg>
               </Button>
             </div>
-            <div className={`space-y-4 transition-all duration-300 ${showAdvanced ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+            <div className={`space-y-4 transition-all duration-300 ${showBasic ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
               <div>
                 <label className="text-sm flex justify-between items-center">
                   <span>Temperatura</span>
@@ -293,6 +296,100 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                   </Tooltip.Root>
                 </Tooltip.Provider>
               </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between cursor-pointer" onClick={toggleAdvanced}>
+              <h3 className="text-sm font-medium">Configuración Avanzada</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                shape="square"
+                className="rounded-full"
+              >
+                <svg
+                  className={`w-4 h-4 transition-transform duration-200 ${showAdvanced ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </Button>
+            </div>
+            <div className={`space-y-4 transition-all duration-300 ${showAdvanced ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+              {/* <div>
+                <label className="text-sm flex justify-between items-center">
+                  <span>Temperatura</span>
+                  <span className="px-2 py-1 bg-neutral-100 dark:bg-neutral-800 rounded text-sm min-w-[40px] text-center">
+                    {config.temperature}
+                  </span>
+                </label>
+                <Tooltip.Provider>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        value={config.temperature}
+                        onChange={(e) => handleSliderChange('temperature', parseFloat(e.target.value))}
+                        className="w-full h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-50"
+                        sideOffset={5}
+                      >
+                        Controla la aleatoriedad de las respuestas. Valores más altos (0.8-1.0) generan respuestas más creativas y diversas, mientras que valores más bajos (0.2-0.4) producen respuestas más consistentes y deterministas.
+                        <Tooltip.Arrow className="fill-neutral-800" />
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
+                </Tooltip.Provider>
+              </div>
+
+              <div>
+                <label className="text-sm flex justify-between items-center">
+                  <span>Tokens Máximos</span>
+                  <span className="px-2 py-1 bg-neutral-100 dark:bg-neutral-800 rounded text-sm min-w-[40px] text-center">
+                    {config.maxTokens}
+                  </span>
+                </label>
+                <Tooltip.Provider>
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <input
+                        type="range"
+                        min="256"
+                        max="4096"
+                        step="256"
+                        value={config.maxTokens}
+                        onChange={(e) => handleSliderChange('maxTokens', parseInt(e.target.value))}
+                        className="w-full h-2 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-50"
+                        sideOffset={5}
+                      >
+                        El número máximo de tokens que el modelo generará en una respuesta. Un valor más alto permite respuestas más largas pero consume más recursos.
+                        <Tooltip.Arrow className="fill-neutral-800" />
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
+                </Tooltip.Provider>
+              </div> */}
 
               <div>
                 <label className="text-sm flex justify-between items-center">
