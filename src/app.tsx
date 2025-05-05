@@ -218,26 +218,64 @@ function ChatComponent() {
           <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24 max-h-[calc(100vh-10rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {agentMessages.length === 0 && (
               <div className="h-full flex items-center justify-center">
-                <Card className="p-6 max-w-md mx-auto bg-neutral-100 dark:bg-neutral-900">
-                  <div className="text-center space-y-4">
-                    <div className="bg-[#F48120]/10 text-[#F48120] rounded-full p-3 inline-flex">
-                      <Robot size={24} />
+                <Card className="p-8 max-w-md mx-auto bg-gradient-to-b from-neutral-100/80 to-neutral-50 dark:from-neutral-900/80 dark:to-neutral-950 backdrop-blur-sm border border-neutral-200/50 dark:border-neutral-800/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+                  <div className="text-center space-y-6">
+                    <div className="relative">
+                      <div className="absolute -inset-4 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-full blur-2xl dark:from-[#F48120]/10 dark:to-purple-500/10"></div>
+                      <div className="bg-gradient-to-r from-[#F48120] to-[#F48120]/80 text-white rounded-full p-4 inline-flex relative transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                        <Robot size={28} weight="duotone" />
+                      </div>
                     </div>
-                    <h3 className="font-semibold text-lg">Welcome to AI Chat</h3>
-                    <p className="text-muted-foreground text-sm">
-                      Start a conversation with your AI assistant. Try asking
-                      about:
-                    </p>
-                    <ul className="text-sm text-left space-y-2">
-                      <li className="flex items-center gap-2">
-                        <span className="text-[#F48120]">•</span>
-                        <span>Weather information for any city</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-[#F48120]">•</span>
-                        <span>Local time in different locations</span>
-                      </li>
-                    </ul>
+                    <div className="space-y-3">
+                      <h3 className="font-bold text-2xl bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Bienvenido a tu Asistente IA</h3>
+                      <p className="text-neutral-600 dark:text-neutral-300 text-base leading-relaxed">
+                        Tu compañero inteligente para resolver dudas y automatizar tareas. Potenciado por tecnología IA avanzada.
+                      </p>
+                    </div>
+                    <div className="bg-white/50 dark:bg-neutral-800/50 rounded-xl p-4 space-y-4 backdrop-blur-sm border border-neutral-200/50 dark:border-neutral-700/50">
+                      <h4 className="font-medium text-neutral-800 dark:text-neutral-200">Explora mis capacidades:</h4>
+                      <ul className="text-base space-y-3">
+                        <li className="group relative flex items-center gap-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 p-2 rounded-lg transition-all duration-200">
+                          <span className="flex-shrink-0 w-8 h-8 bg-[#F48120]/10 dark:bg-[#F48120]/20 rounded-full flex items-center justify-center">
+                            <span className="text-[#F48120]">🌤️</span>
+                          </span>
+                          <div className="flex flex-col">
+                            <span>Obtén datos meteorológicos precisos y actualizados</span>
+                            <span className="text-sm text-neutral-500 dark:text-neutral-400">Consulta el clima, pronósticos y condiciones atmosféricas</span>
+                          </div>
+                          <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 bg-neutral-800 dark:bg-neutral-700 text-white p-3 rounded-lg shadow-xl -top-24 left-0 right-0 mx-4 transition-all duration-200 z-10">
+                            <p className="text-sm font-medium mb-2">Ejemplo de uso:</p>
+                            <p className="text-xs italic">"¿Cuál es el pronóstico del tiempo para Madrid este fin de semana? Incluye temperatura y probabilidad de lluvia."</p>
+                          </div>
+                        </li>
+                        <li className="group relative flex items-center gap-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 p-2 rounded-lg transition-all duration-200">
+                          <span className="flex-shrink-0 w-8 h-8 bg-[#F48120]/10 dark:bg-[#F48120]/20 rounded-full flex items-center justify-center">
+                            <span className="text-[#F48120]">🌍</span>
+                          </span>
+                          <div className="flex flex-col">
+                            <span>Maneja zonas horarias con precisión</span>
+                            <span className="text-sm text-neutral-500 dark:text-neutral-400">Coordina reuniones y eventos internacionales sin complicaciones</span>
+                          </div>
+                          <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 bg-neutral-800 dark:bg-neutral-700 text-white p-3 rounded-lg shadow-xl -top-24 left-0 right-0 mx-4 transition-all duration-200 z-10">
+                            <p className="text-sm font-medium mb-2">Ejemplo de uso:</p>
+                            <p className="text-xs italic">"¿Qué hora será en Tokyo cuando sean las 15:00 en Madrid? Programa una reunión considerando el horario laboral de ambas ciudades."</p>
+                          </div>
+                        </li>
+                        <li className="group relative flex items-center gap-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 p-2 rounded-lg transition-all duration-200">
+                          <span className="flex-shrink-0 w-8 h-8 bg-[#F48120]/10 dark:bg-[#F48120]/20 rounded-full flex items-center justify-center">
+                            <span className="text-[#F48120]">💡</span>
+                          </span>
+                          <div className="flex flex-col">
+                            <span>Recibe asistencia inteligente y personalizada</span>
+                            <span className="text-sm text-neutral-500 dark:text-neutral-400">Obtén respuestas adaptadas a tus necesidades específicas</span>
+                          </div>
+                          <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 bg-neutral-800 dark:bg-neutral-700 text-white p-3 rounded-lg shadow-xl -top-24 left-0 right-0 mx-4 transition-all duration-200 z-10">
+                            <p className="text-sm font-medium mb-2">Ejemplo de uso:</p>
+                            <p className="text-xs italic">"¿Podrías ayudarme a crear un plan de estudio personalizado para aprender desarrollo web en 3 meses? Tengo conocimientos básicos de HTML y CSS."</p>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </Card>
               </div>
