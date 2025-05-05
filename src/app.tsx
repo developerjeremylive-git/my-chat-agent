@@ -7,6 +7,7 @@ import type { tools } from "./tools";
 import { AIConfigProvider, useAIConfig } from "@/contexts/AIConfigContext";
 import "@/styles/markdown.css";
 import { MessageView } from "@/components/message/MessageView";
+import { ModelSelect } from "@/components/model/ModelSelect";
 
 // Component imports
 import { Button } from "@/components/button/Button";
@@ -499,6 +500,7 @@ function ChatComponent() {
             className="p-3 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-t border-neutral-300 dark:border-neutral-800"
           >
             <div className="flex items-center gap-2">
+              <ModelSelect className="flex-shrink-0" />
               <div className="flex-1 relative">
                 <Input
                   disabled={pendingToolCallConfirmation}
