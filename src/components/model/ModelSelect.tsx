@@ -76,9 +76,11 @@ export function ModelSelect({ className }: ModelSelectProps) {
           'shadow-sm hover:shadow-md',
           className
         )}>
-          <div className="flex flex-col flex-1">
-            <span className="text-xs text-neutral-600 dark:text-neutral-400 font-medium">{selectedModel.provider}</span>
-            <span className="text-sm font-semibold text-neutral-900 dark:text-white">{selectedModel.name}</span>
+          <div className="flex items-center justify-center">
+            {selectedModel.provider === 'DeepSeek / Meta' && <Brain className="w-5 h-5 text-blue-500" weight="duotone" />}
+            {selectedModel.provider === 'Meta' && <Robot className="w-5 h-5 text-purple-500" weight="duotone" />}
+            {selectedModel.provider === 'Google' && <Code className="w-5 h-5 text-green-500" weight="duotone" />}
+            {selectedModel.provider === 'Alibaba Cloud' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
           </div>
           <div className="flex items-center gap-2">
             <CaretDown className="w-4 h-4 text-neutral-500" />
