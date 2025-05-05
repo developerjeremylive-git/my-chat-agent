@@ -94,10 +94,14 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
   const [showBasic, setShowBasic] = useState(true);
 
   const handlePresetSelect = (preset: PresetConfig) => {
+    setSelectedPreset(preset.name);
     setConfig({ ...preset.config, stream: config.stream });
   };
 
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+
   const handleSliderChange = <T extends number | boolean>(key: keyof AIModelConfig, value: T) => {
+    setSelectedPreset(null);
     setConfig({ ...config, [key]: value });
   };
 
@@ -167,7 +171,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
               {presets.map((preset) => (
                 <Card
                   key={preset.name}
-                  className={`p-3 cursor-pointer transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 ${JSON.stringify(config) === JSON.stringify(preset.config) ? 'border-[#F48120]' : ''}`}
+                  className={`p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 ${selectedPreset === preset.name ? 'border-[#F48120] border-2 shadow-lg dark:shadow-[#F48120]/20' : 'border border-neutral-200 dark:border-neutral-700'}`}
                   onClick={() => handlePresetSelect(preset)}
                 >
                   <div className="flex items-center gap-3">
