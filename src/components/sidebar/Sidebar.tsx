@@ -22,6 +22,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect }: SidebarProps) {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [isTemplatesExpanded, setIsTemplatesExpanded] = useState(false);
 
   const promptTemplates = {
     "exploracion-ideas": [
@@ -360,6 +361,19 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
               </div>
 
               <div className="space-y-3">
+                <div 
+                  onClick={() => setIsTemplatesExpanded(!isTemplatesExpanded)}
+                  className="flex items-center justify-between p-3 bg-neutral-100/50 dark:bg-neutral-800/50 rounded-xl
+                    hover:bg-neutral-200/70 dark:hover:bg-neutral-700/70
+                    transform hover:scale-[0.99] active:scale-[0.97]
+                    cursor-pointer transition-all duration-200 group"
+                >
+                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Plantillas de Mensajes IA</span>
+                  <div className="p-1 rounded-lg bg-neutral-200/50 dark:bg-neutral-700/50 group-hover:bg-neutral-300/50 dark:group-hover:bg-neutral-600/50 transition-colors">
+                    <List weight="bold" className={cn("w-4 h-4 transition-transform duration-200 text-neutral-600 dark:text-neutral-400 group-hover:text-neutral-800 dark:group-hover:text-white", isTemplatesExpanded ? "rotate-180" : "")} />
+                  </div>
+                </div>
+                <div className={cn("space-y-3 transition-all duration-200", isTemplatesExpanded ? "opacity-100" : "opacity-0 h-0 overflow-hidden")}>
                 <div>
                   <Button
                     variant="ghost"
@@ -682,6 +696,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                       ))}
                     </div>
                   )}
+                </div>
                 </div>
               </div>
             </div>
