@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/button/Button';
 import { Card } from '@/components/card/Card';
 import { cn } from '@/lib/utils';
-import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun, GraduationCap, Pencil, Palette, Leaf, Camera, MusicNotes } from '@phosphor-icons/react';
+import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun, GraduationCap, Pencil, Palette, Leaf, Camera, MusicNotes, ChartBar, Globe, ShieldCheck, Rocket } from '@phosphor-icons/react';
 import AuthPopup from '../AuthPopup';
 import AuthButton from '../AuthButton';
 
@@ -200,6 +200,94 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
         prompt: "¿Podrías sugerir ejercicios diarios de calentamiento vocal y técnicas para mejorar mi rango vocal y control de la respiración?"
       }
     ],
+    "marketing-digital": [
+      {
+        title: "Estrategia de contenidos",
+        description: "Desarrolla un plan de contenidos efectivo.",
+        prompt: "Necesito crear una estrategia de contenidos para redes sociales que aumente el engagement. ¿Podrías ayudarme con un plan mensual?"
+      },
+      {
+        title: "SEO básico",
+        description: "Mejora el posicionamiento de tu web.",
+        prompt: "¿Cuáles son las mejores prácticas actuales de SEO para mejorar el ranking de mi sitio web en los motores de búsqueda?"
+      },
+      {
+        title: "Email marketing",
+        description: "Optimiza tus campañas de email.",
+        prompt: "¿Cómo puedo mejorar la tasa de apertura y conversión de mis newsletters? Necesito consejos para crear asuntos atractivos y contenido relevante."
+      },
+      {
+        title: "Análisis de métricas",
+        description: "Interpreta datos de marketing digital.",
+        prompt: "¿Cuáles son los KPIs más importantes que debo monitorear en mi estrategia de marketing digital y cómo interpretarlos correctamente?"
+      }
+    ],
+    "trafico-web": [
+      {
+        title: "Google Ads",
+        description: "Optimiza tus campañas publicitarias.",
+        prompt: "Necesito ayuda para optimizar mis campañas de Google Ads. ¿Cómo puedo mejorar el ROI y reducir el CPC?"
+      },
+      {
+        title: "Facebook Ads",
+        description: "Mejora tu publicidad en redes sociales.",
+        prompt: "¿Cuáles son las mejores prácticas para crear campañas efectivas en Facebook Ads? Necesito mejorar la segmentación y el rendimiento."
+      },
+      {
+        title: "Análisis de conversión",
+        description: "Optimiza el embudo de conversión.",
+        prompt: "¿Cómo puedo identificar y resolver los cuellos de botella en mi embudo de conversión para aumentar las ventas?"
+      },
+      {
+        title: "Retargeting",
+        description: "Estrategias de remarketing efectivas.",
+        prompt: "Necesito desarrollar una estrategia de retargeting efectiva. ¿Cuáles son las mejores prácticas y plataformas para implementarla?"
+      }
+    ],
+    "blockchain": [
+      {
+        title: "Smart Contracts",
+        description: "Desarrollo de contratos inteligentes.",
+        prompt: "¿Podrías explicarme los conceptos básicos para crear y auditar smart contracts en Ethereum? Necesito entender las mejores prácticas de seguridad."
+      },
+      {
+        title: "DeFi",
+        description: "Finanzas descentralizadas.",
+        prompt: "¿Cómo funcionan los protocolos DeFi y cuáles son los riesgos y oportunidades en el ecosistema actual?"
+      },
+      {
+        title: "NFTs",
+        description: "Tokens no fungibles.",
+        prompt: "Quiero crear y vender NFTs. ¿Cuál es el proceso completo, desde la creación hasta la comercialización en los marketplaces?"
+      },
+      {
+        title: "Consenso blockchain",
+        description: "Mecanismos de consenso.",
+        prompt: "¿Podrías explicar las diferencias entre PoW, PoS y otros mecanismos de consenso en blockchain?"
+      }
+    ],
+    "ciberseguridad": [
+      {
+        title: "Pentesting",
+        description: "Tests de penetración básicos.",
+        prompt: "¿Cuáles son los pasos básicos para realizar un test de penetración ético? Necesito aprender metodologías y herramientas fundamentales."
+      },
+      {
+        title: "Análisis de malware",
+        description: "Identificación de software malicioso.",
+        prompt: "¿Cómo puedo analizar y detectar malware de manera segura? Necesito conocer las herramientas y técnicas básicas."
+      },
+      {
+        title: "Seguridad web",
+        description: "Protección de aplicaciones web.",
+        prompt: "¿Cuáles son las mejores prácticas actuales para proteger una aplicación web contra vulnerabilidades comunes como XSS y SQL Injection?"
+      },
+      {
+        title: "Respuesta a incidentes",
+        description: "Gestión de brechas de seguridad.",
+        prompt: "¿Cuál es el protocolo recomendado para responder a un incidente de seguridad? Necesito un plan paso a paso."
+      }
+    ],
     "fotografia-visual": [
       {
         title: "Fotografía nocturna",
@@ -238,7 +326,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
     <>
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out shadow-2xl',
+          'fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out shadow-2xl overflow-hidden',
           theme === 'dark' ? 'bg-gradient-to-b from-neutral-900 to-neutral-950' : 'bg-gradient-to-b from-white to-gray-100',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
@@ -263,7 +351,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4">
+          <nav className="flex-1 p-4 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="space-y-6">
               <div className="space-y-2">
                 <AuthButton 
@@ -476,14 +564,89 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                   <Button
                     variant="ghost"
                     className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('fotografia-visual')}
+                    onClick={() => handleSectionClick('marketing-digital')}
                   >
-                    <Camera weight="duotone" className="mr-3 h-5 w-5 text-blue-400" />
-                    Fotografía y Visual
+                    <ChartBar weight="duotone" className="mr-3 h-5 w-5 text-blue-500" />
+                    Marketing Digital
                   </Button>
-                  {selectedSection === 'fotografia-visual' && (
+                  {selectedSection === 'marketing-digital' && (
                     <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['fotografia-visual'].map((template, index) => (
+                      {promptTemplates['marketing-digital'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('trafico-web')}
+                  >
+                    <ChartLine weight="duotone" className="mr-3 h-5 w-5 text-green-500" />
+                    Tráfico Web
+                  </Button>
+                  {selectedSection === 'trafico-web' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['trafico-web'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('blockchain')}
+                  >
+                    <Rocket weight="duotone" className="mr-3 h-5 w-5 text-orange-500" />
+                    Blockchain
+                  </Button>
+                  {selectedSection === 'blockchain' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['blockchain'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('ciberseguridad')}
+                  >
+                    <ShieldCheck weight="duotone" className="mr-3 h-5 w-5 text-red-500" />
+                    Ciberseguridad
+                  </Button>
+                  {selectedSection === 'ciberseguridad' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['ciberseguridad'].map((template, index) => (
                         <Card
                           key={index}
                           className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
