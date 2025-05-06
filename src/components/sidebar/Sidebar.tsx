@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun, GraduationCap, Pencil, Palette, Leaf, Camera, MusicNotes, ChartBar, Globe, ShieldCheck, Rocket } from '@phosphor-icons/react';
 import AuthPopup from '../AuthPopup';
 import AuthButton from '../AuthButton';
+import { OIAICreator } from '../modal/OIAICreator';
 
 interface PromptTemplate {
   title: string;
@@ -730,7 +731,8 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
         />
       )}
 
-      <AuthPopup/> 
+      <AuthPopup/>
+
     </>
   );
 }

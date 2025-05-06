@@ -1,5 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  theme: {
+    extend: {
+      keyframes: {
+        shine: {
+          '100%': { transform: 'translateX(100%)' }
+        }
+      },
+    },
+  },
   darkMode: ["class"],
   content: [
     './pages/**/*.{ts,tsx}',

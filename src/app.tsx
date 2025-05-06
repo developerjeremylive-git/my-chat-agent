@@ -26,7 +26,9 @@ import {
   Sun,
   Trash,
   Gear,
-  List
+  List,
+  Brain,
+  X
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -34,6 +36,7 @@ import SyntaxHighlighter from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { ModelSelect } from "./components/model/ModelSelect";
 import { ClearHistoryDialog } from "./components/dialog/ClearHistoryDialog";
+import { OIAICreator } from "./components/modal/OIAICreator";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -518,16 +521,16 @@ function ChatComponent() {
                 />
               </div>
 
-              <Button
-                type="submit"
-                shape="square"
-                className="rounded-full h-10 w-10 flex-shrink-0"
-                disabled={pendingToolCallConfirmation || !agentInput.trim()}
-              >
-                <PaperPlaneRight size={16} />
-              </Button>
-
-              {/* <ModelSelect className="flex-shrink-0" /> */}
+              <div className="relative">
+                <Button
+                  type="submit"
+                  shape="square"
+                  className="rounded-full h-10 w-10 flex-shrink-0"
+                  disabled={pendingToolCallConfirmation || !agentInput.trim()}
+                >
+                  <PaperPlaneRight size={16} />
+                </Button>
+              </div>
             </div>
           </form>
         </div>
