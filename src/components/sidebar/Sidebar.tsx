@@ -659,6 +659,30 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                     </div>
                   )}
                 </div>
+                <div>
+                <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => handleSectionClick('fotografia-visual')}
+                  >
+                    <Camera weight="duotone" className="mr-3 h-5 w-5 text-indigo-500" />
+                    Fotografía Visual
+                  </Button>
+                  {selectedSection === 'fotografia-visual' && (
+                    <div className="mt-2 space-y-2 pl-8">
+                      {promptTemplates['fotografia-visual'].map((template, index) => (
+                        <Card
+                          key={index}
+                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                          onClick={() => handlePromptSelect(template.prompt)}
+                        >
+                          <h4 className="font-medium text-sm">{template.title}</h4>
+                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </nav>
