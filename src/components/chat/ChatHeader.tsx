@@ -93,7 +93,10 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
 
               <DropdownMenu.Item
                 className="group flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10 dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5 cursor-pointer transition-all duration-300 hover:translate-x-1 hover:shadow-lg outline-none"
-                onClick={() => setShowOiaiCreator(true)}
+                onClick={() => {
+                  setShowOiaiGuide(false);
+                  setShowOiaiCreator(true);
+                }}
               >
                 <div className="relative">
                   <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-full blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -116,10 +119,10 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
         {/* Modal de Guía etherOI */}
         {showOiaiGuide && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl border border-neutral-200 dark:border-neutral-800">
+            <div className="bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl border border-neutral-200 dark:border-neutral-800 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               <div className="p-6 space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between sticky top-0 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm z-50 -mx-6 px-6 border-b border-neutral-200 dark:border-neutral-800 h-[60px]">
+                  <div className="flex items-center gap-3 h-full">
                     <Brain weight="duotone" className="w-8 h-8 text-[#F48120]" />
                     <h2 className="text-2xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Guía de etherOI</h2>
                   </div>
@@ -195,26 +198,47 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
                   </div>
 
                   {/* Sección 4: Mejores Prácticas */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Mejores prácticas</h3>
-                    <ul className="space-y-2 text-neutral-600 dark:text-neutral-300">
-                      <li className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
-                        <span className="text-sm">Sé específico en tus instrucciones</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
-                        <span className="text-sm">Incluye ejemplos cuando sea posible</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
-                        <span className="text-sm">Define límites claros de lo que debe y no debe hacer</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
-                        <span className="text-sm">Mantén las instrucciones concisas pero completas</span>
-                      </li>
-                    </ul>
+                  <div className="flex gap-4">
+                    <div className="flex-1 space-y-4">
+                      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Mejores prácticas</h3>
+                      <ul className="space-y-2 text-neutral-600 dark:text-neutral-300">
+                        <li className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
+                          <span className="text-sm">Sé específico en tus instrucciones</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
+                          <span className="text-sm">Incluye ejemplos cuando sea posible</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
+                          <span className="text-sm">Define límites claros de lo que debe y no debe hacer</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
+                          <span className="text-sm">Mantén las instrucciones concisas pero completas</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="flex-1">
+                      <button
+                        onClick={() => {
+                  setShowOiaiGuide(false);
+                  setShowOiaiCreator(true);
+                }}
+                        className="w-full h-full flex items-center justify-center bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5
+                                  hover:from-[#F48120]/20 hover:to-purple-500/20 dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10
+                                  border border-[#F48120]/20 dark:border-[#F48120]/10 rounded-xl
+                                  transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                                  group relative overflow-hidden animate-pulse hover:animate-none"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="relative z-10 flex flex-col items-center gap-3 p-4">
+                          <Brain weight="duotone" className="w-8 h-8 text-[#F48120] group-hover:scale-110 transition-transform duration-300" />
+                          <span className="text-sm font-medium bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent group-hover:opacity-90">Crear OIAI</span>
+                        </div>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
