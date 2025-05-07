@@ -28,7 +28,10 @@ import {
   Gear,
   List,
   Brain,
-  X
+  X,
+  Question,
+  CaretLeft,
+  CaretRight
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -37,6 +40,7 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { ModelSelect } from "./components/model/ModelSelect";
 import { ClearHistoryDialog } from "./components/dialog/ClearHistoryDialog";
 import { OIAICreator } from "./components/modal/OIAICreator";
+import { useState as useOIAIState } from "react";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -45,6 +49,8 @@ const toolsRequiringConfirmation: (keyof typeof tools)[] = [
 
 function ChatComponent() {
   const { config } = useAIConfig();
+  const [showOIAICreator, setShowOIAICreator] = useOIAIState(false);
+  const [showOiaiGuide, setShowOiaiGuide] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">(() => {
@@ -55,6 +61,7 @@ function ChatComponent() {
   });
   const [showDebug, setShowDebug] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [isToolbarExpanded, setIsToolbarExpanded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -165,22 +172,31 @@ function ChatComponent() {
               {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
             </Button> */}
 
-          <div className="flex items-center gap-2">
-            <Tooltip content="Limpiar historial">
-              <Button
-                variant="ghost"
-                size="md"
-                shape="square"
-                className="rounded-full h-9 w-9 hover:bg-red-100/10 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors duration-200"
-                onClick={() => setShowClearDialog(true)}
-              >
-                <Trash size={20} weight="duotone" />
-              </Button>
-            </Tooltip>
-          </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24 max-h-[calc(100vh-10rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+
+          {showOIAICreator && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowOIAICreator(false)}>
+              <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
+                <div className="absolute top-4 right-4 z-10">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    shape="square"
+                    className="rounded-full hover:bg-red-100/10 hover:text-red-500 dark:hover:bg-red-900/20"
+                    onClick={() => setShowOIAICreator(false)}
+                  >
+                    <X size={20} />
+                  </Button>
+                </div>
+                <OIAICreator onCopyContent={(content) => {
+                  handleAgentInputChange({ target: { value: content } } as any);
+                  setShowOIAICreator(false);
+                }} />
+              </div>
+            </div>
+          )}
+
+          <div className="flex-1 overflow-y-auto p-2 space-y-2 pb-20 max-h-[calc(100vh-14rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {agentMessages.length === 0 && (
               <div className="h-full flex items-center justify-center">
                 <Card className="p-8 max-w-md mx-auto bg-gradient-to-b from-neutral-100/80 to-neutral-50 dark:from-neutral-900/80 dark:to-neutral-950 backdrop-blur-sm border border-neutral-200/50 dark:border-neutral-800/50 shadow-xl hover:shadow-2xl transition-all duration-300">
@@ -486,6 +502,69 @@ function ChatComponent() {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Messages */}
+          {/* Action Buttons Frame */}
+          <div className={`pl-4 pr-10 rounded-full mb-0 py-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm mt-7 md:mt-9 transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''}`}>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Tooltip content="Guía">
+                  <Button
+                    variant="ghost"
+                    size="md"
+                    shape="square"
+                    className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
+                    onClick={() => setShowOiaiGuide(true)}
+                  >
+                    <Question size={20} weight="duotone" />
+                  </Button>
+                </Tooltip>
+                <Tooltip content="Crear OIAI">
+                  <Button
+                    variant="ghost"
+                    size="md"
+                    shape="square"
+                    className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
+                    onClick={() => setShowOIAICreator(true)}
+                  >
+                    <Brain size={20} weight="duotone" />
+                  </Button>
+                </Tooltip>
+                {/* <Tooltip content="Expandir"> */}
+                <Tooltip content="">
+                  <Button
+                    variant="ghost"
+                    size="md"
+                    shape="square"
+                    className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
+                    onClick={() => setIsToolbarExpanded(!isToolbarExpanded)}
+                  >
+                    {isToolbarExpanded ? (
+                      <CaretLeft size={20} weight="duotone" />
+                    ) : (
+                      <CaretRight size={20} weight="duotone" />
+                    )}
+                  </Button>
+                </Tooltip>
+              </div>
+              <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${isToolbarExpanded ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0 overflow-hidden'}`}>
+                <ModelSelect />
+              </div>
+              <div className={`transition-all duration-300 ${isToolbarExpanded ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0 overflow-hidden'}`}>
+                <Tooltip content="Limpiar historial">
+                  <Button
+                    variant="ghost"
+                    size="md"
+                    shape="square"
+                    className="rounded-full h-9 w-9 hover:bg-red-100/10 hover:text-red-500 dark:hover:bg-red-900/20 transition-colors duration-200"
+                    onClick={() => setShowClearDialog(true)}
+                  >
+                    <Trash size={20} weight="duotone" />
+                  </Button>
+                </Tooltip>
+              </div>
+            </div>
+          </div>
+
           {/* Input Area */}
           <form
             onSubmit={(e) =>
@@ -497,7 +576,7 @@ function ChatComponent() {
                 },
               })
             }
-            className="p-3 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-t border-neutral-300 dark:border-neutral-800"
+            className="p-2 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-t border-neutral-300 dark:border-neutral-800"
           >
             <div className="flex items-center gap-2">
               <div className="flex-1 relative">
@@ -545,6 +624,135 @@ function ChatComponent() {
         onClose={() => setShowClearDialog(false)}
         onConfirm={clearHistory}
       />
+      {/* Modal de Guía etherOI */}
+      {showOiaiGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowOiaiGuide(false)}>
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl border border-neutral-200 dark:border-neutral-800 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 space-y-6">
+              <div className="flex items-center justify-between sticky top-0 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm z-50 -mx-6 px-6 border-b border-neutral-200 dark:border-neutral-800 h-[60px]">
+                <div className="flex items-center gap-3 h-full">
+                  <Brain weight="duotone" className="w-8 h-8 text-[#F48120]" />
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Guía de etherOI</h2>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  shape="square"
+                  className="rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                  onClick={() => setShowOiaiGuide(false)}
+                >
+                  <X weight="bold" size={20} />
+                </Button>
+              </div>
+
+              <div className="space-y-8">
+                {/* Sección 1: Introducción */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">¿Qué es oiai en etherOI?</h3>
+                  <p className="text-neutral-600 dark:text-neutral-300">
+                    oiai es un asistente de IA personalizable dentro de etherOI que te ayuda a realizar tareas específicas. Puedes crear oiai personalizados para diferentes propósitos y necesidades.
+                  </p>
+                </div>
+
+                {/* Sección 2: Componentes Clave */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Componentes clave de un oiai efectivo</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card className="p-4 space-y-2 bg-gradient-to-br from-[#F48120]/5 to-transparent border-[#F48120]/20">
+                      <h4 className="font-medium text-[#F48120]">Persona</h4>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-300">Define el rol y comportamiento del oiai</p>
+                    </Card>
+                    <Card className="p-4 space-y-2 bg-gradient-to-br from-purple-500/5 to-transparent border-purple-500/20">
+                      <h4 className="font-medium text-purple-500">Tarea</h4>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-300">Especifica qué debe hacer o crear el oiai</p>
+                    </Card>
+                    <Card className="p-4 space-y-2 bg-gradient-to-br from-blue-500/5 to-transparent border-blue-500/20">
+                      <h4 className="font-medium text-blue-500">Contexto</h4>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-300">Proporciona información de fondo relevante</p>
+                    </Card>
+                    <Card className="p-4 space-y-2 bg-gradient-to-br from-green-500/5 to-transparent border-green-500/20">
+                      <h4 className="font-medium text-green-500">Formato</h4>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-300">Define la estructura deseada de las respuestas</p>
+                    </Card>
+                  </div>
+                </div>
+
+                {/* Sección 3: Pasos para Crear */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Pasos para crear un oiai</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/50">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F48120]/10 text-[#F48120]">1</div>
+                      <div className="space-y-1">
+                        <h5 className="font-medium text-neutral-900 dark:text-white">Define el propósito</h5>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-300">Establece claramente qué quieres que haga tu oiai y qué problemas debe resolver.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/50">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F48120]/10 text-[#F48120]">2</div>
+                      <div className="space-y-1">
+                        <h5 className="font-medium text-neutral-900 dark:text-white">Escribe las instrucciones</h5>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-300">Proporciona instrucciones detalladas incluyendo persona, tarea, contexto y formato deseado.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/50">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F48120]/10 text-[#F48120]">3</div>
+                      <div className="space-y-1">
+                        <h5 className="font-medium text-neutral-900 dark:text-white">Prueba y refina</h5>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-300">Realiza pruebas con diferentes prompts y ajusta las instrucciones según sea necesario.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sección 4: Mejores Prácticas */}
+                <div className="flex gap-4">
+                  <div className="flex-1 space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Mejores prácticas</h3>
+                    <ul className="space-y-2 text-neutral-600 dark:text-neutral-300">
+                      <li className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
+                        <span className="text-sm">Sé específico en tus instrucciones</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
+                        <span className="text-sm">Incluye ejemplos cuando sea posible</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
+                        <span className="text-sm">Define límites claros de lo que debe y no debe hacer</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
+                        <span className="text-sm">Mantén las instrucciones concisas pero completas</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="flex-1">
+                    <button
+                      onClick={() => {
+                        setShowOiaiGuide(false);
+                        setShowOIAICreator(true);
+                      }}
+                      className="w-full h-full flex items-center justify-center bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5
+                                  hover:from-[#F48120]/20 hover:to-purple-500/20 dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10
+                                  border border-[#F48120]/20 dark:border-[#F48120]/10 rounded-xl
+                                  transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                                  group relative overflow-hidden animate-pulse hover:animate-none"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative z-10 flex flex-col items-center gap-3 p-4">
+                        <Brain weight="duotone" className="w-8 h-8 text-[#F48120] group-hover:scale-110 transition-transform duration-300" />
+                        <span className="text-sm font-medium bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent group-hover:opacity-90">Crear OIAI</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

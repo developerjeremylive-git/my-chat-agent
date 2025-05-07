@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ModelSelect } from '@/components/model/ModelSelect';
 import { Button } from '@/components/button/Button';
-import { List, Bug, Gear, Brain, X } from '@phosphor-icons/react';
+import { List, Bug, Gear, Brain, X, Question, Trash } from '@phosphor-icons/react';
 import { Toggle } from '@/components/toggle/Toggle';
 import { Card } from '../card/Card';
 import { OIAICreator } from '../modal/OIAICreator';
@@ -54,7 +54,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
         </div>
 
         {/* Botón OIAI con menú desplegable usando Radix UI */}
-        <DropdownMenu.Root>
+        {/* <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
             <div className="relative mr-2">
               <div
@@ -109,11 +109,20 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Portal>
-        </DropdownMenu.Root>
-        
-        <div className="flex justify-between gap-2 mr-2">
+        </DropdownMenu.Root> */}
+
+        {/* <div className="flex items-center gap-2 mr-2">
+          <Button
+            variant="ghost"
+            size="md"
+            shape="square"
+            className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
+            onClick={() => setShowOiaiGuide(true)}
+          >
+            <Question size={20} weight="duotone" />
+          </Button>
           <ModelSelect className="flex-1" />
-        </div>
+        </div> */}
 
 
         {/* Modal de Guía etherOI */}
@@ -223,9 +232,9 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
                     <div className="flex-1">
                       <button
                         onClick={() => {
-                  setShowOiaiGuide(false);
-                  setShowOiaiCreator(true);
-                }}
+                          setShowOiaiGuide(false);
+                          setShowOiaiCreator(true);
+                        }}
                         className="w-full h-full flex items-center justify-center bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5
                                   hover:from-[#F48120]/20 hover:to-purple-500/20 dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10
                                   border border-[#F48120]/20 dark:border-[#F48120]/10 rounded-xl
@@ -270,7 +279,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
         <ModelSelect className="flex-1" />
       </div> */}
       {/* Modal del Creador OIAI */}
-      {showOiaiCreator && (
+      {/* {showOiaiCreator && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
           <div className="relative w-full max-w-4xl p-4">
             <button
@@ -282,7 +291,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
             <OIAICreator />
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

@@ -44,25 +44,38 @@ export const OIAISectionSelector = ({
           Agregar
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 overflow-y-auto h-[calc(100%-8rem)] pr-2 scrollbar-thin scrollbar-thumb-[#F48120]/20 scrollbar-track-transparent">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 overflow-y-auto h-[calc(100%-8rem)] pr-2 scrollbar-thin scrollbar-thumb-[#F48120]/20 scrollbar-track-transparent">
         {options.map((option) => (
           <Card
             key={option}
-            className={`cursor-pointer p-4 transition-colors ${selectedOptions.includes(option) ? 'border-primary bg-primary/10' : 'hover:border-primary/50'} flex justify-between items-center group`}
-            onClick={() => onSelect(option)}
+            className={`group relative transform transition-all duration-300 p-4 overflow-hidden rounded-xl ${
+              selectedOptions.includes(option)
+                ? 'bg-gradient-to-br from-[#F48120]/10 to-purple-500/10 border-2 border-[#F48120]/30 dark:border-[#F48120]/20 shadow-lg shadow-[#F48120]/10'
+                : 'hover:bg-gradient-to-br hover:from-white/95 hover:to-neutral-50/95 dark:hover:from-gray-800/95 dark:hover:to-gray-700/95 border border-[#F48120]/20 dark:border-[#F48120]/10 hover:shadow-lg hover:shadow-[#F48120]/5'
+            }`}
+            // onClick={() => {
+              // if (!e.target.closest('button')) {
+              // }
+              // onSelect(option);
+            // }}
           >
-            <p className="text-sm flex-1">{option}</p>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect(option);
-              }}
-            >
-              ×
-            </Button>
+            <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10 flex justify-between items-center gap-3">
+              <div className="flex-1 space-y-1">
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-[#F48120] transition-colors duration-200">{option}</p>
+                <div className="h-0.5 bg-gradient-to-r from-[#F48120]/30 to-purple-500/30 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left rounded-full"></div>
+              </div>
+              <button
+                type="button"
+                className=" group-hover:opacity-100 transition-all duration-200 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 hover:scale-110 active:scale-95 border border-transparent hover:border-red-200 dark:hover:border-red-800"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelect(option);
+                }}
+              >
+                <span className="text-lg leading-none">&times;</span>
+              </button>
+            </div>
           </Card>
         ))}
       </div>
