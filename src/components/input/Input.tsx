@@ -60,7 +60,7 @@ export const Input = ({
         className="w-full max-w-6xl mx-auto "
       >
         <textarea
-          className="w-full h-[73vh] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
+          className="w-full h-[calc(90vh-13rem)] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
           value={value as string}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
             onChange?.(e as any);

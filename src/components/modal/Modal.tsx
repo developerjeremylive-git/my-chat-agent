@@ -1,7 +1,7 @@
 import { Button } from "@/components/button/Button";
 import { Card } from "@/components/card/Card";
 import useClickOutside from "@/hooks/useClickOutside";
-import { X, ArrowsOut, ArrowsIn, PaperPlaneRight } from "@phosphor-icons/react";
+import { X, ArrowsOut, PaperPlaneRight, ArrowsIn } from "@phosphor-icons/react";
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -94,15 +94,15 @@ export const Modal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
+      <div 
         className="fade fixed inset-0 bg-black"
         onClick={onClose}
       />
 
       <div className="relative w-full max-w-[95vw] mx-auto">
         <Card
-          className={cn("reveal reveal-sm relative z-50 w-full h-[90vh] rounded-xl border border-gray-200 bg-white shadow-2xl dark:bg-gray-900", className)}
+          className={cn("reveal reveal-sm relative z-50 w-full max-h-[90vh] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:bg-gray-900", className)}
           ref={modalRef}
           tabIndex={-1}
         >
@@ -120,8 +120,9 @@ export const Modal = ({
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Editor de texto</h2>
           </div>
 
-          {children}
-
+          <div className="flex-1 h-[calc(90vh-12rem)] overflow-y-auto">
+            {children}
+          </div>
           <div className="sticky bottom-0 w-full border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-4 z-[60]">
             <div className="flex justify-between items-center">
               <Button
@@ -139,7 +140,7 @@ export const Modal = ({
                 size="sm"
                 disabled={!children}
               >
-                {isOpen ? <ArrowsIn size={16} weight="bold" /> : <ArrowsOut size={16} weight="bold" />}
+               <ArrowsIn size={16} weight="bold" />
               </Button>
               <Button
                 aria-label="Enviar texto"
