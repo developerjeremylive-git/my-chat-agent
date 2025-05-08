@@ -9,7 +9,7 @@ interface MessageViewProps {
 }
 
 export function MessageView({ text, onCopy }: MessageViewProps) {
-    const [isMarkdownView, setIsMarkdownView] = useState(false);
+    const [isMarkdownView, setIsMarkdownView] = useState(true);
 
     const renderContent = () => {
         if (isMarkdownView) {

@@ -153,8 +153,8 @@ function ChatComponent() {
         onThemeChange={toggleTheme}
         onPromptSelect={(prompt) => handleAgentInputChange({ target: { value: prompt } } as any)}
       />
-      <main className="flex-1 container mx-auto px-4 py-4">
-        <div className="h-[calc(100vh-2rem)] w-full mx-auto max-w-lg flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800">
+      <main className="flex-1 w-full px-4 py-4">
+        <div className="h-[calc(100vh-2rem)] w-full mx-auto flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800">
           <ChatHeader
             onOpenSidebar={() => setIsSidebarOpen(true)}
             onOpenSettings={() => setIsSettingsOpen(true)}
@@ -175,8 +175,8 @@ function ChatComponent() {
 
 
           {showOIAICreator && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowOIAICreator(false)}>
-              <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onClick={() => setShowOIAICreator(false)}>
+              <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[85vh] overflow-hidden relative transform transition-all duration-300 scale-100 opacity-100" onClick={(e) => e.stopPropagation()}>
                 <div className="absolute top-4 right-4 z-10">
                   <Button
                     variant="ghost"
@@ -504,7 +504,7 @@ function ChatComponent() {
 
           {/* Messages */}
           {/* Action Buttons Frame */}
-          <div className={`pl-4 pr-10 rounded-full mb-0 py-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm mt-7 md:mt-9 transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''}`}>
+          <div className={`pl-4 pr-10 rounded-full mb-0 py-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm mt-7 md:mt-8 transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''}`}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Tooltip content="Guía">
@@ -529,8 +529,7 @@ function ChatComponent() {
                     <Brain size={20} weight="duotone" />
                   </Button>
                 </Tooltip>
-                {/* <Tooltip content="Expandir"> */}
-                <Tooltip content="">
+                <Tooltip content={isToolbarExpanded ? "Minimizar" : "Expandir"}>
                   <Button
                     variant="ghost"
                     size="md"
@@ -604,7 +603,7 @@ function ChatComponent() {
                 <Button
                   type="submit"
                   shape="square"
-                  className="rounded-full h-10 w-10 flex-shrink-0"
+                  className="rounded-full h-10 w-10 flex-shrink-0 mr-2"
                   disabled={pendingToolCallConfirmation || !agentInput.trim()}
                 >
                   <PaperPlaneRight size={16} />

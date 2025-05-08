@@ -205,9 +205,10 @@
   @apply disabled:text-ob-base-100 disabled:cursor-not-allowed;
 }
 
+
 /* Use size variants for elements that need to match certain heights */
 .add-size-sm {
-  @apply h-6.5 rounded px-2 text-sm;
+  @apply h-6 px-2 text-sm;
 
   @variant square {
     @apply flex size-6.5 items-center justify-center px-0;
@@ -219,7 +220,7 @@
 }
 
 .add-size-md {
-  @apply h-8 rounded-md px-2.5 text-base;
+  @apply h-8 rounded px-2 text-base;
 
   @variant square {
     @apply flex size-8 items-center justify-center px-0;
