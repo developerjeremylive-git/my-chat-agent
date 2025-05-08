@@ -177,21 +177,13 @@ function ChatComponent() {
           {showOIAICreator && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
               <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[85vh] overflow-hidden relative transform transition-all duration-300 scale-100 opacity-100">
-                <div className="absolute top-4 right-4 z-10">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    shape="square"
-                    className="rounded-full hover:bg-red-100/10 hover:text-red-500 dark:hover:bg-red-900/20"
-                    onClick={() => setShowOIAICreator(false)}
-                  >
-                    <X size={20} />
-                  </Button>
-                </div>
-                <OIAICreator onCopyContent={(content) => {
-                  handleAgentInputChange({ target: { value: content } } as any);
-                  setShowOIAICreator(false);
-                }} />
+                <OIAICreator 
+                  onCopyContent={(content) => {
+                    handleAgentInputChange({ target: { value: content } } as any);
+                    setShowOIAICreator(false);
+                  }}
+                  onClose={() => setShowOIAICreator(false)}
+                />
               </div>
             </div>
           )}
