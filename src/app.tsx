@@ -41,6 +41,7 @@ import { ModelSelect } from "./components/model/ModelSelect";
 import { ClearHistoryDialog } from "./components/dialog/ClearHistoryDialog";
 import { OIAICreator } from "./components/modal/OIAICreator";
 import { useState as useOIAIState } from "react";
+import { ModernAgentInterface } from "@/components/agent/ModernAgentInterface";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -62,6 +63,7 @@ function ChatComponent() {
   const [showDebug, setShowDebug] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [isToolbarExpanded, setIsToolbarExpanded] = useState(false);
+  const [showAgentInterface, setShowAgentInterface] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -161,18 +163,6 @@ function ChatComponent() {
             showDebug={showDebug}
             onToggleDebug={() => setShowDebug((prev) => !prev)}
           />
-
-          {/* <Button
-              variant="ghost"
-              size="md"
-              shape="square"
-              className="rounded-full h-9 w-9"
-              onClick={toggleTheme}
-            >
-              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-            </Button> */}
-
-
 
           {showOIAICreator && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -521,6 +511,20 @@ function ChatComponent() {
                     <Brain size={20} weight="duotone" />
                   </Button>
                 </Tooltip>
+                {/* nuevo boton con icono de agente */}
+
+                <Button
+                  variant="ghost"
+                  size="md"
+                  shape="square"
+                  className="rounded-full h-9 w-9"
+                  onClick={() => setShowAgentInterface(true)}
+                >
+                  <Brain size={20} weight="duotone" className="text-[#F48120]" />
+                </Button>
+
+
+
                 <Tooltip content={isToolbarExpanded ? "Minimizar" : "Expandir"}>
                   <Button
                     variant="ghost"
@@ -743,6 +747,13 @@ function ChatComponent() {
             </div>
           </div>
         </div>
+      )}
+
+      {showAgentInterface && (
+        <ModernAgentInterface
+          isOpen={showAgentInterface}
+          onClose={() => setShowAgentInterface(false)}
+        />
       )}
     </div>
   );
