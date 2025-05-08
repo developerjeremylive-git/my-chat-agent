@@ -282,7 +282,7 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
               <Button
                 className="bg-gradient-to-r from-[#F48120] to-purple-500 text-white hover:opacity-90 transition-opacity duration-200"
                 onClick={() => setCurrentStep(2)}
-                disabled={!customOIAI?.persona}
+                disabled={!customOIAI?.persona || customOIAI.persona.trim() === ''}
               >
                 Siguiente
               </Button>
@@ -322,7 +322,7 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
               <Button
                 className="bg-gradient-to-r from-[#F48120] to-purple-500 text-white hover:opacity-90 transition-opacity duration-200"
                 onClick={() => setCurrentStep(3)}
-                disabled={!customOIAI?.tarea.length}
+                disabled={!customOIAI?.tarea.length || customOIAI.tarea.length === 0}
               >
                 Siguiente
               </Button>
@@ -362,7 +362,7 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
               <Button
                 className="bg-gradient-to-r from-[#F48120] to-purple-500 text-white hover:opacity-90 transition-opacity duration-200"
                 onClick={() => setCurrentStep(4)}
-                disabled={!customOIAI?.contexto.length}
+                disabled={!customOIAI?.contexto.length || customOIAI.contexto.length === 0}
               >
                 Siguiente
               </Button>
@@ -402,7 +402,7 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
               <Button
                 className="bg-gradient-to-r from-[#F48120] to-purple-500 text-white hover:opacity-90 transition-opacity duration-200"
                 onClick={handleCopyContent}
-                disabled={!customOIAI?.formato.length}
+                disabled={!customOIAI?.formato.length || customOIAI.formato.length === 0}
               >
                 Finalizar
               </Button>
@@ -590,14 +590,21 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
               setIsAnimating(false);
             }, 300);
           }}
-          disabled={currentStep === steps.length - 1 || !selectedProfession}
+          disabled={
+            currentStep === steps.length - 1 ||
+            !selectedProfession ||
+            (currentStep === 1 && (!customOIAI?.persona || customOIAI.persona.trim() === '')) ||
+            (currentStep === 2 && (!customOIAI?.tarea || customOIAI.tarea.length === 0)) ||
+            (currentStep === 3 && (!customOIAI?.contexto || customOIAI.contexto.length === 0)) ||
+            (currentStep === 4 && (!customOIAI?.formato || customOIAI.formato.length === 0))
+          }
           className="flex-1 md:flex-none transform transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-purple-500 hover:to-[#F48120] text-white shadow-md hover:shadow-lg dark:shadow-[#F48120]/20 text-sm md:text-base py-2 md:py-3"
         >
           <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" viewBox="0 0 24 24" fill="none">
             <path d="M13.75 6.75L19.25 12L13.75 17.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M19 12H4.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          {/* Siguiente */}
+          Siguiente
         </Button>
       </div>
     </div>
