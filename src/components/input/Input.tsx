@@ -57,7 +57,7 @@ export const Input = ({
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        className="w-full h-[85vh]"
+        className="w-full max-w-6xl mx-auto h-[85vh]"
       >
         <textarea
           className="w-full h-[80vh] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
