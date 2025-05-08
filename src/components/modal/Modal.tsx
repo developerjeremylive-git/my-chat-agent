@@ -82,9 +82,9 @@ export const Modal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-transparent">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
       <div 
-        className="fade fixed inset-0 bg-black/40 backdrop-blur-md bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent"
+        className="fade fixed inset-0 bg-black"
         onClick={onClose}
       />
 
@@ -92,7 +92,7 @@ export const Modal = ({
         <Button
           aria-label="Cerrar modal"
           shape="square"
-          className="absolute right-2 top-2 z-[60] bg-white/95 text-ob-base-200 hover:text-ob-base-300 p-2 rounded-full shadow-lg dark:bg-gray-900/95 transition-colors duration-200"
+          className="absolute right-2 top-2 z-[60] bg-white text-ob-base-200 hover:text-ob-base-300 p-2 rounded-full shadow-lg dark:bg-gray-900 transition-colors duration-200"
           onClick={onClose}
           variant="ghost"
           size="sm"
@@ -101,15 +101,15 @@ export const Modal = ({
         </Button>
 
         <Card
-          className={cn("reveal reveal-sm relative z-50 w-full max-h-[90vh] overflow-hidden rounded-xl border border-gray-200/10 bg-white/95 shadow-2xl dark:bg-gray-900/95", className)}
+          className={cn("reveal reveal-sm relative z-50 w-full max-h-[90vh] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:bg-gray-900", className)}
           ref={modalRef}
           tabIndex={-1}
         >
-          <div className="sticky top-0 z-50 flex items-center border-b border-gray-200/10 bg-white/80 px-6 py-4 backdrop-blur-sm dark:bg-gray-900/80">
+          <div className="sticky top-0 z-50 flex items-center border-b border-gray-200 bg-white px-6 py-4 dark:bg-gray-900">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Editor de texto</h2>
           </div>
 
-          <div className="flex-1 p-6 space-y-6 h-[calc(100vh-10rem)]">
+          <div className="flex-1 h-[calc(100vh-8rem)] overflow-y-auto">
             {children}
           </div>
         </Card>
