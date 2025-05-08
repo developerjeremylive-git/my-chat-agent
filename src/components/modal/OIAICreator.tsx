@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/button/Button';
 import { Card } from '@/components/card/Card';
 import { OIAISectionSelector } from './OIAISectionSelector';
+import { Modal } from './Modal';
 
 type Profession = 'generador' | 'programador' | 'editor';
 
@@ -109,6 +110,9 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [showDesktopPreview, setShowDesktopPreview] = useState(false);
 
+  const [isInputModalOpen, setIsInputModalOpen] = useState(false);
+  const [copiedContent, setCopiedContent] = useState('');
+
   const handleCopyContent = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     if (!customOIAI) return;
@@ -122,10 +126,15 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
 
     setShowMobilePreview(false);
     setShowDesktopPreview(false);
+    setCopiedContent(content);
+    setIsInputModalOpen(true);
 
-    if (onCopyContent) {
-      onCopyContent(content);
-    }
+    // Llamar a onCopyContent después de que el modal esté abierto
+    // setTimeout(() => {
+    //   if (onCopyContent) {
+    //     onCopyContent(content);
+    //   }
+    // }, 100);
   };
 
   const PreviewContent = () => (
@@ -187,7 +196,7 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
           </ul>
         </div>
       )}
-    </div>
+     </div>
   );
 
   const handleProfessionSelect = (profession: Profession) => {
@@ -352,7 +361,8 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-gradient-to-br from-white/95 via-white to-neutral-50/95 dark:from-gray-900/95 dark:via-gray-900 dark:to-gray-950/95 rounded-xl shadow-2xl overflow-hidden transition-all duration-300 ease-in-out border border-neutral-200/50 dark:border-neutral-800/50 backdrop-blur-sm p-3 sm:p-4 md:p-6 min-h-[80vh] sm:min-h-0 flex flex-col relative">
+    <>
+      <div className="w-full max-w-6xl mx-auto bg-gradient-to-br from-white/95 via-white to-neutral-50/95 dark:from-gray-900/95 dark:via-gray-900 dark:to-gray-950/95 rounded-xl shadow-2xl overflow-hidden transition-all duration-300 ease-in-out border border-neutral-200/50 dark:border-neutral-800/50 backdrop-blur-sm p-3 sm:p-4 md:p-6 min-h-[80vh] sm:min-h-0 flex flex-col relative">
 
       {/* Modal de vista previa móvil */}
       {showMobilePreview && (
@@ -575,6 +585,31 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
           Siguiente
         </Button> */}
       </div>
-    </div>
+      
+      </div>
+
+      <Modal
+        isOpen={isInputModalOpen}
+        onClose={() => {
+          setIsInputModalOpen(false);
+          if (onCopyContent) {
+            onCopyContent(copiedContent);
+          }
+        }}
+        className="w-full h-[85vh]"
+      >
+        <textarea
+          className="w-full h-[80vh] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
+          value={copiedContent}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+            setCopiedContent(e.target.value);
+            // if (onCopyContent) {
+            //   onCopyContent(e.target.value);
+            // }
+          }}
+        />
+      </Modal>
+      
+    </>
   );
 };
