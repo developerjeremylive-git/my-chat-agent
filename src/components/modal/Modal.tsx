@@ -1,9 +1,9 @@
 import { Button } from "@/components/button/Button";
 import { Card } from "@/components/card/Card";
 import useClickOutside from "@/hooks/useClickOutside";
-import { X, ArrowsOut } from "@phosphor-icons/react";
+import { X, ArrowsOut, ArrowsIn, PaperPlaneRight } from "@phosphor-icons/react";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type ModalProps = {
@@ -22,9 +22,18 @@ export const Modal = ({
   isOpen,
   onClose,
 }: ModalProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const modalRef = clickOutsideToClose
     ? useClickOutside(onClose)
     : useRef<HTMLDivElement>(null);
+
+  // Cerrar el modal cuando isModalOpen cambia a true
+  useEffect(() => {
+    if (isModalOpen) {
+      onClose();
+      setIsModalOpen(false);
+    }
+  }, [isModalOpen, onClose]);
 
   // Stop site overflow when modal is open
   useEffect(() => {
@@ -85,53 +94,64 @@ export const Modal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
-      <div 
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div
         className="fade fixed inset-0 bg-black"
         onClick={onClose}
       />
 
       <div className="relative w-full max-w-[95vw] mx-auto">
         <Card
-          className={cn("reveal reveal-sm relative z-50 w-full max-h-[90vh] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:bg-gray-900", className)}
+          className={cn("reveal reveal-sm relative z-50 w-full h-[90vh] rounded-xl border border-gray-200 bg-white shadow-2xl dark:bg-gray-900", className)}
           ref={modalRef}
           tabIndex={-1}
         >
           <Button
             aria-label="Cerrar modal"
             shape="square"
-            className="absolute right-4 top-4 z-[60] bg-white dark:bg-gray-900 text-ob-base-200 hover:text-ob-base-300 p-2 rounded-full transition-colors duration-200"
+            className="absolute right-4 top-4 z-[60] bg-white/95 dark:bg-gray-800/95 border-2 border-[#F48120]/20 dark:border-[#F48120]/10 text-[#F48120] hover:text-white hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20"
             onClick={onClose}
             variant="ghost"
             size="sm"
           >
-            <X size={16} weight="bold" />
+            <X size={20} weight="bold" />
           </Button>
           <div className="sticky top-0 z-50 flex items-center border-b border-gray-200 bg-white px-6 py-4 dark:bg-gray-900">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Editor de texto</h2>
           </div>
 
-          <div className="flex-1 h-[calc(100vh-8rem)] overflow-y-auto pb-16">
-            {children}
-          </div>
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4 z-[60]">
-            <Button
-              aria-label="Expandir modal"
-              shape="square"
-              className={cn(
-                "bg-white dark:bg-gray-900 text-ob-base-200 hover:text-ob-base-300 p-2 rounded-full transition-all duration-200 transform hover:scale-110",
-                {
-                  "opacity-50 cursor-not-allowed": !children,
-                  "hover:rotate-180": children
-                }
-              )}
-              onClick={onClose}
-              variant="ghost"
-              size="sm"
-              disabled={!children}
-            >
-              <ArrowsOut size={16} weight="bold" />
-            </Button>
+          {children}
+
+          <div className="sticky bottom-0 w-full border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-4 z-[60]">
+            <div className="flex justify-between items-center">
+              <Button
+                aria-label="Expandir modal"
+                shape="square"
+                className={cn(
+                  "bg-white dark:bg-gray-900 text-ob-base-200 hover:text-ob-base-300 p-2 rounded-full transition-all duration-200 transform hover:scale-110",
+                  {
+                    "opacity-50 cursor-not-allowed": !children,
+                    "hover:rotate-180": children
+                  }
+                )}
+                onClick={onClose}
+                variant="ghost"
+                size="sm"
+                disabled={!children}
+              >
+                {isOpen ? <ArrowsIn size={16} weight="bold" /> : <ArrowsOut size={16} weight="bold" />}
+              </Button>
+              <Button
+                aria-label="Enviar texto"
+                shape="square"
+                className="bg-white/95 dark:bg-gray-800/95 border-2 border-[#F48120]/20 dark:border-[#F48120]/10 text-[#F48120] hover:text-white hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20"
+                onClick={() => setIsModalOpen(true)}
+                variant="ghost"
+                size="sm"
+              >
+                <PaperPlaneRight size={20} weight="bold" />
+              </Button>
+            </div>
           </div>
         </Card>
       </div>

@@ -57,10 +57,10 @@ export const Input = ({
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        className="w-full max-w-6xl mx-auto h-[85vh]"
+        className="w-full max-w-6xl mx-auto "
       >
         <textarea
-          className="w-full h-[80vh] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
+          className="w-full h-[73vh] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
           value={value as string}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
             onChange?.(e as any);

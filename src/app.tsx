@@ -177,7 +177,7 @@ function ChatComponent() {
           {showOIAICreator && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
               <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[85vh] overflow-hidden relative transform transition-all duration-300 scale-100 opacity-100">
-                <OIAICreator 
+                <OIAICreator
                   onCopyContent={(content) => {
                     handleAgentInputChange({ target: { value: content } } as any);
                     setShowOIAICreator(false);
@@ -629,7 +629,7 @@ function ChatComponent() {
                   variant="ghost"
                   size="sm"
                   shape="square"
-                  className="rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                  className="bg-white/95 dark:bg-gray-800/95 border-2 border-[#F48120]/20 dark:border-[#F48120]/10 text-[#F48120] hover:text-white hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20"
                   onClick={() => setShowOiaiGuide(false)}
                 >
                   <X weight="bold" size={20} />
