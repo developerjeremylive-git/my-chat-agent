@@ -206,7 +206,8 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
         return (
           <div className="space-y-6 h-[calc(93.7vh-20rem)]">
             <h2 className="text-xl md:text-2xl font-bold text-center md:text-left mb-8 bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Selecciona tu profesión</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 sm:px-0 overflow-y-auto scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-h-[calc(100vh-240px)] sm:max-h-none">
+            <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4 sm:p-6 overflow-y-auto scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-h-[calc(100vh-240px)] sm:max-h-none before:absolute before:inset-4 sm:before:inset-6 before:bg-gradient-to-br before:from-[#F48120]/5 before:to-purple-500/5 before:opacity-30 before:rounded-3xl before:z-0">
+              <div className="absolute inset-0 backdrop-blur-[2px] bg-white/10 dark:bg-gray-900/10 rounded-3xl z-0"></div>
               {[
                 {
                   id: 'generador',
@@ -230,8 +231,8 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
                 <Card
                   key={profession.id}
                   onClick={() => handleProfessionSelect(profession.id as Profession)}
-                  className="group cursor-pointer transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] touch-manipulation h-auto min-h-[16rem] sm:h-56 flex flex-col justify-between p-6 sm:p-8 bg-gradient-to-br from-white/95 to-neutral-50/95 dark:from-gray-900/95 dark:to-gray-800/95 hover:shadow-2xl hover:shadow-[#F48120]/20 dark:hover:shadow-[#F48120]/10 border-2 border-[#F48120]/20 dark:border-[#F48120]/10 relative overflow-hidden rounded-2xl"
-                >
+                  className={`group cursor-pointer transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] touch-manipulation h-auto min-h-[16rem] sm:h-56 flex flex-col justify-between p-6 sm:p-8 ${selectedProfession === profession.id ? 'bg-gradient-to-br from-[#F48120]/10 to-purple-500/10 border-2 border-[#F48120]/30 dark:border-[#F48120]/20 shadow-lg shadow-[#F48120]/10' : 'bg-gradient-to-br from-white/95 to-neutral-50/95 dark:from-gray-900/95 dark:to-gray-800/95 hover:shadow-2xl hover:shadow-[#F48120]/20 dark:hover:shadow-[#F48120]/10 border-2 border-[#F48120]/20 dark:border-[#F48120]/10'} relative overflow-hidden rounded-2xl backdrop-blur-sm`
+                    }  >
                   <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <div className="relative z-10 flex flex-col h-full gap-6">
                     <div className="flex items-start gap-4">
@@ -552,23 +553,25 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
           {/* Anterior */}
         </Button>
         <div className="flex flex-row gap-4 justify-center w-full">
-          <Button
-            onClick={() => {
-              if (window.innerWidth >= 768) {
-                setShowDesktopPreview(true);
-              } else {
-                setShowMobilePreview(true);
-              }
-            }}
-            className={`h-12 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 text-[#F48120] hover:from-[#F48120]/20 hover:to-purple-500/20 dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10 border border-[#F48120]/20 dark:border-[#F48120]/10 transform hover:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group w-[80px] md:w-[150px]`}
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-              <path d="M12 4.75H19.25V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M19.25 4.75L13.75 10.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M19.25 15.25V19.25H4.75V4.75H8.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="font-medium hidden md:inline">Vista Previa</span>
-          </Button>
+          {currentStep > 0 && (
+            <Button
+              onClick={() => {
+                if (window.innerWidth >= 768) {
+                  setShowDesktopPreview(true);
+                } else {
+                  setShowMobilePreview(true);
+                }
+              }}
+              className={`h-12 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 text-[#F48120] hover:from-[#F48120]/20 hover:to-purple-500/20 dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10 border border-[#F48120]/20 dark:border-[#F48120]/10 transform hover:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group w-[80px] md:w-[150px]`}
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                <path d="M12 4.75H19.25V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M19.25 4.75L13.75 10.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M19.25 15.25V19.25H4.75V4.75H8.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span className="font-medium hidden md:inline">Vista Previa</span>
+            </Button>
+          )}
           {currentStep === 4 && (
             <Button
               onClick={handleCopyContent}
@@ -604,7 +607,7 @@ export const OIAICreator = ({ onCopyContent }: OIAICreatorProps = {}) => {
             <path d="M13.75 6.75L19.25 12L13.75 17.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M19 12H4.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          Siguiente
+          {/* Siguiente */}
         </Button>
       </div>
     </div>
