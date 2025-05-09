@@ -43,6 +43,7 @@ import { ClearHistoryDialog } from "./components/dialog/ClearHistoryDialog";
 import { OIAICreator } from "./components/modal/OIAICreator";
 import { useState as useOIAIState } from "react";
 import { ModernAgentInterface } from "@/components/agent/ModernAgentInterface";
+import { ToolsInterface } from "@/components/agent/ToolsInterface";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -65,6 +66,7 @@ function ChatComponent() {
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [isToolbarExpanded, setIsToolbarExpanded] = useState(false);
   const [showAgentInterface, setShowAgentInterface] = useState(false);
+  const [showToolsInterface, setShowToolsInterface] = useState(false);
   const [textSize, setTextSize] = useState<'normal' | 'large' | 'small'>(() => {
     const savedSize = localStorage.getItem('textSize');
     return (savedSize as 'normal' | 'large' | 'small') || 'normal';
@@ -175,6 +177,13 @@ function ChatComponent() {
             textSize={textSize}
             onTextSizeChange={setTextSize}
           />
+
+          {showToolsInterface && (
+            <ToolsInterface
+              isOpen={showToolsInterface}
+              onClose={() => setShowToolsInterface(false)}
+            />
+          )}
 
           {showOIAICreator && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -498,7 +507,7 @@ function ChatComponent() {
 
           {/* Messages */}
           {/* Action Buttons Frame */}
-          <div className={`pl-4 pr-10 rounded-full mb-0 py-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm mt-7 md:mt-8 transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''}`}>
+          <div className={`pl-4 pr-10 rounded-full mb-0 py-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm mt-9 md:mt-8.6 transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''}`}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Tooltip content="Guía">
@@ -525,15 +534,26 @@ function ChatComponent() {
                 </Tooltip>
                 {/* nuevo boton con icono de agente */}
 
-                <Button
-                  variant="ghost"
-                  size="md"
-                  shape="square"
-                  className="rounded-full h-9 w-9"
-                  onClick={() => setShowAgentInterface(true)}
-                >
-                  <Wrench size={20} weight="duotone" className="text-[#F48120]" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="md"
+                    shape="square"
+                    className="rounded-full h-9 w-9"
+                    onClick={() => setShowAgentInterface(true)}
+                  >
+                    <Wrench size={20} weight="duotone" className="text-[#F48120]" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="md"
+                    shape="square"
+                    className="rounded-full h-9 w-9"
+                    onClick={() => setShowToolsInterface(true)}
+                  >
+                    <Robot size={20} weight="duotone" className="text-[#F48120]" />
+                  </Button>
+                </div>
 
 
 
