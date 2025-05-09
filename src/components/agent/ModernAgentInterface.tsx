@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/card/Card';
 import { Button } from '@/components/button/Button';
-import { X, Files, Calendar, EnvelopeSimple, Plus, ArrowRight, Brain, Lightbulb, Code, ChartLine, CaretRight, Palette, ChartBar, Rocket, Globe, Camera, Robot, MusicNotes, ShieldCheck, MagnifyingGlass } from '@phosphor-icons/react';
+import { X, Files, Calendar, EnvelopeSimple, Plus, ArrowRight, Brain, Lightbulb, Code, ChartLine, CaretRight, Palette, ChartBar, Rocket, Globe, Camera, Robot, MusicNotes, ShieldCheck, MagnifyingGlass, Book, Wrench } from '@phosphor-icons/react';
 import { RecentFilesDashboard } from '@/components/dashboard/RecentFilesDashboard';
 import { CalendarEventDashboard } from '@/components/calendar/CalendarEventDashboard';
 import { GmailDashboard } from '@/components/email/GmailDashboard';
@@ -145,6 +145,7 @@ const ServicePopup: React.FC<ServicePopupProps> = ({ service, onClose }) => (
 );
 
 const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
+  const [activeTab, setActiveTab] = useState<'recursos' | 'herramientas'>('recursos');
   const getThemeStyles = () => {
     switch (source.label) {
       case 'IA General':
@@ -159,19 +160,19 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
               title: 'Fundamentos de IA',
               description: 'Conceptos básicos y teoría fundamental',
               link: '#',
-              icon: <Brain size={20} />
+              icon: <Brain size={24} className="transform group-hover:rotate-12 transition-transform duration-300" />
             },
             {
               title: 'Modelos Avanzados',
               description: 'Arquitecturas y frameworks modernos',
               link: '#',
-              icon: <Robot size={20} />
+              icon: <Robot size={24} className="transform group-hover:scale-110 transition-transform duration-300" />
             },
             {
               title: 'Ética en IA',
               description: 'Principios y mejores prácticas',
               link: '#',
-              icon: <ShieldCheck size={20} />
+              icon: <ShieldCheck size={24} className="transform group-hover:rotate-[-12deg] transition-transform duration-300" />
             }
           ],
           herramientas: [
@@ -179,19 +180,19 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
               title: 'Asistente de IA',
               description: 'Tu compañero inteligente',
               status: 'disponible',
-              icon: <Brain size={20} />
+              icon: <Brain size={24} className="transform group-hover:rotate-12 transition-transform duration-300" />
             },
             {
               title: 'Procesamiento NLP',
               description: 'Análisis de lenguaje natural',
               status: 'beta',
-              icon: <Robot size={20} />
+              icon: <Robot size={24} className="transform group-hover:scale-110 transition-transform duration-300" />
             },
             {
               title: 'Visión por Computadora',
               description: 'Análisis de imágenes',
               status: 'próximamente',
-              icon: <ShieldCheck size={20} />
+              icon: <ShieldCheck size={24} className="transform group-hover:rotate-[-12deg] transition-transform duration-300" />
             }
           ]
         };
@@ -361,97 +362,161 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        className="w-full max-w-2xl"
+        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 20 }}
+        transition={{ type: 'spring', damping: 20 }}
+        className="w-full max-w-4xl my-8"
         onClick={(e) => e.stopPropagation()}
       >
-        <Card className="bg-white dark:bg-neutral-900 overflow-hidden border border-neutral-200 dark:border-neutral-800">
-          <div className="p-6 relative h-[600px] flex flex-col">
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`absolute right-4 top-4 rounded-full hover:bg-${themeStyles.gradient} hover:text-white`}
-              onClick={onClose}
+        <Card className="bg-white dark:bg-neutral-900 p-6 relative overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-xl">
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br opacity-5"
+            style={{ background: `linear-gradient(to bottom right, var(--${themeStyles.gradient}))` }}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute right-4 top-4 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 z-10"
+            onClick={onClose}
+          >
+            <X size={20} />
+          </Button>
+
+          <motion.div 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="flex items-center gap-4 mb-8"
+          >
+            <div className={`p-4 bg-gradient-to-br ${themeStyles.bgGradient} rounded-xl ${themeStyles.iconColor} transform hover:scale-110 transition-transform duration-300`}>
+              {source.icon}
+            </div>
+            <div>
+              <h3 className={`text-3xl font-bold bg-gradient-to-r ${themeStyles.gradient} bg-clip-text text-transparent mb-2`}>
+                {source.label}
+              </h3>
+              <p className="text-lg text-neutral-600 dark:text-neutral-400">{themeStyles.description}</p>
+            </div>
+          </motion.div>
+
+          {/* Tabs para móvil */}
+          <div className="flex gap-2 mb-6 md:hidden">
+            <motion.div
+              className="flex-1"
+              initial={false}
+              animate={{
+                scale: activeTab === 'recursos' ? 1 : 0.95,
+                opacity: activeTab === 'recursos' ? 1 : 0.7
+              }}
             >
-              <X size={20} />
-            </Button>
+              <Button
+                variant={activeTab === 'recursos' ? 'secondary' : 'ghost'}
+                className={`w-full flex items-center justify-center gap-2 ${activeTab === 'recursos' ? `bg-gradient-to-r ${themeStyles.gradient} text-white shadow-lg` : 'border border-neutral-200 dark:border-neutral-700'} transition-all duration-300`}
+                onClick={() => setActiveTab('recursos')}
+              >
+                <Book size={20} />
+                Recursos
+              </Button>
+            </motion.div>
+            <motion.div
+              className="flex-1"
+              initial={false}
+              animate={{
+                scale: activeTab === 'herramientas' ? 1 : 0.95,
+                opacity: activeTab === 'herramientas' ? 1 : 0.7
+              }}
+            >
+              <Button
+                variant={activeTab === 'herramientas' ? 'secondary' : 'ghost'}
+                className={`w-full flex items-center justify-center gap-2 ${activeTab === 'herramientas' ? `bg-gradient-to-r ${themeStyles.gradient} text-white shadow-lg` : 'border border-neutral-200 dark:border-neutral-700'} transition-all duration-300`}
+                onClick={() => setActiveTab('herramientas')}
+              >
+                <Wrench size={20} />
+                Herramientas
+              </Button>
+            </motion.div>
+          </div>
 
-            <div className="flex items-center gap-4 mb-6">
-              <div className={`p-4 bg-gradient-to-br ${themeStyles.bgGradient} rounded-xl ${themeStyles.iconColor}`}>
-                {source.icon}
-              </div>
-              <div>
-                <h3 className={`text-2xl font-bold bg-gradient-to-r ${themeStyles.gradient} bg-clip-text text-transparent mb-1`}>
-                  {source.label}
-                </h3>
-                <p className="text-neutral-600 dark:text-neutral-400">
-                  {themeStyles.description}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
-              <div className="grid grid-cols-2 gap-6 p-4">
-                {/* Sección de Recursos */}
-                <div>
-                  <h4 className="text-lg font-semibold mb-3">Recursos Especializados</h4>
-                  <div className="space-y-3">
-                    {recursos.map((recurso, index) => (
-                      <div
-                        key={index}
-                        className={`p-4 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:border-${themeStyles.iconColor} transition-colors group cursor-pointer bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`p-2 rounded-lg ${themeStyles.bgGradient} ${themeStyles.iconColor}`}>
-                            {recurso.icon}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className={`font-semibold group-hover:${themeStyles.iconColor} transition-colors`}>{recurso.title}</h4>
-                            <p className="text-sm text-neutral-600 dark:text-neutral-400">{recurso.description}</p>
-                          </div>
-                          <ArrowRight size={20} className={`${themeStyles.iconColor} opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all`} />
-                        </div>
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className={`${activeTab === 'herramientas' ? 'hidden md:block' : ''}`}
+            >
+              <h4 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Book size={24} className={themeStyles.iconColor} />
+                Recursos Especializados
+              </h4>
+              <div className="space-y-4">
+                {recursos.map((recurso, index) => (
+                  <motion.div
+                    key={index}
+                    className="group p-4 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:border-transparent hover:ring-2 hover:ring-[#F48120] dark:hover:ring-[#F48120] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+                    whileHover={{ scale: 1.02 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-3 rounded-lg ${themeStyles.iconColor} bg-gradient-to-br ${themeStyles.bgGradient} group-hover:scale-110 transition-transform duration-300`}>
+                        {recurso.icon}
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Sección de Herramientas */}
-                <div>
-                  <h4 className="text-lg font-semibold mb-3">Herramientas Disponibles</h4>
-                  <div className="space-y-3">
-                    {herramientas.map((herramienta, index) => (
-                      <div
-                        key={index}
-                        className={`p-4 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:border-${themeStyles.iconColor} transition-colors group cursor-pointer bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`p-2 rounded-lg ${themeStyles.bgGradient} ${themeStyles.iconColor}`}>
-                            {herramienta.icon}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className={`font-semibold group-hover:${themeStyles.iconColor} transition-colors`}>{herramienta.title}</h4>
-                            <p className="text-sm text-neutral-600 dark:text-neutral-400">{herramienta.description}</p>
-                          </div>
-                          <span className={`text-xs px-3 py-1 rounded-full ${herramienta.status === 'disponible' ? `bg-gradient-to-r ${themeStyles.gradient} text-white` :
-                            herramienta.status === 'beta' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
-                              'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
-                            }`}>
-                            {herramienta.status}
-                          </span>
-                        </div>
+                      <div className="flex-1">
+                        <h5 className="font-medium text-lg group-hover:text-[#F48120] transition-colors duration-300">{recurso.title}</h5>
+                        <p className="text-sm text-neutral-500 group-hover:text-neutral-700 dark:group-hover:text-neutral-300 transition-colors duration-300">{recurso.description}</p>
                       </div>
-                    ))}
-                  </div>
-                </div>
+                      <ArrowRight size={20} className={`${themeStyles.iconColor} opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300`} />
+                    </div>
+                  </motion.div>
+                ))}
               </div>
-            </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className={`${activeTab === 'recursos' ? 'hidden md:block' : ''}`}
+            >
+              <h4 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Wrench size={24} className={themeStyles.iconColor} />
+                Herramientas Disponibles
+              </h4>
+              <div className="space-y-4">
+                {herramientas.map((herramienta, index) => (
+                  <motion.div
+                    key={index}
+                    className="group p-4 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:border-transparent hover:ring-2 hover:ring-[#F48120] dark:hover:ring-[#F48120] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
+                    whileHover={{ scale: 1.02 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-3 rounded-lg ${themeStyles.iconColor} bg-gradient-to-br ${themeStyles.bgGradient} group-hover:scale-110 transition-transform duration-300`}>
+                        {herramienta.icon}
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="font-medium text-lg group-hover:text-[#F48120] transition-colors duration-300">{herramienta.title}</h5>
+                        <p className="text-sm text-neutral-500 group-hover:text-neutral-700 dark:group-hover:text-neutral-300 transition-colors duration-300">{herramienta.description}</p>
+                      </div>
+                      <span className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-300 ${herramienta.status === 'disponible' ? `bg-gradient-to-r ${themeStyles.gradient} text-white` :
+                        herramienta.status === 'beta' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                          'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
+                        }`}>
+                        {herramienta.status}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
           </div>
         </Card>
       </motion.div>
