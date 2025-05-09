@@ -4,6 +4,7 @@ import { Button } from '@/components/button/Button';
 import { X, Files, Calendar, EnvelopeSimple, Plus, ArrowRight, Brain, Lightbulb, Code, ChartLine, CaretRight, Palette, ChartBar, Rocket, Globe, Camera, Robot, MusicNotes, ShieldCheck, MagnifyingGlass } from '@phosphor-icons/react';
 import { RecentFilesDashboard } from '@/components/dashboard/RecentFilesDashboard';
 import { CalendarEventDashboard } from '@/components/calendar/CalendarEventDashboard';
+import { GmailDashboard } from '@/components/email/GmailDashboard';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ModernAgentInterfaceProps {
@@ -436,8 +437,8 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
                             <p className="text-sm text-neutral-600 dark:text-neutral-400">{herramienta.description}</p>
                           </div>
                           <span className={`text-xs px-3 py-1 rounded-full ${herramienta.status === 'disponible' ? `bg-gradient-to-r ${themeStyles.gradient} text-white` :
-                              herramienta.status === 'beta' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
-                                'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
+                            herramienta.status === 'beta' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                              'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
                             }`}>
                             {herramienta.status}
                           </span>
@@ -658,6 +659,7 @@ const NewServicePopup: React.FC<NewServicePopupProps> = ({ onClose, onSave }) =>
 
 export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfaceProps) {
   const [showCalendarDashboard, setShowCalendarDashboard] = useState(false);
+  const [showGmailDashboard, setShowGmailDashboard] = useState(false);
   const [showRecentFiles, setShowRecentFiles] = useState(false);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedKnowledge, setSelectedKnowledge] = useState<number | null>(null);
@@ -709,7 +711,7 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
       ],
       actions: [
         { label: 'Conectar Gmail', action: () => console.log('Conectar Gmail') },
-        { label: 'Ver bandeja de entrada', action: () => console.log('Ver emails') }
+        { label: 'Ver bandeja de entrada', action: () => setShowGmailDashboard(true) }
       ]
     }
   ];
@@ -839,12 +841,22 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
         isOpen={showRecentFiles}
         onClose={() => setShowRecentFiles(false)}
       />
-          {showCalendarDashboard && (
+      {showCalendarDashboard && (
         <CalendarEventDashboard
           isOpen={showCalendarDashboard}
           onClose={() => setShowCalendarDashboard(false)}
         />
       )}
+
+      {showGmailDashboard && (
+        <GmailDashboard
+          isOpen={showGmailDashboard}
+          onClose={() => setShowGmailDashboard(false)}
+        />
+      )}
+
+
+
     </AnimatePresence>
   );
 
