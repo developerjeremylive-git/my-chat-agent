@@ -3,6 +3,7 @@ import { Card } from '@/components/card/Card';
 import { Button } from '@/components/button/Button';
 import { X, Files, Calendar, EnvelopeSimple, Plus, ArrowRight, Brain, Lightbulb, Code, ChartLine, CaretRight, Palette, ChartBar, Rocket, Globe, Camera, Robot, MusicNotes, ShieldCheck, MagnifyingGlass } from '@phosphor-icons/react';
 import { RecentFilesDashboard } from '@/components/dashboard/RecentFilesDashboard';
+import { CalendarEventDashboard } from '@/components/calendar/CalendarEventDashboard';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ModernAgentInterfaceProps {
@@ -656,6 +657,7 @@ const NewServicePopup: React.FC<NewServicePopupProps> = ({ onClose, onSave }) =>
 };
 
 export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfaceProps) {
+  const [showCalendarDashboard, setShowCalendarDashboard] = useState(false);
   const [showRecentFiles, setShowRecentFiles] = useState(false);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedKnowledge, setSelectedKnowledge] = useState<number | null>(null);
@@ -691,7 +693,7 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
       ],
       actions: [
         { label: 'Sincronizar calendario', action: () => console.log('Sincronizar') },
-        { label: 'Crear evento', action: () => console.log('Crear evento') }
+        { label: 'Crear evento', action: () => setShowCalendarDashboard(true) }
       ]
     },
     {
@@ -837,6 +839,12 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
         isOpen={showRecentFiles}
         onClose={() => setShowRecentFiles(false)}
       />
+          {showCalendarDashboard && (
+        <CalendarEventDashboard
+          isOpen={showCalendarDashboard}
+          onClose={() => setShowCalendarDashboard(false)}
+        />
+      )}
     </AnimatePresence>
   );
 
