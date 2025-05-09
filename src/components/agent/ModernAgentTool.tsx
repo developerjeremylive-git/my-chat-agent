@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/card/Card';
 import { Button } from '@/components/button/Button';
 import { X, Files, Calendar, EnvelopeSimple, PencilSimple } from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface Tool {
   id: string;
@@ -63,11 +64,20 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
             {tool.icon}
             <span>{tool.name}</span>
             {(!isPreview && (selectedToolIndex === index)) && (
-              <div className="absolute z-50 mt-2 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 py-2 min-w-[200px]">
-                {availableTools.map((t) => (
-                  <div
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                className="absolute z-50 mt-2 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 py-2 min-w-[200px] overflow-hidden"
+              >
+                {availableTools.map((t, idx) => (
+                  <motion.div
                     key={t.id}
-                    className="flex items-center gap-2 px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 cursor-pointer"
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="flex items-center gap-2 px-4 py-2 hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10 dark:hover:from-[#F48120]/20 dark:hover:to-purple-500/20 cursor-pointer group transition-all duration-300"
                     onClick={(e) => {
                       e.stopPropagation();
                       const parts = text.split(/\[(.*?)\]/);
@@ -84,11 +94,15 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                       setSelectedToolIndex(null);
                     }}
                   >
-                    {t.icon}
-                    <span>{t.name}</span>
-                  </div>
+                    <div className="transform group-hover:scale-110 transition-transform duration-300">
+                      {t.icon}
+                    </div>
+                    <span className="text-neutral-700 dark:text-neutral-300 group-hover:text-[#F48120] transition-colors duration-300">
+                      {t.name}
+                    </span>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
           </div>
         );
@@ -344,27 +358,48 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                 {/* <div className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800 min-h-[50px] relative">
                   {renderInstructionsWithTools(instructions)}
                 </div> */}
-                <div className="flex justify-end space-x-2">   
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-neutral-500"
-                    onClick={() => {
-                      setInstructions('');
-                      setEditingTaskId(null);
-                    }}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    className={`${editingTaskId ? 'bg-gradient-to-r from-[#F48120] to-purple-500 shadow-lg' : 'bg-[#F48120]'} text-white hover:opacity-90 transition-all duration-300`}
-                    onClick={editingTaskId ? handleUpdateTask : handleAddTask}
-                  >
-                    {editingTaskId ? 'Actualizar Tarea' : 'Agregar Tarea'}
-                  </Button>
-                </div>
+                <motion.div 
+                  className="flex justify-end space-x-2"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                >   
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-300"
+                      onClick={() => {
+                        setInstructions('');
+                        setEditingTaskId(null);
+                      }}
+                    >
+                      <motion.span
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        Cancelar
+                      </motion.span>
+                    </Button>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className={`${editingTaskId ? 'bg-gradient-to-r from-[#F48120] to-purple-500 shadow-lg hover:shadow-xl' : 'bg-[#F48120] hover:bg-[#F48120]/90'} text-white transition-all duration-300 transform hover:-translate-y-0.5`}
+                      onClick={editingTaskId ? handleUpdateTask : handleAddTask}
+                    >
+                      <motion.span
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        {editingTaskId ? 'Actualizar Tarea' : 'Agregar Tarea'}
+                      </motion.span>
+                    </Button>
+                  </motion.div>
+                </motion.div>
               </div>
               
               {showToolMenu && (
@@ -391,34 +426,52 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
 
               {/* Lista de Tareas */}
               <div className="space-y-2" ref={editTaskRef}>
-                {tasks.map((task, index) => (
-                  <div
-                    key={task.id}
-                    className={`flex items-center gap-2 p-2 rounded-lg transition-colors group ${editingTaskId === task.id ? 'bg-[#F48120]/10 border-2 border-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
-                  >
-                    <span className="text-[#F48120]">{index + 1}.</span>
-                    <div className="flex-1">{renderInstructionsWithTools(task.text, editingTaskId !== task.id)}</div>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-[#F48120]"
-                        onClick={() => handleEditTask(task.id)}
+                <AnimatePresence>
+                  {tasks.map((task, index) => (
+                    <motion.div
+                      key={task.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                      className={`flex items-center gap-2 p-2 rounded-lg group transform transition-all duration-300 ${editingTaskId === task.id ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 border-2 border-[#F48120] scale-102' : 'hover:bg-gradient-to-r hover:from-neutral-100/50 hover:to-neutral-100 dark:hover:from-neutral-800/50 dark:hover:to-neutral-800 hover:scale-[1.02]'}`}
+                    >
+                      <motion.span 
+                        className="text-[#F48120] font-medium"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2 }}
                       >
-                        <PencilSimple size={16} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500"
-                        onClick={() => handleDeleteTask(task.id)}
-                        disabled={editingTaskId === task.id}
+                        {index + 1}.
+                      </motion.span>
+                      <div className="flex-1">{renderInstructionsWithTools(task.text, editingTaskId !== task.id)}</div>
+                      <motion.div 
+                        className="flex items-center gap-2 transition-all duration-300"
+                        initial={{ x: 20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        whileHover={{ scale: 1.05 }}
                       >
-                        <X size={16} />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-[#F48120] hover:bg-[#F48120]/10 transition-colors duration-300"
+                          onClick={() => handleEditTask(task.id)}
+                        >
+                          <PencilSimple size={16} className="transform transition-transform duration-300 hover:rotate-12" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:bg-red-500/10 transition-colors duration-300"
+                          onClick={() => handleDeleteTask(task.id)}
+                          disabled={editingTaskId === task.id}
+                        >
+                          <X size={16} className="transform transition-transform duration-300 hover:rotate-90" />
+                        </Button>
+                      </motion.div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
             </div>
           </div>
