@@ -828,7 +828,7 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-2xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
-                      Asistente Inteligente
+                      USB
                     </h2>
                     <p className="text-neutral-600 dark:text-neutral-400 mt-1">
                       Potencia tu productividad con integración de servicios

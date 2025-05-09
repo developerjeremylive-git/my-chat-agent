@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/card/Card';
 import { Button } from '@/components/button/Button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ComputerTower, Image as ImageIcon, Globe, Code, Robot } from '@phosphor-icons/react';
+import { X, ComputerTower, Image as ImageIcon, Globe, Code, Robot, Rocket, PlugsConnected } from '@phosphor-icons/react';
 
 interface ToolsInterfaceProps {
     isOpen: boolean;
@@ -21,26 +21,18 @@ interface Tool {
 const initialTools: Tool[] = [
     {
         id: 'ai_assistant',
-        name: 'Asistente IA',
-        description: 'Resuelve dudas y automatiza tareas',
+        name: 'USB',
+        description: 'Conecta con IA',
+        icon: <PlugsConnected size={24} />,
+        status: 'available',
+        selected: false
+    },
+    {
+        id: 'ai_agent',
+        name: 'Agente Inteligente',
+        description: 'Crea flujos de trabajo',
         icon: <Robot size={24} />,
         status: 'available',
-        selected: false
-    },
-    {
-        id: 'canvas',
-        name: 'Lienzo Colaborativo',
-        description: 'Edita documentos en tiempo real',
-        icon: <ComputerTower size={24} />,
-        status: 'available',
-        selected: false
-    },
-    {
-        id: 'image_generation',
-        name: 'Generación de Imágenes',
-        description: 'Crea imágenes con IA',
-        icon: <ImageIcon size={24} />,
-        status: 'coming_soon',
         selected: false
     },
     {
@@ -49,6 +41,22 @@ const initialTools: Tool[] = [
         description: 'Encuentra información al instante',
         icon: <Globe size={24} />,
         status: 'available',
+        selected: false
+    },
+    {
+        id: 'canvas',
+        name: 'Lienzo Colaborativo',
+        description: 'Edita documentos en tiempo real',
+        icon: <ComputerTower size={24} />,
+        status: 'coming_soon',
+        selected: false
+    },
+    {
+        id: 'image_generation',
+        name: 'Generación de Imágenes',
+        description: 'Crea imágenes con IA',
+        icon: <ImageIcon size={24} />,
+        status: 'coming_soon',
         selected: false
     },
     {
@@ -116,7 +124,7 @@ export const ToolsInterface: React.FC<ToolsInterfaceProps> = ({ isOpen, onClose 
                                     whileHover={{ scale: 1.02, x: 4 }}
                                     className={`group flex items-center gap-3 p-3 rounded-lg
                       ${tool.status === 'available' ? 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800' : 'opacity-70'}
-                      ${tool.id === 'ai_assistant' ? 'bg-gradient-to-r from-[#F48120]/5 to-purple-500/5 dark:from-[#F48120]/10 dark:to-purple-500/10 border-2 border-[#F48120] dark:border-[#F48120]/50' : ''}
+                      ${(tool.id === 'ai_assistant' || tool.id === 'ai_agent') ? 'bg-gradient-to-r from-[#F48120]/5 to-purple-500/5 dark:from-[#F48120]/10 dark:to-purple-500/10 border-2 border-[#F48120] dark:border-[#F48120]/50' : ''}
                       transition-all duration-200`}
                                     onClick={() => {
                                         if (tool.status === 'available') {
@@ -124,6 +132,9 @@ export const ToolsInterface: React.FC<ToolsInterfaceProps> = ({ isOpen, onClose 
                                             if (tool.id === 'ai_assistant') {
                                                 onClose();
                                                 window.dispatchEvent(new CustomEvent('openModernAgentInterface'));
+                                            } else if (tool.id === 'ai_agent') {
+                                                onClose();
+                                                window.dispatchEvent(new CustomEvent('openToolsInterface'));
                                             }
                                         }
                                     }}
