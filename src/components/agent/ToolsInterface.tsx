@@ -90,7 +90,7 @@ export const ToolsInterface: React.FC<ToolsInterfaceProps> = ({ isOpen, onClose 
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    className="fixed bottom-29 left-4 z-50 w-80 overflow-hidden left-2"
+                    className="fixed bottom-29 left-4 z-50 w-80 overflow-hidden ml-2"
                 >
                     <Card ref={menuRef} className="bg-white dark:bg-neutral-900 overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-lg rounded-xl">
                         <div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
