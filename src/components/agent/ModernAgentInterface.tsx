@@ -6,6 +6,7 @@ import { RecentFilesDashboard } from '@/components/dashboard/RecentFilesDashboar
 import { CalendarEventDashboard } from '@/components/calendar/CalendarEventDashboard';
 import { GmailDashboard } from '@/components/email/GmailDashboard';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DriveDashboard } from '../drive/DriveDashboard';
 
 interface ModernAgentInterfaceProps {
   isOpen: boolean;
@@ -658,6 +659,7 @@ const NewServicePopup: React.FC<NewServicePopupProps> = ({ onClose, onSave }) =>
 };
 
 export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfaceProps) {
+  const [showDriveDashboard, setShowDriveDashboard] = useState(false);
   const [showCalendarDashboard, setShowCalendarDashboard] = useState(false);
   const [showGmailDashboard, setShowGmailDashboard] = useState(false);
   const [showRecentFiles, setShowRecentFiles] = useState(false);
@@ -678,8 +680,8 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
         'Integración con otras apps'
       ],
       actions: [
-        { label: 'Conectar Drive', action: () => console.log('Conectar Drive') },
-        { label: 'Ver archivos recientes', action: () => setShowRecentFiles(true) }
+        { label: 'Conectar Drive', action: () => setShowDriveDashboard(true) },
+        { label: 'Ver archivos', action: () => setShowDriveDashboard(true) }
       ]
     },
     {
@@ -855,7 +857,12 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
         />
       )}
 
-
+      {showDriveDashboard && (
+        <DriveDashboard
+          isOpen={showDriveDashboard}
+          onClose={() => setShowDriveDashboard(false)}
+        />
+      )}
 
     </AnimatePresence>
   );
