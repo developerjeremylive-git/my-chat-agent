@@ -32,7 +32,9 @@ import {
   Question,
   CaretLeft,
   CaretRight,
-  Wrench
+  Wrench,
+  Files,
+  DotsThreeCircleVertical
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -44,6 +46,7 @@ import { OIAICreator } from "./components/modal/OIAICreator";
 import { useState as useOIAIState } from "react";
 import { ModernAgentInterface } from "@/components/agent/ModernAgentInterface";
 import { ToolsInterface } from "@/components/agent/ToolsInterface";
+import { CorporateAgentInterface } from "./components/agent/CorporateAgentInterface";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -67,6 +70,7 @@ function ChatComponent() {
   const [isToolbarExpanded, setIsToolbarExpanded] = useState(false);
   const [showAgentInterface, setShowAgentInterface] = useState(false);
   const [showToolsInterface, setShowToolsInterface] = useState(false);
+  const [showCorporateAgent, setShowCorporateAgent] = useState(false);
   const [textSize, setTextSize] = useState<'normal' | 'large' | 'small'>(() => {
     const savedSize = localStorage.getItem('textSize');
     return (savedSize as 'normal' | 'large' | 'small') || 'normal';
@@ -541,21 +545,10 @@ function ChatComponent() {
                     className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
                     onClick={() => setShowOIAICreator(true)}
                   >
-                    <Robot size={20} weight="duotone" />
+                    <Brain size={20} weight="duotone" />
                   </Button>
                 </Tooltip>
-                {/* nuevo boton con icono de agente */}
-
                 <div className="flex gap-2">
-                  {/* <Button
-                    variant="ghost"
-                    size="md"
-                    shape="square"
-                    className="rounded-full h-9 w-9"
-                    onClick={() => setShowAgentInterface(true)}
-                  >
-                    <Wrench size={20} weight="duotone" className="text-[#F48120]" />
-                  </Button> */}
                   <Button
                     variant="ghost"
                     size="md"
@@ -585,9 +578,25 @@ function ChatComponent() {
                   </Button>
                 </Tooltip>
               </div>
+
               <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${isToolbarExpanded ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0 overflow-hidden'}`}>
                 <ModelSelect />
               </div>
+              {/* Botón de Resumen Corporativo */}
+              <div className={`transition-all duration-300 ${isToolbarExpanded ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0 overflow-hidden'}`}>
+                <Tooltip content="Resumen Corporativo">
+                  <Button
+                    variant="ghost"
+                    size="md"
+                    shape="square"
+                    className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
+                    onClick={() => setShowCorporateAgent(true)}
+                  >
+                    <DotsThreeCircleVertical size={20} weight="duotone" />
+                  </Button>
+                </Tooltip>
+              </div>
+              {/* Botón de Limpiar Historial */}
               <div className={`transition-all duration-300 ${isToolbarExpanded ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0 overflow-hidden'}`}>
                 <Tooltip content="Limpiar historial">
                   <Button
@@ -799,6 +808,14 @@ function ChatComponent() {
           onClose={() => setShowAgentInterface(false)}
         />
       )}
+
+      {showCorporateAgent && (
+        <CorporateAgentInterface
+          isOpen={showCorporateAgent}
+          onClose={() => setShowCorporateAgent(false)}
+        />
+      )}
+
     </div>
   );
 }
