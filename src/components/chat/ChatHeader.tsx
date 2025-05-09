@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ModelSelect } from '@/components/model/ModelSelect';
 import { Button } from '@/components/button/Button';
-import { List, Bug, Gear, Brain, X, Question, Trash } from '@phosphor-icons/react';
+import { List, Bug, Gear, Brain, X, Question, Trash, Divide } from '@phosphor-icons/react';
 import { Toggle } from '@/components/toggle/Toggle';
 import { Card } from '../card/Card';
 import { OIAICreator } from '../modal/OIAICreator';
@@ -52,7 +52,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
         </div>
 
         <div className="flex-1">
-          <h2 className="font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Asistente Inteligente</h2>
+          <h2 className="font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent hidden md:block">Asistente Inteligente</h2>
         </div>
 
         <div className="flex items-center gap-1 mr-2">
@@ -62,7 +62,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
             shape="square"
             className={`rounded-full h-8 w-8 ${textSize === 'small' ? 'bg-[#F48120]/10 text-[#F48120]' : ''} hover:bg-[#F48120]/10 hover:text-[#F48120] transition-colors duration-200`}
             onClick={() => onTextSizeChange('small')}
-            // title="Texto pequeño"
+          // title="Texto pequeño"
           >
             <span className="text-xs font-bold">A</span>
           </Button>
@@ -72,7 +72,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
             shape="square"
             className={`rounded-full h-8 w-8 ${textSize === 'normal' ? 'bg-[#F48120]/10 text-[#F48120]' : ''} hover:bg-[#F48120]/10 hover:text-[#F48120] transition-colors duration-200`}
             onClick={() => onTextSizeChange('normal')}
-            // title="Texto normal"
+          // title="Texto normal"
           >
             <span className="text-sm font-bold">A</span>
           </Button>
@@ -82,7 +82,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
             shape="square"
             className={`rounded-full h-8 w-8 ${textSize === 'large' ? 'bg-[#F48120]/10 text-[#F48120]' : ''} hover:bg-[#F48120]/10 hover:text-[#F48120] transition-colors duration-200`}
             onClick={() => onTextSizeChange('large')}
-            // title="Texto grande"
+          // title="Texto grande"
           >
             <span className="text-base font-bold">A</span>
           </Button>
@@ -290,14 +290,16 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
           </div>
         )}
 
-        <div className="flex items-center gap-2 mr-2">
-          <Bug size={16} />
-          <Toggle
-            toggled={showDebug}
-            aria-label="Toggle debug mode"
-            onClick={onToggleDebug}
-          />
-        </div>
+        {/* <div className="flex items-center gap-2">
+          <Bug size={16} className='hidden md:block' />
+          <div className='hidden md:block'>
+            <Toggle
+              toggled={showDebug}
+              aria-label="Toggle debug mode"
+              onClick={onToggleDebug}
+            />
+          </div>
+        </div> */}
 
         <Button
           variant="ghost"
