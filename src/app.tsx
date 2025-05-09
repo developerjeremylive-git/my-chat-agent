@@ -64,6 +64,10 @@ function ChatComponent() {
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [isToolbarExpanded, setIsToolbarExpanded] = useState(false);
   const [showAgentInterface, setShowAgentInterface] = useState(false);
+  const [textSize, setTextSize] = useState<'normal' | 'large' | 'small'>(() => {
+    const savedSize = localStorage.getItem('textSize');
+    return (savedSize as 'normal' | 'large' | 'small') || 'normal';
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -83,6 +87,11 @@ function ChatComponent() {
     // Save theme preference to localStorage
     localStorage.setItem("theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    // Save text size preference to localStorage
+    localStorage.setItem('textSize', textSize);
+  }, [textSize]);
 
   // Scroll to bottom on mount
   useEffect(() => {
@@ -162,6 +171,8 @@ function ChatComponent() {
             onOpenSettings={() => setIsSettingsOpen(true)}
             showDebug={showDebug}
             onToggleDebug={() => setShowDebug((prev) => !prev)}
+            textSize={textSize}
+            onTextSizeChange={setTextSize}
           />
 
           {showOIAICreator && (
@@ -320,7 +331,7 @@ function ChatComponent() {
                                       } ${part.text.startsWith("scheduled message")
                                         ? "border-accent/50"
                                         : ""
-                                      } relative`}
+                                      } relative ${textSize === 'small' ? 'text-sm' : textSize === 'large' ? 'text-lg' : 'text-base'}`}
                                   >
                                     {part.text.startsWith(
                                       "scheduled message"
