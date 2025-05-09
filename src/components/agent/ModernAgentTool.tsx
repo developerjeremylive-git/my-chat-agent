@@ -58,11 +58,11 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
           <div
             key={index}
             className={`inline-flex items-center gap-1 px-2 py-1 rounded bg-neutral-100 dark:bg-neutral-800 text-sm ${!isPreview ? 'cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors' : ''}`}
-            onClick={() => !isPreview && setSelectedToolIndex(index)}
+            onClick={() => (!isPreview && setSelectedToolIndex(index))}
           >
             {tool.icon}
             <span>{tool.name}</span>
-            {!isPreview && selectedToolIndex === index && (
+            {(!isPreview && (selectedToolIndex === index)) && (
               <div className="absolute z-50 mt-2 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 py-2 min-w-[200px]">
                 {availableTools.map((t) => (
                   <div
@@ -359,7 +359,7 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                   <Button
                     variant="primary"
                     size="sm"
-                    className="bg-[#F48120] text-white"
+                    className={`${editingTaskId ? 'bg-gradient-to-r from-[#F48120] to-purple-500 shadow-lg' : 'bg-[#F48120]'} text-white hover:opacity-90 transition-all duration-300`}
                     onClick={editingTaskId ? handleUpdateTask : handleAddTask}
                   >
                     {editingTaskId ? 'Actualizar Tarea' : 'Agregar Tarea'}
@@ -394,10 +394,10 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                 {tasks.map((task, index) => (
                   <div
                     key={task.id}
-                    className="flex items-center gap-2 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors group"
+                    className={`flex items-center gap-2 p-2 rounded-lg transition-colors group ${editingTaskId === task.id ? 'bg-[#F48120]/10 border-2 border-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
                   >
                     <span className="text-[#F48120]">{index + 1}.</span>
-                    <div className="flex-1">{renderInstructionsWithTools(task.text, true)}</div>
+                    <div className="flex-1">{renderInstructionsWithTools(task.text, editingTaskId !== task.id)}</div>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="ghost"
@@ -412,6 +412,7 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                         size="sm"
                         className="text-red-500"
                         onClick={() => handleDeleteTask(task.id)}
+                        disabled={editingTaskId === task.id}
                       >
                         <X size={16} />
                       </Button>
