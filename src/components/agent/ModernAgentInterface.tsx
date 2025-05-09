@@ -65,7 +65,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, onC
       </div>
       <div className="flex-1">
         <h3 className="font-semibold text-lg mb-1 bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">{title}</h3>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">{description}</p>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400 hidden md:block">{description}</p>
       </div>
       <ArrowRight
         size={20}
@@ -735,6 +735,14 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedKnowledge, setSelectedKnowledge] = useState<number | null>(null);
   const [showNewServicePopup, setShowNewServicePopup] = useState(false);
+  const [showToolsPopup, setShowToolsPopup] = useState(false);
+  const [activeCheckboxes, setActiveCheckboxes] = useState<string[]>([]);
+
+  const handleCheckboxChange = (id: string) => {
+    setActiveCheckboxes(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
 
   const services = [
     {
@@ -826,14 +834,29 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
                       Potencia tu productividad con integración de servicios
                     </p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                    onClick={onClose}
-                  >
-                    <X size={20} />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2"
+                      onClick={() => setShowToolsPopup(true)}
+                    >
+                      <Wrench size={20} />
+                      {activeCheckboxes.length > 0 && (
+                        <span className="bg-[#F48120] text-white rounded-full px-2 py-0.5 text-xs">
+                          {activeCheckboxes.length}
+                        </span>
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                      onClick={onClose}
+                    >
+                      <X size={20} />
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Services Section */}
@@ -852,13 +875,20 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
                   </div>
                   <div className="grid gap-3">
                     {services.map((service) => (
-                      <ServiceCard
-                        key={service.id}
-                        icon={service.icon}
-                        title={service.title}
-                        description={service.description}
-                        onClick={() => setSelectedService(service.id)}
-                      />
+                      <div key={service.id} className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={activeCheckboxes.includes(service.id)}
+                          onChange={() => handleCheckboxChange(service.id)}
+                          className="h-5 w-5 rounded border-neutral-300 text-[#F48120] focus:ring-[#F48120]/50"
+                        />
+                        <ServiceCard
+                          icon={service.icon}
+                          title={service.title}
+                          description={service.description}
+                          onClick={() => setSelectedService(service.id)}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -944,6 +974,84 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
           isOpen={conectarGmail}
           onClose={() => setConectarGmail(false)}
         />
+      )}
+
+      {showToolsPopup && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowToolsPopup(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="w-full max-w-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Card className="bg-white dark:bg-neutral-900 p-6 relative overflow-hidden border border-neutral-200 dark:border-neutral-800">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-4 top-4 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                onClick={() => setShowToolsPopup(false)}
+              >
+                <X size={20} />
+              </Button>
+
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-4 bg-gradient-to-br from-[#F48120]/20 to-purple-500/20 dark:from-[#F48120]/10 dark:to-purple-500/10 rounded-xl text-[#F48120]">
+                  <Wrench size={24} weight="duotone" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent mb-1">
+                    Herramientas Seleccionadas
+                  </h3>
+                  <p className="text-neutral-600 dark:text-neutral-400">
+                    {activeCheckboxes.length} herramientas activas
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {activeCheckboxes.map((id) => {
+                  const service = services.find(s => s.id === id);
+                  if (!service) return null;
+                  return (
+                    <div key={id} className="flex items-center justify-between p-4 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:border-[#F48120] dark:hover:border-[#F48120] transition-all duration-300">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-br from-[#F48120]/20 to-purple-500/20 dark:from-[#F48120]/10 dark:to-purple-500/10 rounded-lg text-[#F48120]">
+                          {service.icon}
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-neutral-900 dark:text-neutral-100">{service.title}</h4>
+                          <p className="text-sm text-neutral-500">{service.description}</p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-neutral-500 hover:text-[#F48120] hover:bg-[#F48120]/10"
+                        onClick={() => handleCheckboxChange(id)}
+                      >
+                        <X size={20} />
+                      </Button>
+                    </div>
+                  );
+                })}
+
+                {activeCheckboxes.length === 0 && (
+                  <div className="text-center py-8 text-neutral-500">
+                    <p>No hay herramientas seleccionadas</p>
+                    <p className="text-sm mt-2">Selecciona las herramientas que deseas utilizar</p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </motion.div>
+        </motion.div>
       )}
 
     </AnimatePresence>

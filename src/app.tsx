@@ -31,7 +31,8 @@ import {
   X,
   Question,
   CaretLeft,
-  CaretRight
+  CaretRight,
+  Wrench
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -531,7 +532,7 @@ function ChatComponent() {
                   className="rounded-full h-9 w-9"
                   onClick={() => setShowAgentInterface(true)}
                 >
-                  <Brain size={20} weight="duotone" className="text-[#F48120]" />
+                  <Wrench size={20} weight="duotone" className="text-[#F48120]" />
                 </Button>
 
 
