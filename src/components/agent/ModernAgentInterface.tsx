@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/card/Card';
 import { Button } from '@/components/button/Button';
 import { X, Files, Calendar, EnvelopeSimple, Plus, ArrowRight, Brain, Lightbulb, Code, ChartLine, CaretRight, Palette, ChartBar, Rocket, Globe, Camera, Robot, MusicNotes, ShieldCheck, MagnifyingGlass } from '@phosphor-icons/react';
+import { RecentFilesDashboard } from '@/components/dashboard/RecentFilesDashboard';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ModernAgentInterfaceProps {
@@ -149,19 +150,19 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
           buttonGradient: 'from-blue-500 to-purple-600',
           description: 'Explora el futuro de la inteligencia artificial',
           recursos: [
-            { 
+            {
               title: 'Fundamentos de IA',
               description: 'Conceptos básicos y teoría fundamental',
               link: '#',
               icon: <Brain size={20} />
             },
-            { 
+            {
               title: 'Modelos Avanzados',
               description: 'Arquitecturas y frameworks modernos',
               link: '#',
               icon: <Robot size={20} />
             },
-            { 
+            {
               title: 'Ética en IA',
               description: 'Principios y mejores prácticas',
               link: '#',
@@ -169,19 +170,19 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
             }
           ],
           herramientas: [
-            { 
+            {
               title: 'Asistente de IA',
               description: 'Tu compañero inteligente',
               status: 'disponible',
               icon: <Brain size={20} />
             },
-            { 
+            {
               title: 'Procesamiento NLP',
               description: 'Análisis de lenguaje natural',
               status: 'beta',
               icon: <Robot size={20} />
             },
-            { 
+            {
               title: 'Visión por Computadora',
               description: 'Análisis de imágenes',
               status: 'próximamente',
@@ -197,19 +198,19 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
           buttonGradient: 'from-emerald-500 to-teal-600',
           description: 'Potencia tu desarrollo con herramientas avanzadas',
           recursos: [
-            { 
+            {
               title: 'Arquitectura Software',
               description: 'Patrones y mejores prácticas',
               link: '#',
               icon: <Code size={20} />
             },
-            { 
+            {
               title: 'DevOps & Cloud',
               description: 'Infraestructura y despliegue',
               link: '#',
               icon: <Globe size={20} />
             },
-            { 
+            {
               title: 'Seguridad',
               description: 'Protección y vulnerabilidades',
               link: '#',
@@ -217,19 +218,19 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
             }
           ],
           herramientas: [
-            { 
+            {
               title: 'IDE Inteligente',
               description: 'Desarrollo asistido por IA',
               status: 'disponible',
               icon: <Code size={20} />
             },
-            { 
+            {
               title: 'Testing Automático',
               description: 'Pruebas y calidad de código',
               status: 'beta',
               icon: <Robot size={20} />
             },
-            { 
+            {
               title: 'Optimizador',
               description: 'Mejora de rendimiento',
               status: 'próximamente',
@@ -245,19 +246,19 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
           buttonGradient: 'from-pink-500 to-rose-600',
           description: 'Libera tu potencial creativo',
           recursos: [
-            { 
+            {
               title: 'Diseño UI/UX',
               description: 'Interfaces y experiencias',
               link: '#',
               icon: <Palette size={20} />
             },
-            { 
+            {
               title: 'Multimedia',
               description: 'Audio y video digital',
               link: '#',
               icon: <Camera size={20} />
             },
-            { 
+            {
               title: 'Arte Digital',
               description: 'Ilustración y animación',
               link: '#',
@@ -265,19 +266,19 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
             }
           ],
           herramientas: [
-            { 
+            {
               title: 'Editor Creativo',
               description: 'Suite de diseño integral',
               status: 'disponible',
               icon: <Palette size={20} />
             },
-            { 
+            {
               title: 'Generador de Arte',
               description: 'Creación asistida por IA',
               status: 'beta',
               icon: <Camera size={20} />
             },
-            { 
+            {
               title: 'Estudio Musical',
               description: 'Producción de audio',
               status: 'próximamente',
@@ -293,19 +294,19 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
           buttonGradient: 'from-amber-500 to-orange-600',
           description: 'Descubre insights poderosos en tus datos',
           recursos: [
-            { 
+            {
               title: 'Análisis Predictivo',
               description: 'Modelos y pronósticos',
               link: '#',
               icon: <ChartLine size={20} />
             },
-            { 
+            {
               title: 'Visualización',
               description: 'Gráficos y dashboards',
               link: '#',
               icon: <ChartBar size={20} />
             },
-            { 
+            {
               title: 'Big Data',
               description: 'Procesamiento a escala',
               link: '#',
@@ -313,19 +314,19 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
             }
           ],
           herramientas: [
-            { 
+            {
               title: 'Analytics Suite',
               description: 'Análisis empresarial',
               status: 'disponible',
               icon: <ChartLine size={20} />
             },
-            { 
+            {
               title: 'Data Mining',
               description: 'Exploración de datos',
               status: 'beta',
               icon: <ChartBar size={20} />
             },
-            { 
+            {
               title: 'Predictor IA',
               description: 'Modelos predictivos',
               status: 'próximamente',
@@ -433,11 +434,10 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
                             <h4 className={`font-semibold group-hover:${themeStyles.iconColor} transition-colors`}>{herramienta.title}</h4>
                             <p className="text-sm text-neutral-600 dark:text-neutral-400">{herramienta.description}</p>
                           </div>
-                          <span className={`text-xs px-3 py-1 rounded-full ${
-                            herramienta.status === 'disponible' ? `bg-gradient-to-r ${themeStyles.gradient} text-white` :
-                            herramienta.status === 'beta' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
-                            'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
-                          }`}>
+                          <span className={`text-xs px-3 py-1 rounded-full ${herramienta.status === 'disponible' ? `bg-gradient-to-r ${themeStyles.gradient} text-white` :
+                              herramienta.status === 'beta' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                                'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
+                            }`}>
                             {herramienta.status}
                           </span>
                         </div>
@@ -461,7 +461,7 @@ const NewServicePopup: React.FC<NewServicePopupProps> = ({ onClose, onSave }) =>
     title: '',
     description: '',
     features: [''],
-    actions: [{ label: '', action: () => {} }]
+    actions: [{ label: '', action: () => { } }]
   });
 
   const handleSave = () => {
@@ -483,7 +483,7 @@ const NewServicePopup: React.FC<NewServicePopupProps> = ({ onClose, onSave }) =>
   const addAction = () => {
     setFormData(prev => ({
       ...prev,
-      actions: [...prev.actions, { label: '', action: () => {} }]
+      actions: [...prev.actions, { label: '', action: () => { } }]
     }));
   };
 
@@ -656,6 +656,7 @@ const NewServicePopup: React.FC<NewServicePopupProps> = ({ onClose, onSave }) =>
 };
 
 export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfaceProps) {
+  const [showRecentFiles, setShowRecentFiles] = useState(false);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedKnowledge, setSelectedKnowledge] = useState<number | null>(null);
   const [showNewServicePopup, setShowNewServicePopup] = useState(false);
@@ -674,7 +675,7 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
       ],
       actions: [
         { label: 'Conectar Drive', action: () => console.log('Conectar Drive') },
-        { label: 'Ver archivos recientes', action: () => console.log('Ver archivos') }
+        { label: 'Ver archivos recientes', action: () => setShowRecentFiles(true) }
       ]
     },
     {
@@ -832,6 +833,11 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
           )}
         </motion.div>
       )}
+      <RecentFilesDashboard
+        isOpen={showRecentFiles}
+        onClose={() => setShowRecentFiles(false)}
+      />
     </AnimatePresence>
   );
+
 }
