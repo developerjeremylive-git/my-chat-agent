@@ -7,6 +7,8 @@ import { CalendarEventDashboard } from '@/components/calendar/CalendarEventDashb
 import { GmailDashboard } from '@/components/email/GmailDashboard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DriveDashboard } from '../drive/DriveDashboard';
+import { CalendarSyncDashboard } from '../calendar/CalendarSyncDashboard';
+import { ConectarGmail } from '@/components/email/ConectarGmail';
 
 interface ModernAgentInterfaceProps {
   isOpen: boolean;
@@ -659,6 +661,8 @@ const NewServicePopup: React.FC<NewServicePopupProps> = ({ onClose, onSave }) =>
 };
 
 export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfaceProps) {
+  const [conectarGmail, setConectarGmail] = useState(false);
+  const [showCalendarSyncDashboard, setShowCalendarSyncDashboard] = useState(false);
   const [showDriveDashboard, setShowDriveDashboard] = useState(false);
   const [showCalendarDashboard, setShowCalendarDashboard] = useState(false);
   const [showGmailDashboard, setShowGmailDashboard] = useState(false);
@@ -696,7 +700,7 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
         'Análisis de disponibilidad'
       ],
       actions: [
-        { label: 'Sincronizar calendario', action: () => console.log('Sincronizar') },
+        { label: 'Sincronizar calendario', action: () => setShowCalendarSyncDashboard(true) },
         { label: 'Crear evento', action: () => setShowCalendarDashboard(true) }
       ]
     },
@@ -712,7 +716,7 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
         'Priorización de mensajes'
       ],
       actions: [
-        { label: 'Conectar Gmail', action: () => console.log('Conectar Gmail') },
+        { label: 'Conectar Gmail', action: () => setConectarGmail(true) },
         { label: 'Ver bandeja de entrada', action: () => setShowGmailDashboard(true) }
       ]
     }
@@ -861,6 +865,19 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
         <DriveDashboard
           isOpen={showDriveDashboard}
           onClose={() => setShowDriveDashboard(false)}
+        />
+      )}
+      {showCalendarSyncDashboard && (
+        <CalendarSyncDashboard
+          isOpen={showCalendarSyncDashboard}
+          onClose={() => setShowCalendarSyncDashboard(false)}
+        />
+      )}
+
+      {conectarGmail && (
+        <ConectarGmail
+          isOpen={conectarGmail}
+          onClose={() => setConectarGmail(false)}
         />
       )}
 
