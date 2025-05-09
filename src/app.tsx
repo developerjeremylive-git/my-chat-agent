@@ -541,7 +541,7 @@ function ChatComponent() {
                     className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
                     onClick={() => setShowOIAICreator(true)}
                   >
-                    <Brain size={20} weight="duotone" />
+                    <Robot size={20} weight="duotone" />
                   </Button>
                 </Tooltip>
                 {/* nuevo boton con icono de agente */}
@@ -563,7 +563,7 @@ function ChatComponent() {
                     className="rounded-full h-9 w-9"
                     onClick={() => setShowToolsInterface(true)}
                   >
-                    <Robot size={20} weight="duotone" className="text-[#F48120]" />
+                    <Wrench size={20} weight="duotone" className="text-[#F48120]" />
                   </Button>
                 </div>
 
