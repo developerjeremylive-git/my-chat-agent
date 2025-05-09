@@ -96,6 +96,18 @@ function ChatComponent() {
     localStorage.setItem('textSize', textSize);
   }, [textSize]);
 
+  useEffect(() => {
+    const handleOpenModernAgentInterface = () => {
+      setShowAgentInterface(true);
+    };
+
+    window.addEventListener('openModernAgentInterface', handleOpenModernAgentInterface);
+
+    return () => {
+      window.removeEventListener('openModernAgentInterface', handleOpenModernAgentInterface);
+    };
+  }, []);
+
   // Scroll to bottom on mount
   useEffect(() => {
     scrollToBottom();
@@ -507,7 +519,7 @@ function ChatComponent() {
 
           {/* Messages */}
           {/* Action Buttons Frame */}
-          <div className={`pl-4 pr-10 rounded-full mb-0 py-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm mt-9 md:mt-8.6 transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''}`}>
+          <div className={`pl-4 pr-10 rounded-full mb-0 py-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm mt-9 md:mt-8.6 transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''} ml-2 mr-2`}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Tooltip content="Guía">
@@ -535,7 +547,7 @@ function ChatComponent() {
                 {/* nuevo boton con icono de agente */}
 
                 <div className="flex gap-2">
-                  <Button
+                  {/* <Button
                     variant="ghost"
                     size="md"
                     shape="square"
@@ -543,7 +555,7 @@ function ChatComponent() {
                     onClick={() => setShowAgentInterface(true)}
                   >
                     <Wrench size={20} weight="duotone" className="text-[#F48120]" />
-                  </Button>
+                  </Button> */}
                   <Button
                     variant="ghost"
                     size="md"

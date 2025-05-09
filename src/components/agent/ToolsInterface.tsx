@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/card/Card';
 import { Button } from '@/components/button/Button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ComputerTower, Image as ImageIcon, Globe, Code } from '@phosphor-icons/react';
+import { X, ComputerTower, Image as ImageIcon, Globe, Code, Robot } from '@phosphor-icons/react';
 
 interface ToolsInterfaceProps {
   isOpen: boolean;
@@ -18,6 +18,13 @@ interface Tool {
 }
 
 const tools: Tool[] = [
+  {
+    id: 'ai_assistant',
+    name: 'Asistente IA',
+    description: 'Tu compañero inteligente para resolver dudas y automatizar tareas',
+    icon: <Robot size={24} />,
+    status: 'available'
+  },
   {
     id: 'canvas',
     name: 'Lienzo Colaborativo',
@@ -76,7 +83,7 @@ export const ToolsInterface: React.FC<ToolsInterfaceProps> = ({ isOpen, onClose 
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed bottom-29 left-4 z-50 w-80 overflow-hidden"
+          className="fixed bottom-29 left-4 z-50 w-80 overflow-hidden left-2"
         >
           <Card ref={menuRef} className="bg-white dark:bg-neutral-900 overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-lg rounded-xl">
               <div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
@@ -103,7 +110,15 @@ export const ToolsInterface: React.FC<ToolsInterfaceProps> = ({ isOpen, onClose 
                     className={`group flex items-center gap-3 p-3 rounded-lg
                       ${tool.status === 'available' ? 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800' : 'opacity-70'}
                       transition-all duration-200`}
-                    onClick={() => tool.status === 'available' && setSelectedTool(tool)}
+                    onClick={() => {
+                      if (tool.status === 'available') {
+                        setSelectedTool(tool);
+                        if (tool.id === 'ai_assistant') {
+                          onClose();
+                          window.dispatchEvent(new CustomEvent('openModernAgentInterface'));
+                        }
+                      }
+                    }}
                   >
                     <div className={`p-2 rounded-lg ${tool.status === 'available' ? 'bg-[#F48120]/10 text-[#F48120]' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500'}`}>
                       {tool.icon}
