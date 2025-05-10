@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/card/Card';
 import { Button } from '@/components/button/Button';
-import { X, Files, Calendar, EnvelopeSimple, PencilSimple } from '@phosphor-icons/react';
+import { X, Files, Calendar, EnvelopeSimple, PencilSimple, ArrowRight } from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 interface Tool {
@@ -425,7 +425,7 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
               )}
 
               {/* Lista de Tareas */}
-              <div className="space-y-2" ref={editTaskRef}>
+              <div className="space-y-2 max-h-[300px] overflow-y-auto overflow-x-hidden" ref={editTaskRef}>
                 <AnimatePresence>
                   {tasks.map((task, index) => (
                     <motion.div
@@ -434,7 +434,7 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                      className={`flex items-center gap-2 p-2 rounded-lg group transform transition-all duration-300 ${editingTaskId === task.id ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 border-2 border-[#F48120] scale-102' : 'hover:bg-gradient-to-r hover:from-neutral-100/50 hover:to-neutral-100 dark:hover:from-neutral-800/50 dark:hover:to-neutral-800 hover:scale-[1.02]'}`}
+                      className={`flex items-center gap-2 p-2 rounded-lg group transform transition-all duration-300 ${editingTaskId === task.id ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 border-2 border-[#F48120]' : 'hover:bg-gradient-to-r hover:from-neutral-100/50 hover:to-neutral-100 dark:hover:from-neutral-800/50 dark:hover:to-neutral-800 hover:border-[#F48120] hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50'}`}
                     >
                       <motion.span 
                         className="text-[#F48120] font-medium"
@@ -457,7 +457,11 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                           className="text-[#F48120] hover:bg-[#F48120]/10 transition-colors duration-300"
                           onClick={() => handleEditTask(task.id)}
                         >
-                          <PencilSimple size={16} className="transform transition-transform duration-300 hover:rotate-12" />
+                          {editingTaskId === task.id ? (
+                            <ArrowRight size={16} className="transform transition-transform duration-300 hover:translate-x-1" />
+                          ) : (
+                            <PencilSimple size={16} className="transform transition-transform duration-300 hover:rotate-12" />
+                          )}
                         </Button>
                         <Button
                           variant="ghost"
