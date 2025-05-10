@@ -3,6 +3,7 @@ import { Card } from '@/components/card/Card';
 import { Button } from '@/components/button/Button';
 import { X, Files, Calendar, EnvelopeSimple, PencilSimple, ArrowRight } from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'framer-motion';
+import './ModernAgentTool.css';
 
 interface Tool {
   id: string;
@@ -58,8 +59,21 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
         return (
           <div
             key={index}
-            className={`inline-flex items-center gap-1 px-2 py-1 rounded bg-neutral-100 dark:bg-neutral-800 text-sm ${!isPreview ? 'cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors' : ''}`}
+            className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm relative group/tool
+              ${!isPreview ? 'cursor-pointer' : ''}
+              ${(!isPreview && editingTaskId) ? 'animate-pulse hover:animate-none' : ''}
+              ${(editingTaskId && !isPreview) ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/20 dark:to-purple-500/20' : 'bg-neutral-100 dark:bg-neutral-800'}
+              transition-all duration-300`}
             onClick={() => (!isPreview && setSelectedToolIndex(index))}
+            style={{
+              backgroundSize: '200% 100%',
+              animation: (editingTaskId && !isPreview) ? 'gradient 2s linear infinite, pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' : 'none',
+              border: (editingTaskId && !isPreview) ? '2px solid transparent' : 'none',
+              backgroundImage: (editingTaskId && !isPreview) ? 'linear-gradient(90deg, #F48120, #A855F7, #F48120)' : 'none',
+              WebkitBackgroundClip: (editingTaskId && !isPreview) ? 'padding-box, border-box' : 'padding-box',
+              backgroundOrigin: (editingTaskId && !isPreview) ? 'border-box' : 'padding-box',
+              backgroundClip: (editingTaskId && !isPreview) ? 'padding-box, border-box' : 'padding-box'
+            }}
           >
             {tool.icon}
             <span>{tool.name}</span>
@@ -69,7 +83,15 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                className="absolute z-50 mt-2 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 py-2 min-w-[200px] overflow-hidden"
+                style={{
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  maxHeight: '80vh',
+                  // width: '90%',
+                  // maxWidth: '500px'
+                }}
+                className="fixed z-50 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 py-2 min-w-[200px] max-h-[300px] overflow-y-auto"
               >
                 {availableTools.map((t, idx) => (
                   <motion.div
@@ -304,8 +326,8 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
   }, []);
 
   return (
-    <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'} transition-all duration-300`}>
-      <Card className="w-full max-w-2xl bg-white dark:bg-neutral-900 p-6 m-4 relative overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-xl">
+    <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center h-screen ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'} transition-all duration-300`}>
+      <Card className="w-full max-w-2xl h-[78vh] bg-white dark:bg-neutral-900 p-6 m-4 relative overflow-y-auto border border-neutral-200 dark:border-neutral-800 shadow-xl">
         <Button
           variant="ghost"
           size="sm"
@@ -425,7 +447,7 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
               )}
 
               {/* Lista de Tareas */}
-              <div className="space-y-2 max-h-[300px] overflow-y-auto overflow-x-hidden" ref={editTaskRef}>
+              <div className="space-y-2 max-h-[400px] h-[29vh] overflow-y-auto overflow-x-hidden" ref={editTaskRef}>
                 <AnimatePresence>
                   {tasks.map((task, index) => (
                     <motion.div
@@ -434,6 +456,14 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                style={{
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  maxHeight: '80vh',
+                  // width: '90%',
+                  // maxWidth: '500px'
+                }}
                       className={`flex items-center gap-2 p-2 rounded-lg group transform transition-all duration-300 ${editingTaskId === task.id ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 border-2 border-[#F48120]' : 'hover:bg-gradient-to-r hover:from-neutral-100/50 hover:to-neutral-100 dark:hover:from-neutral-800/50 dark:hover:to-neutral-800 hover:border-[#F48120] hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50'}`}
                     >
                       <motion.span 
