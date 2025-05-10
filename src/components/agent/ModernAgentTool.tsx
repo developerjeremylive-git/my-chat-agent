@@ -51,7 +51,7 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const editTaskRef = useRef<HTMLDivElement>(null);
 
-  const renderInstructionsWithTools = (text: string, isPreview: boolean = false) => {
+  const renderInstructionsWithTools = (text: string, isPreview: boolean = false, taskId: string | null = null) => {
     const parts = text.split(/\[(.*?)\]/);
     return parts.map((part, index) => {
       const tool = availableTools.find(t => t.name === part);
@@ -61,18 +61,19 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
             key={index}
             className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm relative group/tool
               ${!isPreview ? 'cursor-pointer' : ''}
-              ${(!isPreview && editingTaskId) ? 'animate-pulse hover:animate-none' : ''}
+              ${(!isPreview && editingTaskId && selectedToolIndex === null) ? 'animate-pulse hover:animate-none' : ''}
               ${(editingTaskId && !isPreview) ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/20 dark:to-purple-500/20' : 'bg-neutral-100 dark:bg-neutral-800'}
+              ${editingTaskId && taskId !== editingTaskId ? 'opacity-0' : ''}
               transition-all duration-300`}
             onClick={() => (!isPreview && setSelectedToolIndex(index))}
             style={{
               backgroundSize: '200% 100%',
-              animation: (editingTaskId && !isPreview) ? 'gradient 2s linear infinite, pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' : 'none',
+              animation: (editingTaskId && !isPreview && selectedToolIndex === null) ? 'gradient 2s linear infinite, pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' : 'none',
               border: (editingTaskId && !isPreview) ? '2px solid transparent' : 'none',
               backgroundImage: (editingTaskId && !isPreview) ? 'linear-gradient(90deg, #F48120, #A855F7, #F48120)' : 'none',
               WebkitBackgroundClip: (editingTaskId && !isPreview) ? 'padding-box, border-box' : 'padding-box',
               backgroundOrigin: (editingTaskId && !isPreview) ? 'border-box' : 'padding-box',
-              backgroundClip: (editingTaskId && !isPreview) ? 'padding-box, border-box' : 'padding-box'
+              backgroundClip: (editingTaskId && !isPreview) ? 'padding-box, border-box' : 'padding-box',
             }}
           >
             {tool.icon}
@@ -129,9 +130,9 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
           </div>
         );
       }
-      return <span key={index}>{part}</span>;
+      return <span key={index} className={`${editingTaskId && taskId !== editingTaskId ? 'opacity-0' : ''}`}>{part}</span>;
     });
-  
+
   };
 
   const handleTitleClick = () => {
@@ -167,7 +168,7 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
   const handleInstructionsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     setInstructions(text);
-    
+
     const cursorPosition = e.target.selectionStart;
     const textBeforeCursor = text.slice(0, cursorPosition);
     const match = textBeforeCursor.match(/@([^\s]*)$/);
@@ -340,13 +341,13 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
         <div className="space-y-6">
           {/* Encabezado */}
           <div>
-            <h2 
+            <h2
               className="text-2xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent cursor-pointer"
               onClick={handleTitleClick}
             >
               {title}
             </h2>
-            <p 
+            <p
               className="text-neutral-600 dark:text-neutral-400 mt-1 cursor-pointer"
               onClick={handleDescriptionClick}
             >
@@ -380,12 +381,12 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                 {/* <div className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800 min-h-[50px] relative">
                   {renderInstructionsWithTools(instructions)}
                 </div> */}
-                <motion.div 
+                <motion.div
                   className="flex justify-end space-x-2"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                >   
+                >
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <Button
                       variant="ghost"
@@ -423,7 +424,7 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                   </motion.div>
                 </motion.div>
               </div>
-              
+
               {showToolMenu && (
                 <div
                   ref={menuRef}
@@ -456,17 +457,17 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                style={{
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  maxHeight: '80vh',
-                  // width: '90%',
-                  // maxWidth: '500px'
-                }}
-                      className={`flex items-center gap-2 p-2 rounded-lg group transform transition-all duration-300 ${editingTaskId === task.id ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 border-2 border-[#F48120]' : 'hover:bg-gradient-to-r hover:from-neutral-100/50 hover:to-neutral-100 dark:hover:from-neutral-800/50 dark:hover:to-neutral-800 hover:border-[#F48120] hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50'}`}
+                      style={{
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        maxHeight: '80vh',
+                        // width: '90%',
+                        // maxWidth: '500px'
+                      }}
+                      className={`flex items-center gap-2 p-2 rounded-lg group transform transition-all duration-300 ${editingTaskId === task.id ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 border-2 border-[#F48120]' : 'hover:bg-gradient-to-r hover:from-neutral-100/50 hover:to-neutral-100 dark:hover:from-neutral-800/50 dark:hover:to-neutral-800 hover:border-[#F48120] hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50'} ${editingTaskId && editingTaskId !== task.id ? 'opacity-30' : ''}`}
                     >
-                      <motion.span 
+                      <motion.span
                         className="text-[#F48120] font-medium"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -474,8 +475,8 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                       >
                         {index + 1}.
                       </motion.span>
-                      <div className="flex-1">{renderInstructionsWithTools(task.text, editingTaskId !== task.id)}</div>
-                      <motion.div 
+                      <div className="flex-1">{renderInstructionsWithTools(task.text, editingTaskId !== task.id, task.id)}</div>
+                      <motion.div
                         className="flex items-center gap-2 transition-all duration-300"
                         initial={{ x: 20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
