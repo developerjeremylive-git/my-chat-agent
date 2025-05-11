@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/card/Card';
 import { Button } from '@/components/button/Button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ComputerTower, Image as ImageIcon, Globe, Code, Robot, Rocket, PlugsConnected } from '@phosphor-icons/react';
+import { X, ComputerTower, Image as ImageIcon, Globe, Code, Robot, Rocket, PlugsConnected, Wrench } from '@phosphor-icons/react';
 
 interface ToolsInterfaceProps {
     isOpen: boolean;
@@ -103,9 +103,23 @@ export const ToolsInterface: React.FC<ToolsInterfaceProps> = ({ isOpen, onClose 
                     <Card ref={menuRef} className="bg-white dark:bg-neutral-900 overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-lg rounded-xl">
                         <div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                                    Herramientas
-                                </h2>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2"
+                                    >
+                                        <Wrench size={20} />
+                                        {tools.filter(t => t.selected).length > 0 && (
+                                            <span className="bg-[#F48120] text-white rounded-full px-2 py-0.5 text-xs">
+                                                {tools.filter(t => t.selected).length}
+                                            </span>
+                                        )}
+                                    </Button>
+                                    <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
+                                        Herramientas
+                                    </h2>
+                                </div>
                                 <Button
                                     variant="ghost"
                                     size="sm"
