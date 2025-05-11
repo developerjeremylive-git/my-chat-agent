@@ -43,14 +43,14 @@ const initialTools: Tool[] = [
         status: 'available',
         selected: false
     },
-    {
-        id: 'canvas',
-        name: 'Lienzo Colaborativo',
-        description: 'Edita documentos en tiempo real',
-        icon: <ComputerTower size={24} />,
-        status: 'coming_soon',
-        selected: false
-    },
+    // {
+    //     id: 'canvas',
+    //     name: 'Lienzo Colaborativo',
+    //     description: 'Edita documentos en tiempo real',
+    //     icon: <ComputerTower size={24} />,
+    //     status: 'coming_soon',
+    //     selected: false
+    // },
     {
         id: 'image_generation',
         name: 'Generación de Imágenes',
@@ -59,14 +59,14 @@ const initialTools: Tool[] = [
         status: 'coming_soon',
         selected: false
     },
-    {
-        id: 'code_interpreter',
-        name: 'Intérprete de Código',
-        description: 'Analiza código con IA',
-        icon: <Code size={24} />,
-        status: 'coming_soon',
-        selected: false
-    }
+    // {
+    //     id: 'code_interpreter',
+    //     name: 'Intérprete de Código',
+    //     description: 'Analiza código con IA',
+    //     icon: <Code size={24} />,
+    //     status: 'coming_soon',
+    //     selected: false
+    // }
 ];
 
 export const ToolsInterface: React.FC<ToolsInterfaceProps> = ({ isOpen, onClose }) => {
