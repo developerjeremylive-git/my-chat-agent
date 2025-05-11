@@ -2,6 +2,7 @@ import { Button } from "@/components/button/Button";
 import { Card } from "@/components/card/Card";
 import useClickOutside from "@/hooks/useClickOutside";
 import { X, ArrowsOut, PaperPlaneRight, ArrowsIn } from "@phosphor-icons/react";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ export const Modal = ({
   onClose,
 }: ModalProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user, setIsLoginOpen } = useAuth();
   const modalRef = clickOutsideToClose
     ? useClickOutside(onClose)
     : useRef<HTMLDivElement>(null);
@@ -146,9 +148,16 @@ export const Modal = ({
                 aria-label="Enviar texto"
                 shape="square"
                 className="bg-white/95 dark:bg-gray-800/95 border-2 border-[#F48120]/20 dark:border-[#F48120]/10 text-[#F48120] hover:text-white hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20"
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => {
+                  if (!user) {
+                    setIsLoginOpen(true);
+                    return;
+                  }
+                  setIsModalOpen(true);
+                }}
                 variant="ghost"
                 size="sm"
+                disabled={!user}
               >
                 <PaperPlaneRight size={20} weight="bold" />
               </Button>

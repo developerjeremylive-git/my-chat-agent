@@ -16,6 +16,7 @@ import { Toggle } from "@/components/toggle/Toggle";
 import { Tooltip } from "@/components/tooltip/Tooltip";
 import { AISettingsPanel } from "@/components/settings/AISettingsPanel";
 import { Sidebar } from "@/components/sidebar/Sidebar";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Icon imports
 import {
@@ -77,7 +78,8 @@ function ChatComponent() {
     return (savedSize as 'normal' | 'large' | 'small') || 'normal';
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
+  const { user, setIsLoginOpen } = useAuth();
+  
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
@@ -654,6 +656,10 @@ function ChatComponent() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
+                      if (!user) {
+                        setIsLoginOpen(true);
+                        return;
+                      }
                       handleAgentSubmit(e as unknown as React.FormEvent);
                     }
                   }}
@@ -667,6 +673,13 @@ function ChatComponent() {
                   shape="square"
                   className="rounded-full h-10 w-10 flex-shrink-0 mr-2"
                   disabled={pendingToolCallConfirmation || !agentInput.trim()}
+                  onClick={(e) => {
+                    if (!user) {
+                      e.preventDefault();
+                      setIsLoginOpen(true);
+                      return;
+                    }
+                  }}
                 >
                   <PaperPlaneRight size={16} />
                 </Button>
