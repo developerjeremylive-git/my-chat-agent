@@ -4,39 +4,26 @@
   "compatibility_date": "2025-02-04",
   "compatibility_flags": [
     "nodejs_compat",
-    "nodejs_compat_populate_process_env"
+    "nodejs_compat_populate_process_env",
   ],
   "assets": {
-    "directory": "public"
+    "directory": "public",
   },
   "durable_objects": {
     "bindings": [
       {
         "name": "Chat",
-        "class_name": "Chat"
-      }
-    ]
+        "class_name": "Chat",
+      },
+    ],
   },
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": ["Chat"]
-    }
+      "new_sqlite_classes": ["Chat"],
+    },
   ],
   "ai": {
     "binding": "AI"
-  },
-  "vectorize": [
-    {
-      "binding": "VECTORIZE",
-      "index_name": "vector-index"
-    }
-  ],
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "database",
-      "database_id": "bccc0a52-01a9-44c8-87ed-6cd658842536"
-    }
-  ]
+  }
 }
