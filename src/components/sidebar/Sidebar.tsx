@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Button } from '@/components/button/Button';
 import { Card } from '@/components/card/Card';
 import { cn } from '@/lib/utils';
-import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun, GraduationCap, Pencil, Palette, Leaf, Camera, MusicNotes, ChartBar, Globe, ShieldCheck, Rocket } from '@phosphor-icons/react';
+import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun, GraduationCap, Pencil, Palette, Leaf, Camera, MusicNotes, ChartBar, Globe, ShieldCheck, Rocket, Wrench, Users } from '@phosphor-icons/react';
 import AuthPopup from '../AuthPopup';
 import AuthButton from '../AuthButton';
 import { OIAICreator } from '../modal/OIAICreator';
+import { AgentDashboard } from '../agent/AgentDashboard';
 
 interface PromptTemplate {
   title: string;
@@ -24,6 +25,8 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect }: SidebarProps) {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [isTemplatesExpanded, setIsTemplatesExpanded] = useState(false);
+  const [isAgentsExpanded, setIsAgentsExpanded] = useState(false);
+  const [showAgentDashboard, setShowAgentDashboard] = useState(false);
 
   const promptTemplates = {
     "exploracion-ideas": [
@@ -356,13 +359,52 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
           <nav className="flex-1 p-4 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="space-y-6">
               <div className="space-y-2">
-                <AuthButton 
+                <AuthButton
                   className="w-full bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-purple-500 hover:to-[#F48120] text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
                 />
               </div>
 
               <div className="space-y-3">
-                <div 
+                {/* Sección de Agentes */}
+                <div
+                  onClick={() => setIsAgentsExpanded(!isAgentsExpanded)}
+                  className="flex items-center justify-between p-3 bg-neutral-100/50 dark:bg-neutral-800/50 rounded-xl
+                    hover:bg-neutral-200/70 dark:hover:bg-neutral-700/70
+                    transform hover:scale-[0.99] active:scale-[0.97]
+                    cursor-pointer transition-all duration-200 group"
+                >
+                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Agentes Inteligentes</span>
+                  <div className="p-1 rounded-lg bg-neutral-200/50 dark:bg-neutral-700/50 group-hover:bg-neutral-300/50 dark:group-hover:bg-neutral-600/50 transition-colors">
+                    <List weight="bold" className={cn("w-4 h-4 transition-transform duration-200 text-neutral-600 dark:text-neutral-400 group-hover:text-neutral-800 dark:group-hover:text-white", isAgentsExpanded ? "rotate-180" : "")} />
+                  </div>
+                </div>
+                <div className={cn("space-y-3 transition-all duration-200", isAgentsExpanded ? "opacity-100" : "opacity-0 h-0 overflow-hidden")}>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('openToolsInterface'));
+                      onClose();
+                    }}
+                  >
+                    <Robot weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
+                    Crear Agente Inteligente
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowAgentDashboard(true);
+                    }}
+                  >
+                    <Users weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
+                    Ver Agentes
+                  </Button>
+                </div>
+
+                {/* Sección de Plantillas */}
+                <div
                   onClick={() => setIsTemplatesExpanded(!isTemplatesExpanded)}
                   className="flex items-center justify-between p-3 bg-neutral-100/50 dark:bg-neutral-800/50 rounded-xl
                     hover:bg-neutral-200/70 dark:hover:bg-neutral-700/70
@@ -375,329 +417,329 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                   </div>
                 </div>
                 <div className={cn("space-y-3 transition-all duration-200", isTemplatesExpanded ? "opacity-100" : "opacity-0 h-0 overflow-hidden")}>
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('exploracion-ideas')}
-                  >
-                    <Lightbulb weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
-                    Exploración de ideas
-                  </Button>
-                  {selectedSection === 'exploracion-ideas' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['exploracion-ideas'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('exploracion-ideas')}
+                    >
+                      <Lightbulb weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
+                      Exploración de ideas
+                    </Button>
+                    {selectedSection === 'exploracion-ideas' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['exploracion-ideas'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('orientacion-profesional')}
-                  >
-                    <GraduationCap weight="duotone" className="mr-3 h-5 w-5 text-purple-500" />
-                    Orientación profesional
-                  </Button>
-                  {selectedSection === 'orientacion-profesional' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['orientacion-profesional'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('orientacion-profesional')}
+                    >
+                      <GraduationCap weight="duotone" className="mr-3 h-5 w-5 text-purple-500" />
+                      Orientación profesional
+                    </Button>
+                    {selectedSection === 'orientacion-profesional' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['orientacion-profesional'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('asistente-programacion')}
-                  >
-                    <Code weight="duotone" className="mr-3 h-5 w-5 text-green-500" />
-                    Asistente de programación
-                  </Button>
-                  {selectedSection === 'asistente-programacion' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['asistente-programacion'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('asistente-programacion')}
+                    >
+                      <Code weight="duotone" className="mr-3 h-5 w-5 text-green-500" />
+                      Asistente de programación
+                    </Button>
+                    {selectedSection === 'asistente-programacion' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['asistente-programacion'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('tutor-personal')}
-                  >
-                    <Brain weight="duotone" className="mr-3 h-5 w-5 text-blue-500" />
-                    Tutor personal
-                  </Button>
-                  {selectedSection === 'tutor-personal' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['tutor-personal'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('tutor-personal')}
+                    >
+                      <Brain weight="duotone" className="mr-3 h-5 w-5 text-blue-500" />
+                      Tutor personal
+                    </Button>
+                    {selectedSection === 'tutor-personal' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['tutor-personal'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('revision-escritura')}
-                  >
-                    <Pencil weight="duotone" className="mr-3 h-5 w-5 text-pink-500" />
-                    Revisión de escritura
-                  </Button>
-                  {selectedSection === 'revision-escritura' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['revision-escritura'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('revision-escritura')}
+                    >
+                      <Pencil weight="duotone" className="mr-3 h-5 w-5 text-pink-500" />
+                      Revisión de escritura
+                    </Button>
+                    {selectedSection === 'revision-escritura' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['revision-escritura'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('arte-diseno')}
-                  >
-                    <Palette weight="duotone" className="mr-3 h-5 w-5 text-yellow-500" />
-                    Arte y Diseño
-                  </Button>
-                  {selectedSection === 'arte-diseno' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['arte-diseno'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('arte-diseno')}
+                    >
+                      <Palette weight="duotone" className="mr-3 h-5 w-5 text-yellow-500" />
+                      Arte y Diseño
+                    </Button>
+                    {selectedSection === 'arte-diseno' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['arte-diseno'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('sostenibilidad-ambiental')}
-                  >
-                    <Leaf weight="duotone" className="mr-3 h-5 w-5 text-green-400" />
-                    Sostenibilidad Ambiental
-                  </Button>
-                  {selectedSection === 'sostenibilidad-ambiental' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['sostenibilidad-ambiental'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('sostenibilidad-ambiental')}
+                    >
+                      <Leaf weight="duotone" className="mr-3 h-5 w-5 text-green-400" />
+                      Sostenibilidad Ambiental
+                    </Button>
+                    {selectedSection === 'sostenibilidad-ambiental' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['sostenibilidad-ambiental'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('musica-audio')}
-                  >
-                    <MusicNotes weight="duotone" className="mr-3 h-5 w-5 text-purple-400" />
-                    Música y Audio
-                  </Button>
-                  {selectedSection === 'musica-audio' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['musica-audio'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('musica-audio')}
+                    >
+                      <MusicNotes weight="duotone" className="mr-3 h-5 w-5 text-purple-400" />
+                      Música y Audio
+                    </Button>
+                    {selectedSection === 'musica-audio' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['musica-audio'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('marketing-digital')}
-                  >
-                    <ChartBar weight="duotone" className="mr-3 h-5 w-5 text-blue-500" />
-                    Marketing Digital
-                  </Button>
-                  {selectedSection === 'marketing-digital' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['marketing-digital'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('marketing-digital')}
+                    >
+                      <ChartBar weight="duotone" className="mr-3 h-5 w-5 text-blue-500" />
+                      Marketing Digital
+                    </Button>
+                    {selectedSection === 'marketing-digital' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['marketing-digital'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('trafico-web')}
-                  >
-                    <ChartLine weight="duotone" className="mr-3 h-5 w-5 text-green-500" />
-                    Tráfico Web
-                  </Button>
-                  {selectedSection === 'trafico-web' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['trafico-web'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('trafico-web')}
+                    >
+                      <ChartLine weight="duotone" className="mr-3 h-5 w-5 text-green-500" />
+                      Tráfico Web
+                    </Button>
+                    {selectedSection === 'trafico-web' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['trafico-web'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('blockchain')}
-                  >
-                    <Rocket weight="duotone" className="mr-3 h-5 w-5 text-orange-500" />
-                    Blockchain
-                  </Button>
-                  {selectedSection === 'blockchain' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['blockchain'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('blockchain')}
+                    >
+                      <Rocket weight="duotone" className="mr-3 h-5 w-5 text-orange-500" />
+                      Blockchain
+                    </Button>
+                    {selectedSection === 'blockchain' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['blockchain'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                <div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('ciberseguridad')}
-                  >
-                    <ShieldCheck weight="duotone" className="mr-3 h-5 w-5 text-red-500" />
-                    Ciberseguridad
-                  </Button>
-                  {selectedSection === 'ciberseguridad' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['ciberseguridad'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div>
-                <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={() => handleSectionClick('fotografia-visual')}
-                  >
-                    <Camera weight="duotone" className="mr-3 h-5 w-5 text-indigo-500" />
-                    Fotografía Visual
-                  </Button>
-                  {selectedSection === 'fotografia-visual' && (
-                    <div className="mt-2 space-y-2 pl-8">
-                      {promptTemplates['fotografia-visual'].map((template, index) => (
-                        <Card
-                          key={index}
-                          className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
-                          onClick={() => handlePromptSelect(template.prompt)}
-                        >
-                          <h4 className="font-medium text-sm">{template.title}</h4>
-                          <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('ciberseguridad')}
+                    >
+                      <ShieldCheck weight="duotone" className="mr-3 h-5 w-5 text-red-500" />
+                      Ciberseguridad
+                    </Button>
+                    {selectedSection === 'ciberseguridad' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['ciberseguridad'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                      onClick={() => handleSectionClick('fotografia-visual')}
+                    >
+                      <Camera weight="duotone" className="mr-3 h-5 w-5 text-indigo-500" />
+                      Fotografía Visual
+                    </Button>
+                    {selectedSection === 'fotografia-visual' && (
+                      <div className="mt-2 space-y-2 pl-8">
+                        {promptTemplates['fotografia-visual'].map((template, index) => (
+                          <Card
+                            key={index}
+                            className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
+                            onClick={() => handlePromptSelect(template.prompt)}
+                          >
+                            <h4 className="font-medium text-sm">{template.title}</h4>
+                            <p className="text-xs text-neutral-600 dark:text-neutral-400">{template.description}</p>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -710,8 +752,8 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
               className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
               onClick={onThemeChange}
             >
-              {theme === "dark" ? 
-                <Sun weight="duotone" className="mr-3 h-5 w-5 text-amber-400" /> : 
+              {theme === "dark" ?
+                <Sun weight="duotone" className="mr-3 h-5 w-5 text-amber-400" /> :
                 <Moon weight="duotone" className="mr-3 h-5 w-5 text-blue-400" />
               }
               {theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
@@ -731,8 +773,8 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
         />
       )}
 
-      <AuthPopup/>
-
+      <AuthPopup />
+      <AgentDashboard isOpen={showAgentDashboard} onClose={() => setShowAgentDashboard(false)} />
     </>
   );
 }

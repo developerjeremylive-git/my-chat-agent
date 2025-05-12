@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/card/Card';
 import { Button } from '@/components/button/Button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ComputerTower, Image as ImageIcon, Globe, Code, Robot, Rocket, PlugsConnected, Wrench } from '@phosphor-icons/react';
+import { X, ComputerTower, Image as ImageIcon, Globe, Code, Robot, Rocket, PlugsConnected, Wrench, Users } from '@phosphor-icons/react';
 
 interface ToolsInterfaceProps {
     isOpen: boolean;
@@ -19,20 +19,28 @@ interface Tool {
 }
 
 const initialTools: Tool[] = [
+    // {
+    //     id: 'canvas',
+    //     name: 'Lienzo Colaborativo',
+    //     description: 'Edita documentos en tiempo real',
+    //     icon: <ComputerTower size={24} />,
+    //     status: 'coming_soon',
+    //     selected: false
+    // },
+    // {
+    //     id: 'code_interpreter',
+    //     name: 'Intérprete de Código',
+    //     description: 'Analiza código con IA',
+    //     icon: <Code size={24} />,
+    //     status: 'coming_soon',
+    //     selected: false
+    // }
     {
-        id: 'ai_assistant',
-        name: 'USB',
-        description: 'Conecta con IA',
-        icon: <PlugsConnected size={24} />,
-        status: 'available',
-        selected: false
-    },
-    {
-        id: 'ai_agent',
-        name: 'Agente Inteligente',
-        description: 'Crea flujos de trabajo',
-        icon: <Robot size={24} />,
-        status: 'available',
+        id: 'image_generation',
+        name: 'Generación de Imágenes',
+        description: 'Crea imágenes con IA',
+        icon: <ImageIcon size={24} />,
+        status: 'coming_soon',
         selected: false
     },
     {
@@ -43,28 +51,20 @@ const initialTools: Tool[] = [
         status: 'available',
         selected: false
     },
-    // {
-    //     id: 'canvas',
-    //     name: 'Lienzo Colaborativo',
-    //     description: 'Edita documentos en tiempo real',
-    //     icon: <ComputerTower size={24} />,
-    //     status: 'coming_soon',
-    //     selected: false
-    // },
     {
-        id: 'image_generation',
-        name: 'Generación de Imágenes',
-        description: 'Crea imágenes con IA',
-        icon: <ImageIcon size={24} />,
-        status: 'coming_soon',
+        id: 'ai_assistant',
+        name: 'USB',
+        description: 'Conecta con IA',
+        icon: <PlugsConnected size={24} />,
+        status: 'available',
         selected: false
     },
     // {
-    //     id: 'code_interpreter',
-    //     name: 'Intérprete de Código',
-    //     description: 'Analiza código con IA',
-    //     icon: <Code size={24} />,
-    //     status: 'coming_soon',
+    //     id: 'ai_agent',
+    //     name: 'Agente Inteligente',
+    //     description: 'Crea flujos de trabajo',
+    //     icon: <Robot size={24} />,
+    //     status: 'available',
     //     selected: false
     // }
 ];
@@ -104,18 +104,13 @@ export const ToolsInterface: React.FC<ToolsInterfaceProps> = ({ isOpen, onClose 
                         <div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2"
-                                    >
-                                        <Wrench size={20} />
-                                        {tools.filter(t => t.selected).length > 0 && (
-                                            <span className="bg-[#F48120] text-white rounded-full px-2 py-0.5 text-xs">
-                                                {tools.filter(t => t.selected).length}
-                                            </span>
-                                        )}
-                                    </Button>
+                                    <Wrench size={20} />
+
+                                    {tools.filter(t => t.selected).length > 0 && (
+                                        <span className="bg-[#F48120] text-white rounded-full px-2.5 py-0.5 text-xs">
+                                            {tools.filter(t => t.selected).length}
+                                        </span>
+                                    )}
                                     <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
                                         Herramientas
                                     </h2>
@@ -138,7 +133,7 @@ export const ToolsInterface: React.FC<ToolsInterfaceProps> = ({ isOpen, onClose 
                                     whileHover={{ scale: 1.02, x: 4 }}
                                     className={`group flex items-center gap-3 p-3 rounded-lg
                       ${tool.status === 'available' ? 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800' : 'opacity-70'}
-                      ${(tool.id === 'ai_assistant' || tool.id === 'ai_agent') ? 'bg-gradient-to-r from-[#F48120]/5 to-purple-500/5 dark:from-[#F48120]/10 dark:to-purple-500/10 border-2 border-[#F48120] dark:border-[#F48120]/50' : ''}
+                      ${(tool.id === 'ai_assistant') ? 'bg-gradient-to-r from-[#F48120]/5 to-purple-500/5 dark:from-[#F48120]/10 dark:to-purple-500/10 border-2 border-[#F48120] dark:border-[#F48120]/50' : ''}
                       transition-all duration-200`}
                                     onClick={() => {
                                         if (tool.status === 'available') {
@@ -146,10 +141,11 @@ export const ToolsInterface: React.FC<ToolsInterfaceProps> = ({ isOpen, onClose 
                                             if (tool.id === 'ai_assistant') {
                                                 onClose();
                                                 window.dispatchEvent(new CustomEvent('openModernAgentInterface'));
-                                            } else if (tool.id === 'ai_agent') {
-                                                onClose();
-                                                window.dispatchEvent(new CustomEvent('openToolsInterface'));
                                             }
+                                            //  else if (tool.id === 'ai_agent') {
+                                            //     onClose();
+                                            //     window.dispatchEvent(new CustomEvent('openToolsInterface'));
+                                            // }
                                         }
                                     }}
                                 >

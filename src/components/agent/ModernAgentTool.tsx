@@ -5,6 +5,17 @@ import { X, Files, Calendar, EnvelopeSimple, PencilSimple, ArrowRight } from '@p
 import { AnimatePresence, motion } from 'framer-motion';
 import './ModernAgentTool.css';
 
+interface Agent {
+  id: string;
+  title: string;
+  description: string;
+  tools: Array<{
+    id: string;
+    name: string;
+    icon: React.ReactNode;
+  }>;
+}
+
 interface Tool {
   id: string;
   name: string;
@@ -33,12 +44,14 @@ interface Task {
 interface ModernAgentToolProps {
   isOpen: boolean;
   onClose: () => void;
+  agentToEdit?: Agent;
+  onSaveAgent: (agent: Agent) => void;
 }
 
-export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
+export function ModernAgentTool({ isOpen, onClose, agentToEdit, onSaveAgent }: ModernAgentToolProps) {
   const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [title, setTitle] = useState('My New Agent');
-  const [description, setDescription] = useState('Add description');
+  const [title, setTitle] = useState(agentToEdit?.title || 'My New Agent');
+  const [description, setDescription] = useState(agentToEdit?.description || 'Add description');
   const [instructions, setInstructions] = useState('');
   const [showToolMenu, setShowToolMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -133,6 +146,16 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
       return <span key={index} className={`${editingTaskId && taskId !== editingTaskId ? 'opacity-0' : ''}`}>{part}</span>;
     });
 
+  };
+
+  const handleSaveAgent = () => {
+    const newAgent: Agent = {
+      id: agentToEdit?.id || String(Date.now()),
+      title,
+      description,
+      tools: []
+    };
+    onSaveAgent(newAgent);
   };
 
   const handleTitleClick = () => {
@@ -382,11 +405,22 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                   {renderInstructionsWithTools(instructions)}
                 </div> */}
                 <motion.div
-                  className="flex justify-end space-x-2"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                >
+                className="flex justify-between space-x-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="bg-gradient-to-r from-[#F48120] to-purple-500 text-white hover:opacity-90 transition-all duration-300"
+                    onClick={handleSaveAgent}
+                  >
+                    {agentToEdit ? 'Actualizar Agente' : 'Guardar Agente'}
+                  </Button>
+                </motion.div>
+                <div className="flex space-x-2">
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <Button
                       variant="ghost"
@@ -422,9 +456,9 @@ export function ModernAgentTool({ isOpen, onClose }: ModernAgentToolProps) {
                       </motion.span>
                     </Button>
                   </motion.div>
+                </div>
                 </motion.div>
-              </div>
-
+                </div>
               {showToolMenu && (
                 <div
                   ref={menuRef}

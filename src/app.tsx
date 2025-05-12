@@ -36,7 +36,8 @@ import {
   Wrench,
   Files,
   DotsThreeCircleVertical,
-  Rocket
+  Rocket,
+  Users
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -49,6 +50,7 @@ import { useState as useOIAIState } from "react";
 import { ModernAgentInterface } from "@/components/agent/ModernAgentInterface";
 import { ToolsInterface } from "@/components/agent/ToolsInterface";
 import { ModernAgentTool } from "./components/agent/ModernAgentTool";
+import { AgentDashboard } from "./components/agent/AgentDashboard";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -79,7 +81,7 @@ function ChatComponent() {
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user, setIsLoginOpen } = useAuth();
-  
+
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
@@ -207,6 +209,10 @@ function ChatComponent() {
             <ModernAgentTool
               isOpen={showAgent}
               onClose={() => setShowAgent(false)}
+              onSaveAgent={(agent) => {
+                console.log('Agent saved:', agent);
+                setShowAgent(false);
+              }}
             />
           )}
 
@@ -576,7 +582,7 @@ function ChatComponent() {
                   </Button>
                 </div>
 
-{/* 
+                {/* 
 
                 <Tooltip content="Crear Agente">
                   <Button
