@@ -43,7 +43,6 @@ import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { ModelSelect } from "./components/model/ModelSelect";
 import { ClearHistoryDialog } from "./components/dialog/ClearHistoryDialog";
 import { OIAICreator } from "./components/modal/OIAICreator";
 import { useState as useOIAIState } from "react";
@@ -613,10 +612,6 @@ function ChatComponent() {
                 </Tooltip>
               </div>
 
-              <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${isToolbarExpanded ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0 overflow-hidden'}`}>
-                <ModelSelect />
-              </div>
-
               {/* Botón de Limpiar Historial */}
               <div className={`transition-all duration-300 ${isToolbarExpanded ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0 overflow-hidden'}`}>
                 <Tooltip content="Limpiar historial">
@@ -654,7 +649,7 @@ function ChatComponent() {
                   placeholder={
                     pendingToolCallConfirmation
                       ? "Please respond to the tool confirmation above..."
-                      : "Type your message..."
+                      : "Empieza a escribir tu consulta..."
                   }
                   className="pl-4 pr-10 py-2 w-full rounded-full"
                   value={agentInput}
