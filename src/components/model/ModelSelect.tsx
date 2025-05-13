@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { CaretDown, Brain, Robot, Code, Cloud, Copy, Check, Chats } from '@phosphor-icons/react';
+import { useModel } from '@/contexts/ModelContext';
 
 interface Model {
   provider: string;
@@ -70,7 +71,10 @@ const models: Model[] = [
 ];
 
 export function ModelSelect({ className }: ModelSelectProps) {
-  const [selectedModel, setSelectedModel] = useState<Model>(models[0]);
+  const { selectedModel: contextModel, setSelectedModel: setContextModel } = useModel();
+  const [selectedModel, setSelectedModel] = useState<Model>(
+    models.find(model => model.name === contextModel) || models[0]
+  );
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (modelName: string) => {
@@ -135,7 +139,10 @@ export function ModelSelect({ className }: ModelSelectProps) {
                   'transition-all duration-200 hover:scale-[0.99]',
                   selectedModel.name === model.name && 'bg-neutral-100/80 dark:bg-neutral-800 shadow-sm dark:shadow-neutral-950'
                 )}
-                onClick={() => setSelectedModel(model)}
+                onClick={() => {
+                    setSelectedModel(model);
+                    setContextModel(model.name);
+                  }}
               >
                 <Tooltip.Root>
                   <Tooltip.Trigger asChild>

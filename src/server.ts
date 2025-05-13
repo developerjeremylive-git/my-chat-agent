@@ -1,7 +1,5 @@
 import { routeAgentRequest, type Schedule } from "agents";
-
 import { unstable_getSchedulePrompt } from "agents/schedule";
-
 import { AIChatAgent } from "agents/ai-chat-agent";
 import {
   createDataStreamResponse,
@@ -14,7 +12,27 @@ import { processToolCalls } from "./utils";
 import { tools, executions } from "./tools";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { env } from "cloudflare:workers";
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+
+const app = new Hono();
 const workersai = createWorkersAI({ binding: env.AI });
+
+// Variable global para almacenar el modelo seleccionado
+let selectedModel = '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b';
+
+// Endpoint para actualizar el modelo
+app.post('/api/model', async (c) => {
+  const { model } = await c.req.json();
+  selectedModel = model;
+  return c.json({ success: true, model: selectedModel });
+});
+
+// Middleware CORS
+app.use('/*', cors());
+
+// Función para obtener el modelo actual
+const getModel = () => workersai(selectedModel);
 
 // Stream the AI response using GPT-4
 import { config } from './contexts/config';
@@ -27,7 +45,7 @@ import { config } from './contexts/config';
 // const model = workersai("@cf/qwen/qwq-32b");
 
 //funcionando
-const model = workersai("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b");
+const model = getModel();
 // const model = workersai("@cf/google/gemma-7b-it-lora");
 // const model = workersai("@hf/mistral/mistral-7b-instruct-v0.2");
 // const model = workersai("@cf/fblgit/una-cybertron-7b-v2-bf16");
@@ -123,6 +141,11 @@ If the user asks to schedule a task, use the schedule tool to schedule the task.
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const url = new URL(request.url);
+
+    // Manejar las rutas de la API con Hono
+    if (url.pathname.startsWith('/api/')) {
+      return app.fetch(request, env, ctx);
+    }
 
     if (url.pathname === "/check-open-ai-key") {
       const hasOpenAIKey = !!process.env.OPENAI_API_KEY;

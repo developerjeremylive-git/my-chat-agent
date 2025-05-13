@@ -34,7 +34,7 @@
   }
 }
 
-.group/tool:hover {
+.group-tool:hover {
   transform: translateY(-1px);
   animation: glow 1.5s ease-in-out infinite !important;
 }
