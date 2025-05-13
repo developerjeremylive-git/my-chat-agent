@@ -11,7 +11,6 @@ import { MessageView } from "@/components/message/MessageView";
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { Button } from "@/components/button/Button";
 import { Card } from "@/components/card/Card";
-import { Input } from "@/components/input/Input";
 import { Avatar } from "@/components/avatar/Avatar";
 import { Toggle } from "@/components/toggle/Toggle";
 import { Tooltip } from "@/components/tooltip/Tooltip";
@@ -39,7 +38,8 @@ import {
   DotsThreeCircleVertical,
   Rocket,
   Users,
-  ArrowRight
+  ArrowRight,
+  ArrowsOut
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -53,6 +53,7 @@ import { ToolsInterface } from "@/components/agent/ToolsInterface";
 import { ModernAgentTool } from "./components/agent/ModernAgentTool";
 import { AgentDashboard } from "./components/agent/AgentDashboard";
 import { Modal } from "./components/modal/Modal";
+import { Input } from "./components/input/Input";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -63,6 +64,11 @@ function ChatComponent() {
   const { config } = useAIConfig();
   const { selectedModel } = useModel();
   const [showOIAICreator, setShowOIAICreator] = useOIAIState(false);
+
+  const handleOIAICopy = (content: string) => {
+    setInputText(content);
+    setShowOIAICreator(false);
+  };
   const [showOiaiGuide, setShowOiaiGuide] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -77,6 +83,8 @@ function ChatComponent() {
   const [isToolbarExpanded, setIsToolbarExpanded] = useState(false);
   const [showAgentInterface, setShowAgentInterface] = useState(false);
   const [showToolsInterface, setShowToolsInterface] = useState(false);
+  const [inputText, setInputText] = useState('');
+  const [showTextModal, setShowTextModal] = useState(false);
   const [showAgent, setShowAgent] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [textSize, setTextSize] = useState<'normal' | 'large' | 'small'>(() => {
@@ -231,10 +239,7 @@ function ChatComponent() {
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
               <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[85vh] overflow-hidden relative transform transition-all duration-300 scale-100 opacity-100">
                 <OIAICreator
-                  onCopyContent={(content) => {
-                    handleAgentInputChange({ target: { value: content } } as any);
-                    setShowOIAICreator(false);
-                  }}
+                  onCopyContent={handleOIAICopy}
                   onClose={() => setShowOIAICreator(false)}
                 />
               </div>
@@ -570,7 +575,38 @@ function ChatComponent() {
 
           {/* Messages */}
           {/* Action Buttons Frame */}
-          <div className={`pl-4 pr-10 rounded-full mb-0 py-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm mt-9 md:mt-8.6 transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''} ml-2 mr-2`}>
+          <div className="flex items-center justify-between ml-2 mr-2">
+            <div className="flex-1">
+              <input
+                type="text"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                placeholder="Escribe tu consulta de sistema (Optional)"
+                className="w-full px-4 py-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 transition-all duration-300 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/30"
+              />
+              <button
+                type="button"
+                className="absolute right-2 p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors bg-ob-btn-secondary-bg"
+                onClick={() => setShowTextModal(true)}
+              >
+                <ArrowsOut size={20} />
+              </button>
+
+              <Modal
+                isOpen={showTextModal}
+                onClose={() => setShowTextModal(false)}
+                className="w-full h-[85vh]"
+              >
+                <textarea
+                  className="w-full h-[80vh] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Escribe tu texto aquí..."
+                />
+              </Modal>
+            </div>
+          </div>
+          <div className={`pl-4 pr-10 rounded-full mb-0 mt-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''} ml-2 mr-2`}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Tooltip content="Guía">
@@ -609,17 +645,17 @@ function ChatComponent() {
 
                 {/* 
 
-                <Tooltip content="Crear Agente">
-                  <Button
-                    variant="ghost"
-                    size="md"
-                    shape="square"
-                    className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
-                    onClick={() => setShowAgent(true)}
-                  >
-                    <Robot size={20} weight="duotone" />
-                  </Button>
-                </Tooltip> */}
+              <Tooltip content="Crear Agente">
+                <Button
+                  variant="ghost"
+                  size="md"
+                  shape="square"
+                  className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
+                  onClick={() => setShowAgent(true)}
+                >
+                  <Robot size={20} weight="duotone" />
+                </Button>
+              </Tooltip> */}
                 <Tooltip content={isToolbarExpanded ? "Minimizar" : "Expandir"}>
 
                   <Button
@@ -654,7 +690,6 @@ function ChatComponent() {
               </div>
             </div>
           </div>
-
           {/* Input Area */}
           <form
             onSubmit={(e) =>
@@ -710,7 +745,7 @@ function ChatComponent() {
                         },
                         body: JSON.stringify({ model: selectedModel }),
                       });
-                      
+
                       // Proceder con el envío del mensaje
                       if (!user) {
                         e.preventDefault();

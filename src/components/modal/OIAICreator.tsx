@@ -130,15 +130,10 @@ export const OIAICreator = ({ onCopyContent, onClose }: OIAICreatorProps & { onC
 
     setShowMobilePreview(false);
     setShowDesktopPreview(false);
-    setCopiedContent(content);
-    setIsInputModalOpen(true);
-
-    // Llamar a onCopyContent después de que el modal esté abierto
-    // setTimeout(() => {
-    //   if (onCopyContent) {
-    //     onCopyContent(content);
-    //   }
-    // }, 100);
+    if (onCopyContent) {
+      onCopyContent(content);
+    }
+    handleClose();
   };
 
   const PreviewContent = () => (
