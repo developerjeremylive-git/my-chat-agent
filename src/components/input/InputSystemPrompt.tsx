@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { ArrowsOut, Plus, FloppyDisk, CaretDown } from "@phosphor-icons/react";
+import { ArrowsOut, Plus, FloppyDisk, CaretDown, Trash } from "@phosphor-icons/react";
 import { Modal } from "../modal/Modal";
 
 export const inputClasses = cn(
@@ -35,6 +35,9 @@ export const InputSystemPrompt = ({
   const [promptName, setPromptName] = useState("");
   const [savedPrompts, setSavedPrompts] = useState<SystemPrompt[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [deletePromptId, setDeletePromptId] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [promptToDelete, setPromptToDelete] = useState<SystemPrompt | null>(null);
 
   useEffect(() => {
     const loadedPrompts = localStorage.getItem("systemPrompts");
@@ -68,6 +71,22 @@ export const InputSystemPrompt = ({
     }
     onValueChange?.(prompt.content);
     setIsDropdownOpen(false);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, prompt: SystemPrompt) => {
+    e.stopPropagation();
+    setPromptToDelete(prompt);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (promptToDelete) {
+      const updatedPrompts = savedPrompts.filter(p => p.id !== promptToDelete.id);
+      setSavedPrompts(updatedPrompts);
+      localStorage.setItem("systemPrompts", JSON.stringify(updatedPrompts));
+    }
+    setIsDeleteModalOpen(false);
+    setPromptToDelete(null);
   };
 
   return (
@@ -120,18 +139,29 @@ export const InputSystemPrompt = ({
       </div>
 
       {isDropdownOpen && savedPrompts.length > 0 && (
-        <div className="absolute bottom-full left-0 right-0 mb-1 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-700 scrollbar-track-transparent">
+        <div className="w-80 max-w-[calc(100%-2rem)] absolute bottom-full right-0 mb-1 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-700 scrollbar-track-transparent">
           {savedPrompts.map((prompt) => (
-            <button
+            <div
               key={prompt.id}
-              className="w-full px-4 py-2 text-left hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-              onClick={() => selectPrompt(prompt)}
+              className=" group flex items-center px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
             >
-              <div className="font-medium text-neutral-900 dark:text-white">{prompt.name}</div>
-              <div className="text-sm text-neutral-500 dark:text-neutral-400 truncate">
-                {prompt.content}
-              </div>
-            </button>
+              <button
+                className="flex-grow text-left"
+                onClick={() => selectPrompt(prompt)}
+              >
+                <div className="font-medium text-neutral-900 dark:text-white">{prompt.name}</div>
+                <div className="w-66 max-w-[calc(100%-2rem)] text-sm text-neutral-500 dark:text-neutral-400 truncate">
+                  {prompt.content}
+                </div>
+              </button>
+              <button
+                className="p-2 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                onClick={(e) => handleDeleteClick(e, prompt)}
+                title="Eliminar prompt"
+              >
+                <Trash size={20} />
+              </button>
+            </div>
           ))}
         </div>
       )}
@@ -181,6 +211,41 @@ export const InputSystemPrompt = ({
             >
               <FloppyDisk size={20} />
               Guardar
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setPromptToDelete(null);
+        }}
+        className="w-full max-w-md mx-auto"
+        hideSubmitButton={true}
+      >
+        <div className="p-6 space-y-4">
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Confirmar Eliminación</h3>
+          <p className="text-neutral-700 dark:text-neutral-300">
+            ¿Estás seguro de que deseas eliminar el prompt "{promptToDelete?.name}"?
+          </p>
+          <div className="flex justify-end gap-2">
+            <button
+              className="px-4 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+              onClick={() => {
+                setIsDeleteModalOpen(false);
+                setPromptToDelete(null);
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center gap-2"
+              onClick={confirmDelete}
+            >
+              <Trash size={20} />
+              Eliminar
             </button>
           </div>
         </div>
