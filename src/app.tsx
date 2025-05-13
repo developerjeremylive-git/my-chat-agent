@@ -81,6 +81,7 @@ function ChatComponent() {
   const [showDebug, setShowDebug] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [isToolbarExpanded, setIsToolbarExpanded] = useState(false);
+  const [systemPrompt, setSystemPrompt] = useState(false);
   const [showAgentInterface, setShowAgentInterface] = useState(false);
   const [showToolsInterface, setShowToolsInterface] = useState(false);
   const [inputText, setInputText] = useState('');
@@ -575,37 +576,25 @@ function ChatComponent() {
 
           {/* Messages */}
           {/* Action Buttons Frame */}
-          <div className="flex items-center justify-between ml-2 mr-2">
-            <div className="flex-1">
-              <input
-                type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="Escribe tu consulta de sistema (Optional)"
-                className="w-full px-4 py-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 transition-all duration-300 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/30"
-              />
-              <button
-                type="button"
-                className="absolute right-2 p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors bg-ob-btn-secondary-bg"
-                onClick={() => setShowTextModal(true)}
-              >
-                <ArrowsOut size={20} />
-              </button>
 
-              <Modal
-                isOpen={showTextModal}
-                onClose={() => setShowTextModal(false)}
-                className="w-full h-[85vh]"
+          <div className="mr-2 fixed bottom-20 right-4 z-20">
+            <Tooltip content={systemPrompt ? "Minimizar" : "Expandir"}>
+              <Button
+                variant="ghost"
+                size="md"
+                shape="square"
+                className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
+                onClick={() => setSystemPrompt(!systemPrompt)}
               >
-                <textarea
-                  className="w-full h-[80vh] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder="Escribe tu texto aquí..."
-                />
-              </Modal>
-            </div>
+                {systemPrompt ? (
+                  <CaretLeft size={20} weight="duotone" />
+                ) : (
+                  <CaretRight size={20} weight="duotone" />
+                )}
+              </Button>
+            </Tooltip>
           </div>
+
           <div className={`pl-4 pr-10 rounded-full mb-0 mt-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''} ml-2 mr-2`}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
@@ -657,7 +646,6 @@ function ChatComponent() {
                 </Button>
               </Tooltip> */}
                 <Tooltip content={isToolbarExpanded ? "Minimizar" : "Expandir"}>
-
                   <Button
                     variant="ghost"
                     size="md"
@@ -690,6 +678,44 @@ function ChatComponent() {
               </div>
             </div>
           </div>
+
+          {systemPrompt && (
+            <div className="mb-15 flex items-center justify-between ml-2 mr-9">
+              <div className="flex-1">
+                <h2 className="text-lg font-medium text-neutral-800 dark:text-neutral-200">
+                  <span className="text-[#F48120] mr-2 ml-1">Sistema</span>
+                </h2>
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Escribe tu consulta de sistema (Optional)"
+                  className="w-full px-4 py-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 transition-all duration-300 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/30"
+                />
+                <button
+                  type="button"
+                  className="mr-10 absolute right-2 p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors bg-ob-btn-secondary-bg"
+                  onClick={() => setShowTextModal(true)}
+                >
+                  <ArrowsOut size={20} />
+                </button>
+
+                <Modal
+                  isOpen={showTextModal}
+                  onClose={() => setShowTextModal(false)}
+                  className="w-full h-[85vh]"
+                >
+                  <textarea
+                    className="w-full h-[80vh] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder="Escribe tu consulta de sistema (Optional)"
+                  />
+                </Modal>
+              </div>
+            </div>
+          )}
+
           {/* Input Area */}
           <form
             onSubmit={(e) =>
@@ -701,10 +727,15 @@ function ChatComponent() {
                 },
               })
             }
-            className="p-2 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-t border-neutral-300 dark:border-neutral-800"
+            className="p-2 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-neutral-300 dark:border-neutral-800"
           >
             <div className="flex items-center gap-2">
               <div className="flex-1 relative">
+                <div className={`transition-all duration-300 ${!systemPrompt ? 'opacity-100 max-w-full' : 'opacity-0 overflow-hidden'}`}>
+                  <h2 className='text-lg font-medium text-neutral-800 dark:text-neutral-200'>
+                    <span className="text-[#F48120] mr-2 ml-1">💡Escribe Tu Consulta</span>
+                  </h2>
+                </div>
                 <Input
                   disabled={pendingToolCallConfirmation}
                   placeholder={
@@ -715,16 +746,6 @@ function ChatComponent() {
                   className="pl-4 pr-10 py-2 w-full rounded-full"
                   value={agentInput}
                   onChange={handleAgentInputChange}
-                  // onKeyDown={(e) => {
-                  //   if (e.key === "Enter" && !e.shiftKey) {
-                  //     e.preventDefault();
-                  //     if (!user) {
-                  //       setIsLoginOpen(true);
-                  //       return;
-                  //     }
-                  //     handleAgentSubmit(e as unknown as React.FormEvent);
-                  //   }
-                  // }}
                   onValueChange={undefined}
                 />
               </div>
@@ -733,7 +754,7 @@ function ChatComponent() {
                 <Button
                   type="submit"
                   shape="square"
-                  className="rounded-full h-10 w-10 flex-shrink-0 mr-2"
+                  className="mt-7 rounded-full h-10 w-10 flex-shrink-0 mr-2"
                   disabled={pendingToolCallConfirmation || !agentInput.trim()}
                   onClick={async (e) => {
                     try {
