@@ -604,7 +604,7 @@ function ChatComponent() {
             </Tooltip>
           </div>
 
-          <div className={`pl-4 pr-10 rounded-full mb-0 mt-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''} ml-2 mr-2`}>
+          <div className={`${systemPrompt ? 'hidden' : ''} pl-4 pr-10 rounded-full mb-0 mt-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''} ml-2 mr-2`}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Tooltip content="Guía">
