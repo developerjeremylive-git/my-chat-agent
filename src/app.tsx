@@ -33,6 +33,8 @@ import {
   Question,
   CaretLeft,
   CaretRight,
+  CaretCircleDown,
+  CaretCircleDoubleUp,
   Wrench,
   Files,
   DotsThreeCircleVertical,
@@ -585,7 +587,7 @@ function ChatComponent() {
           {/* Action Buttons Frame */}
 
           <div className="mr-2 fixed bottom-20 right-4 z-20">
-            <Tooltip content={systemPrompt ? "Minimizar" : "Expandir"}>
+            <Tooltip content={systemPrompt ? "Minimizar consulta del sistema" : "Expandir consulta del sistema"}>
               <Button
                 variant="ghost"
                 size="md"
@@ -594,9 +596,9 @@ function ChatComponent() {
                 onClick={() => setSystemPrompt(!systemPrompt)}
               >
                 {systemPrompt ? (
-                  <CaretLeft size={20} weight="duotone" />
+                  <CaretCircleDown size={20} weight="duotone" />
                 ) : (
-                  <CaretRight size={20} weight="duotone" />
+                  <CaretCircleDoubleUp size={20} weight="duotone" />
                 )}
               </Button>
             </Tooltip>
@@ -652,7 +654,7 @@ function ChatComponent() {
                   <Robot size={20} weight="duotone" />
                 </Button>
               </Tooltip> */}
-                <Tooltip content={isToolbarExpanded ? "Minimizar" : "Expandir"}>
+                <Tooltip content={isToolbarExpanded ? "Minimizar barra de herramientas" : "Expandir barra de herramientas"}>
                   <Button
                     variant="ghost"
                     size="md"
@@ -687,17 +689,17 @@ function ChatComponent() {
           </div>
 
           {systemPrompt && (
-            <div className="mb-15 flex items-center justify-between ml-2 mr-9">
+            <div className="mb-15 items-center justify-between ml-2 mr-9">
               {/* <div className="flex-1"> */}
-                {/* <h2 className="text-lg font-medium text-neutral-800 dark:text-neutral-200">
-                  <span className="text-[#F48120] mr-2 ml-1">Sistema</span>
-                </h2> */}
-                <div className="flex-1">
+                <div className="flex">
+                <h2 className="mt-11.5 text-lg font-medium text-neutral-800 dark:text-neutral-200">
+                  <span className="text-[#F48120] mr-2 ml-1 flex mt-0.5">Sistema <Robot className="mr-1 ml-2 mt-1.5"/></span>
+                </h2>
                   <InputSystemPrompt
                     type="text"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Escribe tu consulta de sistema (Optional)"
+                    placeholder="Escribe tu consulta del sistema (Optional)"
                     className="w-full px-4 py-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 transition-all duration-300 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/30"
                   />
                 </div>
