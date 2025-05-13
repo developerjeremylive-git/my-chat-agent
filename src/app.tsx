@@ -715,16 +715,16 @@ function ChatComponent() {
                   className="pl-4 pr-10 py-2 w-full rounded-full"
                   value={agentInput}
                   onChange={handleAgentInputChange}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      if (!user) {
-                        setIsLoginOpen(true);
-                        return;
-                      }
-                      handleAgentSubmit(e as unknown as React.FormEvent);
-                    }
-                  }}
+                  // onKeyDown={(e) => {
+                  //   if (e.key === "Enter" && !e.shiftKey) {
+                  //     e.preventDefault();
+                  //     if (!user) {
+                  //       setIsLoginOpen(true);
+                  //       return;
+                  //     }
+                  //     handleAgentSubmit(e as unknown as React.FormEvent);
+                  //   }
+                  // }}
                   onValueChange={undefined}
                 />
               </div>
@@ -749,8 +749,8 @@ function ChatComponent() {
                       // Proceder con el envío del mensaje
                       if (!user) {
                         e.preventDefault();
-                        // setIsLoginOpen(true);
-                        handleAgentSubmit(e);
+                        setIsLoginOpen(true);
+                        // handleAgentSubmit(e);
                         return;
                       }
                     } catch (error) {
