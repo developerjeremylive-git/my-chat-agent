@@ -54,6 +54,7 @@ import { ModernAgentTool } from "./components/agent/ModernAgentTool";
 import { AgentDashboard } from "./components/agent/AgentDashboard";
 import { Modal } from "./components/modal/Modal";
 import { Input } from "./components/input/Input";
+import { InputSystemPrompt } from "./components/input/InputSystemPrompt";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -681,38 +682,20 @@ function ChatComponent() {
 
           {systemPrompt && (
             <div className="mb-15 flex items-center justify-between ml-2 mr-9">
-              <div className="flex-1">
-                <h2 className="text-lg font-medium text-neutral-800 dark:text-neutral-200">
+              {/* <div className="flex-1"> */}
+                {/* <h2 className="text-lg font-medium text-neutral-800 dark:text-neutral-200">
                   <span className="text-[#F48120] mr-2 ml-1">Sistema</span>
-                </h2>
-                <input
-                  type="text"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder="Escribe tu consulta de sistema (Optional)"
-                  className="w-full px-4 py-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 transition-all duration-300 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/30"
-                />
-                <button
-                  type="button"
-                  className="mr-10 absolute right-2 p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors bg-ob-btn-secondary-bg"
-                  onClick={() => setShowTextModal(true)}
-                >
-                  <ArrowsOut size={20} />
-                </button>
-
-                <Modal
-                  isOpen={showTextModal}
-                  onClose={() => setShowTextModal(false)}
-                  className="w-full h-[85vh]"
-                >
-                  <textarea
-                    className="w-full h-[80vh] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
+                </h2> */}
+                <div className="flex-1">
+                  <InputSystemPrompt
+                    type="text"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     placeholder="Escribe tu consulta de sistema (Optional)"
+                    className="w-full px-4 py-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 transition-all duration-300 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/30"
                   />
-                </Modal>
-              </div>
+                </div>
+              {/* </div> */}
             </div>
           )}
 
@@ -736,18 +719,23 @@ function ChatComponent() {
                     <span className="text-[#F48120] mr-2 ml-1">💡Escribe Tu Consulta</span>
                   </h2>
                 </div>
-                <Input
-                  disabled={pendingToolCallConfirmation}
-                  placeholder={
-                    pendingToolCallConfirmation
-                      ? "Please respond to the tool confirmation above..."
-                      : "Empieza a escribir tu consulta..."
-                  }
-                  className="pl-4 pr-10 py-2 w-full rounded-full"
-                  value={agentInput}
-                  onChange={handleAgentInputChange}
-                  onValueChange={undefined}
-                />
+                <div className="flex">
+                  {/* <p className="mt-2">
+                    <span className="text-[#F48120] mr-2 ml-1 ">Usuario</span>
+                  </p> */}
+                  <Input
+                    disabled={pendingToolCallConfirmation}
+                    placeholder={
+                      pendingToolCallConfirmation
+                        ? "Please respond to the tool confirmation above..."
+                        : "Empieza a escribir tu consulta..."
+                    }
+                    className="pl-4 pr-10 py-2 w-full rounded-full"
+                    value={agentInput}
+                    onChange={handleAgentInputChange}
+                    onValueChange={undefined}
+                  />
+                </div>
               </div>
 
               <div className="relative">
