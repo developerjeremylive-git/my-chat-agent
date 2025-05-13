@@ -56,20 +56,20 @@ interface NewServicePopupProps {
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description, onClick }) => (
   <Card
-    className="p-4 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-300 border border-neutral-200 dark:border-neutral-700 hover:border-[#F48120] dark:hover:border-[#F48120] group"
+    className="p-3 sm:p-4 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-300 border border-neutral-200 dark:border-neutral-700 hover:border-[#F48120] dark:hover:border-[#F48120] group w-full"
     onClick={onClick}
   >
-    <div className="flex items-start gap-4">
-      <div className="p-3 bg-gradient-to-br from-[#F48120]/20 to-purple-500/20 dark:from-[#F48120]/10 dark:to-purple-500/10 rounded-xl text-[#F48120] group-hover:scale-110 transition-transform duration-300">
+    <div className="flex items-start gap-2 sm:gap-4">
+      <div className="p-2 sm:p-3 bg-gradient-to-br from-[#F48120]/20 to-purple-500/20 dark:from-[#F48120]/10 dark:to-purple-500/10 rounded-xl text-[#F48120] group-hover:scale-110 transition-transform duration-300">
         {icon}
       </div>
-      <div className="flex-1">
-        <h3 className="font-semibold text-lg mb-1 bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">{title}</h3>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400 hidden md:block">{description}</p>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-semibold text-base sm:text-lg mb-0.5 sm:mb-1 bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent truncate">{title}</h3>
+        <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2">{description}</p>
       </div>
       <ArrowRight
-        size={20}
-        className="text-neutral-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+        size={16}
+        className="text-neutral-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 hidden sm:block"
       />
     </div>
   </Card>
@@ -381,7 +381,7 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
           <Button
             variant="ghost"
             size="sm"
-            className="absolute right-4 top-4 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 z-10"
+            className="absolute right-4 top-4 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
             onClick={onClose}
           >
             <X size={20} />
@@ -522,6 +522,7 @@ const KnowledgePopup: React.FC<KnowledgePopupProps> = ({ source, onClose }) => {
       </motion.div>
     </motion.div>
   );
+
 };
 
 const NewServicePopup: React.FC<NewServicePopupProps> = ({ onClose, onSave }) => {
@@ -866,22 +867,24 @@ export function ModernAgentInterface({ isOpen, onClose }: ModernAgentInterfacePr
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-[#F48120] hover:bg-[#F48120]/10 rounded-lg gap-2"
+                      className="bg-gradient-to-r from-[#F48120] to-purple-500 text-white hover:opacity-90 transition-opacity rounded-lg gap-2"
                       onClick={() => setShowNewServicePopup(true)}
                     >
                       <Plus size={16} />
                       <span>Añadir servicio</span>
                     </Button>
                   </div>
-                  <div className="grid gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {services.map((service) => (
-                      <div key={service.id} className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={activeCheckboxes.includes(service.id)}
-                          onChange={() => handleCheckboxChange(service.id)}
-                          className="h-5 w-5 rounded border-neutral-300 text-[#F48120] focus:ring-[#F48120]/50"
-                        />
+                      <div key={service.id} className="flex items-center gap-2">
+                        <div
+                          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors duration-200 cursor-pointer ${activeCheckboxes.includes(service.id) ? 'border-[#F48120] bg-[#F48120]' : 'border-neutral-300 dark:border-neutral-600'}`}
+                          onClick={() => handleCheckboxChange(service.id)}
+                        >
+                          {activeCheckboxes.includes(service.id) && (
+                            <div className="w-2 h-2 rounded-full bg-white" />
+                          )}
+                        </div>
                         <ServiceCard
                           icon={service.icon}
                           title={service.title}
