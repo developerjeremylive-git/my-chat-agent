@@ -117,8 +117,10 @@ export const OIAICreator = ({ onCopyContent, onClose }: OIAICreatorProps & { onC
     if (onClose) onClose();
   };
 
-  const handleCopyContent = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
+  const handleCopyContent = (event?: React.MouseEvent<HTMLButtonElement>) => {
+    if (event) {
+      event.preventDefault();
+    }
     if (!customOIAI) return;
 
     const content = [
@@ -561,7 +563,11 @@ export const OIAICreator = ({ onCopyContent, onClose }: OIAICreatorProps & { onC
           )}
           {currentStep === 4 && (
             <Button
-              onClick={handleCopyContent}
+              onClick={() => {
+                handleCopyContent();
+                const event = new CustomEvent('openSystemPrompt');
+                window.dispatchEvent(event);
+              }}
               disabled={!customOIAI?.formato.length || customOIAI.formato.length === 0}
               className="flex-1 md:flex-none transform transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-purple-500 hover:to-[#F48120] text-white shadow-md hover:shadow-lg dark:shadow-[#F48120]/20 text-sm md:text-base py-2 md:py-3"
             >

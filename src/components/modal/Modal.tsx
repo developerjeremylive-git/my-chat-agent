@@ -14,6 +14,7 @@ type ModalProps = {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
+  hideSubmitButton?: boolean;
 };
 
 export const Modal = ({
@@ -22,6 +23,7 @@ export const Modal = ({
   clickOutsideToClose = false,
   isOpen,
   onClose,
+  hideSubmitButton = false,
 }: ModalProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user, setIsLoginOpen } = useAuth();
@@ -127,23 +129,24 @@ export const Modal = ({
           </div>
           <div className="sticky bottom-0 w-full border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-4 z-[60]">
             <div className="flex justify-between items-center">
-              <Button
-                aria-label="Expandir modal"
-                shape="square"
-                className={cn(
-                  "bg-white dark:bg-gray-900 text-ob-base-200 hover:text-ob-base-300 p-2 rounded-full transition-all duration-200 transform hover:scale-110",
-                  {
-                    "opacity-50 cursor-not-allowed": !children,
-                    "hover:rotate-180": children
-                  }
-                )}
-                onClick={onClose}
-                variant="ghost"
-                size="sm"
-                disabled={!children}
-              >
+            <Button
+              aria-label="Expandir modal"
+              shape="square"
+              className={cn(
+                "bg-white dark:bg-gray-900 text-ob-base-200 hover:text-ob-base-300 p-2 rounded-full transition-all duration-200 transform hover:scale-110",
+                {
+                  "opacity-50 cursor-not-allowed": !children,
+                  "hover:rotate-180": children
+                }
+              )}
+              onClick={onClose}
+              variant="ghost"
+              size="sm"
+              disabled={!children}
+            >
                <ArrowsIn size={16} weight="bold" />
-              </Button>
+            </Button>
+            {!hideSubmitButton && (
               <Button
                 aria-label="Enviar texto"
                 shape="square"
@@ -161,6 +164,7 @@ export const Modal = ({
               >
                 <PaperPlaneRight size={20} weight="bold" />
               </Button>
+            )}
             </div>
           </div>
         </Card>

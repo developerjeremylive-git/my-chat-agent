@@ -140,6 +140,7 @@ export const InputSystemPrompt = ({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         className="w-full max-w-6xl mx-auto"
+        hideSubmitButton={true}
       >
         <textarea
           className="w-full h-[calc(90vh-13rem)] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
@@ -156,6 +157,7 @@ export const InputSystemPrompt = ({
         isOpen={isPromptModalOpen}
         onClose={() => setIsPromptModalOpen(false)}
         className="w-full max-w-md mx-auto"
+        hideSubmitButton={true}
       >
         <div className="p-6 space-y-4">
           <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Guardar Prompt del Sistema</h3>

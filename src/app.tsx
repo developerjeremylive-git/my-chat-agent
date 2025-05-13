@@ -128,12 +128,18 @@ function ChatComponent() {
       setShowAgent(true);
     };
 
+    const handleOpenSystemPrompt = () => {
+      setSystemPrompt(true);
+    };
+
     window.addEventListener('openModernAgentInterface', handleOpenModernAgentInterface);
     window.addEventListener('openToolsInterface', handleOpenToolsInterface);
+    window.addEventListener('openSystemPrompt', handleOpenSystemPrompt);
 
     return () => {
       window.removeEventListener('openModernAgentInterface', handleOpenModernAgentInterface);
       window.removeEventListener('openToolsInterface', handleOpenToolsInterface);
+      window.removeEventListener('openSystemPrompt', handleOpenSystemPrompt);
     };
   }, []);
 
