@@ -104,7 +104,7 @@ export const ToolsInterface: React.FC<ToolsInterfaceProps> = ({ isOpen, onClose 
                         <div className="p-4 border-b border-neutral-200 dark:border-neutral-800">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <Wrench size={20} />
+                                    <Rocket size={20} />
 
                                     {tools.filter(t => t.selected).length > 0 && (
                                         <span className="bg-[#F48120] text-white rounded-full px-2.5 py-0.5 text-xs">
@@ -112,7 +112,7 @@ export const ToolsInterface: React.FC<ToolsInterfaceProps> = ({ isOpen, onClose 
                                         </span>
                                     )}
                                     <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">
-                                        Herramientas
+                                        Integraciones
                                     </h2>
                                 </div>
                                 <Button

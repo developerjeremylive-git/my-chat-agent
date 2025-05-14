@@ -302,21 +302,7 @@ function ChatComponent() {
         {/* Botón flotante de configuración */}
         <div className="fixed left-4 top-1/9 -translate-y-1/2 z-20">
           <div className="relative">
-            <Button
-              ref={settingsButtonRef}
-              variant="ghost"
-              size="sm"
-              className="w-full rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                       dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                       border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                       transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                       flex items-center justify-between gap-2 group/button"
-              onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-            >
-              <div className="flex items-center gap-2">
-                <Wrench size={16} className="text-[#F48120]" weight="duotone" />
-              </div>
-            </Button>
+
             {showSettingsMenu && createPortal(
               <div
                 ref={settingsMenuRef}
@@ -543,7 +529,21 @@ function ChatComponent() {
             textSize={textSize}
             onTextSizeChange={setTextSize}
           />
-
+            <Button
+              ref={settingsButtonRef}
+              variant="ghost"
+              size="sm"
+              className="w-8 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                       dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                       border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                       transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                       flex items-center justify-between gap-2 group/button"
+              onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+            >
+              <div className="flex items-center gap-2">
+                <Wrench size={16} className="text-[#F48120] mr-1" weight="duotone" />
+              </div>
+            </Button>
           {showAgent && (
             <ModernAgentTool
               isOpen={showAgent}

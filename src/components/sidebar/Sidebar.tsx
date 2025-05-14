@@ -24,7 +24,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect }: SidebarProps) {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
-  const [isTemplatesExpanded, setIsTemplatesExpanded] = useState(true);
+  const [isTemplatesExpanded, setIsTemplatesExpanded] = useState(false);
   const [isAgentsExpanded, setIsAgentsExpanded] = useState(false);
   const [showAgentDashboard, setShowAgentDashboard] = useState(false);
 
