@@ -42,7 +42,8 @@ import {
   Rocket,
   Users,
   ArrowRight,
-  ArrowsOut
+  ArrowsOut,
+  PlusCircle
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -58,6 +59,7 @@ import { AgentDashboard } from "./components/agent/AgentDashboard";
 import { Modal } from "./components/modal/Modal";
 import { Input } from "./components/input/Input";
 import { InputSystemPrompt } from "./components/input/InputSystemPrompt";
+import { ModelSelect } from "./components/model/ModelSelect";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -76,7 +78,7 @@ function ChatComponent() {
   const [showOiaiGuide, setShowOiaiGuide] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  
+
   // Efecto para cerrar el menú de configuración cuando se abre la barra lateral
   useEffect(() => {
     if (isSidebarOpen) {
@@ -262,9 +264,9 @@ function ChatComponent() {
     };
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (settingsMenuRef.current && settingsButtonRef.current && 
-          !settingsMenuRef.current.contains(event.target as Node) && 
-          !settingsButtonRef.current.contains(event.target as Node)) {
+      if (settingsMenuRef.current && settingsButtonRef.current &&
+        !settingsMenuRef.current.contains(event.target as Node) &&
+        !settingsButtonRef.current.contains(event.target as Node)) {
         setShowSettingsMenu(false);
       }
     };
@@ -518,32 +520,67 @@ function ChatComponent() {
           </div>
         </div>
         <div className={`h-[calc(100vh-2rem)] w-full ${getMainWidth()} mx-auto flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800 transition-all duration-300`}>
-          <ChatHeader
+          {/* <ChatHeader
             onOpenSidebar={() => {
-                setIsSidebarOpen(true);
-                document.dispatchEvent(new Event('sidebarOpen'));
-              }}
+              setIsSidebarOpen(true);
+              document.dispatchEvent(new Event('sidebarOpen'));
+            }}
             onOpenSettings={() => setIsSettingsOpen(true)}
             showDebug={showDebug}
             onToggleDebug={() => setShowDebug((prev) => !prev)}
             textSize={textSize}
             onTextSizeChange={setTextSize}
-          />
+          /> */}
+          <div className="flex items-center gap-2 justify-between w-full px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-8 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                           dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                           border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                           transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                           flex items-center justify-between gap-2 group/button"
+                onClick={() => setIsSidebarOpen(true)}
+              >
+                <div className="flex items-center gap-2">
+                  <List size={16} className="text-[#F48120] mr-1" weight="duotone" />
+                </div>
+              </Button>
+
+              <Button
+                ref={settingsButtonRef}
+                variant="ghost"
+                size="sm"
+                className="w-8 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                           dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                           border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                           transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                           flex items-center justify-between gap-2 group/button"
+                onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+              >
+                <div className="flex items-center gap-2">
+                  <Wrench size={16} className="text-[#F48120] mr-1" weight="duotone" />
+                </div>
+              </Button>
+            </div>
+
             <Button
-              ref={settingsButtonRef}
               variant="ghost"
               size="sm"
               className="w-8 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                       dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                       border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                       transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                       flex items-center justify-between gap-2 group/button"
-              onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                         flex items-center justify-between gap-2 group/button"
+              onClick={() => setIsSettingsOpen(true)}
             >
               <div className="flex items-center gap-2">
-                <Wrench size={16} className="text-[#F48120] mr-1" weight="duotone" />
+                <Gear size={16} className="text-[#F48120] mr-1" weight="duotone" />
               </div>
             </Button>
+          </div>
+
           {showAgent && (
             <ModernAgentTool
               isOpen={showAgent}
@@ -573,7 +610,7 @@ function ChatComponent() {
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto p-2 space-y-2 pb-20 max-h-[calc(100vh-14rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex-1 overflow-y-auto p-2 space-y-2 pb-16 max-h-[calc(100vh-11rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {agentMessages.length === 0 && (
               <div className="h-full flex items-center justify-center">
                 <Modal
@@ -900,31 +937,10 @@ function ChatComponent() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Messages */}
-          {/* Action Buttons Frame */}
-
-          <div className="mr-2 fixed bottom-20 right-4 z-10">
-            <Tooltip content={systemPrompt ? "Minimizar consulta del sistema" : "Expandir consulta del sistema"}>
-              <Button
-                variant="ghost"
-                size="md"
-                shape="square"
-                className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
-                onClick={() => setSystemPrompt(!systemPrompt)}
-              >
-                {systemPrompt ? (
-                  <CaretCircleDown size={20} weight="duotone" />
-                ) : (
-                  <CaretCircleDoubleUp size={20} weight="duotone" />
-                )}
-              </Button>
-            </Tooltip>
-          </div>
-
-          <div className={`${systemPrompt ? 'hidden' : ''} pl-4 pr-10 rounded-full mb-0 mt-0.5 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm transition-all duration-300 ${!isToolbarExpanded ? 'w-35' : ''} ml-2 mr-2`}>
+          <div className={`${systemPrompt ? 'hidden' : ''} pl-4 pr-10 rounded-full mb-0 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm transition-all duration-300 w-58 ml-2 mr-2`}>
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Tooltip content="Guía">
+              {/* <div className="flex items-center gap-2"> */}
+                {/* <Tooltip content="Guía">
                   <Button
                     variant="ghost"
                     size="md"
@@ -934,8 +950,8 @@ function ChatComponent() {
                   >
                     <Question size={20} weight="duotone" />
                   </Button>
-                </Tooltip>
-                <Tooltip content="Crear OIAI">
+                </Tooltip> */}
+                <Tooltip content="Crear IA">
                   <Button
                     variant="ghost"
                     size="md"
@@ -943,7 +959,7 @@ function ChatComponent() {
                     className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
                     onClick={() => setShowOIAICreator(true)}
                   >
-                    <Brain size={20} weight="duotone" />
+                    <PlusCircle size={20} weight="duotone" />
                   </Button>
                 </Tooltip>
                 <div className="flex gap-2">
@@ -958,6 +974,11 @@ function ChatComponent() {
                   </Button>
                 </div>
 
+                <div className={`flex-1 flex transition-all duration-300 opacity-100 max-w-full`}>
+                  <ModelSelect />
+                </div>
+
+
                 {/* 
 
               <Tooltip content="Crear Agente">
@@ -971,7 +992,7 @@ function ChatComponent() {
                   <Robot size={20} weight="duotone" />
                 </Button>
               </Tooltip> */}
-                <Tooltip content={isToolbarExpanded ? "Minimizar barra de herramientas" : "Expandir barra de herramientas"}>
+                {/* <Tooltip content={isToolbarExpanded ? "Minimizar barra de herramientas" : "Expandir barra de herramientas"}>
                   <Button
                     variant="ghost"
                     size="md"
@@ -986,10 +1007,10 @@ function ChatComponent() {
                     )}
                   </Button>
                 </Tooltip>
-              </div>
+              </div> */}
 
               {/* Botón de Limpiar Historial */}
-              <div className={`transition-all duration-300 ${isToolbarExpanded ? 'opacity-100 max-w-full' : 'opacity-0 max-w-0 overflow-hidden'}`}>
+              <div className={`transition-all duration-300 opacity-100 max-w-full`}>
                 <Tooltip content="Limpiar historial">
                   <Button
                     variant="ghost"
@@ -1006,20 +1027,20 @@ function ChatComponent() {
           </div>
 
           {systemPrompt && (
-            <div className="mb-15 items-center justify-between ml-2 mr-9">
+            <div className="mb-15 items-center justify-between ml-2 mr-2">
               {/* <div className="flex-1"> */}
-                <div className="flex">
+              <div className="flex">
                 <h2 className="mt-11.5 text-lg font-medium text-neutral-800 dark:text-neutral-200">
-                  <span className="text-[#F48120] mr-2 ml-1 flex mt-0.5">Sistema <Robot className="mr-1 ml-2 mt-1.5"/></span>
+                  <span className="text-[#F48120] mr-2 ml-1 flex mt-0.5">Sistema <Robot className="mr-1 ml-2 mt-1.5" /></span>
                 </h2>
-                  <InputSystemPrompt
-                    type="text"
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Escribe tu consulta del sistema (Optional)"
-                    className="w-full px-4 py-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 transition-all duration-300 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/30"
-                  />
-                </div>
+                <InputSystemPrompt
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Escribe tu consulta del sistema (Optional)"
+                  className="w-full px-4 py-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 transition-all duration-300 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/30"
+                />
+              </div>
               {/* </div> */}
             </div>
           )}
@@ -1037,17 +1058,37 @@ function ChatComponent() {
             }
             className="p-2 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-neutral-300 dark:border-neutral-800"
           >
+            {/* <div className={`transition-all duration-300 ${!systemPrompt ? 'opacity-100 max-w-full' : 'opacity-0 overflow-hidden'}`}>
+              <h2 className='text-lg font-medium text-neutral-800 dark:text-neutral-200'>
+                <span className="text-[#F48120] mr-2 ml-1">💡Escribe Tu Consulta</span>
+              </h2>
+            </div> */}
             <div className="flex items-center gap-2">
               <div className="flex-1 relative">
-                <div className={`transition-all duration-300 ${!systemPrompt ? 'opacity-100 max-w-full' : 'opacity-0 overflow-hidden'}`}>
-                  <h2 className='text-lg font-medium text-neutral-800 dark:text-neutral-200'>
-                    <span className="text-[#F48120] mr-2 ml-1">💡Escribe Tu Consulta</span>
-                  </h2>
-                </div>
                 <div className="flex">
                   {/* <p className="mt-2">
                     <span className="text-[#F48120] mr-2 ml-1 ">Usuario</span>
                   </p> */}
+                  {/* Action Buttons Frame */}
+                  <Tooltip content={systemPrompt ? "Minimizar" : "Expandir"}>
+                    <Button
+                      variant="ghost"
+                      size="md"
+                      shape="square"
+                      className="w-8 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                       dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                       border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                       transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                       flex items-center justify-between gap-2 group/button mt-0.5 mr-2"
+                      onClick={() => setSystemPrompt(!systemPrompt)}
+                    >
+                      {systemPrompt ? (
+                        <CaretCircleDown size={20} className="text-[#F48120]" weight="duotone" />
+                      ) : (
+                        <CaretCircleDoubleUp size={20} className="text-[#F48120]" weight="duotone" />
+                      )}
+                    </Button>
+                  </Tooltip>
                   <Input
                     disabled={pendingToolCallConfirmation}
                     placeholder={
@@ -1067,21 +1108,21 @@ function ChatComponent() {
                 <Button
                   type="submit"
                   shape="square"
-                  className="mt-7 rounded-full h-10 w-10 flex-shrink-0 mr-2"
+                  className="rounded-full h-10 w-10 flex-shrink-0"
                   disabled={pendingToolCallConfirmation || !agentInput.trim()}
                   onClick={async (e) => {
                     try {
                       updateSystemPrompt(inputText),
-                      // Actualizar el modelo y el prompt del sistema en el servidor antes de enviar el mensaje
-                      await Promise.all([
-                        fetch('/api/model', {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({ model: selectedModel }),
-                        })
-                      ]);
+                        // Actualizar el modelo y el prompt del sistema en el servidor antes de enviar el mensaje
+                        await Promise.all([
+                          fetch('/api/model', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ model: selectedModel }),
+                          })
+                        ]);
 
                       // Proceder con el envío del mensaje
                       if (!user) {
@@ -1138,7 +1179,7 @@ function ChatComponent() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">¿Qué es oiai en etherOI?</h3>
                   <p className="text-neutral-600 dark:text-neutral-300">
-                    oiai es un asistente de IA personalizable dentro de etherOI que te ayuda a realizar tareas específicas. Puedes crear oiai personalizados para diferentes propósitos y necesidades.
+                    oiai es un asistente de IA personalizable dentro de etherOI que te ayuda a realizar tareas específicas. Puedes Crear Asistente IA personalizados para diferentes propósitos y necesidades.
                   </p>
                 </div>
 
@@ -1231,7 +1272,7 @@ function ChatComponent() {
                       <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       <div className="relative z-10 flex flex-col items-center gap-3 p-4">
                         <Brain weight="duotone" className="w-8 h-8 text-[#F48120] group-hover:scale-110 transition-transform duration-300" />
-                        <span className="text-sm font-medium bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent group-hover:opacity-90">Crear OIAI</span>
+                        <span className="text-sm font-medium bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent group-hover:opacity-90">Crear Asistente IA</span>
                       </div>
                     </button>
                   </div>

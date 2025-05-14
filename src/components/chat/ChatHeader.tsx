@@ -23,7 +23,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
   return (
     <div className="flex flex-col gap-3 px-4 py-3 border-b border-neutral-300 dark:border-neutral-800 sticky top-0 z-10 bg-background">
       <div className="flex items-center gap-3">
-        <Button
+        {/* <Button
           variant="ghost"
           size="md"
           shape="square"
@@ -31,15 +31,11 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
           onClick={onOpenSidebar}
         >
           <List size={20} />
-        </Button>
+        </Button> */}
 
         {/* <div className="flex-1">
           <h2 className="font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent hidden md:block">Asistente Inteligente</h2>
         </div> */}
-
-        <div className={`flex-1 flex transition-all duration-300 opacity-100 max-w-full`}>
-          <ModelSelect />
-        </div>
 
 
 
@@ -141,7 +137,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">¿Qué es oiai en etherOI?</h3>
                     <p className="text-neutral-600 dark:text-neutral-300">
-                      oiai es un asistente de IA personalizable dentro de etherOI que te ayuda a realizar tareas específicas. Puedes crear oiai personalizados para diferentes propósitos y necesidades.
+                      oiai es un asistente de IA personalizable dentro de etherOI que te ayuda a realizar tareas específicas. Puedes Crear Asistente IA personalizados para diferentes propósitos y necesidades.
                     </p>
                   </div>
 
@@ -234,7 +230,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
                         <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         <div className="relative z-10 flex flex-col items-center gap-3 p-4">
                           <Brain weight="duotone" className="w-8 h-8 text-[#F48120] group-hover:scale-110 transition-transform duration-300" />
-                          <span className="text-sm font-medium bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent group-hover:opacity-90">Crear OIAI</span>
+                          <span className="text-sm font-medium bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent group-hover:opacity-90">Crear Asistente IA</span>
                         </div>
                       </button>
                     </div>
@@ -256,7 +252,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
           </div>
         </div> */}
 
-        <Button
+        {/* <Button
           variant="ghost"
           size="md"
           shape="square"
@@ -264,7 +260,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
           onClick={onOpenSettings}
         >
           <Gear size={20} />
-        </Button>
+        </Button> */}
       </div>
       {/* 
       <div className="flex items-center justify-between gap-2">

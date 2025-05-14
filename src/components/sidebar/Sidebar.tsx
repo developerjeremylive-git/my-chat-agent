@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/button/Button';
 import { Card } from '@/components/card/Card';
 import { cn } from '@/lib/utils';
-import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun, GraduationCap, Pencil, Palette, Leaf, Camera, MusicNotes, ChartBar, Globe, ShieldCheck, Rocket, Wrench, Users } from '@phosphor-icons/react';
+import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun, GraduationCap, Pencil, Palette, Leaf, Camera, MusicNotes, ChartBar, Globe, ShieldCheck, Rocket, Wrench, Users, Question, PlusCircle } from '@phosphor-icons/react';
 import AuthPopup from '../AuthPopup';
 import AuthButton from '../AuthButton';
 import { OIAICreator } from '../modal/OIAICreator';
@@ -27,6 +27,8 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
   const [isTemplatesExpanded, setIsTemplatesExpanded] = useState(false);
   const [isAgentsExpanded, setIsAgentsExpanded] = useState(false);
   const [showAgentDashboard, setShowAgentDashboard] = useState(false);
+  const [showOiaiGuide, setShowOiaiGuide] = useState(false);
+  const [showOIAICreator, setShowOIAICreator] = useState(false);
 
   const promptTemplates = {
     "exploracion-ideas": [
@@ -329,6 +331,148 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
   };
   return (
     <>
+      {showOiaiGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowOiaiGuide(false)}>
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl border border-neutral-200 dark:border-neutral-800 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 space-y-6">
+              <div className="flex items-center justify-between sticky top-0 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm z-50 -mx-6 px-6 border-b border-neutral-200 dark:border-neutral-800 h-[60px]">
+                <div className="flex items-center gap-3 h-full">
+                  <Brain weight="duotone" className="w-8 h-8 text-[#F48120]" />
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Guía de etherOI</h2>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  shape="square"
+                  className="bg-white/95 dark:bg-gray-800/95 border-2 border-[#F48120]/20 dark:border-[#F48120]/10 text-[#F48120] hover:text-white hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20"
+                  onClick={() => setShowOiaiGuide(false)}
+                >
+                  <X weight="bold" size={20} />
+                </Button>
+              </div>
+
+              <div className="space-y-8">
+                {/* Sección 1: Introducción */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">¿Qué es oiai en etherOI?</h3>
+                  <p className="text-neutral-600 dark:text-neutral-300">
+                    oiai es un asistente de IA personalizable dentro de etherOI que te ayuda a realizar tareas específicas. Puedes Crear Asistente IA personalizados para diferentes propósitos y necesidades.
+                  </p>
+                </div>
+
+                {/* Sección 2: Componentes Clave */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Componentes clave de un oiai efectivo</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card className="p-4 space-y-2 bg-gradient-to-br from-[#F48120]/5 to-transparent border-[#F48120]/20">
+                      <h4 className="font-medium text-[#F48120]">Persona</h4>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-300">Define el rol y comportamiento del oiai</p>
+                    </Card>
+                    <Card className="p-4 space-y-2 bg-gradient-to-br from-purple-500/5 to-transparent border-purple-500/20">
+                      <h4 className="font-medium text-purple-500">Tarea</h4>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-300">Especifica qué debe hacer o crear el oiai</p>
+                    </Card>
+                    <Card className="p-4 space-y-2 bg-gradient-to-br from-blue-500/5 to-transparent border-blue-500/20">
+                      <h4 className="font-medium text-blue-500">Contexto</h4>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-300">Proporciona información de fondo relevante</p>
+                    </Card>
+                    <Card className="p-4 space-y-2 bg-gradient-to-br from-green-500/5 to-transparent border-green-500/20">
+                      <h4 className="font-medium text-green-500">Formato</h4>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-300">Define la estructura deseada de las respuestas</p>
+                    </Card>
+                  </div>
+                </div>
+
+                {/* Sección 3: Pasos para Crear */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Pasos para crear un oiai</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/50">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F48120]/10 text-[#F48120]">1</div>
+                      <div className="space-y-1">
+                        <h5 className="font-medium text-neutral-900 dark:text-white">Define el propósito</h5>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-300">Establece claramente qué quieres que haga tu oiai y qué problemas debe resolver.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/50">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F48120]/10 text-[#F48120]">2</div>
+                      <div className="space-y-1">
+                        <h5 className="font-medium text-neutral-900 dark:text-white">Escribe las instrucciones</h5>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-300">Proporciona instrucciones detalladas incluyendo persona, tarea, contexto y formato deseado.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/50">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F48120]/10 text-[#F48120]">3</div>
+                      <div className="space-y-1">
+                        <h5 className="font-medium text-neutral-900 dark:text-white">Prueba y refina</h5>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-300">Realiza pruebas con diferentes prompts y ajusta las instrucciones según sea necesario.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sección 4: Mejores Prácticas */}
+                <div className="flex gap-4">
+                  <div className="flex-1 space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Mejores prácticas</h3>
+                    <ul className="space-y-2 text-neutral-600 dark:text-neutral-300">
+                      <li className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
+                        <span className="text-sm">Sé específico en tus instrucciones</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
+                        <span className="text-sm">Incluye ejemplos cuando sea posible</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
+                        <span className="text-sm">Define límites claros de lo que debe y no debe hacer</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
+                        <span className="text-sm">Mantén las instrucciones concisas pero completas</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="flex-1">
+                    <button
+                      onClick={() => {
+                        setShowOiaiGuide(false);
+                        setShowOIAICreator(true);
+                      }}
+                      className="w-full h-full flex items-center justify-center bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5
+                                  hover:from-[#F48120]/20 hover:to-purple-500/20 dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10
+                                  border border-[#F48120]/20 dark:border-[#F48120]/10 rounded-xl
+                                  transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                                  group relative overflow-hidden animate-pulse hover:animate-none"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative z-10 flex flex-col items-center gap-3 p-4">
+                        <Brain weight="duotone" className="w-8 h-8 text-[#F48120] group-hover:scale-110 transition-transform duration-300" />
+                        <span className="text-sm font-medium bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent group-hover:opacity-90">Crear Asistente IA</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showOIAICreator && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[85vh] overflow-hidden relative transform transition-all duration-300 scale-100 opacity-100">
+            <OIAICreator
+              onCopyContent={(content) => {
+                
+              }}
+              onClose={() => setShowOIAICreator(false)}
+            />
+          </div>
+        </div>
+      )}
+
       <div
         className={cn(
           'fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out shadow-2xl overflow-hidden',
@@ -358,9 +502,33 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
           {/* Navigation */}
           <nav className="flex-1 p-4 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="flex flex-col h-full space-y-6">
-            
+
 
               <div className="space-y-3">
+                {/* Sección de Asistente IA */}
+                <div className="flex items-center justify-between p-3 bg-neutral-100/50 dark:bg-neutral-800/50 rounded-xl">
+                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Asistente IA</span>
+                </div>
+                <div className="space-y-2 px-2">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20"
+                    onClick={() => { setShowOiaiGuide(true); onClose(); }}
+                  >
+                    <Question weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
+                    Guía etherOI
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20"
+                    onClick={() => { setShowOIAICreator(true); onClose(); }}
+                    disabled={true}
+                  >
+                    <PlusCircle weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
+                    Crear Asistente IA
+                  </Button>
+                </div>
+
                 {/* Sección de Agentes */}
                 <div
                   onClick={() => setIsAgentsExpanded(!isAgentsExpanded)}
@@ -850,11 +1018,11 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
               </div>
             </div>
           </div> */}
-            <div className="mt-4 text-xs text-center cn('text-neutral-500 hover:text-neutral-400 transition-colors duration-300', theme === 'dark' ? 'text-neutral-500' : 'text-gray-500')">
-              Potenciado por Tecnología IA Avanzada
-            </div>
+          <div className="mt-4 text-xs text-center cn('text-neutral-500 hover:text-neutral-400 transition-colors duration-300', theme === 'dark' ? 'text-neutral-500' : 'text-gray-500')">
+            Potenciado por Tecnología IA Avanzada
           </div>
         </div>
+      </div>
 
       {/* Overlay */}
       {isOpen && (
