@@ -104,9 +104,9 @@ export const Modal = ({
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-[95vw] mx-auto">
+      <div className="relative w-full max-w-[min(95vw,1400px)] mx-auto">
         <Card
-          className={cn("reveal reveal-sm relative z-50 w-full max-h-[90vh] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:bg-gray-900", className)}
+          className={cn("reveal reveal-sm relative z-50 w-full max-h-[min(90vh,900px)] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:bg-gray-900", className)}
           ref={modalRef}
           tabIndex={-1}
         >
@@ -124,10 +124,10 @@ export const Modal = ({
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Editor de texto</h2>
           </div>
 
-          <div className="flex-1 h-[calc(90vh-12rem)] overflow-y-auto">
+          <div className="flex-1 h-[min(calc(90vh-12rem),calc(900px-12rem))] overflow-y-auto p-4 sm:p-6">
             {children}
           </div>
-          <div className="sticky bottom-0 w-full border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-6 py-4 z-[60]">
+          <div className="sticky bottom-0 w-full border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 sm:px-6 py-3 sm:py-4 z-[60]">
             <div className="flex justify-between items-center">
             <Button
               aria-label="Expandir modal"

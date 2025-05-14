@@ -219,7 +219,10 @@ function ChatComponent() {
       <main className="flex-1 w-full px-4 py-4">
         <div className="h-[calc(100vh-2rem)] w-full mx-auto flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800">
           <ChatHeader
-            onOpenSidebar={() => setIsSidebarOpen(true)}
+            onOpenSidebar={() => {
+                setIsSidebarOpen(true);
+                document.dispatchEvent(new Event('sidebarOpen'));
+              }}
             onOpenSettings={() => setIsSettingsOpen(true)}
             showDebug={showDebug}
             onToggleDebug={() => setShowDebug((prev) => !prev)}
@@ -586,7 +589,7 @@ function ChatComponent() {
           {/* Messages */}
           {/* Action Buttons Frame */}
 
-          <div className="mr-2 fixed bottom-20 right-4 z-20">
+          <div className="mr-2 fixed bottom-20 right-4 z-10">
             <Tooltip content={systemPrompt ? "Minimizar consulta del sistema" : "Expandir consulta del sistema"}>
               <Button
                 variant="ghost"

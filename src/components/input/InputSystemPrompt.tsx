@@ -94,7 +94,7 @@ export const InputSystemPrompt = ({
       <div className="flex justify-end gap-1 mb-2">
         <button
           type="button"
-          className="p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors bg-ob-btn-secondary-bg rounded-lg"
+          className="p-2 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 bg-gradient-to-br from-orange-50 to-purple-50 dark:from-orange-500/5 dark:to-purple-500/5 hover:from-orange-100 hover:to-purple-100 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg border border-orange-200/50 dark:border-purple-700/30 shadow-sm hover:shadow-orange-500/10 dark:hover:shadow-purple-500/10 hover:scale-105"
           onClick={() => setIsModalOpen(true)}
           title="Expandir"
         >
@@ -102,7 +102,7 @@ export const InputSystemPrompt = ({
         </button>
         <button
           type="button"
-          className="p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors bg-ob-btn-secondary-bg rounded-lg"
+          className="p-2 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 bg-gradient-to-br from-orange-50 to-purple-50 dark:from-orange-500/5 dark:to-purple-500/5 hover:from-orange-100 hover:to-purple-100 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg border border-orange-200/50 dark:border-purple-700/30 shadow-sm hover:shadow-orange-500/10 dark:hover:shadow-purple-500/10 hover:scale-105"
           onClick={() => setIsPromptModalOpen(true)}
           title="Guardar prompt"
         >
@@ -110,7 +110,7 @@ export const InputSystemPrompt = ({
         </button>
         <button
           type="button"
-          className="p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors bg-ob-btn-secondary-bg rounded-lg"
+          className="p-2 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 bg-gradient-to-br from-orange-50 to-purple-50 dark:from-orange-500/5 dark:to-purple-500/5 hover:from-orange-100 hover:to-purple-100 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg border border-orange-200/50 dark:border-purple-700/30 shadow-sm hover:shadow-orange-500/10 dark:hover:shadow-purple-500/10 hover:scale-105"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           title="Ver prompts guardados"
         >
@@ -139,23 +139,23 @@ export const InputSystemPrompt = ({
       </div>
 
       {isDropdownOpen && savedPrompts.length > 0 && (
-        <div className="w-80 max-w-[calc(100%-2rem)] absolute bottom-full right-0 mb-1 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-700 scrollbar-track-transparent">
+        <div className="w-full max-w-[min(calc(100%-1rem),600px)] absolute bottom-full right-0 mb-1 bg-gradient-to-br from-white to-purple-50 dark:from-neutral-900 dark:to-purple-900/10 border border-orange-200 dark:border-purple-700/50 rounded-lg shadow-lg shadow-orange-500/5 dark:shadow-purple-500/5 z-50 max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 hover:scrollbar-thumb-orange-300 dark:scrollbar-thumb-purple-700 dark:hover:scrollbar-thumb-purple-600 scrollbar-track-transparent backdrop-blur-sm">
           {savedPrompts.map((prompt) => (
             <div
               key={prompt.id}
-              className=" group flex items-center px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="group flex items-center px-4 py-3 hover:bg-gradient-to-r hover:from-orange-50 hover:to-purple-50 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 transition-all duration-300 border-b border-orange-100/20 dark:border-purple-700/20 last:border-b-0"
             >
               <button
-                className="flex-grow text-left"
+                className="flex-grow text-left group-hover:scale-[1.01] transition-transform duration-300 min-w-0"
                 onClick={() => selectPrompt(prompt)}
               >
-                <div className="font-medium text-neutral-900 dark:text-white">{prompt.name}</div>
-                <div className="w-66 max-w-[calc(100%-2rem)] text-sm text-neutral-500 dark:text-neutral-400 truncate">
+                <div className="font-medium text-neutral-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-300">{prompt.name}</div>
+                <div className="text-sm text-neutral-500 dark:text-neutral-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 truncate transition-colors duration-300 max-w-[400px]">
                   {prompt.content}
                 </div>
               </button>
               <button
-                className="p-2 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                className="p-2 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-110 hover:rotate-2"
                 onClick={(e) => handleDeleteClick(e, prompt)}
                 title="Eliminar prompt"
               >
@@ -186,15 +186,15 @@ export const InputSystemPrompt = ({
       <Modal
         isOpen={isPromptModalOpen}
         onClose={() => setIsPromptModalOpen(false)}
-        className="w-full max-w-md mx-auto"
+        className="w-full max-w-[min(95vw,500px)] mx-auto"
         hideSubmitButton={true}
       >
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4">
           <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Guardar Prompt del Sistema</h3>
           <input
             type="text"
             placeholder="Nombre del prompt"
-            className="w-full px-4 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10"
+            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-neutral-200 dark:border-neutral-700 focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10"
             value={promptName}
             onChange={(e) => setPromptName(e.target.value)}
           />
@@ -222,10 +222,10 @@ export const InputSystemPrompt = ({
           setIsDeleteModalOpen(false);
           setPromptToDelete(null);
         }}
-        className="w-full max-w-md mx-auto"
+        className="w-full max-w-[min(95vw,500px)] mx-auto"
         hideSubmitButton={true}
       >
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4">
           <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Confirmar Eliminación</h3>
           <p className="text-neutral-700 dark:text-neutral-300">
             ¿Estás seguro de que deseas eliminar el prompt "{promptToDelete?.name}"?
