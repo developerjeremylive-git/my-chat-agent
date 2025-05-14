@@ -24,7 +24,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect }: SidebarProps) {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
-  const [isTemplatesExpanded, setIsTemplatesExpanded] = useState(false);
+  const [isTemplatesExpanded, setIsTemplatesExpanded] = useState(true);
   const [isAgentsExpanded, setIsAgentsExpanded] = useState(false);
   const [showAgentDashboard, setShowAgentDashboard] = useState(false);
 
@@ -357,12 +357,8 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
 
           {/* Navigation */}
           <nav className="flex-1 p-4 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <AuthButton
-                  className="w-full bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-purple-500 hover:to-[#F48120] text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
-                />
-              </div>
+            <div className="flex flex-col h-full space-y-6">
+            
 
               <div className="space-y-3">
                 {/* Sección de Agentes */}
@@ -742,6 +738,10 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                   </div>
                 </div>
               </div>
+              <AuthButton
+                variant="sidebar"
+                className="mt-auto"
+              />
             </div>
           </nav>
 
