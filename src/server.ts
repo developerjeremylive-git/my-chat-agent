@@ -18,14 +18,27 @@ import { cors } from 'hono/cors';
 const app = new Hono();
 const workersai = createWorkersAI({ binding: env.AI });
 
-// Variable global para almacenar el modelo seleccionado
+// Variables globales para almacenar el modelo seleccionado y el prompt del sistema
 let selectedModel = '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b';
+let systemPrompt = 'You are a helpful assistant that can do various tasks...';
 
 // Endpoint para actualizar el modelo
 app.post('/api/model', async (c) => {
   const { model } = await c.req.json();
   selectedModel = model;
   return c.json({ success: true, model: selectedModel });
+});
+
+// Endpoint para actualizar el prompt del sistema
+app.post('/api/system-prompt', async (c) => {
+  const { prompt } = await c.req.json();
+  systemPrompt = prompt;
+  return c.json({ success: true, prompt: systemPrompt });
+});
+
+// Endpoint para obtener el prompt del sistema actual
+app.get('/api/system-prompt', async (c) => {
+  return c.json({ prompt: systemPrompt });
 });
 
 // Middleware CORS
@@ -100,7 +113,7 @@ export class Chat extends AIChatAgent<Env> {
             topK: config.topK,
             frequencyPenalty: config.frequencyPenalty,
             presencePenalty: config.presencePenalty,
-            system: `You are a helpful assistant that can do various tasks... 
+            system: `${systemPrompt}
 
 ${unstable_getSchedulePrompt({ date: new Date() })}
 

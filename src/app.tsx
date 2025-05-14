@@ -88,6 +88,42 @@ function ChatComponent() {
   const [showAgentInterface, setShowAgentInterface] = useState(false);
   const [showToolsInterface, setShowToolsInterface] = useState(false);
   const [inputText, setInputText] = useState('');
+
+  // Interfaz para la respuesta de la API
+  interface SystemPromptResponse {
+    prompt: string;
+  }
+
+  // Función para sincronizar el prompt del sistema con el servidor
+  const syncSystemPrompt = async () => {
+    try {
+      const response = await fetch('/api/system-prompt');
+      const data = await response.json() as SystemPromptResponse;
+      setInputText(data.prompt);
+    } catch (error) {
+      console.error('Error al obtener el prompt del sistema:', error);
+    }
+  };
+
+  // Sincronizar el prompt del sistema al montar el componente
+  useEffect(() => {
+    syncSystemPrompt();
+  }, []);
+
+  // Función para actualizar el prompt del sistema en el servidor
+  const updateSystemPrompt = async (newPrompt: string) => {
+    try {
+      await fetch('/api/system-prompt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: newPrompt }),
+      });
+    } catch (error) {
+      console.error('Error al actualizar el prompt del sistema:', error);
+    }
+  };
   const [showTextModal, setShowTextModal] = useState(false);
   const [showAgent, setShowAgent] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -757,14 +793,17 @@ function ChatComponent() {
                   disabled={pendingToolCallConfirmation || !agentInput.trim()}
                   onClick={async (e) => {
                     try {
-                      // Actualizar el modelo en el servidor antes de enviar el mensaje
-                      await fetch('/api/model', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ model: selectedModel }),
-                      });
+                      updateSystemPrompt(inputText),
+                      // Actualizar el modelo y el prompt del sistema en el servidor antes de enviar el mensaje
+                      await Promise.all([
+                        fetch('/api/model', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({ model: selectedModel }),
+                        })
+                      ]);
 
                       // Proceder con el envío del mensaje
                       if (!user) {
