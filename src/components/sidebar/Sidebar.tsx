@@ -746,7 +746,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
           </nav>
 
           {/* Theme Toggle */}
-          <div className="p-4 mt-auto border-t cn('border-opacity-10', theme === 'dark' ? 'border-neutral-800' : 'border-gray-200')">
+          {/* <div className="p-4 mt-auto border-t cn('border-opacity-10', theme === 'dark' ? 'border-neutral-800' : 'border-gray-200')">
             <div className="relative">
               <Button
                 variant="ghost"
@@ -849,7 +849,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
             <div className="mt-4 text-xs text-center cn('text-neutral-500 hover:text-neutral-400 transition-colors duration-300', theme === 'dark' ? 'text-neutral-500' : 'text-gray-500')">
               Potenciado por Tecnología IA Avanzada
             </div>

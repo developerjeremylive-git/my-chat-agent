@@ -76,6 +76,13 @@ function ChatComponent() {
   const [showOiaiGuide, setShowOiaiGuide] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Efecto para cerrar el menú de configuración cuando se abre la barra lateral
+  useEffect(() => {
+    if (isSidebarOpen) {
+      setShowSettingsMenu(false);
+    }
+  }, [isSidebarOpen]);
   const [theme, setTheme] = useState<"dark" | "light">(() => {
 
     // Check localStorage first, default to dark if not found
