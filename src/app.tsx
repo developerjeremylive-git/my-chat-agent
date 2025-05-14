@@ -633,7 +633,7 @@ function ChatComponent() {
                         <Robot size={28} weight="duotone" />
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <h3 className="font-bold text-2xl bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Asistente IA</h3>
                     </div>
@@ -646,7 +646,7 @@ function ChatComponent() {
                         <span className="text-2xl mb-2 block">🌤️</span>
                         <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Clima</span>
                       </div>
-                      
+
                       <div onClick={() => {
                         setShowModal(true);
                         handleAgentInputChange({ target: { value: "¿Qué hora es en Tokyo cuando son las 15:00 en Madrid?" } } as any);
@@ -654,7 +654,7 @@ function ChatComponent() {
                         <span className="text-2xl mb-2 block">🌍</span>
                         <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Horarios</span>
                       </div>
-                      
+
                       <div onClick={() => {
                         setShowModal(true);
                         handleAgentInputChange({ target: { value: "¿Podrías ayudarme a crear un plan de estudio?" } } as any);
@@ -880,7 +880,7 @@ function ChatComponent() {
           <div className={`${systemPrompt ? 'hidden' : ''} pl-4 pr-10 rounded-full mb-0 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm transition-all duration-300 w-58 ml-2 mr-2`}>
             <div className="flex items-center justify-between gap-3">
               {/* <div className="flex items-center gap-2"> */}
-                {/* <Tooltip content="Guía">
+              {/* <Tooltip content="Guía">
                   <Button
                     variant="ghost"
                     size="md"
@@ -891,35 +891,35 @@ function ChatComponent() {
                     <Question size={20} weight="duotone" />
                   </Button>
                 </Tooltip> */}
-                <Tooltip content="Crear IA">
-                  <Button
-                    variant="ghost"
-                    size="md"
-                    shape="square"
-                    className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
-                    onClick={() => setShowOIAICreator(true)}
-                  >
-                    <PlusCircle size={20} weight="duotone" />
-                  </Button>
-                </Tooltip>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="md"
-                    shape="square"
-                    className="rounded-full h-9 w-9"
-                    onClick={() => setShowToolsInterface(true)}
-                  >
-                    <Rocket size={20} weight="duotone" className="text-[#F48120]" />
-                  </Button>
-                </div>
+              <Tooltip content="Crear IA">
+                <Button
+                  variant="ghost"
+                  size="md"
+                  shape="square"
+                  className="rounded-full h-9 w-9 hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20 transition-colors duration-200"
+                  onClick={() => setShowOIAICreator(true)}
+                >
+                  <PlusCircle size={20} weight="duotone" />
+                </Button>
+              </Tooltip>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="md"
+                  shape="square"
+                  className="rounded-full h-9 w-9"
+                  onClick={() => setShowToolsInterface(true)}
+                >
+                  <Rocket size={20} weight="duotone" className="text-[#F48120]" />
+                </Button>
+              </div>
 
-                <div className={`flex-1 flex transition-all duration-300 opacity-100 max-w-full`}>
-                  <ModelSelect />
-                </div>
+              <div className={`flex-1 flex transition-all duration-300 opacity-100 max-w-full`}>
+                <ModelSelect />
+              </div>
 
 
-                {/* 
+              {/* 
 
               <Tooltip content="Crear Agente">
                 <Button
@@ -932,7 +932,7 @@ function ChatComponent() {
                   <Robot size={20} weight="duotone" />
                 </Button>
               </Tooltip> */}
-                {/* <Tooltip content={isToolbarExpanded ? "Minimizar barra de herramientas" : "Expandir barra de herramientas"}>
+              {/* <Tooltip content={isToolbarExpanded ? "Minimizar barra de herramientas" : "Expandir barra de herramientas"}>
                   <Button
                     variant="ghost"
                     size="md"
@@ -967,7 +967,7 @@ function ChatComponent() {
           </div>
 
           {systemPrompt && (
-            <div className="mb-15 items-center justify-between ml-2 mr-2">
+            <div className="mb-2 items-center justify-between ml-2 mr-2">
               {/* <div className="flex-1"> */}
               <div className="flex">
                 <h2 className="mt-11.5 text-lg font-medium text-neutral-800 dark:text-neutral-200">
@@ -985,6 +985,22 @@ function ChatComponent() {
             </div>
           )}
 
+          <Tooltip content={systemPrompt ? "Minimizar" : "Expandir"}>
+            <Button
+              variant="ghost"
+              size="md"
+              shape="square"
+              className="mt-1 mr-2 ml-1 mb-2.5"
+              onClick={() => setSystemPrompt(!systemPrompt)}
+            >
+              {systemPrompt ? (
+                <CaretCircleDown size={20} className="text-[#F48120]" weight="duotone" />
+              ) : (
+                <CaretCircleDoubleUp size={20} className="text-[#F48120] mt-4" weight="duotone" />
+              )}
+            </Button>
+          </Tooltip>
+
           {/* Input Area */}
           <form
             onSubmit={(e) =>
@@ -996,7 +1012,7 @@ function ChatComponent() {
                 },
               })
             }
-            className="p-2 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-neutral-300 dark:border-neutral-800"
+            className="ml-8 p-2 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-neutral-300 dark:border-neutral-800"
           >
             {/* <div className={`transition-all duration-300 ${!systemPrompt ? 'opacity-100 max-w-full' : 'opacity-0 overflow-hidden'}`}>
               <h2 className='text-lg font-medium text-neutral-800 dark:text-neutral-200'>
@@ -1010,25 +1026,6 @@ function ChatComponent() {
                     <span className="text-[#F48120] mr-2 ml-1 ">Usuario</span>
                   </p> */}
                   {/* Action Buttons Frame */}
-                  <Tooltip content={systemPrompt ? "Minimizar" : "Expandir"}>
-                    <Button
-                      variant="ghost"
-                      size="md"
-                      shape="square"
-                      className="w-8 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                       dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                       border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                       transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                       flex items-center justify-between gap-2 group/button mt-0.5 mr-2"
-                      onClick={() => setSystemPrompt(!systemPrompt)}
-                    >
-                      {systemPrompt ? (
-                        <CaretCircleDown size={20} className="text-[#F48120]" weight="duotone" />
-                      ) : (
-                        <CaretCircleDoubleUp size={20} className="text-[#F48120]" weight="duotone" />
-                      )}
-                    </Button>
-                  </Tooltip>
                   <Input
                     disabled={pendingToolCallConfirmation}
                     placeholder={
