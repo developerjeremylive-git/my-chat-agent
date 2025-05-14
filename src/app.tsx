@@ -243,6 +243,31 @@ function ChatComponent() {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
+  const [chatWidth, setChatWidth] = useState<'narrow' | 'default' | 'full'>('default');
+
+  useEffect(() => {
+    const handleChatWidth = (event: CustomEvent<{ width: 'narrow' | 'default' | 'full' }>) => {
+      setChatWidth(event.detail.width);
+    };
+
+    window.addEventListener('toggleChatWidth', handleChatWidth as EventListener);
+
+    return () => {
+      window.removeEventListener('toggleChatWidth', handleChatWidth as EventListener);
+    };
+  }, []);
+
+  const getMainWidth = () => {
+    switch (chatWidth) {
+      case 'narrow':
+        return 'max-w-3xl';
+      case 'full':
+        return 'max-w-full';
+      default:
+        return 'max-w-6xl';
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground overflow-hidden">
       <Sidebar
@@ -253,7 +278,7 @@ function ChatComponent() {
         onPromptSelect={(prompt) => handleAgentInputChange({ target: { value: prompt } } as any)}
       />
       <main className="flex-1 w-full px-4 py-4">
-        <div className="h-[calc(100vh-2rem)] w-full mx-auto flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800">
+        <div className={`h-[calc(100vh-2rem)] w-full ${getMainWidth()} mx-auto flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800 transition-all duration-300`}>
           <ChatHeader
             onOpenSidebar={() => {
                 setIsSidebarOpen(true);

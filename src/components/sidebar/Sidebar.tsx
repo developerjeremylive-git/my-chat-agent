@@ -747,23 +747,114 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
 
           {/* Theme Toggle */}
           <div className="p-4 mt-auto border-t cn('border-opacity-10', theme === 'dark' ? 'border-neutral-800' : 'border-gray-200')">
-            <Button
-              variant="ghost"
-              className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-              onClick={onThemeChange}
-            >
-              {theme === "dark" ?
-                <Sun weight="duotone" className="mr-3 h-5 w-5 text-amber-400" /> :
-                <Moon weight="duotone" className="mr-3 h-5 w-5 text-blue-400" />
-              }
-              {theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
-            </Button>
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                         flex items-center justify-between gap-2 group/button"
+                onClick={() => {
+                  const menu = document.getElementById('settingsMenu');
+                  if (menu) {
+                    menu.classList.toggle('opacity-0');
+                    menu.classList.toggle('invisible');
+                    menu.classList.toggle('translate-y-2');
+                  }
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <Palette size={16} className="text-[#F48120]" weight="duotone" />
+                  <span className="text-sm font-medium bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent group-hover/button:from-[#F48120] group-hover/button:to-purple-600">Configuración</span>
+                </div>
+                <List size={16} className="text-[#F48120] group-hover/button:rotate-180 transition-transform duration-300" weight="bold" />
+              </Button>
+              <div
+                id="settingsMenu"
+                className="absolute right-0 bottom-full mb-2 w-56 bg-white dark:bg-neutral-900 rounded-xl shadow-xl
+                         border border-neutral-200/50 dark:border-neutral-700/50
+                         backdrop-blur-lg backdrop-saturate-150
+                         opacity-0 invisible -translate-y-2 transition-all duration-300 z-50"
+              >
+                <div className="p-2 space-y-1">
+                  <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Ancho del chat</div>
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                             text-neutral-700 dark:text-neutral-300
+                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                    onClick={() => {
+                      const event = new CustomEvent('toggleChatWidth', {
+                        detail: { width: 'narrow' }
+                      });
+                      window.dispatchEvent(event);
+                    }}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                    <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Reducido</span>
+                  </button>
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                             text-neutral-700 dark:text-neutral-300
+                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                    onClick={() => {
+                      const event = new CustomEvent('toggleChatWidth', {
+                        detail: { width: 'default' }
+                      });
+                      window.dispatchEvent(event);
+                    }}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                    <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Normal</span>
+                  </button>
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                             text-neutral-700 dark:text-neutral-300
+                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                    onClick={() => {
+                      const event = new CustomEvent('toggleChatWidth', {
+                        detail: { width: 'full' }
+                      });
+                      window.dispatchEvent(event);
+                    }}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                    <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Completo</span>
+                  </button>
+                  <div className="my-2 border-t border-neutral-200 dark:border-neutral-700"></div>
+                  <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Tema</div>
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                             text-neutral-700 dark:text-neutral-300
+                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                    onClick={onThemeChange}
+                  >
+                    {theme === "dark" ?
+                      <Sun weight="duotone" className="w-5 h-5 text-amber-400" /> :
+                      <Moon weight="duotone" className="w-5 h-5 text-blue-400" />
+                    }
+                    <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">
+                      {theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
             <div className="mt-4 text-xs text-center cn('text-neutral-500 hover:text-neutral-400 transition-colors duration-300', theme === 'dark' ? 'text-neutral-500' : 'text-gray-500')">
               Potenciado por Tecnología IA Avanzada
             </div>
           </div>
         </div>
-      </div>
 
       {/* Overlay */}
       {isOpen && (
