@@ -625,108 +625,48 @@ function ChatComponent() {
                     placeholder="Escribe tu mensaje aquí..."
                   />
                 </Modal>
-                <Card className="p-4 md:p-8 w-full max-w-md mx-auto bg-gradient-to-b from-neutral-100/80 to-neutral-50 dark:from-neutral-900/80 dark:to-neutral-950 backdrop-blur-sm border border-neutral-200/50 dark:border-neutral-800/50 shadow-xl hover:shadow-2xl transition-all duration-300">
-                  <div className="text-center space-y-4 md:space-y-6">
+                <Card className="p-6 w-full max-w-md mx-auto bg-gradient-to-b from-neutral-100/80 to-neutral-50 dark:from-neutral-900/80 dark:to-neutral-950 backdrop-blur-sm border border-neutral-200/50 dark:border-neutral-800/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+                  <div className="text-center space-y-6">
                     <div className="relative">
                       <div className="absolute -inset-4 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-full blur-2xl dark:from-[#F48120]/10 dark:to-purple-500/10"></div>
-                      <div className="bg-gradient-to-r from-[#F48120] to-[#F48120]/80 text-white rounded-full p-3 md:p-4 inline-flex relative transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                        <Robot size={24} weight="duotone" className="md:w-7 md:h-7" />
+                      <div className="bg-gradient-to-r from-[#F48120] to-[#F48120]/80 text-white rounded-full p-4 inline-flex relative transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                        <Robot size={28} weight="duotone" />
                       </div>
                     </div>
-                    <div className="space-y-2 md:space-y-3">
-                      <h3 className="font-bold text-xl md:text-2xl bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Bienvenido a tu Asistente IA</h3>
-                      <p className="text-neutral-600 dark:text-neutral-300 text-sm md:text-base leading-relaxed hidden md:block">
-                        Tu compañero inteligente para resolver dudas y automatizar tareas. Potenciado por tecnología IA avanzada.
-                      </p>
+                    
+                    <div className="space-y-2">
+                      <h3 className="font-bold text-2xl bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Asistente IA</h3>
                     </div>
-                    <div className="bg-white/50 dark:bg-neutral-800/50 rounded-xl p-3 md:p-4 space-y-3 md:space-y-4 backdrop-blur-sm border border-neutral-200/50 dark:border-neutral-700/50">
-                      <h4 className="font-medium text-sm md:text-base text-neutral-800 dark:text-neutral-200">Explora mis capacidades:</h4>
-                      <ul className="grid gap-2 md:gap-3">
-                        <li
-                          onClick={() => {
-                            setShowModal(true);
-                            handleAgentInputChange({ target: { value: "¿Cuál es el pronóstico del tiempo para Madrid este fin de semana? Incluye temperatura y probabilidad de lluvia." } } as any);
-                          }}
-                          className="group relative flex items-center gap-2 md:gap-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 p-2 rounded-lg transition-all duration-200 cursor-pointer active:scale-98 hover:shadow-md">
-                          <span className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 bg-[#F48120]/10 dark:bg-[#F48120]/20 rounded-full flex items-center justify-center">
-                            <span className="text-[#F48120] text-sm md:text-base">🌤️</span>
-                          </span>
-                          <div className="flex flex-col flex-1">
-                            <span className="text-sm md:text-base font-medium">Datos meteorológicos</span>
-                            <span className="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 line-clamp-1">Consulta el clima y pronósticos</span>
-                          </div>
-                          <div className="text-[#F48120] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <ArrowRight size={16} className="md:w-5 md:h-5" />
-                          </div>
-                          <div className="absolute invisible md:group-hover:visible opacity-0 md:group-hover:opacity-100 bg-neutral-800 dark:bg-neutral-700 text-white p-4 rounded-lg shadow-xl -top-32 left-0 right-0 mx-4 transition-all duration-200 z-10">
-                            <h4 className="font-medium mb-2">Asistente Meteorológico</h4>
-                            <p className="text-sm mb-3">Obtén información detallada sobre:</p>
-                            <ul className="text-xs space-y-1 list-disc list-inside mb-3">
-                              <li>Pronósticos del tiempo actualizados</li>
-                              <li>Temperaturas máximas y mínimas</li>
-                              <li>Probabilidad de precipitaciones</li>
-                              <li>Condiciones atmosféricas</li>
-                            </ul>
-                            <p className="text-xs italic border-t border-white/10 pt-2">"¿Cuál es el pronóstico del tiempo para Madrid este fin de semana? Incluye temperatura y probabilidad de lluvia."</p>
-                          </div>
-                        </li>
-                        <li
-                          onClick={() => {
-                            setShowModal(true);
-                            handleAgentInputChange({ target: { value: "¿Qué hora será en Tokyo cuando sean las 15:00 en Madrid? Programa una reunión considerando el horario laboral de ambas ciudades." } } as any);
-                          }}
-                          className="group relative flex items-center gap-2 md:gap-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 p-2 rounded-lg transition-all duration-200 cursor-pointer active:scale-98 hover:shadow-md">
-                          <span className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 bg-[#F48120]/10 dark:bg-[#F48120]/20 rounded-full flex items-center justify-center">
-                            <span className="text-[#F48120] text-sm md:text-base">🌍</span>
-                          </span>
-                          <div className="flex flex-col flex-1">
-                            <span className="text-sm md:text-base font-medium">Zonas horarias</span>
-                            <span className="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 line-clamp-1">Coordina reuniones internacionales</span>
-                          </div>
-                          <div className="text-[#F48120] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <ArrowRight size={16} className="md:w-5 md:h-5" />
-                          </div>
-                          <div className="absolute invisible md:group-hover:visible opacity-0 md:group-hover:opacity-100 bg-neutral-800 dark:bg-neutral-700 text-white p-4 rounded-lg shadow-xl -top-32 left-0 right-0 mx-4 transition-all duration-200 z-10">
-                            <h4 className="font-medium mb-2">Coordinador de Zonas Horarias</h4>
-                            <p className="text-sm mb-3">Te ayudo a gestionar:</p>
-                            <ul className="text-xs space-y-1 list-disc list-inside mb-3">
-                              <li>Diferencias horarias entre ciudades</li>
-                              <li>Horarios laborales internacionales</li>
-                              <li>Programación de reuniones</li>
-                              <li>Conversiones horarias automáticas</li>
-                            </ul>
-                            <p className="text-xs italic border-t border-white/10 pt-2">"¿Qué hora será en Tokyo cuando sean las 15:00 en Madrid? Programa una reunión considerando el horario laboral de ambas ciudades."</p>
-                          </div>
-                        </li>
-                        <li
-                          onClick={() => {
-                            setShowModal(true);
-                            handleAgentInputChange({ target: { value: "¿Podrías ayudarme a crear un plan de estudio personalizado para aprender desarrollo web en 3 meses? Tengo conocimientos básicos de HTML y CSS." } } as any);
-                          }}
-                          className="group relative flex items-center gap-2 md:gap-3 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/50 p-2 rounded-lg transition-all duration-200 cursor-pointer active:scale-98 hover:shadow-md">
-                          <span className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 bg-[#F48120]/10 dark:bg-[#F48120]/20 rounded-full flex items-center justify-center">
-                            <span className="text-[#F48120] text-sm md:text-base">💡</span>
-                          </span>
-                          <div className="flex flex-col flex-1">
-                            <span className="text-sm md:text-base font-medium">Asistencia personalizada</span>
-                            <span className="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 line-clamp-1">Respuestas adaptadas a ti</span>
-                          </div>
-                          <div className="text-[#F48120] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <ArrowRight size={16} className="md:w-5 md:h-5" />
-                          </div>
-                          <div className="absolute invisible md:group-hover:visible opacity-0 md:group-hover:opacity-100 bg-neutral-800 dark:bg-neutral-700 text-white p-4 rounded-lg shadow-xl -top-32 left-0 right-0 mx-4 transition-all duration-200 z-10">
-                            <h4 className="font-medium mb-2">Asistente Personal de Aprendizaje</h4>
-                            <p className="text-sm mb-3">Te ayudo a desarrollar:</p>
-                            <ul className="text-xs space-y-1 list-disc list-inside mb-3">
-                              <li>Planes de estudio personalizados</li>
-                              <li>Rutas de aprendizaje adaptativas</li>
-                              <li>Recomendaciones de recursos</li>
-                              <li>Seguimiento de progreso</li>
-                            </ul>
-                            <p className="text-xs italic border-t border-white/10 pt-2">"¿Podrías ayudarme a crear un plan de estudio personalizado para aprender desarrollo web en 3 meses? Tengo conocimientos básicos de HTML y CSS."</p>
-                          </div>
-                        </li>
-                      </ul>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      <div onClick={() => {
+                        setShowModal(true);
+                        handleAgentInputChange({ target: { value: "¿Cuál es el pronóstico del tiempo para Madrid este fin de semana?" } } as any);
+                      }} className="group p-4 rounded-xl bg-[#F48120]/5 hover:bg-[#F48120]/10 dark:bg-[#F48120]/5 dark:hover:bg-[#F48120]/10 cursor-pointer transition-all duration-300 border border-transparent hover:border-[#F48120]/20">
+                        <span className="text-2xl mb-2 block">🌤️</span>
+                        <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Clima</span>
+                      </div>
+                      
+                      <div onClick={() => {
+                        setShowModal(true);
+                        handleAgentInputChange({ target: { value: "¿Qué hora es en Tokyo cuando son las 15:00 en Madrid?" } } as any);
+                      }} className="group p-4 rounded-xl bg-[#F48120]/5 hover:bg-[#F48120]/10 dark:bg-[#F48120]/5 dark:hover:bg-[#F48120]/10 cursor-pointer transition-all duration-300 border border-transparent hover:border-[#F48120]/20">
+                        <span className="text-2xl mb-2 block">🌍</span>
+                        <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Horarios</span>
+                      </div>
+                      
+                      <div onClick={() => {
+                        setShowModal(true);
+                        handleAgentInputChange({ target: { value: "¿Podrías ayudarme a crear un plan de estudio?" } } as any);
+                      }} className="group p-4 rounded-xl bg-[#F48120]/5 hover:bg-[#F48120]/10 dark:bg-[#F48120]/5 dark:hover:bg-[#F48120]/10 cursor-pointer transition-all duration-300 border border-transparent hover:border-[#F48120]/20">
+                        <span className="text-2xl mb-2 block">💡</span>
+                        <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Ayuda</span>
+                      </div>
+                    </div>
+
+                    <div className="animate-bounce mt-8 text-neutral-500 dark:text-neutral-400">
+                      <CaretCircleDown size={24} className="mx-auto" />
+                      <p className="text-sm mt-2">Escribe tu consulta</p>
                     </div>
                   </div>
                 </Card>
