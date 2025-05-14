@@ -2,6 +2,7 @@ import { Loader } from "@/components/loader/Loader";
 import { Slot } from "@/components/slot/Slot";
 import { Tooltip } from "@/components/tooltip/Tooltip";
 import { cn } from "@/lib/utils";
+import { forwardRef } from "react";
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   as?: React.ElementType;
@@ -19,28 +20,31 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "ghost" | "destructive" | "tertiary";
 };
 
-const ButtonComponent = ({
-  as,
-  children,
-  className,
-  disabled,
-  displayContent = "items-last",
-  external,
-  href,
-  loading,
-  shape = "base",
-  size = "base",
-  title,
-  toggled,
-  variant = "secondary",
-  ...props
-}: ButtonProps) => {
+const ButtonComponent = forwardRef<HTMLButtonElement, ButtonProps>((
+  {
+    as,
+    children,
+    className,
+    disabled,
+    displayContent = "items-last",
+    external,
+    href,
+    loading,
+    shape = "base",
+    size = "base",
+    title,
+    toggled,
+    variant = "secondary",
+    ...props
+  },
+  ref
+) => {
   return (
     <Slot
       as={as ?? "button"}
+      ref={ref}
       className={cn(
         "btn add-focus group interactive flex w-max shrink-0 items-center font-medium select-none",
-
         {
           "btn-primary": variant === "primary",
           "btn-secondary": variant === "secondary",
@@ -88,14 +92,17 @@ const ButtonComponent = ({
       )}
     </Slot>
   );
-};
+});
 
-export const Button = ({ ...props }: ButtonProps) => {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
   return props.tooltip ? (
     <Tooltip content={props.tooltip} className={props.className} id={props.id}>
-      <ButtonComponent {...props} className={undefined} />
+      <ButtonComponent ref={ref} {...props} className={undefined} />
     </Tooltip>
   ) : (
-    <ButtonComponent {...props} />
+    <ButtonComponent ref={ref} {...props} />
   );
-};
+});
+
+ButtonComponent.displayName = "ButtonComponent";
+Button.displayName = "Button";

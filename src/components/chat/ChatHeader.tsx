@@ -41,38 +41,7 @@ export function ChatHeader({ onOpenSidebar, onOpenSettings, showDebug, onToggleD
           <ModelSelect />
         </div>
 
-        <div className="flex items-center gap-1 mr-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            shape="square"
-            className={`rounded-full h-8 w-8 ${textSize === 'small' ? 'bg-[#F48120]/10 text-[#F48120]' : ''} hover:bg-[#F48120]/10 hover:text-[#F48120] transition-colors duration-200`}
-            onClick={() => onTextSizeChange('small')}
-          // title="Texto pequeño"
-          >
-            <span className="text-xs font-bold">A</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            shape="square"
-            className={`rounded-full h-8 w-8 ${textSize === 'normal' ? 'bg-[#F48120]/10 text-[#F48120]' : ''} hover:bg-[#F48120]/10 hover:text-[#F48120] transition-colors duration-200`}
-            onClick={() => onTextSizeChange('normal')}
-          // title="Texto normal"
-          >
-            <span className="text-sm font-bold">A</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            shape="square"
-            className={`rounded-full h-8 w-8 ${textSize === 'large' ? 'bg-[#F48120]/10 text-[#F48120]' : ''} hover:bg-[#F48120]/10 hover:text-[#F48120] transition-colors duration-200`}
-            onClick={() => onTextSizeChange('large')}
-          // title="Texto grande"
-          >
-            <span className="text-base font-bold">A</span>
-          </Button>
-        </div>
+
 
         {/* Botón OIAI con menú desplegable usando Radix UI */}
         {/* <DropdownMenu.Root>

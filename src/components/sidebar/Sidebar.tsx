@@ -766,7 +766,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <Palette size={16} className="text-[#F48120]" weight="duotone" />
+                  <Wrench size={16} className="text-[#F48120]" weight="duotone" />
                   <span className="text-sm font-medium bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent group-hover/button:from-[#F48120] group-hover/button:to-purple-600">Configuración</span>
                 </div>
                 <List size={16} className="text-[#F48120] group-hover/button:rotate-180 transition-transform duration-300" weight="bold" />

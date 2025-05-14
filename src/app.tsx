@@ -17,6 +17,7 @@ import { Tooltip } from "@/components/tooltip/Tooltip";
 import { AISettingsPanel } from "@/components/settings/AISettingsPanel";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { createPortal } from "react-dom";
 
 // Icon imports
 import {
@@ -244,16 +245,29 @@ function ChatComponent() {
   };
 
   const [chatWidth, setChatWidth] = useState<'narrow' | 'default' | 'full'>('default');
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const settingsButtonRef = useRef<HTMLButtonElement>(null);
+  const settingsMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleChatWidth = (event: CustomEvent<{ width: 'narrow' | 'default' | 'full' }>) => {
       setChatWidth(event.detail.width);
     };
 
+    const handleClickOutside = (event: MouseEvent) => {
+      if (settingsMenuRef.current && settingsButtonRef.current && 
+          !settingsMenuRef.current.contains(event.target as Node) && 
+          !settingsButtonRef.current.contains(event.target as Node)) {
+        setShowSettingsMenu(false);
+      }
+    };
+
     window.addEventListener('toggleChatWidth', handleChatWidth as EventListener);
+    document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
       window.removeEventListener('toggleChatWidth', handleChatWidth as EventListener);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -277,7 +291,239 @@ function ChatComponent() {
         onThemeChange={toggleTheme}
         onPromptSelect={(prompt) => handleAgentInputChange({ target: { value: prompt } } as any)}
       />
-      <main className="flex-1 w-full px-4 py-4">
+      <main className="flex-1 w-full px-4 py-4 relative">
+        {/* Botón flotante de configuración */}
+        <div className="fixed left-4 top-1/9 -translate-y-1/2 z-20">
+          <div className="relative">
+            <Button
+              ref={settingsButtonRef}
+              variant="ghost"
+              size="sm"
+              className="w-full rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                       dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                       border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                       transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                       flex items-center justify-between gap-2 group/button"
+              onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+            >
+              <div className="flex items-center gap-2">
+                <Wrench size={16} className="text-[#F48120]" weight="duotone" />
+              </div>
+            </Button>
+            {showSettingsMenu && createPortal(
+              <div
+                ref={settingsMenuRef}
+                className="fixed z-50 min-w-[200px] bg-white dark:bg-neutral-900 rounded-xl shadow-xl
+                         border border-neutral-200/50 dark:border-neutral-700/50
+                         backdrop-blur-lg backdrop-saturate-150"
+                style={{
+                  left: settingsButtonRef.current?.getBoundingClientRect().right ?? 0 + 8,
+                  top: settingsButtonRef.current?.getBoundingClientRect().top ?? 0
+                }}
+              >
+                <div className="p-2 space-y-1">
+                  <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Ancho del chat</div>
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                             text-neutral-700 dark:text-neutral-300
+                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                    onClick={() => {
+                      const event = new CustomEvent('toggleChatWidth', {
+                        detail: { width: 'narrow' }
+                      });
+                      window.dispatchEvent(event);
+                      setShowSettingsMenu(false);
+                    }}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                    <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Reducido</span>
+                  </button>
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                             text-neutral-700 dark:text-neutral-300
+                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                    onClick={() => {
+                      const event = new CustomEvent('toggleChatWidth', {
+                        detail: { width: 'default' }
+                      });
+                      window.dispatchEvent(event);
+                      setShowSettingsMenu(false);
+                    }}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                    <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Normal</span>
+                  </button>
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                             text-neutral-700 dark:text-neutral-300
+                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                    onClick={() => {
+                      const event = new CustomEvent('toggleChatWidth', {
+                        detail: { width: 'full' }
+                      });
+                      window.dispatchEvent(event);
+                      setShowSettingsMenu(false);
+                    }}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                    <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Completo</span>
+                  </button>
+                  <div className="my-2 border-t border-neutral-200 dark:border-neutral-700"></div>
+                  <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Tamaño del texto</div>
+                  <div className="flex items-center justify-center gap-2 px-4 py-2">
+                    <button
+                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                                text-neutral-700 dark:text-neutral-300
+                                hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                                dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                                transition-all duration-300 ${textSize === 'small' ? 'bg-[#F48120]/10 text-[#F48120]' : ''}
+                                group/item`}
+                      onClick={() => {
+                        setTextSize('small');
+                        setShowSettingsMenu(false);
+                      }}
+                    >
+                      <span className="text-xs font-bold group-hover/item:text-[#F48120] transition-colors duration-300">A</span>
+                    </button>
+                    <button
+                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                                text-neutral-700 dark:text-neutral-300
+                                hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                                dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                                transition-all duration-300 ${textSize === 'normal' ? 'bg-[#F48120]/10 text-[#F48120]' : ''}
+                                group/item`}
+                      onClick={() => {
+                        setTextSize('normal');
+                        setShowSettingsMenu(false);
+                      }}
+                    >
+                      <span className="text-sm font-bold group-hover/item:text-[#F48120] transition-colors duration-300">A</span>
+                    </button>
+                    <button
+                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                                text-neutral-700 dark:text-neutral-300
+                                hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                                dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                                transition-all duration-300 ${textSize === 'large' ? 'bg-[#F48120]/10 text-[#F48120]' : ''}
+                                group/item`}
+                      onClick={() => {
+                        setTextSize('large');
+                        setShowSettingsMenu(false);
+                      }}
+                    >
+                      <span className="text-base font-bold group-hover/item:text-[#F48120] transition-colors duration-300">A</span>
+                    </button>
+                  </div>
+                  <div className="my-2 border-t border-neutral-200 dark:border-neutral-700"></div>
+                  <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Tema</div>
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                             text-neutral-700 dark:text-neutral-300
+                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                    onClick={() => {
+                      toggleTheme();
+                      setShowSettingsMenu(false);
+                    }}
+                  >
+                    {theme === "dark" ?
+                      <Sun weight="duotone" className="w-5 h-5 text-amber-400" /> :
+                      <Moon weight="duotone" className="w-5 h-5 text-blue-400" />
+                    }
+                    <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">
+                      {theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
+                    </span>
+                  </button>
+                </div>
+              </div>,
+              document.body
+            )}
+            <div
+              id="settingsMenu"
+              className="absolute left-full ml-2 top-0 w-56 bg-white dark:bg-neutral-900 rounded-xl shadow-xl
+                       border border-neutral-200/50 dark:border-neutral-700/50
+                       backdrop-blur-lg backdrop-saturate-150
+                       opacity-0 invisible -translate-y-2 transition-all duration-300 z-50"
+            >
+              <div className="p-2 space-y-1">
+                <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Ancho del chat</div>
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                           text-neutral-700 dark:text-neutral-300
+                           hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                           dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                           transition-all duration-300 transform hover:translate-x-1 group/item"
+                  onClick={() => {
+                    const event = new CustomEvent('toggleChatWidth', {
+                      detail: { width: 'narrow' }
+                    });
+                    window.dispatchEvent(event);
+                  }}
+                >
+                  <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                  <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Reducido</span>
+                </button>
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                           text-neutral-700 dark:text-neutral-300
+                           hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                           dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                           transition-all duration-300 transform hover:translate-x-1 group/item"
+                  onClick={() => {
+                    const event = new CustomEvent('toggleChatWidth', {
+                      detail: { width: 'default' }
+                    });
+                    window.dispatchEvent(event);
+                  }}
+                >
+                  <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                  <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Normal</span>
+                </button>
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                           text-neutral-700 dark:text-neutral-300
+                           hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                           dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                           transition-all duration-300 transform hover:translate-x-1 group/item"
+                  onClick={() => {
+                    const event = new CustomEvent('toggleChatWidth', {
+                      detail: { width: 'full' }
+                    });
+                    window.dispatchEvent(event);
+                  }}
+                >
+                  <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                  <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Completo</span>
+                </button>
+                <div className="my-2 border-t border-neutral-200 dark:border-neutral-700"></div>
+                <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Tema</div>
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                           text-neutral-700 dark:text-neutral-300
+                           hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                           dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                           transition-all duration-300 transform hover:translate-x-1 group/item"
+                  onClick={toggleTheme}
+                >
+                  {theme === "dark" ?
+                    <Sun weight="duotone" className="w-5 h-5 text-amber-400" /> :
+                    <Moon weight="duotone" className="w-5 h-5 text-blue-400" />
+                  }
+                  <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">
+                    {theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div className={`h-[calc(100vh-2rem)] w-full ${getMainWidth()} mx-auto flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800 transition-all duration-300`}>
           <ChatHeader
             onOpenSidebar={() => {
@@ -701,7 +947,7 @@ function ChatComponent() {
                     className="rounded-full h-9 w-9"
                     onClick={() => setShowToolsInterface(true)}
                   >
-                    <Wrench size={20} weight="duotone" className="text-[#F48120]" />
+                    <Rocket size={20} weight="duotone" className="text-[#F48120]" />
                   </Button>
                 </div>
 
