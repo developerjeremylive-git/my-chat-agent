@@ -572,9 +572,9 @@ function ChatComponent() {
             textSize={textSize}
             onTextSizeChange={setTextSize}
           /> */}
-          <div className="flex items-center gap-2 justify-between w-full px-4 py-3">
+          {/* <div className="flex items-center gap-2 justify-between w-full px-4 py-3">
             <div className="flex-1"></div>
-          </div>
+          </div> */}
 
           {showAgent && (
             <ModernAgentTool
@@ -605,7 +605,7 @@ function ChatComponent() {
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto p-2 space-y-2 pb-16 max-h-[calc(100vh-11rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex-1 overflow-y-auto p-2 space-y-2 pb-16 max-h-[calc(100vh-1rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {agentMessages.length === 0 && (
               <div className="h-full flex items-center justify-center">
                 <Modal
@@ -980,99 +980,101 @@ function ChatComponent() {
             </div>
           )}
 
-          <Tooltip content={systemPrompt ? "Minimizar" : "Expandir"}>
-            <Button
-              variant="ghost"
-              size="md"
-              shape="square"
-              className="mt-1 mr-2 ml-1 mb-2.5"
-              onClick={() => setSystemPrompt(!systemPrompt)}
-            >
-              {systemPrompt ? (
-                <CaretCircleDown size={20} className="text-[#F48120]" weight="duotone" />
-              ) : (
-                <CaretCircleDoubleUp size={20} className="text-[#F48120] mt-4" weight="duotone" />
-              )}
-            </Button>
-          </Tooltip>
+          <div className="flex p-2 max-h-[calc(100vh-1rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <Tooltip content={systemPrompt ? "Minimizar" : "Expandir"}>
+              <Button
+                variant="ghost"
+                size="md"
+                shape="square"
+                className="mb-1 mr-1 pt-1"
+                onClick={() => setSystemPrompt(!systemPrompt)}
+              >
+                {systemPrompt ? (
+                  <CaretCircleDown size={20} className="text-[#F48120]" weight="duotone" />
+                ) : (
+                  <CaretCircleDoubleUp size={20} className="text-[#F48120]" weight="duotone" />
+                )}
+              </Button>
+            </Tooltip>
 
-          {/* Input Area */}
-          <form
-            onSubmit={(e) =>
-              handleAgentSubmit(e, {
-                data: {
-                  annotations: {
-                    hello: "world",
+            {/* Input Area */}
+            <form
+              onSubmit={(e) =>
+                handleAgentSubmit(e, {
+                  data: {
+                    annotations: {
+                      hello: "world",
+                    },
                   },
-                },
-              })
-            }
-            className="ml-8 p-2 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-neutral-300 dark:border-neutral-800"
-          >
-            {/* <div className={`transition-all duration-300 ${!systemPrompt ? 'opacity-100 max-w-full' : 'opacity-0 overflow-hidden'}`}>
+                })
+              }
+              className="ml-9 p-2 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-neutral-300 dark:border-neutral-800"
+            >
+              {/* <div className={`transition-all duration-300 ${!systemPrompt ? 'opacity-100 max-w-full' : 'opacity-0 overflow-hidden'}`}>
               <h2 className='text-lg font-medium text-neutral-800 dark:text-neutral-200'>
                 <span className="text-[#F48120] mr-2 ml-1">💡Escribe Tu Consulta</span>
               </h2>
             </div> */}
-            <div className="flex items-center gap-2">
-              <div className="flex-1 relative">
-                <div className="flex">
-                  {/* <p className="mt-2">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 relative">
+                  <div className="flex">
+                    {/* <p className="mt-2">
                     <span className="text-[#F48120] mr-2 ml-1 ">Usuario</span>
                   </p> */}
-                  {/* Action Buttons Frame */}
-                  <Input
-                    disabled={pendingToolCallConfirmation}
-                    placeholder={
-                      pendingToolCallConfirmation
-                        ? "Please respond to the tool confirmation above..."
-                        : "Empieza a escribir tu consulta..."
-                    }
-                    className="pl-4 pr-10 py-2 w-full rounded-full"
-                    value={agentInput}
-                    onChange={handleAgentInputChange}
-                    onValueChange={undefined}
-                  />
+                    {/* Action Buttons Frame */}
+                    <Input
+                      disabled={pendingToolCallConfirmation}
+                      placeholder={
+                        pendingToolCallConfirmation
+                          ? "Please respond to the tool confirmation above..."
+                          : "Empieza a escribir tu consulta..."
+                      }
+                      className="pl-4 pr-10 py-2 w-full rounded-full"
+                      value={agentInput}
+                      onChange={handleAgentInputChange}
+                      onValueChange={undefined}
+                    />
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <Button
+                    type="submit"
+                    shape="square"
+                    className="rounded-full h-10 w-10 flex-shrink-0"
+                    disabled={pendingToolCallConfirmation || !agentInput.trim()}
+                    onClick={async (e) => {
+                      try {
+                        updateSystemPrompt(inputText),
+                          // Actualizar el modelo y el prompt del sistema en el servidor antes de enviar el mensaje
+                          await Promise.all([
+                            fetch('/api/model', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({ model: selectedModel }),
+                            })
+                          ]);
+
+                        // Proceder con el envío del mensaje
+                        if (!user) {
+                          e.preventDefault();
+                          setIsLoginOpen(true);
+                          // handleAgentSubmit(e);
+                          return;
+                        }
+                      } catch (error) {
+                        console.error('Error al actualizar el modelo:', error);
+                      }
+                    }}
+                  >
+                    <PaperPlaneRight size={16} />
+                  </Button>
                 </div>
               </div>
-
-              <div className="relative">
-                <Button
-                  type="submit"
-                  shape="square"
-                  className="rounded-full h-10 w-10 flex-shrink-0"
-                  disabled={pendingToolCallConfirmation || !agentInput.trim()}
-                  onClick={async (e) => {
-                    try {
-                      updateSystemPrompt(inputText),
-                        // Actualizar el modelo y el prompt del sistema en el servidor antes de enviar el mensaje
-                        await Promise.all([
-                          fetch('/api/model', {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ model: selectedModel }),
-                          })
-                        ]);
-
-                      // Proceder con el envío del mensaje
-                      if (!user) {
-                        e.preventDefault();
-                        setIsLoginOpen(true);
-                        // handleAgentSubmit(e);
-                        return;
-                      }
-                    } catch (error) {
-                      console.error('Error al actualizar el modelo:', error);
-                    }
-                  }}
-                >
-                  <PaperPlaneRight size={16} />
-                </Button>
-              </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </main>
       <AISettingsPanel
