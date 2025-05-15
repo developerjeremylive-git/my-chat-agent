@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/card/Card';
 import { Button } from '@/components/button/Button';
-import { X, CaretLeft, CaretRight } from '@phosphor-icons/react';
+import { X, CaretLeft, CaretRight, PlusCircle, Robot, Wrench, Trash } from '@phosphor-icons/react';
 import { ModernAgentTool } from './ModernAgentTool';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -55,7 +55,7 @@ export function AgentDashboard({ isOpen, onClose }: AgentDashboardProps) {
     }
   ]);
 
-  const cardsPerPage = 2;
+  const cardsPerPage = 3;
   const totalPages = Math.ceil(agents.length / cardsPerPage);
 
   const nextPage = () => {
@@ -107,131 +107,136 @@ export function AgentDashboard({ isOpen, onClose }: AgentDashboardProps) {
         onSaveAgent={handleSaveAgent}
       />
 
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={onClose}
-        >
+      <AnimatePresence>
+        {isOpen && (
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            className="w-full max-w-4xl"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={onClose}
           >
-            <Card className="bg-white dark:bg-neutral-900 p-6 relative overflow-hidden border border-neutral-200 dark:border-neutral-800">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-4 top-4 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                onClick={onClose}
-              >
-                <X size={20} />
-              </Button>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-6xl h-[calc(100vh-2rem)] flex items-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Card className="bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl p-8 relative overflow-hidden border-0 shadow-2xl rounded-3xl w-full max-h-full flex flex-col">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 z-0"></div>
 
-              <div className="mb-6 flex justify-between items-center">
-                <div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
-                    Mis Agentes
-                  </h2>
-                  <p className="text-neutral-600 dark:text-neutral-400 mt-1">
-                    Gestiona y visualiza tus agentes inteligentes
-                  </p>
-                </div>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="bg-gradient-to-r from-[#F48120] to-purple-500 text-white hover:opacity-90 transition-all duration-300"
-                  onClick={handleCreateAgent}
+                <button
+                  className="z-20 absolute right-6 top-6 rounded-full w-10 h-10 flex items-center justify-center bg-white/90 dark:bg-neutral-800/90 hover:bg-[#F48120]/20 hover:text-[#F48120] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  onClick={onClose}
                 >
-                  Crear Agente
-                </Button>
-              </div>
+                  <X weight="bold" size={20} />
+                </button>
 
-              <div className="relative">
-                <div className="flex gap-4 mb-4 overflow-hidden">
-                  <AnimatePresence mode="wait">
-                    {agents
-                      .slice(
-                        currentPage * cardsPerPage,
-                        (currentPage + 1) * cardsPerPage
-                      )
-                      .map((agent) => (
-                        <motion.div
-                          key={agent.id}
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.3 }}
-                          className="flex-1"
-                        >
-                          <Card className="p-6 h-full border-2 border-neutral-200 dark:border-neutral-700 hover:border-[#F48120] dark:hover:border-[#F48120] transition-all duration-300 group cursor-pointer">
-                            <div className="flex flex-col h-full">
-                              <h3 className="text-xl font-semibold mb-2 bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300">
-                                {agent.title}
-                              </h3>
-                              <p className="text-neutral-600 dark:text-neutral-400 mb-4 flex-grow">
-                                {agent.description}
-                              </p>
-                              <div className="flex justify-end">
-                                <div className="flex gap-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-[#F48120] hover:bg-[#F48120]/10 transition-colors duration-300"
-                                    onClick={() => handleEditAgent(agent)}
-                                  >
-                                    Editar
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-red-500 hover:bg-red-500/10 transition-colors duration-300"
-                                    onClick={() => handleDeleteAgent(agent.id)}
-                                  >
-                                    Eliminar
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </Card>
-                        </motion.div>
-                      ))}
-                  </AnimatePresence>
+                <div className="relative z-10 mb-8 flex justify-between items-center">
+                  <div>
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent mb-2">
+                      Mis Agentes
+                    </h2>
+                    <p className="text-lg text-neutral-600 dark:text-neutral-400">
+                      Centro de control de agentes inteligentes
+                    </p>
+                  </div>
+                  <button
+                    className="mr-13 bg-gradient-to-r from-[#F48120] to-purple-500 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 rounded-xl px-6 py-3 flex items-center gap-2"
+                    onClick={handleCreateAgent}
+                  >
+                    <PlusCircle size={20} weight="bold" />
+                    Crear Agente
+                  </button>
                 </div>
 
-                {totalPages > 1 && (
-                  <div className="flex justify-center gap-2 mt-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={prevPage}
-                      className="hover:bg-[#F48120]/10 text-[#F48120]"
-                      disabled={currentPage === 0}
-                    >
-                      <CaretLeft size={20} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={nextPage}
-                      className="hover:bg-[#F48120]/10 text-[#F48120]"
-                      disabled={currentPage === totalPages - 1}
-                    >
-                      <CaretRight size={20} />
-                    </Button>
+                <div className="relative z-10 flex-1 overflow-hidden flex flex-col">
+                  <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 hover:scrollbar-thumb-orange-300 dark:scrollbar-thumb-purple-700 dark:hover:scrollbar-thumb-purple-600 scrollbar-track-transparent pr-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-min pb-4">
+                      <AnimatePresence mode="wait">
+                        {agents
+                          .slice(
+                            currentPage * cardsPerPage,
+                            (currentPage + 1) * cardsPerPage
+                          )
+                          .map((agent) => (
+                            <motion.div
+                              key={agent.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -20 }}
+                              transition={{ duration: 0.4, ease: "easeOut" }}
+                            >
+                              <Card className="group relative overflow-hidden p-6 h-full border border-neutral-200/50 dark:border-neutral-700/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 transition-all duration-500 rounded-2xl backdrop-blur-lg bg-white/40 dark:bg-neutral-900/40 hover:bg-white/60 dark:hover:bg-neutral-800/60 shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
+                                <div className="absolute inset-0 bg-gradient-to-br from-[#F48120]/5 via-purple-500/5 to-[#F48120]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-gradient-xy"></div>
+
+                                <div className="relative z-10 flex flex-col h-full">
+                                  <div className="flex items-center gap-3 mb-4">
+                                    <div className="p-2 rounded-xl bg-gradient-to-br from-[#F48120]/20 via-purple-500/20 to-[#F48120]/20 dark:from-[#F48120]/10 dark:via-purple-500/10 dark:to-[#F48120]/10 group-hover:scale-110 group-hover:rotate-[5deg] transition-all duration-500 shadow-lg group-hover:shadow-[0_5px_20px_-5px_rgba(244,129,32,0.5)] dark:group-hover:shadow-[0_5px_20px_-5px_rgba(244,129,32,0.4)]">
+                                      <Robot size={24} weight="duotone" className="text-[#F48120]" />
+                                    </div>
+                                    <h3 className="text-xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300">
+                                      {agent.title}
+                                    </h3>
+                                  </div>
+
+                                  <p className="text-neutral-600 dark:text-neutral-400 mb-6 flex-grow text-lg">
+                                    {agent.description}
+                                  </p>
+
+                                  <div className="flex justify-end gap-3">
+                                    <button
+                                      className="flex items-center gap-2 text-[#F48120] hover:bg-[#F48120]/10 transition-all duration-300 rounded-xl px-4 py-2 transform hover:scale-105"
+                                      onClick={() => handleEditAgent(agent)}
+                                    >
+                                      <Wrench size={18} weight="duotone" />
+                                      Editar
+                                    </button>
+                                    <button
+                                      className="flex items-center gap-2 text-red-500 hover:bg-red-500/10 transition-all duration-300 rounded-xl px-4 py-2 transform hover:scale-105"
+                                      onClick={() => handleDeleteAgent(agent.id)}
+                                    >
+                                      <Trash size={18} weight="duotone" />
+                                      Eliminar
+                                    </button>
+                                  </div>
+                                </div>
+                              </Card>
+                            </motion.div>
+                          ))}
+                      </AnimatePresence>
+                    </div>
+
+                    {totalPages > 1 && (
+                      <div className="flex justify-center gap-6 mt-8">
+                        <Button
+                          variant="ghost"
+                          size="lg"
+                          className="rounded-full w-12 h-12 flex items-center justify-center bg-white/90 dark:bg-neutral-800/90 hover:bg-[#F48120]/20 hover:text-[#F48120] transition-all duration-300 shadow-lg hover:shadow-[0_10px_30px_-10px_rgba(244,129,32,0.5)] dark:hover:shadow-[0_10px_30px_-10px_rgba(244,129,32,0.4)] transform hover:scale-110 hover:translate-x-[-2px]"
+                          onClick={prevPage}
+                          disabled={currentPage === 0}
+                        >
+                          <CaretLeft weight="bold" size={24} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="lg"
+                          className="rounded-full w-12 h-12 flex items-center justify-center bg-white/90 dark:bg-neutral-800/90 hover:bg-[#F48120]/20 hover:text-[#F48120] transition-all duration-300 shadow-lg hover:shadow-[0_10px_30px_-10px_rgba(244,129,32,0.5)] dark:hover:shadow-[0_10px_30px_-10px_rgba(244,129,32,0.4)] transform hover:scale-110 hover:translate-x-[2px]"
+                          onClick={nextPage}
+                          disabled={currentPage === totalPages - 1}
+                        >
+                          <CaretRight weight="bold" size={24} />
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </Card>
+                </div>
+              </Card>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
     </>
   );
 }

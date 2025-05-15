@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Button } from '@/components/button/Button';
 import { Card } from '@/components/card/Card';
 import { cn } from '@/lib/utils';
-import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun, GraduationCap, Pencil, Palette, Leaf, Camera, MusicNotes, ChartBar, Globe, ShieldCheck, Rocket, Wrench, Users, Question, PlusCircle } from '@phosphor-icons/react';
+import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun, GraduationCap, Pencil, Palette, Leaf, Camera, MusicNotes, ChartBar, Globe, ShieldCheck, Rocket, Wrench, Users, Question, PlusCircle, ChatText } from '@phosphor-icons/react';
 import AuthPopup from '../AuthPopup';
 import AuthButton from '../AuthButton';
 import { OIAICreator } from '../modal/OIAICreator';
 import { AgentDashboard } from '../agent/AgentDashboard';
+import { SystemPromptDashboard } from '../dashboard/SystemPromptDashboard';
 
 interface PromptTemplate {
   title: string;
@@ -29,6 +30,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
   const [showAgentDashboard, setShowAgentDashboard] = useState(false);
   const [showOiaiGuide, setShowOiaiGuide] = useState(false);
   const [showOIAICreator, setShowOIAICreator] = useState(false);
+  const [showSystemPromptDashboard, setShowSystemPromptDashboard] = useState(false);
 
   const promptTemplates = {
     "exploracion-ideas": [
@@ -465,7 +467,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
           <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[85vh] overflow-hidden relative transform transition-all duration-300 scale-100 opacity-100">
             <OIAICreator
               onCopyContent={(content) => {
-                
+
               }}
               onClose={() => setShowOIAICreator(false)}
             />
@@ -503,6 +505,16 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
           <nav className="flex-1 p-4 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="flex flex-col h-full space-y-6">
 
+              {/* Sección de Prompts del Sistema */}
+              <div className="px-2 py-2">
+                <button
+                  className="flex items-center gap-2 w-full px-3 py-2 text-left text-neutral-700 dark:text-neutral-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-gradient-to-r hover:from-orange-50 hover:to-purple-50 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg transition-all duration-300"
+                  onClick={() => setShowSystemPromptDashboard(true)}
+                >
+                  <ChatText size={20} />
+                  <span>Prompts del Sistema</span>
+                </button>
+              </div>
 
               <div className="space-y-3">
                 {/* Sección de Asistente IA */}
@@ -1034,6 +1046,10 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
 
       <AuthPopup />
       <AgentDashboard isOpen={showAgentDashboard} onClose={() => setShowAgentDashboard(false)} />
+      <SystemPromptDashboard
+        isOpen={showSystemPromptDashboard}
+        onClose={() => setShowSystemPromptDashboard(false)}
+      />
     </>
   );
 }
