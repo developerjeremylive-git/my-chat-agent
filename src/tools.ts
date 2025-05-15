@@ -18,7 +18,9 @@ import {
  */
 const getWeatherInformation = tool({
   description: "show the weather in a given city to the user",
-  parameters: z.object({ city: z.string() }),
+  parameters: z.object({ 
+    city: z.string().describe("The city to get weather information for")
+  }),
   // Omitting execute function makes this tool require human confirmation
 });
 
@@ -29,10 +31,13 @@ const getWeatherInformation = tool({
  */
 const getLocalTime = tool({
   description: "get the local time for a specified location",
-  parameters: z.object({ location: z.string() }),
+  parameters: z.object({ 
+    location: z.string().describe("The location to get local time for")
+  }),
   execute: async ({ location }) => {
     console.log(`Getting local time for ${location}`);
-    return "10am";
+    const time = new Date().toLocaleTimeString('es-ES', { timeZone: 'America/Los_Angeles' });
+    return `La hora actual en ${location} es ${time}`;
   },
 });
 
@@ -138,6 +143,9 @@ export const tools = {
 export const executions = {
   getWeatherInformation: async ({ city }: { city: string }) => {
     console.log(`Getting weather information for ${city}`);
-    return `The weather in ${city} is sunny`;
+    if (city.toLowerCase() === 'california') {
+      return `El clima en ${city} es soleado con una temperatura de 25°C`;
+    }
+    return `El clima en ${city} está disponible bajo petición`;
   },
 };

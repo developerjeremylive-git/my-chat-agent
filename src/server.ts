@@ -6,6 +6,7 @@ import {
   generateId,
   streamText,
   type StreamTextOnFinishCallback,
+  type ToolSet,
 } from "ai";
 import { createWorkersAI } from 'workers-ai-provider';
 import { processToolCalls } from "./utils";
@@ -91,7 +92,15 @@ export class Chat extends AIChatAgent<Env> {
    */
 
   // biome-ignore lint/complexity/noBannedTypes: <explanation>
-  async onChatMessage(onFinish: StreamTextOnFinishCallback<{}>) {
+  async onChatMessage(
+    onFinish: StreamTextOnFinishCallback<ToolSet>,
+    options?: { abortSignal?: AbortSignal }
+  ) {
+    const allTools = {
+      ...tools,
+      // ...this.mcp.unstable_getAITools(),
+    };
+
     // Create a streaming response that handles both text and tool outputs
     return agentContext.run(this, async () => {
       const dataStreamResponse = createDataStreamResponse({
@@ -101,18 +110,20 @@ export class Chat extends AIChatAgent<Env> {
           const processedMessages = await processToolCalls({
             messages: this.messages,
             dataStream,
-            tools,
+            tools: allTools,
             executions,
           });
 
           const result = streamText({
             model,
-            temperature: config.temperature,
-            maxTokens: config.maxTokens,
-            topP: config.topP,
-            topK: config.topK,
-            frequencyPenalty: config.frequencyPenalty,
-            presencePenalty: config.presencePenalty,
+            // temperature: config.temperature,
+            // maxTokens: config.maxTokens,
+            // topP: config.topP,
+            // topK: config.topK,
+            // frequencyPenalty: config.frequencyPenalty,
+            // presencePenalty: config.presencePenalty,
+            // seed: config.seed,
+            // toolCallStreaming: true,
             system: `${systemPrompt}
 
 ${unstable_getSchedulePrompt({ date: new Date() })}
@@ -120,11 +131,17 @@ ${unstable_getSchedulePrompt({ date: new Date() })}
 If the user asks to schedule a task, use the schedule tool to schedule the task.
 `,
             messages: processedMessages,
-            tools,
-            onFinish,
+            tools: allTools,
+            onFinish: async (args) => {
+              onFinish(
+                args as Parameters<StreamTextOnFinishCallback<ToolSet>>[0]
+              );
+              console.log('Stream finalizado');
+            },
             onError: (error) => {
               console.error("Error while streaming:", error);
-            }
+            },
+            maxSteps: 10,
           });
 
           // Merge the AI response stream with tool execution outputs

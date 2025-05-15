@@ -43,7 +43,8 @@ import {
   Users,
   ArrowRight,
   ArrowsOut,
-  PlusCircle
+  PlusCircle,
+  Stop
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -75,7 +76,6 @@ function ChatComponent() {
     setInputText(content);
     setShowOIAICreator(false);
   };
-  const [showOiaiGuide, setShowOiaiGuide] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -213,11 +213,11 @@ function ChatComponent() {
       seed: config.seed,
       stream: config.stream,
     },
-    stream: config.stream,
-    onStreamEnd: () => {
-      scrollToBottom();
-      console.log('Stream finalizado');
-    }
+    // stream: config.stream,
+    // onStreamEnd: () => {
+    //   scrollToBottom();
+    //   console.log('Stream finalizado');
+    // }
   });
   console.log('Configuración:', config);
 
@@ -228,6 +228,8 @@ function ChatComponent() {
     handleSubmit: handleAgentSubmit,
     addToolResult,
     clearHistory,
+    isLoading,
+    stop
   } = useAgentChat({
     agent,
     maxSteps: 5,
@@ -319,6 +321,19 @@ function ChatComponent() {
               <List size={20} className="text-[#F48120]" weight="duotone" />
             </Button>
 
+           <Button
+              variant="ghost"
+              size="sm"
+              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                         flex items-center justify-center"
+              onClick={() => setIsSettingsOpen(true)}
+            >
+              <Gear size={20} className="text-[#F48120]" weight="duotone" />
+            </Button>
+
             <Button
               ref={settingsButtonRef}
               variant="ghost"
@@ -346,18 +361,20 @@ function ChatComponent() {
               <Rocket size={20} weight="duotone" className="text-[#F48120]" />
             </Button>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                         flex items-center justify-center"
-              onClick={() => setIsSettingsOpen(true)}
-            >
-              <Gear size={20} className="text-[#F48120]" weight="duotone" />
-            </Button>
+            <Tooltip content="Crear IA">
+              <Button
+                variant="ghost"
+                size="md"
+                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                flex items-center justify-center"
+                onClick={() => setShowOIAICreator(true)}
+              >
+                <PlusCircle className="text-[#F48120]" size={29} weight="duotone" />
+              </Button>
+            </Tooltip>
 
             {showSettingsMenu && createPortal(
               <div
@@ -899,7 +916,7 @@ function ChatComponent() {
                     <Question size={20} weight="duotone" />
                   </Button>
                 </Tooltip> */}
-              <Tooltip content="Crear IA">
+              {/* <Tooltip content="Crear IA">
                 <Button
                   variant="ghost"
                   size="md"
@@ -909,7 +926,7 @@ function ChatComponent() {
                 >
                   <PlusCircle size={20} weight="duotone" />
                 </Button>
-              </Tooltip>
+              </Tooltip> */}
 
               <div className={`flex-1 flex transition-all duration-300 opacity-100 max-w-full`}>
                 <ModelSelect />
@@ -1002,13 +1019,14 @@ function ChatComponent() {
             {/* Input Area */}
             <form
               onSubmit={(e) =>
-                handleAgentSubmit(e, {
-                  data: {
-                    annotations: {
-                      hello: "world",
-                    },
-                  },
-                })
+                e.preventDefault()
+                // handleAgentSubmit(e, {
+                //   data: {
+                //     annotations: {
+                //       hello: "world",
+                //     },
+                //   },
+                // })
               }
               className="ml-9 p-2 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-neutral-300 dark:border-neutral-800"
             >
@@ -1040,39 +1058,51 @@ function ChatComponent() {
                 </div>
 
                 <div className="relative">
-                  <Button
-                    type="submit"
-                    shape="square"
-                    className="rounded-full h-10 w-10 flex-shrink-0"
-                    disabled={pendingToolCallConfirmation || !agentInput.trim()}
-                    onClick={async (e) => {
-                      try {
-                        updateSystemPrompt(inputText),
-                          // Actualizar el modelo y el prompt del sistema en el servidor antes de enviar el mensaje
-                          await Promise.all([
-                            fetch('/api/model', {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify({ model: selectedModel }),
-                            })
-                          ]);
+                  {isLoading ? (
+                    <button
+                      type="button"
+                      onClick={stop}
+                      className="inline-flex items-center cursor-pointer justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full p-1.5 h-fit border border-neutral-200 dark:border-neutral-800"
+                      aria-label="Stop generation"
+                    >
+                      <Stop size={16} />
+                    </button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      shape="square"
+                      className="rounded-full h-10 w-10 flex-shrink-0"
+                      disabled={pendingToolCallConfirmation || !agentInput.trim()}
+                      onClick={async (e) => {
+                        try {
+                          updateSystemPrompt(inputText),
+                            // Actualizar el modelo y el prompt del sistema en el servidor antes de enviar el mensaje
+                            await Promise.all([
+                              fetch('/api/model', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ model: selectedModel }),
+                              })
+                            ]);
 
-                        // Proceder con el envío del mensaje
-                        if (!user) {
-                          e.preventDefault();
-                          setIsLoginOpen(true);
-                          // handleAgentSubmit(e);
-                          return;
+                          // Proceder con el envío del mensaje
+                          if (!user) {
+                            setIsLoginOpen(true);
+                            return;
+                          } else {
+                            // e.preventDefault();
+                            handleAgentSubmit(e);
+                          }
+                        } catch (error) {
+                          console.error('Error al actualizar el modelo:', error);
                         }
-                      } catch (error) {
-                        console.error('Error al actualizar el modelo:', error);
-                      }
-                    }}
-                  >
-                    <PaperPlaneRight size={16} />
-                  </Button>
+                      }}
+                    >
+                      <PaperPlaneRight size={16} />
+                    </Button>
+                  )}
                 </div>
               </div>
             </form>
@@ -1089,135 +1119,6 @@ function ChatComponent() {
         onClose={() => setShowClearDialog(false)}
         onConfirm={clearHistory}
       />
-      {/* Modal de Guía etherOI */}
-      {showOiaiGuide && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowOiaiGuide(false)}>
-          <div className="bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl border border-neutral-200 dark:border-neutral-800 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 space-y-6">
-              <div className="flex items-center justify-between sticky top-0 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm z-50 -mx-6 px-6 border-b border-neutral-200 dark:border-neutral-800 h-[60px]">
-                <div className="flex items-center gap-3 h-full">
-                  <Brain weight="duotone" className="w-8 h-8 text-[#F48120]" />
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Guía de etherOI</h2>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  shape="square"
-                  className="bg-white/95 dark:bg-gray-800/95 border-2 border-[#F48120]/20 dark:border-[#F48120]/10 text-[#F48120] hover:text-white hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20"
-                  onClick={() => setShowOiaiGuide(false)}
-                >
-                  <X weight="bold" size={20} />
-                </Button>
-              </div>
-
-              <div className="space-y-8">
-                {/* Sección 1: Introducción */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">¿Qué es oiai en etherOI?</h3>
-                  <p className="text-neutral-600 dark:text-neutral-300">
-                    oiai es un asistente de IA personalizable dentro de etherOI que te ayuda a realizar tareas específicas. Puedes Crear Asistente IA personalizados para diferentes propósitos y necesidades.
-                  </p>
-                </div>
-
-                {/* Sección 2: Componentes Clave */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Componentes clave de un oiai efectivo</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card className="p-4 space-y-2 bg-gradient-to-br from-[#F48120]/5 to-transparent border-[#F48120]/20">
-                      <h4 className="font-medium text-[#F48120]">Persona</h4>
-                      <p className="text-sm text-neutral-600 dark:text-neutral-300">Define el rol y comportamiento del oiai</p>
-                    </Card>
-                    <Card className="p-4 space-y-2 bg-gradient-to-br from-purple-500/5 to-transparent border-purple-500/20">
-                      <h4 className="font-medium text-purple-500">Tarea</h4>
-                      <p className="text-sm text-neutral-600 dark:text-neutral-300">Especifica qué debe hacer o crear el oiai</p>
-                    </Card>
-                    <Card className="p-4 space-y-2 bg-gradient-to-br from-blue-500/5 to-transparent border-blue-500/20">
-                      <h4 className="font-medium text-blue-500">Contexto</h4>
-                      <p className="text-sm text-neutral-600 dark:text-neutral-300">Proporciona información de fondo relevante</p>
-                    </Card>
-                    <Card className="p-4 space-y-2 bg-gradient-to-br from-green-500/5 to-transparent border-green-500/20">
-                      <h4 className="font-medium text-green-500">Formato</h4>
-                      <p className="text-sm text-neutral-600 dark:text-neutral-300">Define la estructura deseada de las respuestas</p>
-                    </Card>
-                  </div>
-                </div>
-
-                {/* Sección 3: Pasos para Crear */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Pasos para crear un oiai</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/50">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F48120]/10 text-[#F48120]">1</div>
-                      <div className="space-y-1">
-                        <h5 className="font-medium text-neutral-900 dark:text-white">Define el propósito</h5>
-                        <p className="text-sm text-neutral-600 dark:text-neutral-300">Establece claramente qué quieres que haga tu oiai y qué problemas debe resolver.</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/50">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F48120]/10 text-[#F48120]">2</div>
-                      <div className="space-y-1">
-                        <h5 className="font-medium text-neutral-900 dark:text-white">Escribe las instrucciones</h5>
-                        <p className="text-sm text-neutral-600 dark:text-neutral-300">Proporciona instrucciones detalladas incluyendo persona, tarea, contexto y formato deseado.</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-4 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800/50">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#F48120]/10 text-[#F48120]">3</div>
-                      <div className="space-y-1">
-                        <h5 className="font-medium text-neutral-900 dark:text-white">Prueba y refina</h5>
-                        <p className="text-sm text-neutral-600 dark:text-neutral-300">Realiza pruebas con diferentes prompts y ajusta las instrucciones según sea necesario.</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sección 4: Mejores Prácticas */}
-                <div className="flex gap-4">
-                  <div className="flex-1 space-y-4">
-                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Mejores prácticas</h3>
-                    <ul className="space-y-2 text-neutral-600 dark:text-neutral-300">
-                      <li className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
-                        <span className="text-sm">Sé específico en tus instrucciones</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
-                        <span className="text-sm">Incluye ejemplos cuando sea posible</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
-                        <span className="text-sm">Define límites claros de lo que debe y no debe hacer</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#F48120]"></div>
-                        <span className="text-sm">Mantén las instrucciones concisas pero completas</span>
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="flex-1">
-                    <button
-                      onClick={() => {
-                        setShowOiaiGuide(false);
-                        setShowOIAICreator(true);
-                      }}
-                      className="w-full h-full flex items-center justify-center bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5
-                                  hover:from-[#F48120]/20 hover:to-purple-500/20 dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10
-                                  border border-[#F48120]/20 dark:border-[#F48120]/10 rounded-xl
-                                  transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                                  group relative overflow-hidden animate-pulse hover:animate-none"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <div className="relative z-10 flex flex-col items-center gap-3 p-4">
-                        <Brain weight="duotone" className="w-8 h-8 text-[#F48120] group-hover:scale-110 transition-transform duration-300" />
-                        <span className="text-sm font-medium bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent group-hover:opacity-90">Crear Asistente IA</span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showAgentInterface && (
         <ModernAgentInterface

@@ -340,7 +340,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
               <div className="flex items-center justify-between sticky top-0 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm z-50 -mx-6 px-6 border-b border-neutral-200 dark:border-neutral-800 h-[60px]">
                 <div className="flex items-center gap-3 h-full">
                   <Brain weight="duotone" className="w-8 h-8 text-[#F48120]" />
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Guía de etherOI</h2>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Guía Asistente IA</h2>
                 </div>
                 <Button
                   variant="ghost"
@@ -356,15 +356,15 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
               <div className="space-y-8">
                 {/* Sección 1: Introducción */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">¿Qué es oiai en etherOI?</h3>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">¿Qué es Asistente IA en etherOI?</h3>
                   <p className="text-neutral-600 dark:text-neutral-300">
-                    oiai es un asistente de IA personalizable dentro de etherOI que te ayuda a realizar tareas específicas. Puedes Crear Asistente IA personalizados para diferentes propósitos y necesidades.
+                   Asistente IA es un asistente de IA personalizable dentro de etherOI que te ayuda a realizar tareas específicas. Puedes Crear Asistente IA personalizados para diferentes propósitos y necesidades.
                   </p>
                 </div>
 
                 {/* Sección 2: Componentes Clave */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Componentes clave de un oiai efectivo</h3>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Componentes clave de un Asistente IA efectivo</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Card className="p-4 space-y-2 bg-gradient-to-br from-[#F48120]/5 to-transparent border-[#F48120]/20">
                       <h4 className="font-medium text-[#F48120]">Persona</h4>
@@ -528,7 +528,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                     onClick={() => { setShowOiaiGuide(true); onClose(); }}
                   >
                     <Question weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
-                    Guía etherOI
+                    Guía Asistente IA
                   </Button>
                   <Button
                     variant="ghost"
@@ -558,6 +558,17 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                   <Button
                     variant="ghost"
                     className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowAgentDashboard(true);
+                    }}
+                  >
+                    <Users weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
+                    Ver Agentes Inteligentes
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
                     onClick={() => {
                       window.dispatchEvent(new CustomEvent('openToolsInterface'));
                       onClose();
@@ -565,17 +576,6 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                   >
                     <Robot weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
                     Crear Agente Inteligente
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowAgentDashboard(true);
-                    }}
-                  >
-                    <Users weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
-                    Ver Agentes
                   </Button>
                 </div>
 

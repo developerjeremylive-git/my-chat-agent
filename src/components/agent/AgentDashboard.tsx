@@ -153,7 +153,7 @@ export function AgentDashboard({ isOpen, onClose }: AgentDashboardProps) {
 
                 <div className="relative z-10 flex-1 overflow-hidden flex flex-col">
                   <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 hover:scrollbar-thumb-orange-300 dark:scrollbar-thumb-purple-700 dark:hover:scrollbar-thumb-purple-600 scrollbar-track-transparent pr-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-min pb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-min pb-4 px-4">
                       <AnimatePresence mode="wait">
                         {agents
                           .slice(
@@ -167,9 +167,11 @@ export function AgentDashboard({ isOpen, onClose }: AgentDashboardProps) {
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -20 }}
                               transition={{ duration: 0.4, ease: "easeOut" }}
+                              className="group"
+                              style={{ perspective: '1000px' }}
                             >
-                              <Card className="group relative overflow-hidden p-6 h-full border border-neutral-200/50 dark:border-neutral-700/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 transition-all duration-500 rounded-2xl backdrop-blur-lg bg-white/40 dark:bg-neutral-900/40 hover:bg-white/60 dark:hover:bg-neutral-800/60 shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
-                                <div className="absolute inset-0 bg-gradient-to-br from-[#F48120]/5 via-purple-500/5 to-[#F48120]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-gradient-xy"></div>
+                              <Card className="mt-2 group relative overflow-visible p-6 h-full border border-neutral-200/50 dark:border-neutral-700/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 transition-all duration-500 rounded-2xl backdrop-blur-lg bg-white/40 dark:bg-neutral-900/40 hover:bg-white/60 dark:hover:bg-neutral-800/60 shadow-lg hover:shadow-xl transform-gpu hover:scale-[1.05] hover:rotate-y-[-5deg] will-change-transform">
+                                <div className="absolute inset-0 bg-gradient-to-br from-[#F48120]/5 via-purple-500/5 to-[#F48120]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-gradient-xy rounded-2xl"></div>
 
                                 <div className="relative z-10 flex flex-col h-full">
                                   <div className="flex items-center gap-3 mb-4">
