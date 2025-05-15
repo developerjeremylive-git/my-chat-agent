@@ -36,23 +36,24 @@ export const Input = ({
             "add-size-md": size === "md",
             "add-size-base": size === "base",
           },
-          "pr-12 truncate",
+          "pr-12 truncate cursor-pointer",
           className
         )}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           onChange?.(e);
           onValueChange?.(e.target.value);
         }}
+        onClick={() => setIsModalOpen(true)}
         value={value}
         {...props}
       />
-      <button
+      {/* <button
         type="button"
         className="absolute right-2 p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors bg-ob-btn-secondary-bg"
         onClick={() => setIsModalOpen(true)}
       >
         <ArrowsOut size={20} />
-      </button>
+      </button> */}
 
       <Modal
         isOpen={isModalOpen}

@@ -120,14 +120,14 @@ export const InputSystemPrompt = ({
   return (
     <div className="relative flex flex-col w-full overflow-visible">
       <div className="flex justify-end gap-1 mb-2">
-        <button
+        {/* <button
           type="button"
           className="p-2 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 bg-gradient-to-br from-orange-50 to-purple-50 dark:from-orange-500/5 dark:to-purple-500/5 hover:from-orange-100 hover:to-purple-100 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg border border-orange-200/50 dark:border-purple-700/30 shadow-sm hover:shadow-orange-500/10 dark:hover:shadow-purple-500/10 hover:scale-105"
           onClick={() => setIsModalOpen(true)}
           title="Expandir"
         >
           <ArrowsOut size={20} />
-        </button>
+        </button> */}
         <button
           type="button"
           className="p-2 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 bg-gradient-to-br from-orange-50 to-purple-50 dark:from-orange-500/5 dark:to-purple-500/5 hover:from-orange-100 hover:to-purple-100 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg border border-orange-200/50 dark:border-purple-700/30 shadow-sm hover:shadow-orange-500/10 dark:hover:shadow-purple-500/10 hover:scale-105"
@@ -154,13 +154,14 @@ export const InputSystemPrompt = ({
               "add-size-md": size === "md",
               "add-size-base": size === "base",
             },
-            "truncate",
+            "truncate cursor-pointer",
             className
           )}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             onChange?.(e);
             onValueChange?.(e.target.value);
           }}
+          onClick={() => setIsModalOpen(true)}
           value={value}
           {...props}
         />
