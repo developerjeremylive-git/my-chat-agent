@@ -341,6 +341,19 @@ function ChatComponent() {
                          border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                          transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
                          flex items-center justify-center"
+              onClick={() => setShowToolsInterface(true)}
+            >
+              <Rocket size={20} weight="duotone" className="text-[#F48120]" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                         flex items-center justify-center"
               onClick={() => setIsSettingsOpen(true)}
             >
               <Gear size={20} className="text-[#F48120]" weight="duotone" />
@@ -897,17 +910,6 @@ function ChatComponent() {
                   <PlusCircle size={20} weight="duotone" />
                 </Button>
               </Tooltip>
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="md"
-                  shape="square"
-                  className="rounded-full h-9 w-9"
-                  onClick={() => setShowToolsInterface(true)}
-                >
-                  <Rocket size={20} weight="duotone" className="text-[#F48120]" />
-                </Button>
-              </div>
 
               <div className={`flex-1 flex transition-all duration-300 opacity-100 max-w-full`}>
                 <ModelSelect />

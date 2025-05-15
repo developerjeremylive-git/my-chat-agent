@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { ArrowsOut, Plus, FloppyDisk, CaretDown, Trash } from "@phosphor-icons/react";
+import { ArrowsOut, Plus, FloppyDisk, CaretDown, Trash, PencilSimple } from "@phosphor-icons/react";
 import { Modal } from "../modal/Modal";
 
 export const inputClasses = cn(
@@ -38,6 +38,10 @@ export const InputSystemPrompt = ({
   const [deletePromptId, setDeletePromptId] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [promptToDelete, setPromptToDelete] = useState<SystemPrompt | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [promptToEdit, setPromptToEdit] = useState<SystemPrompt | null>(null);
+  const [editPromptName, setEditPromptName] = useState("");
+  const [editPromptContent, setEditPromptContent] = useState("");
 
   useEffect(() => {
     const loadedPrompts = localStorage.getItem("systemPrompts");
@@ -79,6 +83,30 @@ export const InputSystemPrompt = ({
     setIsDeleteModalOpen(true);
   };
 
+  const handleEditClick = (e: React.MouseEvent, prompt: SystemPrompt) => {
+    e.stopPropagation();
+    setPromptToEdit(prompt);
+    setEditPromptName(prompt.name);
+    setEditPromptContent(prompt.content);
+    setIsEditModalOpen(true);
+  };
+
+  const confirmEdit = () => {
+    if (promptToEdit && editPromptName.trim() && editPromptContent.trim()) {
+      const updatedPrompts = savedPrompts.map(p => 
+        p.id === promptToEdit.id 
+          ? { ...p, name: editPromptName, content: editPromptContent }
+          : p
+      );
+      setSavedPrompts(updatedPrompts);
+      localStorage.setItem("systemPrompts", JSON.stringify(updatedPrompts));
+      setIsEditModalOpen(false);
+      setPromptToEdit(null);
+      setEditPromptName("");
+      setEditPromptContent("");
+    }
+  };
+
   const confirmDelete = () => {
     if (promptToDelete) {
       const updatedPrompts = savedPrompts.filter(p => p.id !== promptToDelete.id);
@@ -104,7 +132,7 @@ export const InputSystemPrompt = ({
           type="button"
           className="p-2 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 bg-gradient-to-br from-orange-50 to-purple-50 dark:from-orange-500/5 dark:to-purple-500/5 hover:from-orange-100 hover:to-purple-100 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg border border-orange-200/50 dark:border-purple-700/30 shadow-sm hover:shadow-orange-500/10 dark:hover:shadow-purple-500/10 hover:scale-105"
           onClick={() => setIsPromptModalOpen(true)}
-          title="Guardar prompt"
+          title="Guardar Consulta del Sitema"
         >
           <Plus size={20} />
         </button>
@@ -112,7 +140,7 @@ export const InputSystemPrompt = ({
           type="button"
           className="p-2 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 bg-gradient-to-br from-orange-50 to-purple-50 dark:from-orange-500/5 dark:to-purple-500/5 hover:from-orange-100 hover:to-purple-100 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg border border-orange-200/50 dark:border-purple-700/30 shadow-sm hover:shadow-orange-500/10 dark:hover:shadow-purple-500/10 hover:scale-105"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          title="Ver prompts guardados"
+          title="Ver Consultas del Sitema guardadas"
         >
           <CaretDown size={20} />
         </button>
@@ -154,13 +182,22 @@ export const InputSystemPrompt = ({
                   {prompt.content}
                 </div>
               </button>
-              <button
-                className="p-2 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-110 hover:rotate-2"
-                onClick={(e) => handleDeleteClick(e, prompt)}
-                title="Eliminar prompt"
-              >
-                <Trash size={20} />
-              </button>
+              <div className="flex gap-2">
+                <button
+                  className="p-2 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 hover:scale-110 hover:rotate-2"
+                  onClick={(e) => handleEditClick(e, prompt)}
+                  title="Editar prompt"
+                >
+                  <PencilSimple size={20} />
+                </button>
+                <button
+                  className="p-2 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-110 hover:rotate-2"
+                  onClick={(e) => handleDeleteClick(e, prompt)}
+                  title="Eliminar prompt"
+                >
+                  <Trash size={20} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -246,6 +283,55 @@ export const InputSystemPrompt = ({
             >
               <Trash size={20} />
               Eliminar
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setPromptToEdit(null);
+          setEditPromptName("");
+          setEditPromptContent("");
+        }}
+        className="w-full max-w-[min(95vw,500px)] mx-auto"
+        hideSubmitButton={true}
+      >
+        <div className="p-4 sm:p-6 space-y-4">
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Editar Prompt del Sistema</h3>
+          <input
+            type="text"
+            placeholder="Nombre del prompt"
+            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-neutral-200 dark:border-neutral-700 focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10"
+            value={editPromptName}
+            onChange={(e) => setEditPromptName(e.target.value)}
+          />
+          <textarea
+            placeholder="Contenido del prompt"
+            className="w-full h-40 px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-neutral-200 dark:border-neutral-700 focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 resize-none"
+            value={editPromptContent}
+            onChange={(e) => setEditPromptContent(e.target.value)}
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              className="px-4 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+              onClick={() => {
+                setIsEditModalOpen(false);
+                setPromptToEdit(null);
+                setEditPromptName("");
+                setEditPromptContent("");
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              className="px-4 py-2 rounded-lg bg-[#F48120] text-white hover:bg-[#F48120]/90 transition-colors flex items-center gap-2"
+              onClick={confirmEdit}
+            >
+              <FloppyDisk size={20} />
+              Guardar
             </button>
           </div>
         </div>
