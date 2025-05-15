@@ -304,7 +304,7 @@ function ChatComponent() {
       />
       <main className="flex-1 w-full px-4 py-4 relative">
         {/* Botón flotante de configuración */}
-        <div className="fixed left-4 top-1/2 -translate-y-1/2 z-20">
+        <div className="fixed left-4 top-1/2 -translate-y-1/2 z-10">
           <div className="relative flex flex-col gap-2 p-2 bg-white dark:bg-neutral-900 rounded-xl shadow-xl
                          border border-neutral-200/50 dark:border-neutral-700/50
                          backdrop-blur-lg backdrop-saturate-150">
