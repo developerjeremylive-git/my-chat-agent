@@ -61,6 +61,7 @@ import { Modal } from "./components/modal/Modal";
 import { Input } from "./components/input/Input";
 import { InputSystemPrompt } from "./components/input/InputSystemPrompt";
 import { ModelSelect } from "./components/model/ModelSelect";
+import { GeminiConfigModal } from "./components/modal/GeminiConfigModal";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -71,6 +72,7 @@ function ChatComponent() {
   const { config } = useAIConfig();
   const { selectedModel } = useModel();
   const [showOIAICreator, setShowOIAICreator] = useOIAIState(false);
+  const [showGeminiConfig, setShowGeminiConfig] = useState(false);
 
   const handleOIAICopy = (content: string) => {
     setInputText(content);
@@ -296,6 +298,7 @@ function ChatComponent() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground overflow-hidden">
+      <GeminiConfigModal isOpen={showGeminiConfig} onClose={() => setShowGeminiConfig(false)} />
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
@@ -361,6 +364,21 @@ function ChatComponent() {
             >
               <Rocket size={20} weight="duotone" className="text-[#F48120]" />
             </Button>
+
+            <Tooltip content="Configurar Gemini API">
+              <Button
+                variant="ghost"
+                size="md"
+                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                flex items-center justify-center"
+                onClick={() => setShowGeminiConfig(true)}
+              >
+                <Brain className="text-[#F48120]" size={20} weight="duotone" />
+              </Button>
+            </Tooltip>
 
             <Tooltip content="Crear IA">
               <Button

@@ -19,8 +19,10 @@ import { cors } from 'hono/cors';
 const app = new Hono();
 const workersai = createWorkersAI({ binding: env.AI });
 
-// Variables globales para almacenar el modelo seleccionado y el prompt del sistema
+// Variables globales para almacenar el modelo seleccionado, prompt del sistema y configuración de Gemini
 let selectedModel = '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b';
+let geminiApiKey = '';
+let geminiModel = '@cf/google/gemma-7b-it-lora';
 // let systemPrompt = 'You are a helpful assistant that can do various tasks...';
 let systemPrompt = 'Eres un asistente útil que puede realizar varias tareas...';
 
@@ -29,6 +31,19 @@ app.post('/api/model', async (c) => {
   const { model } = await c.req.json();
   selectedModel = model;
   return c.json({ success: true, model: selectedModel });
+});
+
+// Endpoint para configurar Gemini API
+app.post('/api/gemini-config', async (c) => {
+  const { apiKey, model } = await c.req.json();
+  geminiApiKey = apiKey;
+  if (model) geminiModel = model;
+  return c.json({ success: true, model: geminiModel });
+});
+
+// Endpoint para obtener la configuración actual de Gemini
+app.get('/api/gemini-config', async (c) => {
+  return c.json({ model: geminiModel });
 });
 
 // Endpoint para actualizar el prompt del sistema
@@ -80,6 +95,7 @@ const model = getModel();
 //   apiKey: env.OPENAI_API_KEY,
 //   baseURL: env.GATEWAY_BASE_URL,
 // });
+// const model = openai("gpt-4o-2024-11-20");
 
 // we use ALS to expose the agent context to the tools
 export const agentContext = new AsyncLocalStorage<Chat>();
