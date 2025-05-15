@@ -302,8 +302,49 @@ function ChatComponent() {
       />
       <main className="flex-1 w-full px-4 py-4 relative">
         {/* Botón flotante de configuración */}
-        <div className="fixed left-4 top-1/9 -translate-y-1/2 z-20">
-          <div className="relative">
+        <div className="fixed left-4 top-1/2 -translate-y-1/2 z-20">
+          <div className="relative flex flex-col gap-2 p-2 bg-white dark:bg-neutral-900 rounded-xl shadow-xl
+                         border border-neutral-200/50 dark:border-neutral-700/50
+                         backdrop-blur-lg backdrop-saturate-150">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                         flex items-center justify-center"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <List size={20} className="text-[#F48120]" weight="duotone" />
+            </Button>
+
+            <Button
+              ref={settingsButtonRef}
+              variant="ghost"
+              size="sm"
+              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                         flex items-center justify-center"
+              onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+            >
+              <Wrench size={20} className="text-[#F48120]" weight="duotone" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                         flex items-center justify-center"
+              onClick={() => setIsSettingsOpen(true)}
+            >
+              <Gear size={20} className="text-[#F48120]" weight="duotone" />
+            </Button>
 
             {showSettingsMenu && createPortal(
               <div
@@ -532,53 +573,7 @@ function ChatComponent() {
             onTextSizeChange={setTextSize}
           /> */}
           <div className="flex items-center gap-2 justify-between w-full px-4 py-3">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-8 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                           dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                           border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                           transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                           flex items-center justify-between gap-2 group/button"
-                onClick={() => setIsSidebarOpen(true)}
-              >
-                <div className="flex items-center gap-2">
-                  <List size={16} className="text-[#F48120] mr-1" weight="duotone" />
-                </div>
-              </Button>
-
-              <Button
-                ref={settingsButtonRef}
-                variant="ghost"
-                size="sm"
-                className="w-8 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                           dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                           border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                           transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                           flex items-center justify-between gap-2 group/button"
-                onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-              >
-                <div className="flex items-center gap-2">
-                  <Wrench size={16} className="text-[#F48120] mr-1" weight="duotone" />
-                </div>
-              </Button>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-8 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                         flex items-center justify-between gap-2 group/button"
-              onClick={() => setIsSettingsOpen(true)}
-            >
-              <div className="flex items-center gap-2">
-                <Gear size={16} className="text-[#F48120] mr-1" weight="duotone" />
-              </div>
-            </Button>
+            <div className="flex-1"></div>
           </div>
 
           {showAgent && (
