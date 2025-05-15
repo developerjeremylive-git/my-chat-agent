@@ -203,16 +203,17 @@ function ChatComponent() {
 
   const agent = useAgent({
     agent: "chat",
-    config: {
-      temperature: config.temperature,
-      maxTokens: config.maxTokens,
-      topP: config.topP,
-      topK: config.topK,
-      frequencyPenalty: config.frequencyPenalty,
-      presencePenalty: config.presencePenalty,
-      seed: config.seed,
-      stream: config.stream,
-    },
+    // config: {
+    //   temperature: config.temperature,
+    //   maxTokens: config.maxTokens,
+    //   topP: config.topP,
+    //   topK: config.topK,
+    //   frequencyPenalty: config.frequencyPenalty,
+    //   presencePenalty: config.presencePenalty,
+    //   seed: config.seed,
+    //   stream: config.stream,
+    // },
+    
     // stream: config.stream,
     // onStreamEnd: () => {
     //   scrollToBottom();

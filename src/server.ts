@@ -117,16 +117,15 @@ export class Chat extends AIChatAgent<Env> {
 
           const result = streamText({
             model,
-            // temperature: config.temperature,
-            // maxTokens: config.maxTokens,
-            // topP: config.topP,
-            // topK: config.topK,
-            // frequencyPenalty: config.frequencyPenalty,
-            // presencePenalty: config.presencePenalty,
-            // seed: config.seed,
+            temperature: config.temperature,
+            maxTokens: config.maxTokens,
+            topP: config.topP,
+            topK: config.topK,
+            frequencyPenalty: config.frequencyPenalty,
+            presencePenalty: config.presencePenalty,
+            seed: config.seed,
             // toolCallStreaming: true,
-            system: `${systemPrompt}
-`,
+            system: `${systemPrompt}`,
 
             // ${unstable_getSchedulePrompt({ date: new Date() })}
 
