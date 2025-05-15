@@ -228,9 +228,9 @@ function ChatComponent() {
     handleInputChange: handleAgentInputChange,
     handleSubmit: handleAgentSubmit,
     addToolResult,
-    clearHistory,
-    isLoading,
-    stop
+    clearHistory
+    // isLoading,
+    // stop
   } = useAgentChat({
     agent,
     maxSteps: 5,
@@ -1060,7 +1060,7 @@ function ChatComponent() {
                 </div>
 
                 <div className="relative">
-                  {isLoading ? (
+                  {/* {isLoading ? (
                     <button
                       type="button"
                       onClick={stop}
@@ -1069,7 +1069,7 @@ function ChatComponent() {
                     >
                       <Stop size={18} weight="bold" />
                     </button>
-                  ) : (
+                  ) : ( */}
                     <Button
                       type="submit"
                       shape="square"
@@ -1104,7 +1104,7 @@ function ChatComponent() {
                     >
                       <PaperPlaneRight size={18} weight="bold" />
                     </Button>
-                  )}
+                  {/* )} */}
                 </div>
               </div>
             </form>
