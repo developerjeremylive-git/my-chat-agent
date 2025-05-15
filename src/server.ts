@@ -21,7 +21,8 @@ const workersai = createWorkersAI({ binding: env.AI });
 
 // Variables globales para almacenar el modelo seleccionado y el prompt del sistema
 let selectedModel = '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b';
-let systemPrompt = 'You are a helpful assistant that can do various tasks...';
+// let systemPrompt = 'You are a helpful assistant that can do various tasks...';
+let systemPrompt = 'Eres un asistente útil que puede realizar varias tareas...';
 
 // Endpoint para actualizar el modelo
 app.post('/api/model', async (c) => {
@@ -125,11 +126,14 @@ export class Chat extends AIChatAgent<Env> {
             // seed: config.seed,
             // toolCallStreaming: true,
             system: `${systemPrompt}
-
-${unstable_getSchedulePrompt({ date: new Date() })}
-
-If the user asks to schedule a task, use the schedule tool to schedule the task.
 `,
+
+            // ${unstable_getSchedulePrompt({ date: new Date() })}
+
+            // Si el usuario solicita programar una tarea, utilice la herramienta de programación para programar las tareas
+            // `,
+
+            // If the user asks to schedule a task, use the schedule tool to schedule the task.
             messages: processedMessages,
             tools: allTools,
             onFinish: async (args) => {

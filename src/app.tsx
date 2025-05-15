@@ -1018,8 +1018,9 @@ function ChatComponent() {
 
             {/* Input Area */}
             <form
-              onSubmit={(e) =>
-                e.preventDefault()
+              onSubmit={(e) =>{
+                e.preventDefault();
+                handleAgentSubmit(e);}
                 // handleAgentSubmit(e, {
                 //   data: {
                 //     annotations: {
@@ -1062,16 +1063,16 @@ function ChatComponent() {
                     <button
                       type="button"
                       onClick={stop}
-                      className="inline-flex items-center cursor-pointer justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full p-1.5 h-fit border border-neutral-200 dark:border-neutral-800"
-                      aria-label="Stop generation"
+                      className="inline-flex items-center justify-center p-2.5 text-red-500 hover:text-white bg-white/95 dark:bg-gray-800/95 hover:bg-gradient-to-br hover:from-red-500 hover:to-rose-600 rounded-full border-2 border-red-200/50 dark:border-red-700/30 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-all duration-300 transform hover:scale-105 active:scale-95"
+                      aria-label="Detener generación"
                     >
-                      <Stop size={16} />
+                      <Stop size={18} weight="bold" />
                     </button>
                   ) : (
                     <Button
                       type="submit"
                       shape="square"
-                      className="rounded-full h-10 w-10 flex-shrink-0"
+                      className="inline-flex items-center justify-center p-2.5 text-[#F48120] hover:text-white bg-white/95 dark:bg-gray-800/95 hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full border-2 border-[#F48120]/20 dark:border-[#F48120]/10 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20 transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/95 dark:disabled:hover:bg-gray-800/95 disabled:hover:text-[#F48120] disabled:hover:scale-100"
                       disabled={pendingToolCallConfirmation || !agentInput.trim()}
                       onClick={async (e) => {
                         try {
@@ -1093,14 +1094,14 @@ function ChatComponent() {
                             return;
                           } else {
                             // e.preventDefault();
-                            handleAgentSubmit(e);
+                            // handleAgentSubmit(e);
                           }
                         } catch (error) {
                           console.error('Error al actualizar el modelo:', error);
                         }
                       }}
                     >
-                      <PaperPlaneRight size={16} />
+                      <PaperPlaneRight size={18} weight="bold" />
                     </Button>
                   )}
                 </div>

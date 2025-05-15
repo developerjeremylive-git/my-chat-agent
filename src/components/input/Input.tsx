@@ -36,24 +36,23 @@ export const Input = ({
             "add-size-md": size === "md",
             "add-size-base": size === "base",
           },
-          "pr-12 truncate cursor-pointer",
+          "pr-12 truncate mr-11 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-purple-500/20",
           className
         )}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
           onChange?.(e);
           onValueChange?.(e.target.value);
         }}
-        onClick={() => setIsModalOpen(true)}
         value={value}
         {...props}
       />
-      {/* <button
+      <button
         type="button"
-        className="absolute right-2 p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors bg-ob-btn-secondary-bg"
+        className="absolute right-0.5 p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 bg-gradient-to-br from-orange-50 to-purple-50 dark:from-orange-500/5 dark:to-purple-500/5 hover:from-orange-100 hover:to-purple-100 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg border border-orange-200/50 dark:border-purple-700/30 shadow-sm hover:shadow-orange-500/10 dark:hover:shadow-purple-500/10 hover:scale-105 transform"
         onClick={() => setIsModalOpen(true)}
       >
         <ArrowsOut size={20} />
-      </button> */}
+      </button>
 
       <Modal
         isOpen={isModalOpen}
