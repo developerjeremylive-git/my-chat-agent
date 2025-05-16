@@ -109,8 +109,12 @@ export class Chat extends AIChatAgent<Env> {
 
     // if (geminiApiKey !== '') {
     //gemini-2.0-flash
-    if (selectedModel === 'gemini-2.0-flash') {
-      const ai = new GoogleGenAI({ apiKey: (import.meta as any).env.GEMINI_API_KEY });
+    if (selectedModel === "gemini-2.0-flash") {
+      const geminiApiKey = env.GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || (import.meta as any).env.GEMINI_API_KEY;
+      if (!geminiApiKey) {
+        throw new Error('GEMINI_API_KEY is not set in environment variables');
+      }
+      const ai = new GoogleGenAI({ apiKey: geminiApiKey });
       const response = await ai.models.generateContent({
         model: geminiModel,
         contents: [
