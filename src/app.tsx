@@ -365,7 +365,7 @@ function ChatComponent() {
               <Rocket size={20} weight="duotone" className="text-[#F48120]" />
             </Button>
 
-            <Tooltip content="Configurar Gemini API">
+            {/* <Tooltip content="Configurar Gemini API">
               <Button
                 variant="ghost"
                 size="md"
@@ -378,7 +378,7 @@ function ChatComponent() {
               >
                 <Brain className="text-[#F48120]" size={20} weight="duotone" />
               </Button>
-            </Tooltip>
+            </Tooltip> */}
 
             <Tooltip content="Crear IA">
               <Button

@@ -19,6 +19,18 @@ interface ModelSelectProps {
   className?: string;
 }
 
+// Modelos de Google Gemini
+const geminiModels: Model[] = [
+  {
+    provider: 'Google',
+    name: 'gemini-2.0-flash',
+    description: 'Modelo de última generación de Google con capacidades avanzadas de procesamiento en tiempo real, optimizado para respuestas rápidas y precisas con bajo consumo de recursos.',
+    params: 2,
+    context: '32K tokens',
+    features: ['Baja Latencia', 'Alto Rendimiento', 'Eficiencia Energética', 'Multimodal']
+  }
+];
+
 // Modelos de Razonamiento Avanzado
 const reasoningModels: Model[] = [
   {
@@ -179,7 +191,7 @@ const distilledModels: Model[] = [
   }
 ];
 
-const models: Model[] = [...reasoningModels, ...distilledModels];
+const models: Model[] = [...geminiModels, ...reasoningModels, ...distilledModels];
 
 export function ModelSelect({ className }: ModelSelectProps) {
   const { selectedModel: contextModel, setSelectedModel: setContextModel } = useModel();
@@ -212,7 +224,7 @@ export function ModelSelect({ className }: ModelSelectProps) {
             <div className="flex items-center justify-center">
               {selectedModel.provider === 'DeepSeek / Meta' && <Brain className="w-5 h-5 text-blue-500" weight="duotone" />}
               {selectedModel.provider === 'Meta' && <Robot className="w-5 h-5 text-purple-500" weight="duotone" />}
-              {selectedModel.provider === 'Google' && <Code className="w-5 h-5 text-green-500" weight="duotone" />}
+              {selectedModel.provider === 'Google' && <Robot className="w-5 h-5 text-green-500" weight="duotone" />}
               {selectedModel.provider === 'Alibaba Cloud' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
               {selectedModel.provider === 'Mistral AI' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
               {selectedModel.provider === 'Qwen' && <Chats className="w-5 h-5 text-red-500" weight="duotone" />}
@@ -239,8 +251,103 @@ export function ModelSelect({ className }: ModelSelectProps) {
           <DropdownMenu.Content
             className="min-w-[600px] max-h-[85vh] overflow-y-auto bg-white/95 dark:bg-neutral-900/95 rounded-xl p-2 shadow-xl border border-neutral-200 dark:border-neutral-700/50 z-50 backdrop-blur-xl ml-4 scrollbar-thin scrollbar-thumb-[#F48120] scrollbar-track-transparent hover:scrollbar-thumb-[#F48120]/80 md:min-w-[800px]"
             sideOffset={5}
-          >
-            <div className="mb-2 px-3 py-2">
+          > 
+            {/* geminiModels   */}
+            <div className="mt-4 mb-2 px-3 py-2">
+              <h3 className="text-sm font-semibold text-purple-500 dark:text-purple-400 mb-1">Modelos Gemini</h3>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Modelos eficientes y optimizados para rendimiento</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 px-2">
+              {geminiModels.map((model) => (
+                <DropdownMenu.Item
+                  key={model.name}
+                  className={cn(
+                    'flex flex-col gap-1 px-3 py-2.5 rounded-lg cursor-pointer outline-none',
+                    'hover:bg-neutral-50 dark:hover:bg-neutral-800',
+                    'focus:bg-neutral-50 dark:focus:bg-neutral-800',
+                    'transition-all duration-200 hover:scale-[0.99]',
+                    selectedModel.name === model.name && 'bg-neutral-100/80 dark:bg-neutral-800 shadow-sm dark:shadow-neutral-950'
+                  )}
+                  onClick={() => {
+                    setSelectedModel(model);
+                    setContextModel(model.name);
+                  }}
+                >
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <div className="flex items-center gap-2">
+                        {model.provider === 'Google' && <Robot className="w-5 h-5 text-green-500" weight="duotone" />}
+                        <div className="flex flex-col">
+                          <span className="text-xs text-neutral-600 dark:text-neutral-400">{model.provider}</span>
+                          <span className="text-sm font-medium dark:text-white">{model.name}</span>
+                        </div>
+                      </div>
+                    </Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        className="bg-neutral-900/95 text-white px-4 py-3 rounded-xl text-sm max-w-xs z-50 border border-neutral-700/50 shadow-2xl backdrop-blur-xl dark:shadow-[#F48120]/5"
+                        sideOffset={5}
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">{model.name}</span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopy(model.name);
+                                }}
+                                className="p-1 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-1.5"
+                              >
+                                {copied ?
+                                  <Check className="w-3.5 h-3.5 text-green-500" weight="bold" /> :
+                                  <Copy className="w-3.5 h-3.5 text-neutral-400" weight="regular" />
+                                }
+                                <span className="text-neutral-400 text-[10px]">Copiar ID</span>
+                              </button>
+                            </div>
+                          </div>
+                          <div className="pt-2 border-t border-neutral-800">
+                            <p className="text-sm text-neutral-300">{model.description}</p>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">Parámetros</span>
+                            <span className="text-neutral-200">{model.params}B</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">Contexto</span>
+                            <span className="text-neutral-200">{model.context}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">LIMITS</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-neutral-200">30 / minute</span>
+                              <span className="text-neutral-500">•</span>
+                              <span className="text-neutral-200">1k / day</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">RELEASED</span>
+                            <span className="text-neutral-200">March 5, 2025</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {model.features?.map((feature) => (
+                              <span
+                                key={feature}
+                                className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
+                </DropdownMenu.Item>
+              ))}
+            </div>
+            <div className="mt-4 mb-2 px-3 py-2  border-t border-neutral-200 dark:border-neutral-800">
               <h3 className="text-sm font-semibold text-[#F48120] dark:text-[#F48120] mb-1">Modelos de Razonamiento Avanzado</h3>
               <p className="text-xs text-neutral-500 dark:text-neutral-400">Modelos optimizados para tareas complejas y razonamiento avanzado</p>
             </div>
@@ -265,7 +372,7 @@ export function ModelSelect({ className }: ModelSelectProps) {
                       <div className="flex items-center gap-2">
                         {model.provider === 'DeepSeek / Meta' && <Brain className="w-5 h-5 text-blue-500" weight="duotone" />}
                         {model.provider === 'Meta' && <Robot className="w-5 h-5 text-purple-500" weight="duotone" />}
-                        {model.provider === 'Google' && <Code className="w-5 h-5 text-green-500" weight="duotone" />}
+                        {model.provider === 'Google' && <Robot className="w-5 h-5 text-green-500" weight="duotone" />}
                         {model.provider === 'Alibaba Cloud' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
                         {model.provider === 'Mistral AI' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
                         {model.provider === 'Qwen' && <Chats className="w-5 h-5 text-red-500" weight="duotone" />}
@@ -366,7 +473,7 @@ export function ModelSelect({ className }: ModelSelectProps) {
                       <div className="flex items-center gap-2">
                         {model.provider === 'DeepSeek / Meta' && <Brain className="w-5 h-5 text-blue-500" weight="duotone" />}
                         {model.provider === 'Meta' && <Robot className="w-5 h-5 text-purple-500" weight="duotone" />}
-                        {model.provider === 'Google' && <Code className="w-5 h-5 text-green-500" weight="duotone" />}
+                        {model.provider === 'Google' && <Robot className="w-5 h-5 text-green-500" weight="duotone" />}
                         {model.provider === 'Alibaba Cloud' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
                         {model.provider === 'Mistral AI' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
                         {model.provider === 'Qwen' && <Chats className="w-5 h-5 text-red-500" weight="duotone" />}

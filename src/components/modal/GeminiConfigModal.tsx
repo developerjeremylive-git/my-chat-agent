@@ -46,8 +46,7 @@ export function GeminiConfigModal({ isOpen, onClose }: GeminiConfigModalProps) {
                     <div className="space-y-2">
                         <label className="flex items-center gap-2 text-ob-base-300 font-medium">
                             <Key weight="bold" className="w-5 h-5 text-orange-500" />
-                            API Key de Gemini
-                        </label>
+                                                     </label>
                         <Input
                             type="password"
                             value={apiKey}

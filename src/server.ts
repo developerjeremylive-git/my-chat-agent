@@ -19,37 +19,20 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { GoogleGenAI } from "@google/genai";
 
-let ai = new GoogleGenAI({ apiKey: "00000000-0000-0000-0000-000000000000" });
-
 const app = new Hono();
 const workersai = createWorkersAI({ binding: env.AI });
 
 // Variables globales para almacenar el modelo seleccionado, prompt del sistema y configuración de Gemini
-let selectedModel = '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b';
-let geminiApiKey = '';
+let selectedModel = 'gemini-2.0-flash';
 let geminiModel = 'gemini-2.0-flash';
 // let systemPrompt = 'You are a helpful assistant that can do various tasks...';
 let systemPrompt = 'Eres un asistente útil que puede realizar varias tareas...';
-  
+
 // Endpoint para actualizar el modelo
 app.post('/api/model', async (c) => {
   const { model } = await c.req.json();
   selectedModel = model;
   return c.json({ success: true, model: selectedModel });
-});
-
-// Endpoint para configurar Gemini API
-app.post('/api/gemini-config', async (c) => {
-  const { apiKey, model } = await c.req.json();
-  geminiApiKey = apiKey;
-  ai = new GoogleGenAI({ apiKey: apiKey });
-  if (model) geminiModel = model;
-  return c.json({ success: true, model: geminiModel });
-});
-
-// Endpoint para obtener la configuración actual de Gemini
-app.get('/api/gemini-config', async (c) => {
-  return c.json({ model: geminiModel });
 });
 
 // Endpoint para actualizar el prompt del sistema
@@ -124,7 +107,10 @@ export class Chat extends AIChatAgent<Env> {
       // ...this.mcp.unstable_getAITools(),
     };
 
-    if (geminiApiKey !== '') {
+    // if (geminiApiKey !== '') {
+    //gemini-2.0-flash
+    if (selectedModel === 'gemini-2.0-flash') {
+      const ai = new GoogleGenAI({ apiKey: (import.meta as any).env.GEMINI_API_KEY });
       const response = await ai.models.generateContent({
         model: geminiModel,
         contents: [
@@ -251,3 +237,24 @@ export default {
     );
   },
 };
+
+
+
+//
+// Codigo que no se uso en estas funcionalidades.
+//
+// let geminiApiKey = '';
+// let geminiModel = 'gemini-2.0-flash';
+// Endpoint para configurar Gemini API
+// app.post('/api/gemini-config', async (c) => {
+//   const { apiKey, model } = await c.req.json();
+//   geminiApiKey = apiKey;
+//   ai = new GoogleGenAI({ apiKey: apiKey });
+//   if (model) geminiModel = model;
+//   return c.json({ success: true, model: geminiModel });
+// });
+
+// // Endpoint para obtener la configuración actual de Gemini
+// app.get('/api/gemini-config', async (c) => {
+//   return c.json({ model: geminiModel });
+// });

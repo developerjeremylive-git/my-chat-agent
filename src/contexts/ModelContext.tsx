@@ -8,7 +8,7 @@ interface ModelContextType {
 const ModelContext = createContext<ModelContextType | undefined>(undefined);
 
 export function ModelProvider({ children }: { children: React.ReactNode }) {
-  const [selectedModel, setSelectedModel] = useState('@cf/deepseek-ai/deepseek-r1-distill-qwen-32b');
+  const [selectedModel, setSelectedModel] = useState('gemini-2.0-flash');
 
   return (
     <ModelContext.Provider value={{ selectedModel, setSelectedModel }}>
