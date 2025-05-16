@@ -11,7 +11,7 @@ interface GeminiConfigModalProps {
 
 export function GeminiConfigModal({ isOpen, onClose }: GeminiConfigModalProps) {
     const [apiKey, setApiKey] = useState('');
-    const [model, setModel] = useState('@cf/google/gemma-7b-it-lora');
+    const [model, setModel] = useState('gemini-2.0-flash');
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {

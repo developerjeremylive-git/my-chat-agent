@@ -5,16 +5,21 @@ import {
   createDataStreamResponse,
   generateId,
   streamText,
+  formatDataStreamPart,
   type StreamTextOnFinishCallback,
   type ToolSet,
 } from "ai";
 import { createWorkersAI } from 'workers-ai-provider';
+import { createOpenAI } from '@ai-sdk/openai';
 import { processToolCalls } from "./utils";
 import { tools, executions } from "./tools";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { env } from "cloudflare:workers";
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { GoogleGenAI } from "@google/genai";
+
+let ai = new GoogleGenAI({ apiKey: "00000000-0000-0000-0000-000000000000" });
 
 const app = new Hono();
 const workersai = createWorkersAI({ binding: env.AI });
@@ -22,10 +27,10 @@ const workersai = createWorkersAI({ binding: env.AI });
 // Variables globales para almacenar el modelo seleccionado, prompt del sistema y configuración de Gemini
 let selectedModel = '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b';
 let geminiApiKey = '';
-let geminiModel = '@cf/google/gemma-7b-it-lora';
+let geminiModel = 'gemini-2.0-flash';
 // let systemPrompt = 'You are a helpful assistant that can do various tasks...';
 let systemPrompt = 'Eres un asistente útil que puede realizar varias tareas...';
-
+  
 // Endpoint para actualizar el modelo
 app.post('/api/model', async (c) => {
   const { model } = await c.req.json();
@@ -37,6 +42,7 @@ app.post('/api/model', async (c) => {
 app.post('/api/gemini-config', async (c) => {
   const { apiKey, model } = await c.req.json();
   geminiApiKey = apiKey;
+  ai = new GoogleGenAI({ apiKey: apiKey });
   if (model) geminiModel = model;
   return c.json({ success: true, model: geminiModel });
 });
@@ -92,8 +98,8 @@ const model = getModel();
 
 // Cloudflare AI Gateway
 // const openai = createOpenAI({
-//   apiKey: env.OPENAI_API_KEY,
-//   baseURL: env.GATEWAY_BASE_URL,
+//   apiKey: geminiApiKey,
+//   baseURL: geminiModel,
 // });
 // const model = openai("gpt-4o-2024-11-20");
 
@@ -118,58 +124,89 @@ export class Chat extends AIChatAgent<Env> {
       // ...this.mcp.unstable_getAITools(),
     };
 
-    // Create a streaming response that handles both text and tool outputs
-    return agentContext.run(this, async () => {
-      const dataStreamResponse = createDataStreamResponse({
-        execute: async (dataStream) => {
-          // Process any pending tool calls from previous messages
-          // This handles human-in-the-loop confirmations for tools
-          const processedMessages = await processToolCalls({
-            messages: this.messages,
-            dataStream,
-            tools: allTools,
-            executions,
-          });
-
-          const result = streamText({
-            model,
-            temperature: config.temperature,
-            maxTokens: config.maxTokens,
-            topP: config.topP,
-            topK: config.topK,
-            frequencyPenalty: config.frequencyPenalty,
-            presencePenalty: config.presencePenalty,
-            seed: config.seed,
-            // toolCallStreaming: true,
-            system: `${systemPrompt}`,
-
-            // ${unstable_getSchedulePrompt({ date: new Date() })}
-
-            // Si el usuario solicita programar una tarea, utilice la herramienta de programación para programar las tareas
-            // `,
-
-            // If the user asks to schedule a task, use the schedule tool to schedule the task.
-            messages: processedMessages,
-            tools: allTools,
-            onFinish: async (args) => {
-              onFinish(
-                args as Parameters<StreamTextOnFinishCallback<ToolSet>>[0]
-              );
-              console.log('Stream finalizado');
-            },
-            onError: (error) => {
-              console.error("Error while streaming:", error);
-            },
-            maxSteps: 10,
-          });
-
-          // Merge the AI response stream with tool execution outputs
-          result.mergeIntoDataStream(dataStream);
-        },
+    if (geminiApiKey !== '') {
+      const response = await ai.models.generateContent({
+        model: geminiModel,
+        contents: [
+          {
+            parts: [
+              { text: systemPrompt },
+              ...this.messages.map(msg => ({ text: msg.content }))
+            ]
+          }
+        ],
+        // config: {
+        //   // systemInstruction: "You are a cat. Your name is Neko.",
+        //   // systemInstruction: systemPrompt,
+        //   // maxOutputTokens: 500,
+        //   temperature: config.temperature,
+        //   topP: config.topP,
+        //   topK: config.topK,
+        //   frequencyPenalty: config.frequencyPenalty,
+        //   presencePenalty: config.presencePenalty,
+        //   seed: config.seed,
+        //   // toolCallStreaming: true,
+        // },
       });
+      return createDataStreamResponse({
+        execute: async (dataStream) => {
+          dataStream.write(formatDataStreamPart('text', response.text ?? ''));
+        }
+      });
+    } else {
+      // Create a streaming response that handles both text and tool outputs
+      return agentContext.run(this, async () => {
+        const dataStreamResponse = createDataStreamResponse({
+          execute: async (dataStream) => {
+            // Process any pending tool calls from previous messages
+            // This handles human-in-the-loop confirmations for tools
+            const processedMessages = await processToolCalls({
+              messages: this.messages,
+              dataStream,
+              tools: allTools,
+              executions,
+            });
 
-      return dataStreamResponse;
-    });
+            const result = streamText({
+              model,
+              temperature: config.temperature,
+              maxTokens: config.maxTokens,
+              topP: config.topP,
+              topK: config.topK,
+              frequencyPenalty: config.frequencyPenalty,
+              presencePenalty: config.presencePenalty,
+              seed: config.seed,
+              // toolCallStreaming: true,
+              system: `${systemPrompt}`,
+
+              // ${unstable_getSchedulePrompt({ date: new Date() })}
+
+              // Si el usuario solicita programar una tarea, utilice la herramienta de programación para programar las tareas
+              // `,
+
+              // If the user asks to schedule a task, use the schedule tool to schedule the task.
+              messages: processedMessages,
+              tools: allTools,
+              onFinish: async (args) => {
+                onFinish(
+                  args as Parameters<StreamTextOnFinishCallback<ToolSet>>[0]
+                );
+                console.log('Stream finalizado');
+              },
+              onError: (error) => {
+                console.error("Error while streaming:", error);
+              },
+              maxSteps: 10,
+            });
+
+            // Merge the AI response stream with tool execution outputs
+            result.mergeIntoDataStream(dataStream);
+          },
+        });
+
+        return dataStreamResponse;
+      });
+    }
   }
   async executeTask(description: string, task: Schedule<string>) {
     await this.saveMessages([
@@ -213,4 +250,4 @@ export default {
       new Response("Not found", { status: 404 })
     );
   },
-} satisfies ExportedHandler<Env>;
+};
