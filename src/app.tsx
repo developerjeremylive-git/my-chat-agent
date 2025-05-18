@@ -6,6 +6,7 @@ import { APPROVAL } from "./shared";
 import type { tools } from "./tools";
 import { AIConfigProvider, useAIConfig } from "@/contexts/AIConfigContext";
 import { ModelProvider, useModel } from "@/contexts/ModelContext";
+import { ChatProvider } from "@/contexts/ChatContext";
 import "@/styles/markdown.css";
 import { MessageView } from "@/components/message/MessageView";
 import { ChatHeader } from "@/components/chat/ChatHeader";
@@ -16,6 +17,7 @@ import { Toggle } from "@/components/toggle/Toggle";
 import { Tooltip } from "@/components/tooltip/Tooltip";
 import { AISettingsPanel } from "@/components/settings/AISettingsPanel";
 import { Sidebar } from "@/components/sidebar/Sidebar";
+import { SideMenu } from "@/components/sidemenu/SideMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { createPortal } from "react-dom";
 
@@ -44,7 +46,9 @@ import {
   ArrowRight,
   ArrowsOut,
   PlusCircle,
-  Stop
+  Stop,
+  ListBullets,
+  ChatCenteredDots
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -62,6 +66,7 @@ import { Input } from "./components/input/Input";
 import { InputSystemPrompt } from "./components/input/InputSystemPrompt";
 import { ModelSelect } from "./components/model/ModelSelect";
 import { GeminiConfigModal } from "./components/modal/GeminiConfigModal";
+import { ListHeart } from "@phosphor-icons/react/dist/ssr";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -80,6 +85,7 @@ function ChatComponent() {
   };
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
 
   // Efecto para cerrar el menú de configuración cuando se abre la barra lateral
   useEffect(() => {
@@ -224,7 +230,7 @@ function ChatComponent() {
     // stop
   } = useAgentChat({
     agent,
-    maxSteps: 5,
+    maxSteps: config.maxSteps,
   });
 
   // Scroll to bottom when messages change
@@ -286,75 +292,95 @@ function ChatComponent() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground overflow-hidden">
-      <GeminiConfigModal isOpen={showGeminiConfig} onClose={() => setShowGeminiConfig(false)} />
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        theme={theme}
-        onThemeChange={toggleTheme}
-        onPromptSelect={(prompt) => handleAgentInputChange({ target: { value: prompt } } as any)}
-      />
-      <main className="flex-1 w-full px-4 py-4 relative">
-        {/* Botón flotante de configuración */}
-        <div className="fixed left-4 top-1/2 -translate-y-1/2 z-10">
-          <div className="relative flex flex-col gap-2 p-2 bg-white dark:bg-neutral-900 rounded-xl shadow-xl
+    <ChatProvider>
+      <div className="flex flex-col min-h-screen bg-background text-foreground overflow-hidden">
+        <GeminiConfigModal isOpen={showGeminiConfig} onClose={() => setShowGeminiConfig(false)} />
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          theme={theme}
+          onThemeChange={toggleTheme}
+          onPromptSelect={(prompt) => handleAgentInputChange({ target: { value: prompt } } as any)}
+        />
+        <SideMenu
+          isOpen={isSideMenuOpen}
+          onClose={() => setIsSideMenuOpen(false)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenTools={() => setShowToolsInterface(true)}
+          onClearHistory={() => setShowClearDialog(true)}
+        />
+        <main className="flex-1 w-full px-4 py-4 relative">
+          {/* Botón flotante de configuración */}
+          <div className="fixed left-4 top-1/2 -translate-y-1/2 z-10">
+            <div className="relative flex flex-col gap-2 p-2 bg-white dark:bg-neutral-900 rounded-xl shadow-xl
                          border border-neutral-200/50 dark:border-neutral-700/50
                          backdrop-blur-lg backdrop-saturate-150">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
                          dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
                          border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                          transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
                          flex items-center justify-center"
-              onClick={() => setIsSidebarOpen(true)}
-            >
-              <List size={20} className="text-[#F48120]" weight="duotone" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                onClick={() => setIsSideMenuOpen(true)}
+              >
+                <ChatCenteredDots size={20} className="text-[#F48120]" weight="duotone" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
                          dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
                          border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                          transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
                          flex items-center justify-center"
-              onClick={() => setIsSettingsOpen(true)}
-            >
-              <Gear size={20} className="text-[#F48120]" weight="duotone" />
-            </Button>
+                onClick={() => setIsSidebarOpen(true)}
+              >
+                <List size={20} className="text-[#F48120]" weight="duotone" />
+              </Button>
 
-            <Button
-              ref={settingsButtonRef}
-              variant="ghost"
-              size="sm"
-              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
                          dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
                          border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                          transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
                          flex items-center justify-center"
-              onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-            >
-              <Wrench size={20} className="text-[#F48120]" weight="duotone" />
-            </Button>
+                onClick={() => setIsSettingsOpen(true)}
+              >
+                <Gear size={20} className="text-[#F48120]" weight="duotone" />
+              </Button>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+              <Button
+                ref={settingsButtonRef}
+                variant="ghost"
+                size="sm"
+                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
                          dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
                          border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                          transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
                          flex items-center justify-center"
-              onClick={() => setShowToolsInterface(true)}
-            >
-              <Rocket size={20} weight="duotone" className="text-[#F48120]" />
-            </Button>
+                onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+              >
+                <Wrench size={20} className="text-[#F48120]" weight="duotone" />
+              </Button>
 
-            {/* <Tooltip content="Configurar Gemini API">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                         flex items-center justify-center"
+                onClick={() => setShowToolsInterface(true)}
+              >
+                <Rocket size={20} weight="duotone" className="text-[#F48120]" />
+              </Button>
+
+              {/* <Tooltip content="Configurar Gemini API">
               <Button
                 variant="ghost"
                 size="md"
@@ -369,61 +395,191 @@ function ChatComponent() {
               </Button>
             </Tooltip> */}
 
-            <Tooltip content="Limpiar historial">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+              <Tooltip content="Limpiar historial">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
                 dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
                 border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                 transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
                 flex items-center justify-center"
-                onClick={() => setShowClearDialog(true)}
-              >
-                <Trash className="text-[#F48120]" size={20} weight="duotone" />
-              </Button>
-            </Tooltip>
+                  onClick={() => setShowClearDialog(true)}
+                >
+                  <Trash className="text-[#F48120]" size={20} weight="duotone" />
+                </Button>
+              </Tooltip>
 
-            <Tooltip content="Crear IA">
-              <Button
-                variant="ghost"
-                size="md"
-                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+              <Tooltip content="Crear IA">
+                <Button
+                  variant="ghost"
+                  size="md"
+                  className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
                 dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
                 border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                 transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
                 flex items-center justify-center"
-                onClick={() => setShowOIAICreator(true)}
-              >
-                <PlusCircle className="text-[#F48120]" size={29} weight="duotone" />
-              </Button>
-            </Tooltip>
+                  onClick={() => setShowOIAICreator(true)}
+                >
+                  <PlusCircle className="text-[#F48120]" size={29} weight="duotone" />
+                </Button>
+              </Tooltip>
 
-            {showSettingsMenu && createPortal(
-              <div
-                ref={settingsMenuRef}
-                className="fixed z-50 min-w-[200px] bg-white dark:bg-neutral-900 rounded-xl shadow-xl
+              {showSettingsMenu && createPortal(
+                <div
+                  ref={settingsMenuRef}
+                  className="fixed z-50 min-w-[200px] bg-white dark:bg-neutral-900 rounded-xl shadow-xl
                          border border-neutral-200/50 dark:border-neutral-700/50
                          backdrop-blur-lg backdrop-saturate-150"
-                style={{
-                  left: settingsButtonRef.current?.getBoundingClientRect().right ?? 0 + 8,
-                  top: settingsButtonRef.current?.getBoundingClientRect().top ?? 0
-                }}
+                  style={{
+                    left: settingsButtonRef.current?.getBoundingClientRect().right ?? 0 + 8,
+                    top: settingsButtonRef.current?.getBoundingClientRect().top ?? 0
+                  }}
+                >
+                  <div className="p-2 space-y-1">
+                    <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Ancho del chat</div>
+                    <button
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                             text-neutral-700 dark:text-neutral-300
+                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                      onClick={() => {
+                        const event = new CustomEvent('toggleChatWidth', {
+                          detail: { width: 'narrow' }
+                        });
+                        window.dispatchEvent(event);
+                        setShowSettingsMenu(false);
+                      }}
+                    >
+                      <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                      <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Reducido</span>
+                    </button>
+                    <button
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                             text-neutral-700 dark:text-neutral-300
+                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                      onClick={() => {
+                        const event = new CustomEvent('toggleChatWidth', {
+                          detail: { width: 'default' }
+                        });
+                        window.dispatchEvent(event);
+                        setShowSettingsMenu(false);
+                      }}
+                    >
+                      <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                      <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Normal</span>
+                    </button>
+                    <button
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                             text-neutral-700 dark:text-neutral-300
+                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                      onClick={() => {
+                        const event = new CustomEvent('toggleChatWidth', {
+                          detail: { width: 'full' }
+                        });
+                        window.dispatchEvent(event);
+                        setShowSettingsMenu(false);
+                      }}
+                    >
+                      <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                      <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Completo</span>
+                    </button>
+                    <div className="my-2 border-t border-neutral-200 dark:border-neutral-700"></div>
+                    <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Tamaño del texto</div>
+                    <div className="flex items-center justify-center gap-2 px-4 py-2">
+                      <button
+                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                                text-neutral-700 dark:text-neutral-300
+                                hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                                dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                                transition-all duration-300 ${textSize === 'small' ? 'bg-[#F48120]/10 text-[#F48120]' : ''}
+                                group/item`}
+                        onClick={() => {
+                          setTextSize('small');
+                          setShowSettingsMenu(false);
+                        }}
+                      >
+                        <span className="text-xs font-bold group-hover/item:text-[#F48120] transition-colors duration-300">A</span>
+                      </button>
+                      <button
+                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                                text-neutral-700 dark:text-neutral-300
+                                hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                                dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                                transition-all duration-300 ${textSize === 'normal' ? 'bg-[#F48120]/10 text-[#F48120]' : ''}
+                                group/item`}
+                        onClick={() => {
+                          setTextSize('normal');
+                          setShowSettingsMenu(false);
+                        }}
+                      >
+                        <span className="text-sm font-bold group-hover/item:text-[#F48120] transition-colors duration-300">A</span>
+                      </button>
+                      <button
+                        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                                text-neutral-700 dark:text-neutral-300
+                                hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                                dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                                transition-all duration-300 ${textSize === 'large' ? 'bg-[#F48120]/10 text-[#F48120]' : ''}
+                                group/item`}
+                        onClick={() => {
+                          setTextSize('large');
+                          setShowSettingsMenu(false);
+                        }}
+                      >
+                        <span className="text-base font-bold group-hover/item:text-[#F48120] transition-colors duration-300">A</span>
+                      </button>
+                    </div>
+                    <div className="my-2 border-t border-neutral-200 dark:border-neutral-700"></div>
+                    <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Tema</div>
+                    <button
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                             text-neutral-700 dark:text-neutral-300
+                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                      onClick={() => {
+                        toggleTheme();
+                        setShowSettingsMenu(false);
+                      }}
+                    >
+                      {theme === "dark" ?
+                        <Sun weight="duotone" className="w-5 h-5 text-amber-400" /> :
+                        <Moon weight="duotone" className="w-5 h-5 text-blue-400" />
+                      }
+                      <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">
+                        {theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
+                      </span>
+                    </button>
+                  </div>
+                </div>,
+                document.body
+              )}
+              <div
+                id="settingsMenu"
+                className="absolute left-full ml-2 top-0 w-56 bg-white dark:bg-neutral-900 rounded-xl shadow-xl
+                       border border-neutral-200/50 dark:border-neutral-700/50
+                       backdrop-blur-lg backdrop-saturate-150
+                       opacity-0 invisible -translate-y-2 transition-all duration-300 z-50"
               >
                 <div className="p-2 space-y-1">
                   <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Ancho del chat</div>
                   <button
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
-                             text-neutral-700 dark:text-neutral-300
-                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
-                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
-                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                           text-neutral-700 dark:text-neutral-300
+                           hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                           dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                           transition-all duration-300 transform hover:translate-x-1 group/item"
                     onClick={() => {
                       const event = new CustomEvent('toggleChatWidth', {
                         detail: { width: 'narrow' }
                       });
                       window.dispatchEvent(event);
-                      setShowSettingsMenu(false);
                     }}
                   >
                     <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
@@ -431,16 +587,15 @@ function ChatComponent() {
                   </button>
                   <button
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
-                             text-neutral-700 dark:text-neutral-300
-                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
-                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
-                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                           text-neutral-700 dark:text-neutral-300
+                           hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                           dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                           transition-all duration-300 transform hover:translate-x-1 group/item"
                     onClick={() => {
                       const event = new CustomEvent('toggleChatWidth', {
                         detail: { width: 'default' }
                       });
                       window.dispatchEvent(event);
-                      setShowSettingsMenu(false);
                     }}
                   >
                     <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
@@ -448,79 +603,29 @@ function ChatComponent() {
                   </button>
                   <button
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
-                             text-neutral-700 dark:text-neutral-300
-                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
-                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
-                             transition-all duration-300 transform hover:translate-x-1 group/item"
+                           text-neutral-700 dark:text-neutral-300
+                           hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                           dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                           transition-all duration-300 transform hover:translate-x-1 group/item"
                     onClick={() => {
                       const event = new CustomEvent('toggleChatWidth', {
                         detail: { width: 'full' }
                       });
                       window.dispatchEvent(event);
-                      setShowSettingsMenu(false);
                     }}
                   >
                     <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
                     <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Completo</span>
                   </button>
                   <div className="my-2 border-t border-neutral-200 dark:border-neutral-700"></div>
-                  <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Tamaño del texto</div>
-                  <div className="flex items-center justify-center gap-2 px-4 py-2">
-                    <button
-                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg
-                                text-neutral-700 dark:text-neutral-300
-                                hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
-                                dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
-                                transition-all duration-300 ${textSize === 'small' ? 'bg-[#F48120]/10 text-[#F48120]' : ''}
-                                group/item`}
-                      onClick={() => {
-                        setTextSize('small');
-                        setShowSettingsMenu(false);
-                      }}
-                    >
-                      <span className="text-xs font-bold group-hover/item:text-[#F48120] transition-colors duration-300">A</span>
-                    </button>
-                    <button
-                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg
-                                text-neutral-700 dark:text-neutral-300
-                                hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
-                                dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
-                                transition-all duration-300 ${textSize === 'normal' ? 'bg-[#F48120]/10 text-[#F48120]' : ''}
-                                group/item`}
-                      onClick={() => {
-                        setTextSize('normal');
-                        setShowSettingsMenu(false);
-                      }}
-                    >
-                      <span className="text-sm font-bold group-hover/item:text-[#F48120] transition-colors duration-300">A</span>
-                    </button>
-                    <button
-                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg
-                                text-neutral-700 dark:text-neutral-300
-                                hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
-                                dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
-                                transition-all duration-300 ${textSize === 'large' ? 'bg-[#F48120]/10 text-[#F48120]' : ''}
-                                group/item`}
-                      onClick={() => {
-                        setTextSize('large');
-                        setShowSettingsMenu(false);
-                      }}
-                    >
-                      <span className="text-base font-bold group-hover/item:text-[#F48120] transition-colors duration-300">A</span>
-                    </button>
-                  </div>
-                  <div className="my-2 border-t border-neutral-200 dark:border-neutral-700"></div>
                   <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Tema</div>
                   <button
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
-                             text-neutral-700 dark:text-neutral-300
-                             hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
-                             dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
-                             transition-all duration-300 transform hover:translate-x-1 group/item"
-                    onClick={() => {
-                      toggleTheme();
-                      setShowSettingsMenu(false);
-                    }}
+                           text-neutral-700 dark:text-neutral-300
+                           hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                           dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                           transition-all duration-300 transform hover:translate-x-1 group/item"
+                    onClick={toggleTheme}
                   >
                     {theme === "dark" ?
                       <Sun weight="duotone" className="w-5 h-5 text-amber-400" /> :
@@ -531,90 +636,11 @@ function ChatComponent() {
                     </span>
                   </button>
                 </div>
-              </div>,
-              document.body
-            )}
-            <div
-              id="settingsMenu"
-              className="absolute left-full ml-2 top-0 w-56 bg-white dark:bg-neutral-900 rounded-xl shadow-xl
-                       border border-neutral-200/50 dark:border-neutral-700/50
-                       backdrop-blur-lg backdrop-saturate-150
-                       opacity-0 invisible -translate-y-2 transition-all duration-300 z-50"
-            >
-              <div className="p-2 space-y-1">
-                <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Ancho del chat</div>
-                <button
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
-                           text-neutral-700 dark:text-neutral-300
-                           hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
-                           dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
-                           transition-all duration-300 transform hover:translate-x-1 group/item"
-                  onClick={() => {
-                    const event = new CustomEvent('toggleChatWidth', {
-                      detail: { width: 'narrow' }
-                    });
-                    window.dispatchEvent(event);
-                  }}
-                >
-                  <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
-                  <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Reducido</span>
-                </button>
-                <button
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
-                           text-neutral-700 dark:text-neutral-300
-                           hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
-                           dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
-                           transition-all duration-300 transform hover:translate-x-1 group/item"
-                  onClick={() => {
-                    const event = new CustomEvent('toggleChatWidth', {
-                      detail: { width: 'default' }
-                    });
-                    window.dispatchEvent(event);
-                  }}
-                >
-                  <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
-                  <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Normal</span>
-                </button>
-                <button
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
-                           text-neutral-700 dark:text-neutral-300
-                           hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
-                           dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
-                           transition-all duration-300 transform hover:translate-x-1 group/item"
-                  onClick={() => {
-                    const event = new CustomEvent('toggleChatWidth', {
-                      detail: { width: 'full' }
-                    });
-                    window.dispatchEvent(event);
-                  }}
-                >
-                  <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
-                  <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Completo</span>
-                </button>
-                <div className="my-2 border-t border-neutral-200 dark:border-neutral-700"></div>
-                <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Tema</div>
-                <button
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
-                           text-neutral-700 dark:text-neutral-300
-                           hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
-                           dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
-                           transition-all duration-300 transform hover:translate-x-1 group/item"
-                  onClick={toggleTheme}
-                >
-                  {theme === "dark" ?
-                    <Sun weight="duotone" className="w-5 h-5 text-amber-400" /> :
-                    <Moon weight="duotone" className="w-5 h-5 text-blue-400" />
-                  }
-                  <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">
-                    {theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
-                  </span>
-                </button>
               </div>
             </div>
           </div>
-        </div>
-        <div className={`h-[calc(100vh-2rem)] w-full ${getMainWidth()} mx-auto flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800 transition-all duration-300`}>
-          {/* <ChatHeader
+          <div className={`h-[calc(100vh-2rem)] w-full ${getMainWidth()} mx-auto flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800 transition-all duration-300`}>
+            {/* <ChatHeader
             onOpenSidebar={() => {
               setIsSidebarOpen(true);
               document.dispatchEvent(new Event('sidebarOpen'));
@@ -625,161 +651,161 @@ function ChatComponent() {
             textSize={textSize}
             onTextSizeChange={setTextSize}
           /> */}
-          {/* <div className="flex items-center gap-2 justify-between w-full px-4 py-3">
+            {/* <div className="flex items-center gap-2 justify-between w-full px-4 py-3">
             <div className="flex-1"></div>
           </div> */}
 
-          {showAgent && (
-            <ModernAgentTool
-              isOpen={showAgent}
-              onClose={() => setShowAgent(false)}
-              onSaveAgent={(agent) => {
-                console.log('Agent saved:', agent);
-                setShowAgent(false);
-              }}
-            />
-          )}
+            {showAgent && (
+              <ModernAgentTool
+                isOpen={showAgent}
+                onClose={() => setShowAgent(false)}
+                onSaveAgent={(agent) => {
+                  console.log('Agent saved:', agent);
+                  setShowAgent(false);
+                }}
+              />
+            )}
 
-          {showToolsInterface && (
-            <ToolsInterface
-              isOpen={showToolsInterface}
-              onClose={() => setShowToolsInterface(false)}
-            />
-          )}
+            {showToolsInterface && (
+              <ToolsInterface
+                isOpen={showToolsInterface}
+                onClose={() => setShowToolsInterface(false)}
+              />
+            )}
 
-          {showOIAICreator && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-              <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[85vh] overflow-hidden relative transform transition-all duration-300 scale-100 opacity-100">
-                <OIAICreator
-                  onCopyContent={handleOIAICopy}
-                  onClose={() => setShowOIAICreator(false)}
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="flex-1 overflow-y-auto p-2 space-y-2 pb-16 max-h-[calc(100vh-1rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            {agentMessages.length === 0 && (
-              <div className="h-full flex items-center justify-center">
-                <Modal
-                  isOpen={showModal}
-                  onClose={() => setShowModal(false)}
-                  className="w-full h-[85vh]"
-                >
-                  <textarea
-                    className="w-full h-[80vh] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
-                    value={agentInput}
-                    onChange={handleAgentInputChange}
-                    placeholder="Escribe tu mensaje aquí..."
+            {showOIAICreator && (
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+                <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[85vh] overflow-hidden relative transform transition-all duration-300 scale-100 opacity-100">
+                  <OIAICreator
+                    onCopyContent={handleOIAICopy}
+                    onClose={() => setShowOIAICreator(false)}
                   />
-                </Modal>
-                <Card className="p-6 w-full max-w-md mx-auto bg-gradient-to-b from-neutral-100/80 to-neutral-50 dark:from-neutral-900/80 dark:to-neutral-950 backdrop-blur-sm border border-neutral-200/50 dark:border-neutral-800/50 shadow-xl hover:shadow-2xl transition-all duration-300">
-                  <div className="text-center space-y-6">
-                    <div className="relative">
-                      <div className="absolute -inset-4 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-full blur-2xl dark:from-[#F48120]/10 dark:to-purple-500/10"></div>
-                      <div className="bg-gradient-to-r from-[#F48120] to-[#F48120]/80 text-white rounded-full p-4 inline-flex relative transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                        <Robot size={28} weight="duotone" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <h3 className="font-bold text-2xl bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Asistente IA</h3>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-3">
-                      <div onClick={() => {
-                        setShowModal(true);
-                        handleAgentInputChange({ target: { value: "¿Cuál es el pronóstico del tiempo para Madrid este fin de semana?" } } as any);
-                      }} className="group p-4 rounded-xl bg-[#F48120]/5 hover:bg-[#F48120]/10 dark:bg-[#F48120]/5 dark:hover:bg-[#F48120]/10 cursor-pointer transition-all duration-300 border border-transparent hover:border-[#F48120]/20">
-                        <span className="text-2xl mb-2 block">🌤️</span>
-                        <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Clima</span>
-                      </div>
-
-                      <div onClick={() => {
-                        setShowModal(true);
-                        handleAgentInputChange({ target: { value: "¿Qué hora es en Tokyo cuando son las 15:00 en Madrid?" } } as any);
-                      }} className="group p-4 rounded-xl bg-[#F48120]/5 hover:bg-[#F48120]/10 dark:bg-[#F48120]/5 dark:hover:bg-[#F48120]/10 cursor-pointer transition-all duration-300 border border-transparent hover:border-[#F48120]/20">
-                        <span className="text-2xl mb-2 block">🌍</span>
-                        <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Horarios</span>
-                      </div>
-
-                      <div onClick={() => {
-                        setShowModal(true);
-                        handleAgentInputChange({ target: { value: "¿Podrías ayudarme a crear un plan de estudio?" } } as any);
-                      }} className="group p-4 rounded-xl bg-[#F48120]/5 hover:bg-[#F48120]/10 dark:bg-[#F48120]/5 dark:hover:bg-[#F48120]/10 cursor-pointer transition-all duration-300 border border-transparent hover:border-[#F48120]/20">
-                        <span className="text-2xl mb-2 block">💡</span>
-                        <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Ayuda</span>
-                      </div>
-                    </div>
-
-                    <div className="animate-bounce mt-8 text-neutral-500 dark:text-neutral-400">
-                      <CaretCircleDown size={24} className="mx-auto" />
-                      <p className="text-sm mt-2">Escribe tu consulta</p>
-                    </div>
-                  </div>
-                </Card>
+                </div>
               </div>
             )}
 
-            {agentMessages.map((m: Message, index) => {
-              const isUser = m.role === "user";
-              const showAvatar =
-                index === 0 || agentMessages[index - 1]?.role !== m.role;
-              const showRole = showAvatar && !isUser;
-
-              return (
-                <div key={m.id}>
-                  {showDebug && (
-                    <pre className="text-xs text-muted-foreground overflow-scroll">
-                      {JSON.stringify(m, null, 2)}
-                    </pre>
-                  )}
-                  <div
-                    className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+            <div className="flex-1 overflow-y-auto p-2 space-y-2 pb-16 max-h-[calc(100vh-1rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              {agentMessages.length === 0 && (
+                <div className="h-full flex items-center justify-center">
+                  <Modal
+                    isOpen={showModal}
+                    onClose={() => setShowModal(false)}
+                    className="w-full h-[85vh]"
                   >
-                    <div
-                      className={`flex gap-2 max-w-[85%] ${isUser ? "flex-row-reverse" : "flex-row"
-                        }`}
-                    >
-                      {showAvatar && !isUser ? (
-                        <Avatar username={"AI"} />
-                      ) : (
-                        !isUser && <div className="w-8" />
-                      )}
+                    <textarea
+                      className="w-full h-[80vh] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
+                      value={agentInput}
+                      onChange={handleAgentInputChange}
+                      placeholder="Escribe tu mensaje aquí..."
+                    />
+                  </Modal>
+                  <Card className="p-6 w-full max-w-md mx-auto bg-gradient-to-b from-neutral-100/80 to-neutral-50 dark:from-neutral-900/80 dark:to-neutral-950 backdrop-blur-sm border border-neutral-200/50 dark:border-neutral-800/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+                    <div className="text-center space-y-6">
+                      <div className="relative">
+                        <div className="absolute -inset-4 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-full blur-2xl dark:from-[#F48120]/10 dark:to-purple-500/10"></div>
+                        <div className="bg-gradient-to-r from-[#F48120] to-[#F48120]/80 text-white rounded-full p-4 inline-flex relative transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                          <Robot size={28} weight="duotone" />
+                        </div>
+                      </div>
 
-                      <div>
+                      <div className="space-y-2">
+                        <h3 className="font-bold text-2xl bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Asistente IA</h3>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-3">
+                        <div onClick={() => {
+                          setShowModal(true);
+                          handleAgentInputChange({ target: { value: "¿Cuál es el pronóstico del tiempo para Madrid este fin de semana?" } } as any);
+                        }} className="group p-4 rounded-xl bg-[#F48120]/5 hover:bg-[#F48120]/10 dark:bg-[#F48120]/5 dark:hover:bg-[#F48120]/10 cursor-pointer transition-all duration-300 border border-transparent hover:border-[#F48120]/20">
+                          <span className="text-2xl mb-2 block">🌤️</span>
+                          <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Clima</span>
+                        </div>
+
+                        <div onClick={() => {
+                          setShowModal(true);
+                          handleAgentInputChange({ target: { value: "¿Qué hora es en Tokyo cuando son las 15:00 en Madrid?" } } as any);
+                        }} className="group p-4 rounded-xl bg-[#F48120]/5 hover:bg-[#F48120]/10 dark:bg-[#F48120]/5 dark:hover:bg-[#F48120]/10 cursor-pointer transition-all duration-300 border border-transparent hover:border-[#F48120]/20">
+                          <span className="text-2xl mb-2 block">🌍</span>
+                          <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Horarios</span>
+                        </div>
+
+                        <div onClick={() => {
+                          setShowModal(true);
+                          handleAgentInputChange({ target: { value: "¿Podrías ayudarme a crear un plan de estudio?" } } as any);
+                        }} className="group p-4 rounded-xl bg-[#F48120]/5 hover:bg-[#F48120]/10 dark:bg-[#F48120]/5 dark:hover:bg-[#F48120]/10 cursor-pointer transition-all duration-300 border border-transparent hover:border-[#F48120]/20">
+                          <span className="text-2xl mb-2 block">💡</span>
+                          <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Ayuda</span>
+                        </div>
+                      </div>
+
+                      <div className="animate-bounce mt-8 text-neutral-500 dark:text-neutral-400">
+                        <CaretCircleDown size={24} className="mx-auto" />
+                        <p className="text-sm mt-2">Escribe tu consulta</p>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              )}
+
+              {agentMessages.map((m: Message, index) => {
+                const isUser = m.role === "user";
+                const showAvatar =
+                  index === 0 || agentMessages[index - 1]?.role !== m.role;
+                const showRole = showAvatar && !isUser;
+
+                return (
+                  <div key={m.id}>
+                    {showDebug && (
+                      <pre className="text-xs text-muted-foreground overflow-scroll">
+                        {JSON.stringify(m, null, 2)}
+                      </pre>
+                    )}
+                    <div
+                      className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`flex gap-2 max-w-[85%] ${isUser ? "flex-row-reverse" : "flex-row"
+                          }`}
+                      >
+                        {showAvatar && !isUser ? (
+                          <Avatar username={"AI"} />
+                        ) : (
+                          !isUser && <div className="w-8" />
+                        )}
+
                         <div>
-                          {m.parts?.map((part, i) => {
-                            if (part.type === "text") {
-                              return (
-                                // biome-ignore lint/suspicious/noArrayIndexKey: it's fine here
-                                <div key={i}>
-                                  <Card
-                                    className={`p-3 rounded-md bg-neutral-100 dark:bg-neutral-900 ${isUser
-                                      ? "rounded-br-none"
-                                      : "rounded-bl-none border-assistant-border"
-                                      } ${part.text.startsWith("scheduled message")
-                                        ? "border-accent/50"
-                                        : ""
-                                      } relative ${textSize === 'small' ? 'text-sm' : textSize === 'large' ? 'text-lg' : 'text-base'}`}
-                                  >
-                                    {part.text.startsWith(
-                                      "scheduled message"
-                                    ) && (
-                                        <span className="absolute -top-3 -left-2 text-base">
-                                          🕒
-                                        </span>
-                                      )}
-                                    <div className="flex justify-between items-start mb-2">
-                                      <div className="flex items-center gap-2">
-                                        <MessageView
-                                          key={`${m.id}-${i}`}
-                                          text={part.text.replace(/^scheduled message: /, "")}
-                                          onCopy={() => navigator.clipboard.writeText(part.text.replace(/^scheduled message: /, ""))}
-                                        />
+                          <div>
+                            {m.parts?.map((part, i) => {
+                              if (part.type === "text") {
+                                return (
+                                  // biome-ignore lint/suspicious/noArrayIndexKey: it's fine here
+                                  <div key={i}>
+                                    <Card
+                                      className={`p-3 rounded-md bg-neutral-100 dark:bg-neutral-900 ${isUser
+                                        ? "rounded-br-none"
+                                        : "rounded-bl-none border-assistant-border"
+                                        } ${part.text.startsWith("scheduled message")
+                                          ? "border-accent/50"
+                                          : ""
+                                        } relative ${textSize === 'small' ? 'text-sm' : textSize === 'large' ? 'text-lg' : 'text-base'}`}
+                                    >
+                                      {part.text.startsWith(
+                                        "scheduled message"
+                                      ) && (
+                                          <span className="absolute -top-3 -left-2 text-base">
+                                            🕒
+                                          </span>
+                                        )}
+                                      <div className="flex justify-between items-start mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <MessageView
+                                            key={`${m.id}-${i}`}
+                                            text={part.text.replace(/^scheduled message: /, "")}
+                                            onCopy={() => navigator.clipboard.writeText(part.text.replace(/^scheduled message: /, ""))}
+                                          />
+                                        </div>
                                       </div>
-                                    </div>
-                                    {/* <div
+                                      {/* <div
                                       id={`message-${m.id}-${i}`}
                                       className="markdown-content"
                                     >
@@ -826,109 +852,109 @@ function ChatComponent() {
                                         )}
                                       </div>
                                     </div> */}
-                                  </Card>
-                                  <p
-                                    className={`text-xs text-muted-foreground mt-1 ${isUser ? "text-right" : "text-left"
-                                      }`}
-                                  >
-                                    {formatTime(
-                                      new Date(m.createdAt as unknown as string)
-                                    )}
-                                  </p>
-                                </div>
-                              );
-                            }
+                                    </Card>
+                                    <p
+                                      className={`text-xs text-muted-foreground mt-1 ${isUser ? "text-right" : "text-left"
+                                        }`}
+                                    >
+                                      {formatTime(
+                                        new Date(m.createdAt as unknown as string)
+                                      )}
+                                    </p>
+                                  </div>
+                                );
+                              }
 
-                            if (part.type === "tool-invocation") {
-                              const toolInvocation = part.toolInvocation;
-                              const toolCallId = toolInvocation.toolCallId;
+                              if (part.type === "tool-invocation") {
+                                const toolInvocation = part.toolInvocation;
+                                const toolCallId = toolInvocation.toolCallId;
 
-                              if (
-                                toolsRequiringConfirmation.includes(
-                                  toolInvocation.toolName as keyof typeof tools
-                                ) &&
-                                toolInvocation.state === "call"
-                              ) {
-                                return (
-                                  <Card
-                                    // biome-ignore lint/suspicious/noArrayIndexKey: it's fine here
-                                    key={i}
-                                    className="p-4 my-3 rounded-md bg-neutral-100 dark:bg-neutral-900"
-                                  >
-                                    <div className="flex items-center gap-2 mb-3">
-                                      <div className="bg-[#F48120]/10 p-1.5 rounded-full">
-                                        <Robot
-                                          size={16}
-                                          className="text-[#F48120]"
-                                        />
+                                if (
+                                  toolsRequiringConfirmation.includes(
+                                    toolInvocation.toolName as keyof typeof tools
+                                  ) &&
+                                  toolInvocation.state === "call"
+                                ) {
+                                  return (
+                                    <Card
+                                      // biome-ignore lint/suspicious/noArrayIndexKey: it's fine here
+                                      key={i}
+                                      className="p-4 my-3 rounded-md bg-neutral-100 dark:bg-neutral-900"
+                                    >
+                                      <div className="flex items-center gap-2 mb-3">
+                                        <div className="bg-[#F48120]/10 p-1.5 rounded-full">
+                                          <Robot
+                                            size={16}
+                                            className="text-[#F48120]"
+                                          />
+                                        </div>
+                                        <h4 className="font-medium">
+                                          {toolInvocation.toolName}
+                                        </h4>
                                       </div>
-                                      <h4 className="font-medium">
-                                        {toolInvocation.toolName}
-                                      </h4>
-                                    </div>
 
-                                    <div className="mb-3">
-                                      <h5 className="text-xs font-medium mb-1 text-muted-foreground">
-                                        Arguments:
-                                      </h5>
-                                      <pre className="bg-background/80 p-2 rounded-md text-xs overflow-auto">
-                                        {JSON.stringify(
-                                          toolInvocation.args,
-                                          null,
-                                          2
-                                        )}
-                                      </pre>
-                                    </div>
+                                      <div className="mb-3">
+                                        <h5 className="text-xs font-medium mb-1 text-muted-foreground">
+                                          Arguments:
+                                        </h5>
+                                        <pre className="bg-background/80 p-2 rounded-md text-xs overflow-auto">
+                                          {JSON.stringify(
+                                            toolInvocation.args,
+                                            null,
+                                            2
+                                          )}
+                                        </pre>
+                                      </div>
 
-                                    <div className="flex gap-2 justify-end">
-                                      <Button
-                                        variant="primary"
-                                        size="sm"
-                                        onClick={() =>
-                                          addToolResult({
-                                            toolCallId,
-                                            result: APPROVAL.NO,
-                                          })
-                                        }
-                                      >
-                                        Reject
-                                      </Button>
-                                      <Tooltip content={"Accept action"}>
+                                      <div className="flex gap-2 justify-end">
                                         <Button
                                           variant="primary"
                                           size="sm"
                                           onClick={() =>
                                             addToolResult({
                                               toolCallId,
-                                              result: APPROVAL.YES,
+                                              result: APPROVAL.NO,
                                             })
                                           }
                                         >
-                                          Approve
+                                          Reject
                                         </Button>
-                                      </Tooltip>
-                                    </div>
-                                  </Card>
-                                );
+                                        <Tooltip content={"Accept action"}>
+                                          <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={() =>
+                                              addToolResult({
+                                                toolCallId,
+                                                result: APPROVAL.YES,
+                                              })
+                                            }
+                                          >
+                                            Approve
+                                          </Button>
+                                        </Tooltip>
+                                      </div>
+                                    </Card>
+                                  );
+                                }
+                                return null;
                               }
                               return null;
-                            }
-                            return null;
-                          })}
+                            })}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
 
-          <div className={`${systemPrompt ? 'hidden' : ''} w-full max-w-7xl mx-auto pl-4 pr-10 rounded-full mb-0 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm transition-all duration-300 sm:mx-4 md:mx-8 lg:mx-auto`}>
-            <div className="flex items-center justify-between gap-3">
-              {/* <div className="flex items-center gap-2"> */}
-              {/* <Tooltip content="Guía">
+            <div className={`${systemPrompt ? 'hidden' : ''} w-full max-w-7xl mx-auto pl-4 pr-10 rounded-full mb-0 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm transition-all duration-300 sm:mx-4 md:mx-8 lg:mx-auto`}>
+              <div className="flex items-center justify-between gap-3">
+                {/* <div className="flex items-center gap-2"> */}
+                {/* <Tooltip content="Guía">
                   <Button
                     variant="ghost"
                     size="md"
@@ -939,7 +965,7 @@ function ChatComponent() {
                     <Question size={20} weight="duotone" />
                   </Button>
                 </Tooltip> */}
-              {/* <Tooltip content="Crear IA">
+                {/* <Tooltip content="Crear IA">
                 <Button
                   variant="ghost"
                   size="md"
@@ -951,26 +977,26 @@ function ChatComponent() {
                 </Button>
               </Tooltip> */}
 
-              <div className={`flex-1 flex transition-all duration-300 opacity-100 max-w-full`}>
-                <ModelSelect />
-              </div>
+                <div className={`flex-1 flex transition-all duration-300 opacity-100 max-w-full`}>
+                  <ModelSelect />
+                </div>
 
-              {selectedModel === 'gemini-2.0-flash' && (
-                <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10">
-                  <Robot size={20} className="text-[#F48120]" weight="duotone" />
-                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Asistente</span>
-                  <div className="flex items-center gap-2">
-                    {stepMax > 0 && (
-                      <button
-                        onClick={() => {
-                          if (!isUpdatingStepMax) {
-                            setIsUpdatingStepMax(true);
-                            setStepMax(stepMax - 1);
-                            setTimeout(() => setIsUpdatingStepMax(false), 300);
-                          }
-                        }}
-                        disabled={isUpdatingStepMax}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg
+                {selectedModel === 'gemini-2.0-flash' && (
+                  <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10">
+                    <Robot size={20} className="text-[#F48120]" weight="duotone" />
+                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Asistente</span>
+                    <div className="flex items-center gap-2">
+                      {stepMax > 0 && (
+                        <button
+                          onClick={() => {
+                            if (!isUpdatingStepMax) {
+                              setIsUpdatingStepMax(true);
+                              setStepMax(stepMax - 1);
+                              setTimeout(() => setIsUpdatingStepMax(false), 300);
+                            }
+                          }}
+                          disabled={isUpdatingStepMax}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg
                                bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
                                hover:from-[#F48120]/20 hover:to-purple-500/20
                                dark:from-[#F48120]/5 dark:to-purple-500/5
@@ -978,48 +1004,48 @@ function ChatComponent() {
                                border border-[#F48120]/20 hover:border-[#F48120]/40
                                dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                                transform hover:scale-95 active:scale-90 transition-all duration-200"
-                      >
-                        <span className="text-[#F48120] font-bold">-</span>
-                      </button>
-                    )}
-                    
-                    <div className="relative flex items-center gap-2">
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        min="1"
-                        max="10"
-                        value={stepMax}
-                        onChange={(e) => {
-                          const value = parseInt(e.target.value);
-                          if (!isNaN(value) && value >= 1 && value <= 10) {
-                            setStepMax(value);
-                          }
-                        }}
-                        className="w-12 text-center px-2 py-1 text-sm bg-white dark:bg-neutral-800
+                        >
+                          <span className="text-[#F48120] font-bold">-</span>
+                        </button>
+                      )}
+
+                      <div className="relative flex items-center gap-2">
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          min="1"
+                          max="10"
+                          value={stepMax}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value);
+                            if (!isNaN(value) && value >= 1 && value <= 10) {
+                              setStepMax(value);
+                            }
+                          }}
+                          className="w-12 text-center px-2 py-1 text-sm bg-white dark:bg-neutral-800
                                border border-neutral-200 dark:border-neutral-700 rounded-lg
                                focus:outline-none focus:ring-2 focus:ring-[#F48120]/50
                                [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
-                      {isUpdatingStepMax && (
-                        <div className="ml-4 absolute -center-1 flex items-center">
-                          <div className="animate-spin h-4 w-4 border-2 border-[#F48120] border-t-transparent rounded-full"></div>
-                        </div>
-                      )}
-                    </div>
+                        />
+                        {isUpdatingStepMax && (
+                          <div className="ml-4 absolute -center-1 flex items-center">
+                            <div className="animate-spin h-4 w-4 border-2 border-[#F48120] border-t-transparent rounded-full"></div>
+                          </div>
+                        )}
+                      </div>
 
-                    {stepMax < 10 && (
-                      <button
-                        onClick={() => {
-                          if (!isUpdatingStepMax) {
-                            setIsUpdatingStepMax(true);
-                            setStepMax(stepMax + 1);
-                            setTimeout(() => setIsUpdatingStepMax(false), 300);
-                          }
-                        }}
-                        disabled={isUpdatingStepMax}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg
+                      {stepMax < 10 && (
+                        <button
+                          onClick={() => {
+                            if (!isUpdatingStepMax) {
+                              setIsUpdatingStepMax(true);
+                              setStepMax(stepMax + 1);
+                              setTimeout(() => setIsUpdatingStepMax(false), 300);
+                            }
+                          }}
+                          disabled={isUpdatingStepMax}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg
                                bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
                                hover:from-[#F48120]/20 hover:to-purple-500/20
                                dark:from-[#F48120]/5 dark:to-purple-500/5
@@ -1027,16 +1053,16 @@ function ChatComponent() {
                                border border-[#F48120]/20 hover:border-[#F48120]/40
                                dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                                transform hover:scale-95 active:scale-90 transition-all duration-200"
-                      >
-                        <span className="text-[#F48120] font-bold">+</span>
-                      </button>
-                    )}
+                        >
+                          <span className="text-[#F48120] font-bold">+</span>
+                        </button>
+                      )}
 
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* 
+                {/* 
 
               <Tooltip content="Crear Agente">
                 <Button
@@ -1049,7 +1075,7 @@ function ChatComponent() {
                   <Robot size={20} weight="duotone" />
                 </Button>
               </Tooltip> */}
-              {/* <Tooltip content={isToolbarExpanded ? "Minimizar barra de herramientas" : "Expandir barra de herramientas"}>
+                {/* <Tooltip content={isToolbarExpanded ? "Minimizar barra de herramientas" : "Expandir barra de herramientas"}>
                   <Button
                     variant="ghost"
                     size="md"
@@ -1066,8 +1092,8 @@ function ChatComponent() {
                 </Tooltip>
               </div> */}
 
-              {/* Botón de Limpiar Historial */}
-              {/* <div className={`transition-all duration-300 opacity-100 max-w-full`}>
+                {/* Botón de Limpiar Historial */}
+                {/* <div className={`transition-all duration-300 opacity-100 max-w-full`}>
                 <Tooltip content="Limpiar historial">
                   <Button
                     variant="ghost"
@@ -1080,90 +1106,90 @@ function ChatComponent() {
                   </Button>
                 </Tooltip>
               </div> */}
-            </div>
-          </div>
-
-          {systemPrompt && (
-            <div className="mb-2 items-center justify-between ml-2 mr-2">
-              {/* <div className="flex-1"> */}
-              <div className="flex">
-                <h2 className="mt-11.5 text-lg font-medium text-neutral-800 dark:text-neutral-200">
-                  <span className="text-[#F48120] mr-2 ml-1 flex mt-0.5">Sistema <Robot className="mr-1 ml-2 mt-1.5" /></span>
-                </h2>
-                <InputSystemPrompt
-                  type="text"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder="Escribe tu consulta del sistema (Optional)"
-                  className="w-full px-4 py-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 transition-all duration-300 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/30"
-                />
               </div>
-              {/* </div> */}
             </div>
-          )}
 
-          <div className="flex p-2 max-h-[calc(100vh-1rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            <Tooltip content={systemPrompt ? "Minimizar" : "Expandir"}>
-              <Button
-                variant="ghost"
-                size="md"
-                shape="square"
-                className="mb-1 mr-1 pt-1"
-                onClick={() => setSystemPrompt(!systemPrompt)}
+            {systemPrompt && (
+              <div className="mb-2 items-center justify-between ml-2 mr-2">
+                {/* <div className="flex-1"> */}
+                <div className="flex">
+                  <h2 className="mt-11.5 text-lg font-medium text-neutral-800 dark:text-neutral-200">
+                    <span className="text-[#F48120] mr-2 ml-1 flex mt-0.5">Sistema <Robot className="mr-1 ml-2 mt-1.5" /></span>
+                  </h2>
+                  <InputSystemPrompt
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder="Escribe tu consulta del sistema (Optional)"
+                    className="w-full px-4 py-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 transition-all duration-300 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/30"
+                  />
+                </div>
+                {/* </div> */}
+              </div>
+            )}
+
+            <div className="flex p-2 max-h-[calc(100vh-1rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <Tooltip content={systemPrompt ? "Minimizar" : "Expandir"}>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  shape="square"
+                  className="mb-1 mr-1 pt-1"
+                  onClick={() => setSystemPrompt(!systemPrompt)}
+                >
+                  {systemPrompt ? (
+                    <CaretCircleDown size={20} className="text-[#F48120]" weight="duotone" />
+                  ) : (
+                    <CaretCircleDoubleUp size={20} className="text-[#F48120]" weight="duotone" />
+                  )}
+                </Button>
+              </Tooltip>
+
+              {/* Input Area */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAgentSubmit(e);
+                }
+                  // handleAgentSubmit(e, {
+                  //   data: {
+                  //     annotations: {
+                  //       hello: "world",
+                  //     },
+                  //   },
+                  // })
+                }
+                className="ml-9 p-2 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-neutral-300 dark:border-neutral-800"
               >
-                {systemPrompt ? (
-                  <CaretCircleDown size={20} className="text-[#F48120]" weight="duotone" />
-                ) : (
-                  <CaretCircleDoubleUp size={20} className="text-[#F48120]" weight="duotone" />
-                )}
-              </Button>
-            </Tooltip>
-
-            {/* Input Area */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleAgentSubmit(e);
-              }
-                // handleAgentSubmit(e, {
-                //   data: {
-                //     annotations: {
-                //       hello: "world",
-                //     },
-                //   },
-                // })
-              }
-              className="ml-9 p-2 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-neutral-300 dark:border-neutral-800"
-            >
-              {/* <div className={`transition-all duration-300 ${!systemPrompt ? 'opacity-100 max-w-full' : 'opacity-0 overflow-hidden'}`}>
+                {/* <div className={`transition-all duration-300 ${!systemPrompt ? 'opacity-100 max-w-full' : 'opacity-0 overflow-hidden'}`}>
               <h2 className='text-lg font-medium text-neutral-800 dark:text-neutral-200'>
                 <span className="text-[#F48120] mr-2 ml-1">💡Escribe Tu Consulta</span>
               </h2>
             </div> */}
-              <div className="flex items-center gap-2">
-                <div className="flex-1 relative">
-                  <div className="flex">
-                    {/* <p className="mt-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 relative">
+                    <div className="flex">
+                      {/* <p className="mt-2">
                     <span className="text-[#F48120] mr-2 ml-1 ">Usuario</span>
                   </p> */}
-                    {/* Action Buttons Frame */}
-                    <Input
-                      disabled={pendingToolCallConfirmation}
-                      placeholder={
-                        pendingToolCallConfirmation
-                          ? "Please respond to the tool confirmation above..."
-                          : "Empieza a escribir tu consulta..."
-                      }
-                      className="pl-4 pr-10 py-2 w-full rounded-full"
-                      value={agentInput}
-                      onChange={handleAgentInputChange}
-                      onValueChange={undefined}
-                    />
+                      {/* Action Buttons Frame */}
+                      <Input
+                        disabled={pendingToolCallConfirmation}
+                        placeholder={
+                          pendingToolCallConfirmation
+                            ? "Please respond to the tool confirmation above..."
+                            : "Empieza a escribir tu consulta..."
+                        }
+                        className="pl-4 pr-10 py-2 w-full rounded-full"
+                        value={agentInput}
+                        onChange={handleAgentInputChange}
+                        onValueChange={undefined}
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <div className="relative">
-                  {/* {isLoading ? (
+                  <div className="relative">
+                    {/* {isLoading ? (
                     <button
                       type="button"
                       onClick={stop}
@@ -1173,72 +1199,73 @@ function ChatComponent() {
                       <Stop size={18} weight="bold" />
                     </button>
                   ) : ( */}
-                  <Button
-                    type="submit"
-                    shape="square"
-                    className="inline-flex items-center justify-center p-2.5 text-[#F48120] hover:text-white bg-white/95 dark:bg-gray-800/95 hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full border-2 border-[#F48120]/20 dark:border-[#F48120]/10 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20 transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/95 dark:disabled:hover:bg-gray-800/95 disabled:hover:text-[#F48120] disabled:hover:scale-100"
-                    disabled={pendingToolCallConfirmation || !agentInput.trim()}
-                    onClick={async (e) => {
-                      try {
-                        if (!user) {
-                          setIsLoginOpen(true);
-                          return;
+                    <Button
+                      type="submit"
+                      shape="square"
+                      className="inline-flex items-center justify-center p-2.5 text-[#F48120] hover:text-white bg-white/95 dark:bg-gray-800/95 hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full border-2 border-[#F48120]/20 dark:border-[#F48120]/10 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20 transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/95 dark:disabled:hover:bg-gray-800/95 disabled:hover:text-[#F48120] disabled:hover:scale-100"
+                      disabled={pendingToolCallConfirmation || !agentInput.trim()}
+                      onClick={async (e) => {
+                        try {
+                          if (!user) {
+                            setIsLoginOpen(true);
+                            return;
+                          }
+
+                          // Actualizar el prompt del sistema y el modelo
+                          await Promise.all([
+                            updateSystemPrompt(inputText),
+                            fetch('/api/model', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({ model: selectedModel }),
+                            }),
+                            fetch('/api/assistant', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({ maxSteps: config.maxSteps || 4 }),
+                            })
+                          ]);
+
+                          // Proceder con el envío del mensaje
+                          // e.preventDefault();
+                          // handleAgentSubmit(e);
+                        } catch (error) {
+                          console.error('Error al procesar la solicitud:', error);
                         }
-
-                        // Actualizar el prompt del sistema y el modelo
-                        await Promise.all([
-                          updateSystemPrompt(inputText),
-                          fetch('/api/model', {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ model: selectedModel }),
-                          }),
-                          fetch('/api/assistant', {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ maxSteps: config.maxSteps || 4 }),
-                          })
-                        ]);
-
-                        // Proceder con el envío del mensaje
-                        e.preventDefault();
-                        handleAgentSubmit(e);
-                      } catch (error) {
-                        console.error('Error al procesar la solicitud:', error);
-                      }
-                    }}
-                  >
-                    <PaperPlaneRight size={18} weight="bold" />
-                  </Button>
-                  {/* )} */}
+                      }}
+                    >
+                      <PaperPlaneRight size={18} weight="bold" />
+                    </Button>
+                    {/* )} */}
+                  </div>
                 </div>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        </div>
-      </main>
-      <AISettingsPanel
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
-      <AuthPopup />
-      <ClearHistoryDialog
-        isOpen={showClearDialog}
-        onClose={() => setShowClearDialog(false)}
-        onConfirm={clearHistory}
-      />
-
-      {showAgentInterface && (
-        <ModernAgentInterface
-          isOpen={showAgentInterface}
-          onClose={() => setShowAgentInterface(false)}
+        </main>
+        <AISettingsPanel
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
         />
-      )}
-    </div>
+        <AuthPopup />
+        <ClearHistoryDialog
+          isOpen={showClearDialog}
+          onClose={() => setShowClearDialog(false)}
+          onConfirm={clearHistory}
+        />
+
+        {showAgentInterface && (
+          <ModernAgentInterface
+            isOpen={showAgentInterface}
+            onClose={() => setShowAgentInterface(false)}
+          />
+        )}
+      </div>
+    </ChatProvider>
   );
 }
 

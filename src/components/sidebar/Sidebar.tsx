@@ -8,6 +8,8 @@ import AuthButton from '../AuthButton';
 import { OIAICreator } from '../modal/OIAICreator';
 import { AgentDashboard } from '../agent/AgentDashboard';
 import { SystemPromptDashboard } from '../dashboard/SystemPromptDashboard';
+import { ChatList } from '../chat/ChatList';
+import { ChatProvider } from '@/contexts/ChatContext';
 
 interface PromptTemplate {
   title: string;
@@ -31,6 +33,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
   const [showOiaiGuide, setShowOiaiGuide] = useState(false);
   const [showOIAICreator, setShowOIAICreator] = useState(false);
   const [showSystemPromptDashboard, setShowSystemPromptDashboard] = useState(false);
+  const [activeTab, setActiveTab] = useState<'chats' | 'templates'>('chats');
 
   const promptTemplates = {
     "exploracion-ideas": [
