@@ -136,7 +136,8 @@ function ChatComponent() {
       console.error('Error al actualizar el prompt del sistema:', error);
     }
   };
-  const [showTextModal, setShowTextModal] = useState(false);
+  const [stepMax, setStepMax] = useState(0);
+  const [isUpdatingStepMax, setIsUpdatingStepMax] = useState(false);
   const [showAgent, setShowAgent] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [textSize, setTextSize] = useState<'normal' | 'large' | 'small'>(() => {
@@ -203,25 +204,13 @@ function ChatComponent() {
     setTheme(newTheme);
   };
 
+  interface AgentInstance {
+    setConfig: (config: any) => void;
+  }
+
   const agent = useAgent({
     agent: "chat",
-    // config: {
-    //   temperature: config.temperature,
-    //   maxTokens: config.maxTokens,
-    //   topP: config.topP,
-    //   topK: config.topK,
-    //   frequencyPenalty: config.frequencyPenalty,
-    //   presencePenalty: config.presencePenalty,
-    //   seed: config.seed,
-    //   stream: config.stream,
-    // },
-    
-    // stream: config.stream,
-    // onStreamEnd: () => {
-    //   scrollToBottom();
-    //   console.log('Stream finalizado');
-    // }
-  });
+  }) as AgentInstance;
   console.log('Configuración:', config);
 
   const {
@@ -325,7 +314,7 @@ function ChatComponent() {
               <List size={20} className="text-[#F48120]" weight="duotone" />
             </Button>
 
-           <Button
+            <Button
               variant="ghost"
               size="sm"
               className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
@@ -379,6 +368,21 @@ function ChatComponent() {
                 <Brain className="text-[#F48120]" size={20} weight="duotone" />
               </Button>
             </Tooltip> */}
+
+            <Tooltip content="Limpiar historial">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                flex items-center justify-center"
+                onClick={() => setShowClearDialog(true)}
+              >
+                <Trash className="text-[#F48120]" size={20} weight="duotone" />
+              </Button>
+            </Tooltip>
 
             <Tooltip content="Crear IA">
               <Button
@@ -921,7 +925,7 @@ function ChatComponent() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className={`${systemPrompt ? 'hidden' : ''} pl-4 pr-10 rounded-full mb-0 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm transition-all duration-300 w-58 ml-2 mr-2`}>
+          <div className={`${systemPrompt ? 'hidden' : ''} w-full max-w-7xl mx-auto pl-4 pr-10 rounded-full mb-0 border-b border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm transition-all duration-300 sm:mx-4 md:mx-8 lg:mx-auto`}>
             <div className="flex items-center justify-between gap-3">
               {/* <div className="flex items-center gap-2"> */}
               {/* <Tooltip content="Guía">
@@ -951,6 +955,86 @@ function ChatComponent() {
                 <ModelSelect />
               </div>
 
+              {selectedModel === 'gemini-2.0-flash' && (
+                <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10">
+                  <Robot size={20} className="text-[#F48120]" weight="duotone" />
+                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Asistente</span>
+                  <div className="flex items-center gap-2">
+                    {stepMax > 0 && (
+                      <button
+                        onClick={() => {
+                          if (!isUpdatingStepMax) {
+                            setIsUpdatingStepMax(true);
+                            setStepMax(stepMax - 1);
+                            setTimeout(() => setIsUpdatingStepMax(false), 300);
+                          }
+                        }}
+                        disabled={isUpdatingStepMax}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg
+                               bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
+                               hover:from-[#F48120]/20 hover:to-purple-500/20
+                               dark:from-[#F48120]/5 dark:to-purple-500/5
+                               dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                               border border-[#F48120]/20 hover:border-[#F48120]/40
+                               dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                               transform hover:scale-95 active:scale-90 transition-all duration-200"
+                      >
+                        <span className="text-[#F48120] font-bold">-</span>
+                      </button>
+                    )}
+                    
+                    <div className="relative flex items-center gap-2">
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        min="1"
+                        max="10"
+                        value={stepMax}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value);
+                          if (!isNaN(value) && value >= 1 && value <= 10) {
+                            setStepMax(value);
+                          }
+                        }}
+                        className="w-12 text-center px-2 py-1 text-sm bg-white dark:bg-neutral-800
+                               border border-neutral-200 dark:border-neutral-700 rounded-lg
+                               focus:outline-none focus:ring-2 focus:ring-[#F48120]/50
+                               [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      {isUpdatingStepMax && (
+                        <div className="ml-4 absolute -center-1 flex items-center">
+                          <div className="animate-spin h-4 w-4 border-2 border-[#F48120] border-t-transparent rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
+
+                    {stepMax < 10 && (
+                      <button
+                        onClick={() => {
+                          if (!isUpdatingStepMax) {
+                            setIsUpdatingStepMax(true);
+                            setStepMax(stepMax + 1);
+                            setTimeout(() => setIsUpdatingStepMax(false), 300);
+                          }
+                        }}
+                        disabled={isUpdatingStepMax}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg
+                               bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
+                               hover:from-[#F48120]/20 hover:to-purple-500/20
+                               dark:from-[#F48120]/5 dark:to-purple-500/5
+                               dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                               border border-[#F48120]/20 hover:border-[#F48120]/40
+                               dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                               transform hover:scale-95 active:scale-90 transition-all duration-200"
+                      >
+                        <span className="text-[#F48120] font-bold">+</span>
+                      </button>
+                    )}
+
+                  </div>
+                </div>
+              )}
 
               {/* 
 
@@ -983,7 +1067,7 @@ function ChatComponent() {
               </div> */}
 
               {/* Botón de Limpiar Historial */}
-              <div className={`transition-all duration-300 opacity-100 max-w-full`}>
+              {/* <div className={`transition-all duration-300 opacity-100 max-w-full`}>
                 <Tooltip content="Limpiar historial">
                   <Button
                     variant="ghost"
@@ -995,7 +1079,7 @@ function ChatComponent() {
                     <Trash size={20} weight="duotone" />
                   </Button>
                 </Tooltip>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -1037,9 +1121,10 @@ function ChatComponent() {
 
             {/* Input Area */}
             <form
-              onSubmit={(e) =>{
+              onSubmit={(e) => {
                 e.preventDefault();
-                handleAgentSubmit(e);}
+                handleAgentSubmit(e);
+              }
                 // handleAgentSubmit(e, {
                 //   data: {
                 //     annotations: {
@@ -1088,40 +1173,47 @@ function ChatComponent() {
                       <Stop size={18} weight="bold" />
                     </button>
                   ) : ( */}
-                    <Button
-                      type="submit"
-                      shape="square"
-                      className="inline-flex items-center justify-center p-2.5 text-[#F48120] hover:text-white bg-white/95 dark:bg-gray-800/95 hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full border-2 border-[#F48120]/20 dark:border-[#F48120]/10 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20 transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/95 dark:disabled:hover:bg-gray-800/95 disabled:hover:text-[#F48120] disabled:hover:scale-100"
-                      disabled={pendingToolCallConfirmation || !agentInput.trim()}
-                      onClick={async (e) => {
-                        try {
-                          updateSystemPrompt(inputText),
-                            // Actualizar el modelo y el prompt del sistema en el servidor antes de enviar el mensaje
-                            await Promise.all([
-                              fetch('/api/model', {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({ model: selectedModel }),
-                              })
-                            ]);
-
-                          // Proceder con el envío del mensaje
-                          if (!user) {
-                            setIsLoginOpen(true);
-                            return;
-                          } else {
-                            // e.preventDefault();
-                            // handleAgentSubmit(e);
-                          }
-                        } catch (error) {
-                          console.error('Error al actualizar el modelo:', error);
+                  <Button
+                    type="submit"
+                    shape="square"
+                    className="inline-flex items-center justify-center p-2.5 text-[#F48120] hover:text-white bg-white/95 dark:bg-gray-800/95 hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full border-2 border-[#F48120]/20 dark:border-[#F48120]/10 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20 transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/95 dark:disabled:hover:bg-gray-800/95 disabled:hover:text-[#F48120] disabled:hover:scale-100"
+                    disabled={pendingToolCallConfirmation || !agentInput.trim()}
+                    onClick={async (e) => {
+                      try {
+                        if (!user) {
+                          setIsLoginOpen(true);
+                          return;
                         }
-                      }}
-                    >
-                      <PaperPlaneRight size={18} weight="bold" />
-                    </Button>
+
+                        // Actualizar el prompt del sistema y el modelo
+                        await Promise.all([
+                          updateSystemPrompt(inputText),
+                          fetch('/api/model', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ model: selectedModel }),
+                          }),
+                          fetch('/api/assistant', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ maxSteps: config.maxSteps || 4 }),
+                          })
+                        ]);
+
+                        // Proceder con el envío del mensaje
+                        e.preventDefault();
+                        handleAgentSubmit(e);
+                      } catch (error) {
+                        console.error('Error al procesar la solicitud:', error);
+                      }
+                    }}
+                  >
+                    <PaperPlaneRight size={18} weight="bold" />
+                  </Button>
                   {/* )} */}
                 </div>
               </div>
