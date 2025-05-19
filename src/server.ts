@@ -682,12 +682,6 @@ export class Chat extends AIChatAgent<Env> {
  * Worker entry point that routes incoming requests to the appropriate handler
  */
 export default {
-  fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    return app.fetch(request, env, ctx);
-  }
-};
-
-const workerHandler = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const url = new URL(request.url);
 
