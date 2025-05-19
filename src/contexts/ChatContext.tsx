@@ -22,6 +22,8 @@ interface ChatContextType {
   selectChat: (chatId: string) => void;
   addMessage: (chatId: string, message: Message) => void;
   deleteChat: (chatId: string) => void;
+  clearHistory: () => void;
+  addToolResult: ({ toolCallId, result }: { toolCallId: string; result: any }) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -97,6 +99,33 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const clearHistory = () => {
+    if (currentChat) {
+      setChats(prevChats => prevChats.map(chat => {
+        if (chat.id === currentChat.id) {
+          return {
+            ...chat,
+            messages: [],
+            lastMessageAt: new Date()
+          };
+        }
+        return chat;
+      }));
+    }
+  };
+
+  const addToolResult = ({ toolCallId, result }: { toolCallId: string; result: any }) => {
+    if (currentChat) {
+      const message: Message = {
+        id: toolCallId,
+        role: 'assistant',
+        content: result,
+        createdAt: new Date()
+      };
+      addMessage(currentChat.id, message);
+    }
+  };
+
   return (
     <ChatContext.Provider
       value={{
@@ -105,7 +134,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         createChat,
         selectChat,
         addMessage,
-        deleteChat
+        deleteChat,
+        clearHistory,
+        addToolResult
       }}
     >
       {children}
