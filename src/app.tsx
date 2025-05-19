@@ -78,29 +78,9 @@ function ChatComponent() {
   const { config } = useAIConfig();
   const { selectedModel } = useModel();
   const { clearHistory, addToolResult, createChat, chats } = useChat();
-  // Definición del tipo para la configuración del agente
-  type AgentChatConfig = {
-    agent: string;
-    baseUrl?: string;
-    endpoint: string;
-  };
-
-  // Configuración del agente con tipos
-  const agentConfig: AgentChatConfig = {
-    agent: "chat",
-    baseUrl: window.location.origin,
-    endpoint: "/agents/chat/default/get-messages"
-  };
-
-  // Imprime y verifica la URL completa
-  try {
-    const fullUrl = new URL(agentConfig.endpoint, window.location.origin).href;
-    console.log("URL completa del agente:", fullUrl);
-  } catch (error) {
-    console.error("Error al construir la URL del agente:", error);
-  }
-
-  const { messages: agentMessages, append, setInput } = useAgentChat(agentConfig);
+  const { messages: agentMessages, append, setInput } = useAgentChat({
+    agent: "chat"
+  });
 
   // Crear un nuevo chat automáticamente al iniciar la aplicación si no hay chats
   useEffect(() => {
