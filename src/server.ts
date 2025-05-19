@@ -184,27 +184,147 @@ app.get('/check-open-ai-key', async (c) => {
 });
 
 // Endpoint to get messages for a chat
-// Endpoint to get messages for a chat
+class SimpleDurableObjectState implements DurableObjectState {
+  private store: Map<string, any>;
+  public storage: DurableObjectStorage;
+  private webSocketAutoResponse: WebSocketRequestResponsePair | null = null;
+  private webSocketAutoResponseTimestamp: number = 0;
+  private hibernatableWebSocketEventTimeout: number = 0;
+  private webSockets: Set<WebSocket> = new Set();
+
+  constructor() {
+    this.store = new Map<string, any>();
+    this.storage = {
+      get: async <T>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => {
+        if (Array.isArray(key)) {
+          const results = new Map<string, T>();
+          for (const k of key) {
+            const value = this.store.get(k) as T;
+            if (value !== undefined) results.set(k, value);
+          }
+          return results as any;
+        }
+        return this.store.get(key) as T;
+      },
+      put: async <T>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {
+        if (typeof key === 'string') {
+          this.store.set(key, value);
+        } else {
+          Object.entries(key).forEach(([k, v]) => this.store.set(k, v));
+        }
+      },
+      delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean | number> => {
+        // Handle single key deletion
+        if (typeof key === 'string') {
+          return this.store.delete(key);
+        }
+        // Handle array of keys deletion
+        if (Array.isArray(key)) {
+          let deletedCount = 0;
+          for (const k of key) {
+            if (this.store.delete(k)) {
+              deletedCount++;
+            }
+          }
+          return deletedCount;
+        }
+        throw new Error('Invalid key type');
+      },
+      list: async <T = unknown>(options?: DurableObjectListOptions): Promise<Map<string, T>> => {
+        if (!options?.prefix) return new Map(this.store);
+        const entries = Array.from(this.store.entries())
+          .filter(([key]) => key.startsWith(options.prefix!));
+        
+        if (options.reverse) entries.reverse();
+        if (options.limit) entries.splice(options.limit);
+        
+        return new Map(entries);
+      },
+      deleteAll: async (): Promise<void> => {
+        this.store.clear();
+      },
+      transaction: async <T>(closure: (txn: DurableObjectTransaction) => Promise<T>): Promise<T> => {
+        const txn: DurableObjectTransaction = {
+          get: this.storage.get.bind(this.storage),
+          put: this.storage.put.bind(this.storage),
+          delete: this.storage.delete.bind(this.storage),
+          rollback: () => { throw new Error('Rollback not supported in simulated storage'); },
+          list: this.storage.list.bind(this.storage),
+          getAlarm: async () => null,
+          setAlarm: async () => {},
+          deleteAlarm: async () => {}
+        };
+        return closure(txn);
+      }
+    };
+  }
+
+  setWebSocketAutoResponse(maybeReqResp?: WebSocketRequestResponsePair): void {
+    this.webSocketAutoResponse = maybeReqResp ?? null;
+    this.webSocketAutoResponseTimestamp = Date.now();
+  }
+
+  getWebSocketAutoResponse(): WebSocketRequestResponsePair | null {
+    return this.webSocketAutoResponse;
+  }
+
+  getWebSocketAutoResponseTimestamp(ws: WebSocket): Date | null {
+    return this.webSocketAutoResponseTimestamp ? new Date(this.webSocketAutoResponseTimestamp) : null;
+  }
+
+  setHibernatableWebSocketEventTimeout(timeoutMs: number): void {
+    this.hibernatableWebSocketEventTimeout = timeoutMs;
+  }
+
+  getHibernatableWebSocketEventTimeout(): number {
+    return this.hibernatableWebSocketEventTimeout;
+  }
+
+  blockConcurrencyWhile<T>(callback: () => Promise<T>): Promise<T> {
+    return callback();
+  }
+
+  waitUntil(promise: Promise<any>): void {}
+
+  id = {
+    toString: () => 'mock-id',
+    equals: (other: DurableObjectId) => this.id.toString() === other.toString()
+  };
+
+  getTags(): string[] {
+    return [];
+  }
+
+  abort(): void {}
+
+  acceptWebSocket(ws: WebSocket): void {
+    this.webSockets.add(ws);
+    ws.addEventListener('close', () => {
+      this.webSockets.delete(ws);
+    });
+  }
+
+  getWebSockets(): WebSocket[] {
+    return Array.from(this.webSockets);
+  }
+}
+
 app.get('/agents/chat/default/get-messages', async (c) => {
   try {
     const chatId = c.req.query('chatId') || 'default';
 
-    // Load chats from storage if empty
+    // Obtener o crear instancia de Chat
+    let chat = Chat.instance;
+    if (!chat) {
+      const state = new SimpleDurableObjectState();
+      chat = new Chat(state, env);
+    }
+
+    // Cargar chats si es necesario
     if (chats.length === 0) {
       try {
-        const chat = Chat.instance;
-        if (!chat) {
-          // Initialize a new Chat instance if none exists
-          const newChat = new Chat(env);
-          await newChat.initializeDefaultChat();
-          return c.json({
-            success: true,
-            messages: []
-          });
-        }
-
         const savedChats = await chat.storage.get('chats') as LocalChatData[];
-        if (savedChats && savedChats.length > 0) {
+        if (savedChats?.length > 0) {
           chats = savedChats.map((chat: ChatData) => ({
             ...chat,
             lastMessageAt: new Date(chat.lastMessageAt),
@@ -214,39 +334,36 @@ app.get('/agents/chat/default/get-messages', async (c) => {
             }))
           }));
         } else {
-          // If no chats in storage, initialize with default chat
           await chat.initializeDefaultChat();
-          return c.json({
-            success: true,
-            messages: []
-          });
+          return c.json({ success: true, messages: [] });
         }
       } catch (error) {
-        console.error('Error loading chats from storage:', error);
-        return c.json({ 
-          error: 'Failed to load chats from storage',
-          details: error instanceof Error ? error.message : 'Unknown error'
+        console.error('Error al cargar chats:', error);
+        return c.json({
+          error: 'Error al cargar chats del almacenamiento',
+          details: error instanceof Error ? error.message : 'Error desconocido'
         }, 500);
       }
     }
 
-    const chat = chats.find(c => c.id === chatId);
-    if (!chat) {
-      return c.json({ 
-        error: 'Chat not found',
-        details: `No chat found with ID: ${chatId}`
+    // Buscar chat específico
+    const currentChat = chats.find(c => c.id === chatId);
+    if (!currentChat) {
+      return c.json({
+        error: 'Chat no encontrado',
+        details: `No se encontró un chat con ID: ${chatId}`
       }, 404);
     }
 
     return c.json({
       success: true,
-      messages: chat.messages || []
+      messages: currentChat.messages || []
     });
   } catch (error) {
-    console.error('Error retrieving messages:', error);
-    return c.json({ 
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+    console.error('Error al recuperar mensajes:', error);
+    return c.json({
+      error: 'Error interno del servidor',
+      details: error instanceof Error ? error.message : 'Error desconocido'
     }, 500);
   }
 });
@@ -307,60 +424,32 @@ export const agentContext = new AsyncLocalStorage<Chat>();
 export class Chat extends AIChatAgent<Env> {
   currentChatId: string | null = null;
   public static instance: Chat | null = null;
-  public storage: DurableObjectStorage;
+  public storage!: DurableObjectStorage;
+  public messages: ChatMessage[] = [];
 
-  constructor(env: Env) {
-    const state: DurableObjectState = {
-      waitUntil: (promise: Promise<any>) => {},
-      blockConcurrencyWhile: async (callback: () => Promise<any>) => await callback(),
-      storage: {
-        get: async <T>(key: string | string[]): Promise<T | undefined | Map<string, T | undefined>> => {
-          return Array.isArray(key) ? new Map() : undefined;
-        },
-        put: async <T>(key: string | Record<string, T>, value?: T): Promise<void> => {},
-        delete: async (key: string | string[]): Promise<void> => {},
-        deleteAll: async (): Promise<void> => {},
-        list: async <T>(): Promise<Map<string, T>> => new Map(),
-        transaction: async <T>(closure: (txn: DurableObjectTransaction) => Promise<T>): Promise<T> => closure({} as any),
-        transactionSync: <T>(closure: (txn: DurableObjectTransaction) => T): T => closure({} as any),
-        getAlarm: async (): Promise<number | null> => null,
-        setAlarm: async (scheduledTime: number | Date): Promise<void> => {},
-        deleteAlarm: async (): Promise<void> => {},
-        sync: async (): Promise<void> => {},
-        getCurrentBookmark: (): string => "",
-        sql: (query: string, params?: any[]): Promise<any> => Promise.resolve([])
-      },
-      id: {
-        toString: () => generateId(),
-        equals: (other: DurableObjectId) => other.toString() === generateId()
-      },
-      acceptWebSocket: () => {},
-      getWebSockets: () => [],
-      setWebSocketAutoResponse: () => {},
-      getWebSocketAutoResponse: () => null,
-      getWebSocketAutoResponseTimestamp: () => new Date(),
-      setHibernatableWebSocketEventTimeout: () => {},
-      getHibernatableWebSocketEventTimeout: () => 0,
-      getTags: () => [],
-      abort: () => {}
-    };
-    
+  constructor(state: DurableObjectState, env: Env) {
     super(state, env);
     if (!Chat.instance) {
       Chat.instance = this;
-      // Create a default chat if none exists
-      this.initializeDefaultChat();
+      if (state instanceof SimpleDurableObjectState) {
+        this.storage = state.storage;
+      } else {
+        this.storage = state.storage;
+      }
+      this.messages = [];
+      this.initializeDefaultChat().catch(error => {
+        console.error('Error initializing default chat:', error);
+      });
     } else {
       Chat.instance.env = env;
     }
-    this.storage = state.storage;
     return Chat.instance;
   }
 
   public async initializeDefaultChat() {
     const defaultChat: ChatData = {
-      id: 'default',
-      title: 'Default Chat',
+      id: generateId(),
+      title: '¡Bienvenido a tu Asistente Virtual! 🤖',
       messages: [],
       lastMessageAt: new Date()
     };
@@ -371,10 +460,17 @@ export class Chat extends AIChatAgent<Env> {
       try {
         await this.storage.put('chats', chats);
         this.currentChatId = defaultChat.id;
+        // Emitir evento para actualizar la interfaz
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('chatsUpdated', { 
+            detail: { chats }
+          }));
+        }
       } catch (error) {
         console.error('Error saving default chat to storage:', error);
       }
     }
+    return defaultChat;
   }
 
   /**
@@ -451,16 +547,38 @@ export class Chat extends AIChatAgent<Env> {
     onFinish: StreamTextOnFinishCallback<ToolSet>,
     options?: { abortSignal?: AbortSignal }
   ) {
-    // Cargar chats desde almacenamiento del servidor si es necesario
+    try {
+      // Inicializar o cargar chats si es necesario
+      await this.initializeOrLoadChats();
+
+      // Asegurar que existe un chat activo
+      await this.ensureActiveChat();
+
+      const allTools = { ...tools };
+
+      // Manejar la generación de respuesta según el modelo seleccionado
+      if (selectedModel === "gemini-2.0-flash") {
+        return await this.handleGeminiResponse(onFinish);
+      } else {
+        return await this.handleDefaultModelResponse(allTools, onFinish);
+      }
+    } catch (error) {
+      console.error('Error en onChatMessage:', error);
+      throw error;
+    }
+  }
+
+  private async initializeOrLoadChats() {
     if (chats.length === 0) {
       chats = await this.loadChatsFromStorage();
-      // Si aún no hay chats después de cargar, inicializar con el chat por defecto
       if (chats.length === 0) {
         await this.initializeDefaultChat();
       }
     }
+  }
+
+  private async ensureActiveChat() {
     if (!this.currentChatId) {
-      // Si no hay chat seleccionado, crear uno nuevo
       const newChat: ChatData = {
         id: generateId(),
         title: 'Nuevo Chat',
@@ -470,172 +588,81 @@ export class Chat extends AIChatAgent<Env> {
       chats.push(newChat);
       this.currentChatId = newChat.id;
     }
+  }
 
-    const allTools = {
-      ...tools,
-      // ...this.mcp.unstable_getAITools(),
+  private async handleGeminiResponse(onFinish: StreamTextOnFinishCallback<ToolSet>) {
+    const geminiApiKey = env.GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || (import.meta as any).env.GEMINI_API_KEY;
+    if (!geminiApiKey) {
+      throw new Error('GEMINI_API_KEY no está configurada en las variables de entorno');
+    }
+
+    const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+    const response = await ai.models.generateContent({
+      model: geminiModel,
+      contents: [{
+        parts: [
+          { text: systemPrompt },
+          ...this.messages.map(msg => ({ text: msg.content }))
+        ]
+      }]
+    });
+
+    const message: ChatMessage = {
+      id: generateId(),
+      role: "assistant",
+      content: response.text ?? '',
+      createdAt: new Date(),
     };
+    const messages = [...this.messages, message];
 
-    // if (geminiApiKey !== '') {
-    //gemini-2.0-flash
-    if (selectedModel === "gemini-2.0-flash") {
-      const geminiApiKey = env.GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || (import.meta as any).env.GEMINI_API_KEY;
-      if (!geminiApiKey) {
-        throw new Error('GEMINI_API_KEY is not set in environment variables');
+    await this.saveMessages(messages);
+    await this.saveToCurrentChat(messages);
+
+    return createDataStreamResponse({
+      execute: async (dataStream) => {
+        dataStream.write(formatDataStreamPart('text', response.text ?? ''));
+        console.log('Transmisión de Gemini finalizada');
       }
-      const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-      const response = await ai.models.generateContent({
-        model: geminiModel,
-        contents: [
-          {
-            parts: [
-              { text: systemPrompt },
-              ...this.messages.map(msg => ({ text: msg.content }))
-            ]
-          }
-        ],
-        // config: {
-        //   // systemInstruction: "You are a cat. Your name is Neko.",
-        //   // systemInstruction: systemPrompt,
-        //   // maxOutputTokens: 500,
-        //   temperature: config.temperature,
-        //   topP: config.topP,
-        //   topK: config.topK,
-        //   frequencyPenalty: config.frequencyPenalty,
-        //   presencePenalty: config.presencePenalty,
-        //   seed: config.seed,
-        //   // toolCallStreaming: true,
-        // },
-      });
+    });
+  }
 
-      //
-      // await this.saveMessages([
-      //   ...this.messages,
-      //   {
-      //     id: generateId(),
-      //     role: "assistant",
-      //     content: response.text ?? '',
-      //     createdAt: new Date(),
-      //   },
-      // ]);
-
-      // Guardar mensajes y ejecutar callback de finalización, las cantidades de iteraciones que el usuario indico
-      const message: ChatMessage = {
-        id: generateId(),
-        role: "assistant",
-        content: response.text ?? '',
-        createdAt: new Date(),
-      };
-      const messages = [...this.messages, message];
-
-      await this.saveMessages(messages);
-      await this.saveToCurrentChat(messages);
-      // Crear una promesa para manejar la finalización
+  private async handleDefaultModelResponse(allTools: any, onFinish: StreamTextOnFinishCallback<ToolSet>) {
+    return agentContext.run(this, async () => {
       return createDataStreamResponse({
         execute: async (dataStream) => {
-          dataStream.write(formatDataStreamPart('text', response.text ?? ''));
+          const processedMessages = await processToolCalls({
+            messages: this.messages,
+            dataStream,
+            tools: allTools,
+            executions,
+          });
 
-          // Guardar mensajes y ejecutar callback de finalización
-          // await this.saveMessages([
-          //   ...this.messages,
-          //   {
-          //     id: generateId(),
-          //     role: "assistant",
-          //     content: response.text ?? '',
-          //     createdAt: new Date(),
-          //   },
-          // ]);
+          const result = streamText({
+            model,
+            temperature: config.temperature,
+            maxTokens: config.maxTokens,
+            topP: config.topP,
+            topK: config.topK,
+            frequencyPenalty: config.frequencyPenalty,
+            presencePenalty: config.presencePenalty,
+            seed: config.seed,
+            system: systemPrompt,
+            messages: processedMessages,
+            tools: allTools,
+            onFinish: async (args) => {
+              onFinish(args as Parameters<StreamTextOnFinishCallback<ToolSet>>[0]);
+              console.log('Stream finalizado');
+            },
+            onError: (error) => {
+              console.error("Error durante el streaming:", error);
+            },
+            maxSteps,
+          });
 
-          // Ejecutar el callback onFinish con los argumentos necesarios
-          // onFinish({
-          //   text: response.text ?? '',
-          //   response: {
-          //     id: generateId(),
-          //     timestamp: new Date(),
-          //     modelId: geminiModel,
-          //     messages: [],
-          //     body: response.text ?? ''
-          //   },
-          //   reasoning: 'Generated response using Gemini model',
-          //   reasoningDetails: [{
-          //     type: 'text',
-          //     text: 'Processed user message and generated AI response'
-          //   }],
-          //   files: [],
-          //   toolCalls: [],
-          //   steps: [],
-          //   finishReason: 'stop',
-          //   sources: [],
-          //   toolResults: [],
-          //   usage: {
-          //     promptTokens: 0,
-          //     completionTokens: 0,
-          //     totalTokens: 0
-          //   },
-          //   warnings: [],
-          //   logprobs: undefined,
-          //   request: {},
-          //   providerMetadata: {},
-          //   experimental_providerMetadata: {}
-          // });
-
-          console.log('Transmisión de Gemini finalizada');
-        }
+          result.mergeIntoDataStream(dataStream);
+        },
       });
-    } else {
-      // Create a streaming response that handles both text and tool outputs
-      return agentContext.run(this, async () => {
-        const dataStreamResponse = createDataStreamResponse({
-          execute: async (dataStream) => {
-            // Process any pending tool calls from previous messages
-            // This handles human-in-the-loop confirmations for tools
-            const processedMessages = await processToolCalls({
-              messages: this.messages,
-              dataStream,
-              tools: allTools,
-              executions,
-            });
-
-            const result = streamText({
-              model,
-              temperature: config.temperature,
-              maxTokens: config.maxTokens,
-              topP: config.topP,
-              topK: config.topK,
-              frequencyPenalty: config.frequencyPenalty,
-              presencePenalty: config.presencePenalty,
-              seed: config.seed,
-              // toolCallStreaming: true,
-              system: `${systemPrompt}`,
-
-              // ${unstable_getSchedulePrompt({ date: new Date() })}
-
-              // Si el usuario solicita programar una tarea, utilice la herramienta de programación para programar las tareas
-              // `,
-
-              // If the user asks to schedule a task, use the schedule tool to schedule the task.
-              messages: processedMessages,
-              tools: allTools,
-              onFinish: async (args) => {
-                onFinish(
-                  args as Parameters<StreamTextOnFinishCallback<ToolSet>>[0]
-                );
-                console.log('Stream finalizado');
-              },
-              onError: (error) => {
-                console.error("Error while streaming:", error);
-              },
-              maxSteps,
-            });
-
-            // Merge the AI response stream with tool execution outputs
-            result.mergeIntoDataStream(dataStream);
-          },
-        });
-
-        return dataStreamResponse;
-      });
-    }
+    });
   }
   async executeTask(description: string, task: Schedule<string>) {
     const message: ChatMessage = {
@@ -651,13 +678,11 @@ export class Chat extends AIChatAgent<Env> {
 /**
  * Worker entry point that routes incoming requests to the appropriate handler
  */
-const worker = {
+export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext) {
     return app.fetch(request, env, ctx);
   }
 };
-
-export default worker;
 
 const workerHandler = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {

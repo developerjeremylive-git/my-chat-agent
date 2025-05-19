@@ -2,7 +2,7 @@
  * Tool definitions for the AI chat agent
  * Tools can either require human confirmation or execute automatically
  */
-import { tool } from "ai";
+import { tool, type ToolExecutionOptions } from "ai";
 import { z } from "zod";
 
 import { agentContext } from "./server";
@@ -141,7 +141,8 @@ export const tools = {
  * Each function here corresponds to a tool above that doesn't have an execute function
  */
 export const executions = {
-  getWeatherInformation: async ({ city }: { city: string }) => {
+  getWeatherInformation: async (args: unknown, context: ToolExecutionOptions) => {
+    const { city } = args as { city: string };
     console.log(`Getting weather information for ${city}`);
     if (city.toLowerCase() === 'california') {
       return `El clima en ${city} es soleado con una temperatura de 25°C`;
