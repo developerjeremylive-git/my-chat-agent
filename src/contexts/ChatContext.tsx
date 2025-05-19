@@ -178,8 +178,27 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             createdAt: new Date(msg.createdAt)
           }))
         };
-        updateChat(chatId, formattedChat);
+
+        // Update both the chats array and current chat
+        setChats(prevChats => {
+          const chatIndex = prevChats.findIndex(c => c.id === chatId);
+          if (chatIndex !== -1) {
+            const newChats = [...prevChats];
+            newChats[chatIndex] = formattedChat;
+            return newChats;
+          }
+          return prevChats;
+        });
+
         setCurrentChat(formattedChat);
+
+        // Subscribe to chat updates via WebSocket
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({
+            type: 'subscribe',
+            chatId: formattedChat.id
+          }));
+        }
       }
     } catch (error) {
       console.error('Error fetching chat:', error);
@@ -188,19 +207,55 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addMessage = (chatId: string, message: Message) => {
-    setChats(prevChats => {
-      return prevChats.map(chat => {
-        if (chat.id === chatId) {
-          return {
-            ...chat,
-            messages: [...chat.messages, message],
-            lastMessageAt: new Date()
-          };
-        }
-        return chat;
+  const addMessage = async (chatId: string, message: Message) => {
+    try {
+      // Send message to the server
+      const response = await fetch(`/api/chats/${chatId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content: message.content,
+          role: message.role
+        })
       });
-    });
+
+      if (response.ok) {
+        const data = await response.json() as { success: boolean; chat: ChatResponse };
+        
+        // Update chats array
+        setChats(prevChats => {
+          return prevChats.map(chat => {
+            if (chat.id === chatId) {
+              return {
+                ...chat,
+                messages: data.chat.messages.map((msg: any) => ({
+                  ...msg,
+                  createdAt: new Date(msg.createdAt)
+                })),
+                lastMessageAt: new Date(data.chat.lastMessageAt)
+              };
+            }
+            return chat;
+          });
+        });
+
+        // Update current chat if this is the active chat
+        if (currentChat?.id === chatId) {
+          setCurrentChat(prev => prev ? {
+            ...prev,
+            messages: data.chat.messages.map((msg: any) => ({
+              ...msg,
+              createdAt: new Date(msg.createdAt)
+            })),
+            lastMessageAt: new Date(data.chat.lastMessageAt)
+          } : null);
+        }
+      }
+    } catch (error) {
+      console.error('Error adding message:', error);
+    }
   };
 
   const deleteChat = (chatId: string) => {
