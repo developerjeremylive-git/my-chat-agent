@@ -33,6 +33,7 @@ interface Message {
   role: 'user' | 'assistant' | 'system' | 'data';
   content: string;
   createdAt: Date;
+  chatId?: string;
 }
 
 interface ApiResponse {
@@ -363,11 +364,10 @@ app.get('/agents/chat/default/get-messages', async (c) => {
     }
 
     // Set current chat and messages
-    chat.setCurrentChat(chatId);
-    chat.messages = specificChat.messages;
+    await chat.setCurrentChat(chatId, specificChat.messages);
 
     // Validate and format messages
-    const messages = specificChat.messages.map(msg => ({
+    const messages = chat.getMessages().map(msg => ({
       id: msg.id || generateId(),
       role: msg.role || 'user',
       content: msg.content || '',
@@ -437,29 +437,29 @@ const model = getModel();
 
 // we use ALS to expose the agent context to the tools
 export const agentContext = new AsyncLocalStorage<Chat>();
+
 /**
  * Chat Agent implementation that handles real-time AI chat interactions
  */
-export class Chat extends AIChatAgent<Env> implements ChatInstance {
-  id: string;
-  title: string;
-  createdAt: Date;
-  lastMessageAt: Date;
-  currentChatId: string | null = null;
+export class Chat {
+  private webSockets: Set<WebSocket>;
+  private messages: Message[] = [];
+  private state: DurableObjectState;
+  private env: Env;
   public static instance: Chat | null = null;
-  public storage!: DurableObjectStorage;
-  public messages: Message[] = [];
-  public chats: ChatInstance[] = [];
 
   constructor(state: DurableObjectState, env: Env) {
-    super(state, env);
-    this.id = generateId();
-    this.title = 'Chat Principal';
-    this.createdAt = new Date();
-    this.lastMessageAt = new Date();
-    this.storage = state.storage;
-    this.messages = [];
-    this.currentChatId = null;
+    this.state = state;
+    this.env = env;
+    this.webSockets = new Set();
+
+    // Load stored messages
+    this.state.blockConcurrencyWhile(async () => {
+      const storedMessages = await this.state.storage.get('messages') as Message[];
+      if (!storedMessages) {
+        await this.state.storage.put('messages', []);
+      }
+    });
 
     if (!Chat.instance) {
       Chat.instance = this;
@@ -469,24 +469,77 @@ export class Chat extends AIChatAgent<Env> implements ChatInstance {
     }
   }
 
-  // constructor(state: DurableObjectState, env: Env) {
-  //   super(state, env);
-  //   this.storage = state.storage;
-  //   this.messages = [];
-  //   this.currentChatId = null;
+  getMessages(): Message[] {
+    return this.messages;
+  }
 
-  //   // Initialize messages array with proper type checking
-  //   this.messages = Array.isArray(this.messages) ? this.messages : [];
+  async handleWebSocket(ws: WebSocket) {
+    this.webSockets.add(ws);
 
-  //   if (!Chat.instance) {
-  //     Chat.instance = this;
-  //     this.initializeDefaultChat().catch(error => {
-  //       console.error('Error initializing default chat:', error);
-  //     });
-  //   }
-  // }
+    // Send all existing messages to the new client
+    const messages = this.getMessages();
+    if (messages.length > 0) {
+      ws.send(JSON.stringify({
+        type: 'init',
+        messages: messages
+      }));
+    }
 
-  public async initializeDefaultChat() {
+    ws.addEventListener('message', async (event) => {
+      const message = JSON.parse(event.data);
+      await this.broadcast(message);
+    });
+
+    ws.addEventListener('close', () => {
+      this.webSockets.delete(ws);
+    });
+  }
+
+  async broadcast(message: Message) {
+    // Store the message
+    const messages = this.getMessages();
+    messages.push(message);
+    await this.state.storage.put('messages', messages);
+
+    // Broadcast to all connected clients
+    this.webSockets.forEach(client => {
+      client.send(JSON.stringify(message));
+    });
+  }
+
+  async fetch(request: Request) {
+    const url = new URL(request.url);
+
+    switch (url.pathname) {
+      case '/websocket':
+        // Handle WebSocket connection
+        if (request.headers.get('Upgrade') !== 'websocket') {
+          return new Response('Expected Upgrade: websocket', { status: 426 });
+        }
+        const pair = new WebSocketPair();
+        await this.handleWebSocket(pair[1]);
+        return new Response(null, {
+          status: 101,
+          webSocket: pair[0],
+        });
+
+      case '/messages':
+        // Handle HTTP requests
+        if (request.method === 'POST') {
+          const message = await request.json() as Message;
+          await this.broadcast(message);
+          return new Response('Message sent', { status: 200 });
+        }
+        return new Response(JSON.stringify(this.getMessages()), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+      default:
+        return new Response('Not found', { status: 404 });
+    }
+  }
+
+  async initializeDefaultChat(): Promise<ChatData> {
     const defaultChat: ChatData = {
       id: generateId(),
       title: '¡Bienvenido a tu Asistente Virtual! 🤖',
@@ -494,442 +547,20 @@ export class Chat extends AIChatAgent<Env> implements ChatInstance {
       lastMessageAt: new Date()
     };
 
-    // Initialize chats array with default chat if empty
-    if (chats.length === 0) {
-      chats.push(defaultChat);
-      try {
-        await this.storage.put('chats', chats);
-        this.currentChatId = defaultChat.id;
-        // Emitir evento para actualizar la interfaz
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('chatsUpdated', {
-            detail: { chats }
-          }));
-        }
-      } catch (error) {
-        console.error('Error saving default chat to storage:', error);
-      }
-    }
+    await this.state.storage.put('chats', [defaultChat]);
     return defaultChat;
   }
 
-  /**
-   * Establece el ID del chat actual
-   */
-  setCurrentChat(chatId: string) {
-    this.currentChatId = chatId;
-    // Cargar mensajes del chat seleccionado
-    const chat = chats.find(c => c.id === chatId);
-    if (chat) {
-      this.messages = chat.messages;
-    }
+  async loadChatsFromStorage(): Promise<ChatData[]> {
+    const chats = await this.state.storage.get('chats') as ChatData[];
+    return chats || [];
   }
 
-  /**
-   * Guarda los mensajes en el chat actual y actualiza el estado global
-   */
-  public async loadChatsFromStorage(): Promise<LocalChatData[]> {
-    try {
-      const savedChats = await this.storage.get('chats') as LocalChatData[];
-      if (savedChats && savedChats.length > 0) {
-        return savedChats.map((chat: ChatData) => ({
-          ...chat,
-          lastMessageAt: new Date(chat.lastMessageAt),
-          messages: chat.messages.map(msg => ({
-            ...msg,
-            createdAt: new Date(msg.createdAt)
-          }))
-        }));
-      }
-    } catch (error) {
-      console.error('Error loading chats from storage:', error);
-    }
-    return [];
-  }
-
-  private async saveToCurrentChat(messages: ChatMessage[]) {
-    if (!Array.isArray(messages)) {
-      console.error('Invalid messages array:', messages);
-      return;
-    }
-    // Ensure all messages have a valid Date for createdAt
-    const validatedMessages = messages.map(msg => ({
-      id: msg.id,
-      role: msg.role,
-      content: msg.content,
-      createdAt: msg.createdAt || new Date()
-    }));
-    if (this.currentChatId) {
-      const chatIndex = chats.findIndex(c => c.id === this.currentChatId);
-      if (chatIndex !== -1) {
-        chats[chatIndex].messages = validatedMessages;
-        chats[chatIndex].lastMessageAt = new Date();
-
-        try {
-          await this.storage.put('chats', chats);
-        } catch (error) {
-          console.error('Error saving chats to storage:', error);
-        }
-      }
-    }
-  }
-
-  /**
-   * Handles incoming chat messages and manages the response stream
-   * @param onFinish - Callback function executed when streaming completes
-   */
-
-  // biome-ignore lint/complexity/noBannedTypes: <explanation>
-  async onChatMessage(
-    onFinish: StreamTextOnFinishCallback<ToolSet>,
-    options?: { abortSignal?: AbortSignal }
-  ) {
-    try {
-      // Inicializar o cargar chats si es necesario
-      await this.initializeOrLoadChats();
-
-      // Asegurar que existe un chat activo
-      await this.ensureActiveChat();
-
-      const allTools = { ...tools };
-
-      // Manejar la generación de respuesta según el modelo seleccionado
-      if (selectedModel === "gemini-2.0-flash") {
-        return await this.handleGeminiResponse(onFinish);
-      } else {
-        return await this.handleDefaultModelResponse(allTools, onFinish);
-      }
-    } catch (error) {
-      console.error('Error en onChatMessage:', error);
-      throw error;
-    }
-  }
-
-  private async initializeOrLoadChats() {
-    if (chats.length === 0) {
-      chats = await this.loadChatsFromStorage();
-      if (chats.length === 0) {
-        await this.initializeDefaultChat();
-      }
-    }
-  }
-
-  private async ensureActiveChat() {
-    if (!this.currentChatId) {
-      const newChat: ChatData = {
-        id: generateId(),
-        title: 'Nuevo Chat',
-        messages: [],
-        lastMessageAt: new Date()
-      };
-      chats.push(newChat);
-      this.currentChatId = newChat.id;
-    }
-  }
-
-  private async handleGeminiResponse(onFinish: StreamTextOnFinishCallback<ToolSet>) {
-    const geminiApiKey = env.GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || (import.meta as any).env.GEMINI_API_KEY;
-    if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY is not configured in environment variables');
-    }
-
-    const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-    const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
-    const response = await ai.models.generateContent({
-      model: geminiModel,
-      contents: [{
-        parts: [
-          { text: systemPrompt },
-          ...messageParts
-        ]
-      }]
-    });
-
-    const message: ChatMessage = {
-      id: generateId(),
-      role: "assistant",
-      content: response.text ?? '',
-      createdAt: new Date(),
-    };
-    const messages = [...this.messages, message];
-
-    await this.saveMessages(messages);
-    await this.saveToCurrentChat(messages);
-
-    return createDataStreamResponse({
-      execute: async (dataStream) => {
-        dataStream.write(formatDataStreamPart('text', response.text ?? ''));
-        console.log('Transmisión de Gemini finalizada');
-      }
-    });
-  }
-
-  private async handleDefaultModelResponse(allTools: any, onFinish: StreamTextOnFinishCallback<ToolSet>) {
-    return agentContext.run(this, async () => {
-      return createDataStreamResponse({
-        execute: async (dataStream) => {
-          const processedMessages = await processToolCalls({
-            messages: this.messages,
-            dataStream,
-            tools: allTools,
-            executions,
-          });
-
-          const result = streamText({
-            model,
-            temperature: config.temperature,
-            maxTokens: config.maxTokens,
-            topP: config.topP,
-            topK: config.topK,
-            frequencyPenalty: config.frequencyPenalty,
-            presencePenalty: config.presencePenalty,
-            seed: config.seed,
-            system: systemPrompt,
-            messages: processedMessages,
-            tools: allTools,
-            onFinish: async (args) => {
-              onFinish(args as Parameters<StreamTextOnFinishCallback<ToolSet>>[0]);
-              console.log('Stream finalizado');
-            },
-            onError: (error) => {
-              console.error("Error durante el streaming:", error);
-            },
-            maxSteps,
-          });
-
-          result.mergeIntoDataStream(dataStream);
-        },
-      });
-    });
-  }
-  async saveMessages(messages: ChatMessage[]) {
-    if (!Array.isArray(messages)) {
-      console.error('Invalid messages array:', messages);
-      return;
-    }
-    this.messages = messages;
-    await this.saveToCurrentChat(messages);
-
-    // Emitir evento de actualización de mensajes
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('messagesUpdated', {
-        detail: { messages: messages }
-      }));
-    }
-  }
-
-  async executeTask(description: string, task: Schedule<string>) {
-    const message: ChatMessage = {
-      id: generateId(),
-      role: "user",
-      content: `Running scheduled task: ${description}`,
-      createdAt: new Date(),
-    };
-    await this.saveMessages([...this.messages, message]);
-  }
-
-  createChat() {
-    const newChat: ChatInstance = {
-      id: generateId(),
-      title: `Chat ${this.chats.length + 1}`,
-      messages: [],
-      createdAt: new Date(),
-      lastMessageAt: new Date(),
-      currentChatId: null,
-      storage: this.storage,
-      chats: []
-    };
-    this.chats.push(newChat);
-    this.currentChatId = newChat.id;
-    this.storage.put('chats', this.chats).catch(error => {
-      console.error('Error al guardar el chat:', error);
-    });
-    return newChat;
-  }
-
-  selectChat(chatId: string) {
-    const chat = this.chats.find(c => c.id === chatId);
-    if (chat) {
-      this.currentChatId = chatId;
-      this.messages = chat.messages;
-    }
-    return chat;
-  }
-
-  deleteChat(chatId: string) {
-    this.chats = this.chats.filter(chat => chat.id !== chatId);
-    if (this.currentChatId === chatId) {
-      const remainingChats = this.chats;
-      this.currentChatId = remainingChats.length > 0 ? remainingChats[0].id : null;
-      this.messages = remainingChats.length > 0 ? remainingChats[0].messages : [];
-    }
-    this.storage.put('chats', this.chats).catch(error => {
-      console.error('Error al eliminar el chat:', error);
-    });
-  }
-
-  clearHistory() {
-    if (this.currentChatId) {
-      this.chats = this.chats.map(chat => {
-        if (chat.id === this.currentChatId) {
-          return {
-            ...chat,
-            messages: [],
-            lastMessageAt: new Date()
-          };
-        }
-        return chat;
-      });
-      this.messages = [];
-      this.storage.put('chats', this.chats).catch(error => {
-        console.error('Error al limpiar el historial:', error);
-      });
-    }
-  }
-
-  addToolResult({ toolCallId, result }: { toolCallId: string; result: any }) {
-    if (this.currentChatId) {
-      const message: Message = {
-        id: toolCallId,
-        role: 'assistant',
-        content: result,
-        createdAt: new Date()
-      };
-      this.addMessage(this.currentChatId, message);
-    }
-  }
-
-  addMessage(chatId: string, message: Message) {
-    const chatIndex = this.chats.findIndex(c => c.id === chatId);
-    if (chatIndex !== -1) {
-      this.chats[chatIndex].messages.push(message);
-      this.chats[chatIndex].lastMessageAt = new Date();
-      this.messages = this.chats[chatIndex].messages;
-      this.storage.put('chats', this.chats).catch(error => {
-        console.error('Error al agregar mensaje:', error);
-      });
-    }
+  async setCurrentChat(chatId: string, newMessages: Message[]): Promise<void> {
+    await this.state.storage.put('messages', newMessages.map(msg => ({ ...msg, chatId })));
   }
 }
 
-/**
- * Worker entry point that routes incoming requests to the appropriate handler
- */
-export default {
-  // async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-  //   const url = new URL(request.url);
-    
-  //   // Inicializar la instancia de Chat si no existe
-  //   if (!Chat.instance) {
-  //     const state = new SimpleDurableObjectState(new DurableObjectId('default-chat'), new DurableObjectStorage());
-  //     Chat.instance = new Chat(state, env);
-  //     await Chat.instance.initializeDefaultChat();
-  //   }
-
-  //   return app.fetch(request, env, ctx);
-  // },
-  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    const url = new URL(request.url);
-
-    // Manejar las rutas de la API con Hono
-    if (url.pathname.startsWith('/api/')) {
-      return app.fetch(request, env, ctx);
-    }
-
-    if (url.pathname === "/check-open-ai-key") {
-      const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
-      return Response.json({
-        success: hasOpenAIKey,
-      });
-    }
-
-    // Manejar la solicitud de mensajes del chat por defecto
-    if (url.pathname === "/agents/chat/default/get-messages") {
-      let chat = Chat.instance as Chat | null;
-      if (!chat) {
-        return Response.json({
-          error: 'Chat instance not initialized',
-          details: 'The Chat instance has not been properly initialized.'
-        }, { status: 500 });
-      }
-      
-      const defaultChat = await chat.initializeDefaultChat();
-      return Response.json({
-        success: true,
-        messages: [],
-        chatId: defaultChat.id
-      });
-    }
-    if (!process.env.OPENAI_API_KEY) {
-      console.error(
-        "OPENAI_API_KEY is not set, don't forget to set it locally in .dev.vars, and use `wrangler secret bulk .dev.vars` to upload it to production"
-      );
-    }
-    return (
-      // Route the request to our agent or return 404 if not found
-      (await routeAgentRequest(request, env)) ||
-      new Response("Not found", { status: 404 })
-    );
-  },
-  async fetch_with_context(request: Request, env: Env, ctx: ExecutionContext) {
-    const url = new URL(request.url);
-    const pathname = url.pathname;
-
-    // Manejar rutas específicas
-    if (pathname.startsWith('/agents/chat/default/get-messages')) {
-      const chatId = url.searchParams.get('chatId');
-      let chat = Chat.instance;
-
-      if (!chat) {
-        return new Response(JSON.stringify({
-          error: 'Chat instance not initialized',
-          details: 'The Chat instance has not been properly initialized.'
-        }), { status: 500 });
-      }
-
-      if (!chatId) {
-        const defaultChat = await chat.initializeDefaultChat();
-        return new Response(JSON.stringify({
-          success: true,
-          messages: [],
-          chatId: defaultChat.id
-        }));
-      }
-
-      const savedChats = await chat.loadChatsFromStorage();
-      if (savedChats.length > 0) {
-        chats = savedChats;
-      }
-
-      const specificChat = chats.find(c => c.id === chatId);
-      if (!specificChat) {
-        return new Response(JSON.stringify({
-          error: 'Chat not found',
-          details: `No chat found with ID: ${chatId}`
-        }), { status: 404 });
-      }
-
-      chat.setCurrentChat(chatId);
-      chat.messages = specificChat.messages;
-
-      const messages = specificChat.messages.map(msg => ({
-        id: msg.id || generateId(),
-        role: msg.role || 'user',
-        content: msg.content || '',
-        createdAt: new Date(msg.createdAt)
-      }));
-
-      return new Response(JSON.stringify({
-        success: true,
-        messages: messages
-      }));
-    }
-
-    // Manejar otras rutas
-    return app.fetch(request, env, ctx);
-  },
-
-};
 
 
 

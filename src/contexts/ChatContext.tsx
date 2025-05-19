@@ -23,6 +23,7 @@ interface ApiResponse {
 
 interface ChatContextType {
   chats: Chat[];
+  currentChatId: string | null;
   currentChat: Chat | null;
   createChat: () => void;
   selectChat: (chatId: string) => void;
@@ -170,6 +171,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       value={{
         chats,
         currentChat,
+        currentChatId: currentChat?.id || null,
         createChat,
         selectChat,
         addMessage,
