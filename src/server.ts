@@ -18,7 +18,28 @@ import { env } from "cloudflare:workers";
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { GoogleGenAI } from "@google/genai";
-import type { ChatMessage, ChatData, LocalMessage, LocalChatData } from '@/types/chat';
+import type { ChatMessage, ChatData, LocalMessage, LocalChatData, ChatInstance } from '@/types/chat';
+
+// interface Chat {
+//   id: string;
+//   title: string;
+//   messages: Message[];
+//   createdAt: Date;
+//   lastMessageAt: Date;
+// }
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant' | 'system' | 'data';
+  content: string;
+  createdAt: Date;
+}
+
+interface ApiResponse {
+  success: boolean;
+  chatId: string;
+  messages: Message[];
+}
 
 interface WebSocketRequestResponsePair {
   request: string;
@@ -419,20 +440,26 @@ export const agentContext = new AsyncLocalStorage<Chat>();
 /**
  * Chat Agent implementation that handles real-time AI chat interactions
  */
-export class Chat extends AIChatAgent<Env> {
+export class Chat extends AIChatAgent<Env> implements ChatInstance {
+  id: string;
+  title: string;
+  createdAt: Date;
+  lastMessageAt: Date;
   currentChatId: string | null = null;
   public static instance: Chat | null = null;
   public storage!: DurableObjectStorage;
-  public messages: ChatMessage[] = [];
+  public messages: Message[] = [];
+  public chats: ChatInstance[] = [];
 
   constructor(state: DurableObjectState, env: Env) {
     super(state, env);
+    this.id = generateId();
+    this.title = 'Chat Principal';
+    this.createdAt = new Date();
+    this.lastMessageAt = new Date();
     this.storage = state.storage;
     this.messages = [];
     this.currentChatId = null;
-
-    // Initialize messages array with proper type checking
-    this.messages = Array.isArray(this.messages) ? this.messages : [];
 
     if (!Chat.instance) {
       Chat.instance = this;
@@ -441,6 +468,23 @@ export class Chat extends AIChatAgent<Env> {
       });
     }
   }
+
+  // constructor(state: DurableObjectState, env: Env) {
+  //   super(state, env);
+  //   this.storage = state.storage;
+  //   this.messages = [];
+  //   this.currentChatId = null;
+
+  //   // Initialize messages array with proper type checking
+  //   this.messages = Array.isArray(this.messages) ? this.messages : [];
+
+  //   if (!Chat.instance) {
+  //     Chat.instance = this;
+  //     this.initializeDefaultChat().catch(error => {
+  //       console.error('Error initializing default chat:', error);
+  //     });
+  //   }
+  // }
 
   public async initializeDefaultChat() {
     const defaultChat: ChatData = {
@@ -682,6 +726,89 @@ export class Chat extends AIChatAgent<Env> {
       createdAt: new Date(),
     };
     await this.saveMessages([...this.messages, message]);
+  }
+
+  createChat() {
+    const newChat: ChatInstance = {
+      id: generateId(),
+      title: `Chat ${this.chats.length + 1}`,
+      messages: [],
+      createdAt: new Date(),
+      lastMessageAt: new Date(),
+      currentChatId: null,
+      storage: this.storage,
+      chats: []
+    };
+    this.chats.push(newChat);
+    this.currentChatId = newChat.id;
+    this.storage.put('chats', this.chats).catch(error => {
+      console.error('Error al guardar el chat:', error);
+    });
+    return newChat;
+  }
+
+  selectChat(chatId: string) {
+    const chat = this.chats.find(c => c.id === chatId);
+    if (chat) {
+      this.currentChatId = chatId;
+      this.messages = chat.messages;
+    }
+    return chat;
+  }
+
+  deleteChat(chatId: string) {
+    this.chats = this.chats.filter(chat => chat.id !== chatId);
+    if (this.currentChatId === chatId) {
+      const remainingChats = this.chats;
+      this.currentChatId = remainingChats.length > 0 ? remainingChats[0].id : null;
+      this.messages = remainingChats.length > 0 ? remainingChats[0].messages : [];
+    }
+    this.storage.put('chats', this.chats).catch(error => {
+      console.error('Error al eliminar el chat:', error);
+    });
+  }
+
+  clearHistory() {
+    if (this.currentChatId) {
+      this.chats = this.chats.map(chat => {
+        if (chat.id === this.currentChatId) {
+          return {
+            ...chat,
+            messages: [],
+            lastMessageAt: new Date()
+          };
+        }
+        return chat;
+      });
+      this.messages = [];
+      this.storage.put('chats', this.chats).catch(error => {
+        console.error('Error al limpiar el historial:', error);
+      });
+    }
+  }
+
+  addToolResult({ toolCallId, result }: { toolCallId: string; result: any }) {
+    if (this.currentChatId) {
+      const message: Message = {
+        id: toolCallId,
+        role: 'assistant',
+        content: result,
+        createdAt: new Date()
+      };
+      this.addMessage(this.currentChatId, message);
+    }
+  }
+
+  addMessage(chatId: string, message: Message) {
+    const chatIndex = this.chats.findIndex(c => c.id === chatId);
+    if (chatIndex !== -1) {
+      this.chats[chatIndex].messages.push(message);
+      this.chats[chatIndex].lastMessageAt = new Date();
+      this.messages = this.chats[chatIndex].messages;
+      this.storage.put('chats', this.chats).catch(error => {
+        console.error('Error al agregar mensaje:', error);
+      });
+    }
   }
 }
 

@@ -15,6 +15,12 @@ interface Message {
   createdAt: Date;
 }
 
+interface ApiResponse {
+  success: boolean;
+  chatId: string;
+  messages: Message[];
+}
+
 interface ChatContextType {
   chats: Chat[];
   currentChat: Chat | null;
@@ -55,7 +61,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         // Si no hay chats guardados localmente, obtener del servidor
         if (initialChats.length === 0) {
           const response = await fetch('/agents/chat/default/get-messages');
-          const data = await response.json();
+          const data = await response.json() as ApiResponse;
           
           if (data.success && data.chatId) {
             const defaultChat: Chat = {
