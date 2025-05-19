@@ -22,6 +22,7 @@ interface ChatContextType {
   selectChat: (chatId: string) => void;
   addMessage: (chatId: string, message: Message) => void;
   deleteChat: (chatId: string) => void;
+  updateChat: (chatId: string, updatedChat: Chat) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -29,6 +30,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Cargar chats del almacenamiento local al iniciar
   useEffect(() => {
@@ -67,10 +69,44 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     setCurrentChat(newChat);
   };
 
-  const selectChat = (chatId: string) => {
-    const chat = chats.find(c => c.id === chatId);
-    if (chat) {
-      setCurrentChat(chat);
+  interface ChatResponse {
+    id: string;
+    title: string;
+    messages: {
+      id: string;
+      role: 'user' | 'assistant';
+      content: string;
+      createdAt: string;
+    }[];
+    createdAt: string;
+    lastMessageAt: string;
+  }
+
+  const selectChat = async (chatId: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/chats/${chatId}`);
+      if (response.ok) {
+        const chatData = await response.json() as ChatResponse;
+        const formattedChat: Chat = {
+          id: chatData.id,
+          title: chatData.title,
+          createdAt: new Date(chatData.createdAt),
+          lastMessageAt: new Date(chatData.lastMessageAt),
+          messages: chatData.messages.map(msg => ({
+            id: msg.id,
+            role: msg.role,
+            content: msg.content,
+            createdAt: new Date(msg.createdAt)
+          }))
+        };
+        updateChat(chatId, formattedChat);
+        setCurrentChat(formattedChat);
+      }
+    } catch (error) {
+      console.error('Error fetching chat:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -97,17 +133,29 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateChat = (chatId: string, updatedChat: Chat) => {
+    setChats(prevChats => {
+      const chatIndex = prevChats.findIndex(c => c.id === chatId);
+      if (chatIndex !== -1) {
+        const newChats = [...prevChats];
+        newChats[chatIndex] = updatedChat;
+        localStorage.setItem('chats', JSON.stringify(newChats));
+        return newChats;
+      }
+      return prevChats;
+    });
+  };
+
   return (
-    <ChatContext.Provider
-      value={{
-        chats,
-        currentChat,
-        createChat,
-        selectChat,
-        addMessage,
-        deleteChat
-      }}
-    >
+    <ChatContext.Provider value={{
+      chats,
+      currentChat,
+      createChat,
+      selectChat,
+      addMessage,
+      deleteChat,
+      updateChat
+    }}>
       {children}
     </ChatContext.Provider>
   );

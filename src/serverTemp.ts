@@ -19,6 +19,23 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { GoogleGenAI } from "@google/genai";
 
+// Interfaz para el estado del objeto durable
+interface DurableObjectState {
+  storage: DurableObjectStorage;
+}
+
+interface DurableObjectStorage {
+  get(key: string): Promise<any>;
+  put(key: string, value: any): Promise<void>;
+}
+
+class SimpleDurableObjectState implements DurableObjectState {
+  public storage: DurableObjectStorage = {
+    get: async () => null,
+    put: async () => {}
+  };
+}
+
 // Configuración por defecto
 const DEFAULT_MAX_STEPS = 5;
 // const DEFAULT_TEMPERATURE = 0.7;
