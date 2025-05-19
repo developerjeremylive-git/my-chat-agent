@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef  } from 'react';
 
 interface Chat {
   id: string;
@@ -31,6 +31,84 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
+
+  // Initialize WebSocket connection
+  useEffect(() => {
+    const connectWebSocket = () => {
+      const ws = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/api/ws`);
+
+      ws.onopen = () => {
+        console.log('WebSocket connected');
+        if (currentChat) {
+          ws.send(JSON.stringify({
+            type: 'subscribe',
+            chatId: currentChat.id
+          }));
+        }
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'chat_updated' && data.chatId && data.messages) {
+            const formattedMessages = data.messages.map((msg: any) => ({
+              ...msg,
+              createdAt: new Date(msg.createdAt)
+            }));
+            
+            setChats(prevChats => {
+              return prevChats.map(chat => {
+                if (chat.id === data.chatId) {
+                  return {
+                    ...chat,
+                    messages: formattedMessages,
+                    lastMessageAt: new Date()
+                  };
+                }
+                return chat;
+              });
+            });
+
+            if (currentChat?.id === data.chatId) {
+              setCurrentChat(prev => prev ? {
+                ...prev,
+                messages: formattedMessages,
+                lastMessageAt: new Date()
+              } : null);
+            }
+          }
+        } catch (error) {
+          console.error('Error processing WebSocket message:', error);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket disconnected, attempting to reconnect...');
+        setTimeout(connectWebSocket, 3000);
+      };
+
+      wsRef.current = ws;
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, []);
+
+  // Subscribe to new chat when current chat changes
+  useEffect(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN && currentChat) {
+      wsRef.current.send(JSON.stringify({
+        type: 'subscribe',
+        chatId: currentChat.id
+      }));
+    }
+  }, [currentChat?.id]);
 
   // Cargar chats del almacenamiento local al iniciar
   useEffect(() => {

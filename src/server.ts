@@ -46,6 +46,9 @@ interface Env {
 const app = new Hono<{ Bindings: Env }>();
 const workersai = createWorkersAI({ binding: env.AI });
 
+// WebSocket connections store
+const wsConnections = new Map<string, Set<WebSocket>>();
+
 // Variables globales para almacenar el modelo seleccionado, prompt del sistema y configuración
 let selectedModel = 'gemini-2.0-flash';
 let geminiModel = 'gemini-2.0-flash';
@@ -611,6 +614,21 @@ export class Chat extends AIChatAgent<Env> {
 
     await this.saveMessages(messages);
     await this.saveToCurrentChat(messages);
+
+    // Notify all connected WebSocket clients about the update
+    const chatConnections = wsConnections.get(this.currentChatId || '');
+    if (chatConnections) {
+      const update = {
+        type: 'chat_updated',
+        chatId: this.currentChatId,
+        messages: messages
+      };
+      chatConnections.forEach(ws => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(update));
+        }
+      });
+    }
 
     return createDataStreamResponse({
       execute: async (dataStream) => {
