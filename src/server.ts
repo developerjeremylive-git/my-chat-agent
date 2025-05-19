@@ -299,15 +299,14 @@ app.get('/agents/chat/default/get-messages', async (c) => {
     const chatId = c.req.query('chatId');
     let chat = Chat.instance as Chat | null;
 
-      // Create Chat instance if it doesn't exist
-      if (!chat) {
-        const state = new DurableObjectState({
-          id: new DurableObjectId('default-chat'),
-          storage: new DurableObjectStorage()
-        });
-        chat = new Chat(state, { AI: (import.meta as any).env.AI, OPENAI_API_KEY: (import.meta as any).env.OPENAI_API_KEY, GEMINI_API_KEY: (import.meta as any).env.GEMINI_API_KEY });
-        await chat.initializeDefaultChat();
-      }
+    // Verificar si ya existe una instancia de Chat
+    if (!chat) {
+      // Si no existe instancia, retornar error
+      return c.json({
+        error: 'Chat instance not initialized',
+        details: 'The Chat instance has not been properly initialized.'
+      }, 500);
+    }
     // if (!chat) {
     //   const state = new DurableObjectState({
     //     id: new DurableObjectId('default-chat'),
