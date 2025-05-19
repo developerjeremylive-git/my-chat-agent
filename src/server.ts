@@ -186,6 +186,39 @@ app.delete('/api/chats/:id', async (c) => {
   return c.json({ success: true });
 });
 
+// Assistant configuration endpoint
+app.post('/api/assistant', async (c) => {
+  try {
+    const { maxSteps: newMaxSteps } = await c.req.json();
+    
+    // Validate maxSteps
+    if (typeof newMaxSteps === 'number' && newMaxSteps > 0) {
+      maxSteps = newMaxSteps;
+      return c.json({
+        success: true,
+        config: {
+          maxSteps,
+          selectedModel
+        }
+      });
+    } else {
+      return c.json({
+        error: 'Invalid maxSteps value. Must be a positive number.',
+        currentConfig: {
+          maxSteps,
+          selectedModel
+        }
+      }, 400);
+    }
+  } catch (error) {
+    console.error('Error in /api/assistant:', error);
+    return c.json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
+
 app.use('/*', cors());
 
 // Endpoint to check OpenAI key
