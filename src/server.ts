@@ -665,6 +665,13 @@ export class Chat extends AIChatAgent<Env> {
     }
     this.messages = messages;
     await this.saveToCurrentChat(messages);
+
+    // Emitir evento de actualización de mensajes
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('messagesUpdated', {
+        detail: { messages: messages }
+      }));
+    }
   }
 
   async executeTask(description: string, task: Schedule<string>) {
@@ -706,6 +713,63 @@ export default {
       (await routeAgentRequest(request, env)) ||
       new Response("Not found", { status: 404 })
     );
+  },
+  async fetch_with_context(request: Request, env: Env, ctx: ExecutionContext) {
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+
+    // Manejar rutas específicas
+    if (pathname.startsWith('/agents/chat/default/get-messages')) {
+      const chatId = url.searchParams.get('chatId');
+      let chat = Chat.instance;
+
+      if (!chat) {
+        return new Response(JSON.stringify({
+          error: 'Chat instance not initialized',
+          details: 'The Chat instance has not been properly initialized.'
+        }), { status: 500 });
+      }
+
+      if (!chatId) {
+        const defaultChat = await chat.initializeDefaultChat();
+        return new Response(JSON.stringify({
+          success: true,
+          messages: [],
+          chatId: defaultChat.id
+        }));
+      }
+
+      const savedChats = await chat.loadChatsFromStorage();
+      if (savedChats.length > 0) {
+        chats = savedChats;
+      }
+
+      const specificChat = chats.find(c => c.id === chatId);
+      if (!specificChat) {
+        return new Response(JSON.stringify({
+          error: 'Chat not found',
+          details: `No chat found with ID: ${chatId}`
+        }), { status: 404 });
+      }
+
+      chat.setCurrentChat(chatId);
+      chat.messages = specificChat.messages;
+
+      const messages = specificChat.messages.map(msg => ({
+        id: msg.id || generateId(),
+        role: msg.role || 'user',
+        content: msg.content || '',
+        createdAt: new Date(msg.createdAt)
+      }));
+
+      return new Response(JSON.stringify({
+        success: true,
+        messages: messages
+      }));
+    }
+
+    // Manejar otras rutas
+    return app.fetch(request, env, ctx);
   },
 };
 

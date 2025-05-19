@@ -6,7 +6,7 @@ import { useChat } from '@/contexts/ChatContext';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-import type { Message, ChatData, LocalMessage, LocalChatData } from '@/types/chat';
+import type { Message, ChatData, LocalMessage, LocalChatData, ChatMessage } from '@/types/chat';
 
 interface EditTitleModalProps {
     isOpen: boolean;
@@ -139,27 +139,29 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
 
     const selectChat = async (chatId: string) => {
         try {
-            // Obtener el chat del almacenamiento local
-            const savedChats = localStorage.getItem('chats');
-            if (savedChats) {
-                const parsedChats = JSON.parse(savedChats);
-                const selectedChat = parsedChats.find((c: any) => c.id === chatId);
-                if (selectedChat) {
-                    const chat: LocalChatData = {
-                        ...selectedChat,
-                        lastMessageAt: new Date(selectedChat.lastMessageAt),
-                        messages: selectedChat.messages.map((msg: any) => ({
-                            ...msg,
-                            createdAt: new Date(msg.createdAt)
-                        }))
-                    };
-                    setCurrentChat(chat);
-                    // Emitir evento para actualizar el chat en la interfaz principal
-                    window.dispatchEvent(new CustomEvent('chatSelected', { 
-                        detail: { chatId, messages: chat.messages }
-                    }));
-                }
+            // Obtener el chat y sus mensajes del servidor
+            const response = await fetch(`/api/chats/${chatId}`);
+            const chatData = await response.json() as ChatData | { error: string };
+            
+            if ('error' in chatData) {
+                console.error('Error in API response:', chatData.error);
+                return;
             }
+
+            const chat: LocalChatData = {
+                id: chatData.id,
+                title: chatData.title,
+                lastMessageAt: new Date(chatData.lastMessageAt),
+                messages: chatData.messages.map((msg: ChatMessage) => ({
+                    ...msg,
+                    createdAt: new Date(msg.createdAt)
+                }))
+                };
+                setCurrentChat(chat);
+                // Emitir evento para actualizar el chat en la interfaz principal
+                window.dispatchEvent(new CustomEvent('chatSelected', { 
+                    detail: { chatId, messages: chat.messages }
+                }));
         } catch (error) {
             console.error('Error al cargar el chat:', error);
         }
