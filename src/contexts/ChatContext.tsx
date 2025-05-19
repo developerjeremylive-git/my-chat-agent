@@ -32,57 +32,24 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
 
-  // Cargar chats del almacenamiento local y del servidor al iniciar
+  // Cargar chats del almacenamiento local al iniciar
   useEffect(() => {
-    const loadInitialChats = async () => {
-      try {
-        // Intentar cargar chats del almacenamiento local primero
-        const savedChats = localStorage.getItem('chats');
-        let initialChats = [];
-        
-        if (savedChats) {
-          initialChats = JSON.parse(savedChats).map((chat: any) => ({
-            ...chat,
-            createdAt: new Date(chat.createdAt),
-            lastMessageAt: new Date(chat.lastMessageAt),
-            messages: chat.messages.map((msg: any) => ({
-              ...msg,
-              createdAt: new Date(msg.createdAt)
-            }))
-          }));
-        }
-
-        // Si no hay chats guardados localmente, obtener del servidor
-        if (initialChats.length === 0) {
-          const response = await fetch('/agents/chat/default/get-messages');
-          const data = await response.json();
-          
-          if (data.success && data.chatId) {
-            const defaultChat: Chat = {
-              id: data.chatId,
-              title: 'Nuevo Chat',
-              messages: data.messages || [],
-              createdAt: new Date(),
-              lastMessageAt: new Date()
-            };
-            initialChats = [defaultChat];
-          }
-        }
-
-        setChats(initialChats);
-        if (initialChats.length > 0 && !currentChat) {
-          setCurrentChat(initialChats[0]);
-        }
-      } catch (error) {
-        console.error('Error al cargar los chats:', error);
-        // Si hay un error, crear un chat por defecto
-        if (chats.length === 0) {
-          createChat();
-        }
+    const savedChats = localStorage.getItem('chats');
+    if (savedChats) {
+      const parsedChats = JSON.parse(savedChats).map((chat: any) => ({
+        ...chat,
+        createdAt: new Date(chat.createdAt),
+        lastMessageAt: new Date(chat.lastMessageAt),
+        messages: chat.messages.map((msg: any) => ({
+          ...msg,
+          createdAt: new Date(msg.createdAt)
+        }))
+      }));
+      setChats(parsedChats);
+      if (parsedChats.length > 0 && !currentChat) {
+        setCurrentChat(parsedChats[0]);
       }
-    };
-
-    loadInitialChats();
+    }
   }, []);
 
   // Guardar chats en el almacenamiento local cuando cambien
