@@ -715,6 +715,24 @@ export default {
         success: hasOpenAIKey,
       });
     }
+
+    // Manejar la solicitud de mensajes del chat por defecto
+    if (url.pathname === "/agents/chat/default/get-messages") {
+      let chat = Chat.instance as Chat | null;
+      if (!chat) {
+        return Response.json({
+          error: 'Chat instance not initialized',
+          details: 'The Chat instance has not been properly initialized.'
+        }, { status: 500 });
+      }
+      
+      const defaultChat = await chat.initializeDefaultChat();
+      return Response.json({
+        success: true,
+        messages: [],
+        chatId: defaultChat.id
+      });
+    }
     if (!process.env.OPENAI_API_KEY) {
       console.error(
         "OPENAI_API_KEY is not set, don't forget to set it locally in .dev.vars, and use `wrangler secret bulk .dev.vars` to upload it to production"

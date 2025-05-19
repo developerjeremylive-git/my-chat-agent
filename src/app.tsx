@@ -289,6 +289,7 @@ function ChatComponent() {
   const agent = useAgent({
     agent: "chat",
   }) as AgentInstance;
+  
   console.log('Configuración:', config);
 
 
