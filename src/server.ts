@@ -167,12 +167,12 @@ app.post('/api/chats', async (c) => {
 app.put('/api/chats/:id/title', async (c) => {
   const chatId = c.req.param('id');
   const { title } = await c.req.json();
-  
+
   const chatIndex = chats.findIndex(chat => chat.id === chatId);
   if (chatIndex === -1) {
     return c.json({ error: 'Chat no encontrado' }, 404);
   }
-  
+
   chats[chatIndex].title = title;
   return c.json({ success: true, chat: chats[chatIndex] });
 });
@@ -201,13 +201,13 @@ class SimpleDurableObjectState implements DurableObjectState {
   private autoResponse: string | null = null;
   private autoResponseTimestamp: number | null = null;
   private hibernatableWebSocketEventTimeout: number = 0;
+  private state: { [key: string]: any } = {};
 
   constructor(id: DurableObjectId, storage: DurableObjectStorage) {
     this.id = id;
     this.storage = storage;
     this.webSockets = new Set();
   }
-
   setHibernatableWebSocketEventTimeout(timeoutMs: number): void {
     this.hibernatableWebSocketEventTimeout = timeoutMs;
   }
@@ -220,13 +220,22 @@ class SimpleDurableObjectState implements DurableObjectState {
     return [];
   }
 
-  abort(): void {}
+  abort(): void { }
 
   async blockConcurrencyWhile<T>(callback: () => Promise<T>): Promise<T> {
-    return callback();
+    try {
+      return await callback();
+    } catch (error) {
+      console.error('Error en blockConcurrencyWhile:', error);
+      throw error;
+    }
   }
 
-  waitUntil(promise: Promise<any>): void {}
+  waitUntil(promise: Promise<any>): void {
+    promise.catch(error => {
+      console.error('Error en waitUntil:', error);
+    });
+  }
 
   getWebSockets(): WebSocket[] {
     return Array.from(this.webSockets);
@@ -248,7 +257,7 @@ class SimpleDurableObjectState implements DurableObjectState {
     // Parse the request and response strings
     const parsedRequest = JSON.parse(maybeReqResp.request);
     const parsedResponse = JSON.parse(maybeReqResp.response);
-    
+
     // Convert Request and Response to serializable format
     const serializableReqResp = {
       request: {
@@ -288,51 +297,27 @@ class SimpleDurableObjectState implements DurableObjectState {
 app.get('/agents/chat/default/get-messages', async (c) => {
   try {
     const chatId = c.req.query('chatId');
-    let chat = Chat.instance;
-    
-    // Si no hay instancia de Chat, crearla
-    if (!chat) {
-      const mockId: DurableObjectId = {
-        toString: () => 'default-chat',
-        equals: (other: DurableObjectId) => other.toString() === 'default-chat',
-        name: 'default-chat'
-      };
-      const mockStorage: DurableObjectStorage = {
-        get: async <T>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => {
-          if (key === 'chats') {
-            return chats as T;
-          }
-          return undefined;
-        },
-        put: async <T>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {
-          if (key === 'chats' && value) {
-            chats = value as LocalChatData[];
-          }
-        },
-        delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => true,
-        list: async <T = unknown>(options?: DurableObjectListOptions): Promise<Map<string, T>> => new Map(),
-        deleteAll: async (): Promise<void> => {},
-        transaction: async <T>(closure: (txn: DurableObjectTransaction) => Promise<T>): Promise<T> => {
-          const txn: DurableObjectTransaction = {
-            get: async <T = unknown>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => undefined,
-            put: async <T = unknown>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {},
-            delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => true,
-            rollback: () => { throw new Error('Rollback not supported'); },
-            list: async () => new Map(),
-            getAlarm: async () => null,
-            setAlarm: async () => {},
-            deleteAlarm: async () => {}
-          };
-          return closure(txn);
-        },
-        sync: async () => {}
-      };
-      const state = new SimpleDurableObjectState(mockId, mockStorage);
-      chat = new Chat(state, { AI: env.AI, OPENAI_API_KEY: env.OPENAI_API_KEY, GEMINI_API_KEY: env.GEMINI_API_KEY });
-      await chat.initializeDefaultChat();
-    }
+    let chat = Chat.instance as Chat | null;
 
-    // Si no se proporciona chatId, crear uno nuevo
+      // Create Chat instance if it doesn't exist
+      if (!chat) {
+        const state = new DurableObjectState({
+          id: new DurableObjectId('default-chat'),
+          storage: new DurableObjectStorage()
+        });
+        chat = new Chat(state, { AI: (import.meta as any).env.AI, OPENAI_API_KEY: (import.meta as any).env.OPENAI_API_KEY, GEMINI_API_KEY: (import.meta as any).env.GEMINI_API_KEY });
+        await chat.initializeDefaultChat();
+      }
+    // if (!chat) {
+    //   const state = new DurableObjectState({
+    //     id: new DurableObjectId('default-chat'),
+    //     storage: new DurableObjectStorage()
+    //   });
+    //   chat = new Chat(state, { AI: (import.meta as any).env.AI, OPENAI_API_KEY: (import.meta as any).env.OPENAI_API_KEY, GEMINI_API_KEY: (import.meta as any).env.GEMINI_API_KEY });
+    //   await chat.initializeDefaultChat();
+    // }
+
+    // If no chatId provided, create a new chat
     if (!chatId) {
       const defaultChat = await chat.initializeDefaultChat();
       return c.json({
@@ -342,71 +327,26 @@ app.get('/agents/chat/default/get-messages', async (c) => {
       });
     }
 
-    // Get or create Chat instance
-
-    if (!chat) {
-      const mockId: DurableObjectId = {
-        toString: () => 'default-chat',
-        equals: (other: DurableObjectId) => other.toString() === 'default-chat',
-        name: 'default-chat'
-      };
-      const mockStorage: DurableObjectStorage = {
-        get: async <T>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => {
-          if (key === 'chats') {
-            return chats as T;
-          }
-          return undefined;
-        },
-        put: async <T>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {
-          if (key === 'chats' && value) {
-            chats = value as LocalChatData[];
-          }
-        },
-        delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => {
-          return true;
-        },
-        list: async <T = unknown>(options?: DurableObjectListOptions): Promise<Map<string, T>> => new Map(),
-        deleteAll: async (): Promise<void> => {},
-        transaction: async <T>(closure: (txn: DurableObjectTransaction) => Promise<T>): Promise<T> => {
-          const txn: DurableObjectTransaction = {
-            get: async <T = unknown>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => undefined,
-            put: async <T = unknown>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {},
-            delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => true,
-            rollback: () => { throw new Error('Rollback not supported'); },
-            list: async () => new Map(),
-            getAlarm: async () => null,
-            setAlarm: async () => {},
-            deleteAlarm: async () => {}
-          };
-          return closure(txn);
-        },
-        sync: async () => {}
-      };
-      const state = new SimpleDurableObjectState(mockId, mockStorage);
-      chat = new Chat(state, { AI: env.AI, OPENAI_API_KEY: env.OPENAI_API_KEY, GEMINI_API_KEY: env.GEMINI_API_KEY });
-      await chat.initializeDefaultChat();
-    }
-
-    // Cargar los chats desde el almacenamiento
+    // Load chats from storage
     const savedChats = await chat.loadChatsFromStorage();
     if (savedChats.length > 0) {
       chats = savedChats;
     }
 
-    // Buscar el chat específico
+    // Find specific chat
     const specificChat = chats.find(c => c.id === chatId);
     if (!specificChat) {
       return c.json({
-        error: 'Chat no encontrado',
-        details: `No se encontró un chat con el ID: ${chatId}`
+        error: 'Chat not found',
+        details: `No chat found with ID: ${chatId}`
       }, 404);
     }
 
-    // Establecer el chat actual y sus mensajes
+    // Set current chat and messages
     chat.setCurrentChat(chatId);
     chat.messages = specificChat.messages;
 
-    // Validar y formatear los mensajes
+    // Validate and format messages
     const messages = specificChat.messages.map(msg => ({
       id: msg.id || generateId(),
       role: msg.role || 'user',
@@ -421,8 +361,8 @@ app.get('/agents/chat/default/get-messages', async (c) => {
   } catch (error) {
     console.error('Error retrieving messages:', error);
     return c.json({
-      error: 'Error interno del servidor',
-      details: error instanceof Error ? error.message : 'Error desconocido'
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, 500);
   }
 });
@@ -491,10 +431,10 @@ export class Chat extends AIChatAgent<Env> {
     this.storage = state.storage;
     this.messages = [];
     this.currentChatId = null;
-    
+
     // Initialize messages array with proper type checking
     this.messages = Array.isArray(this.messages) ? this.messages : [];
-    
+
     if (!Chat.instance) {
       Chat.instance = this;
       this.initializeDefaultChat().catch(error => {
@@ -519,7 +459,7 @@ export class Chat extends AIChatAgent<Env> {
         this.currentChatId = defaultChat.id;
         // Emitir evento para actualizar la interfaz
         if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('chatsUpdated', { 
+          window.dispatchEvent(new CustomEvent('chatsUpdated', {
             detail: { chats }
           }));
         }
