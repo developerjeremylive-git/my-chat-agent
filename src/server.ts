@@ -25,7 +25,12 @@ interface WebSocketRequestResponsePair {
   response: string;
 }
 // Almacenamiento temporal de chats (en producción debería usar una base de datos)
-let chats: LocalChatData[] = [];
+let chats: LocalChatData[] = [{
+  id: 'SLKw5zDIgYrGrT7b',
+  title: '¡Bienvenido a tu Asistente Virtual! 🤖',
+  messages: [],
+  lastMessageAt: new Date('2025-05-19T23:36:05.129Z')
+}];
 
 // Configuración por defecto
 const DEFAULT_MAX_STEPS = 5;
@@ -152,6 +157,18 @@ app.get('/api/chats/:id', async (c) => {
   if (!chat) {
     return c.json({ error: 'Chat no encontrado' }, 404);
   }
+  
+  // Notify WebSocket clients about the chat selection
+  const connections = wsConnections.get(chatId) || new Set<WebSocket>();
+  connections.forEach(ws => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        type: 'chat_selected',
+        chat
+      }));
+    }
+  });
+  
   return c.json(chat);
 });
 
@@ -164,6 +181,10 @@ app.post('/api/chats', async (c) => {
     lastMessageAt: new Date()
   };
   chats.push(newChat);
+  
+  // Create a new WebSocket connection set for this chat
+  wsConnections.set(newChat.id, new Set<WebSocket>());
+  
   return c.json(newChat);
 });
 
@@ -187,6 +208,45 @@ app.delete('/api/chats/:id', async (c) => {
 });
 
 // Assistant configuration endpoint
+// Handle chat messages
+app.post('/api/chats/:id/messages', async (c) => {
+  const chatId = c.req.param('id');
+  const { content, role = 'user' } = await c.req.json();
+
+  const chatIndex = chats.findIndex(chat => chat.id === chatId);
+  if (chatIndex === -1) {
+    return c.json({ error: 'Chat no encontrado' }, 404);
+  }
+
+  const newMessage = {
+    id: generateId(),
+    content,
+    role,
+    createdAt: new Date()
+  };
+
+  chats[chatIndex].messages.push(newMessage);
+  chats[chatIndex].lastMessageAt = new Date();
+
+  // Notify all connected WebSocket clients about the new message
+  const connections = wsConnections.get(chatId) || new Set<WebSocket>();
+  connections.forEach(ws => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        type: 'chat_updated',
+        chatId,
+        messages: chats[chatIndex].messages
+      }));
+    }
+  });
+
+  return c.json({
+    success: true,
+    message: newMessage,
+    chat: chats[chatIndex]
+  });
+});
+
 app.post('/api/assistant', async (c) => {
   try {
     const { maxSteps: newMaxSteps } = await c.req.json();
@@ -217,6 +277,53 @@ app.post('/api/assistant', async (c) => {
       details: error instanceof Error ? error.message : 'Unknown error'
     }, 500);
   }
+});
+
+// WebSocket endpoint
+app.get('/api/ws', async (c) => {
+  if (!c.req.header('upgrade')?.includes('websocket')) {
+    return c.text('Expected websocket', 400);
+  }
+
+  const { 0: client, 1: server } = new WebSocketPair();
+
+  server.accept();
+  server.addEventListener('message', async (event) => {
+    try {
+      const data = JSON.parse(event.data as string);
+      if (data.type === 'subscribe' && data.chatId) {
+        const connections = wsConnections.get(data.chatId) || new Set<WebSocket>();
+        connections.add(server);
+        wsConnections.set(data.chatId, connections);
+
+        // Send current chat state
+        const chat = chats.find(c => c.id === data.chatId);
+        if (chat) {
+          server.send(JSON.stringify({
+            type: 'chat_selected',
+            chat
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error processing WebSocket message:', error);
+    }
+  });
+
+  server.addEventListener('close', () => {
+    // Remove the connection from all chats
+    for (const [chatId, connections] of wsConnections.entries()) {
+      connections.delete(server);
+      if (connections.size === 0) {
+        wsConnections.delete(chatId);
+      }
+    }
+  });
+
+  return new Response(null, {
+    status: 101,
+    webSocket: client
+  });
 });
 
 app.use('/*', cors());
