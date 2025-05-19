@@ -202,9 +202,9 @@ class SimpleDurableObjectState implements DurableObjectState {
   private autoResponseTimestamp: number | null = null;
   private hibernatableWebSocketEventTimeout: number = 0;
 
-  constructor(state: DurableObjectState) {
-    this.id = state.id;
-    this.storage = state.storage;
+  constructor(id: DurableObjectId, storage: DurableObjectStorage) {
+    this.id = id;
+    this.storage = storage;
     this.webSockets = new Set();
   }
 
@@ -292,55 +292,42 @@ app.get('/agents/chat/default/get-messages', async (c) => {
     
     // Si no hay instancia de Chat, crearla
     if (!chat) {
-      const mockState: DurableObjectState = {
-        id: {
-          toString: () => 'default-chat',
-          equals: (other: DurableObjectId) => other.toString() === 'default-chat',
-          name: 'default-chat'
-        },
-        storage: {
-          get: async <T>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => {
-            if (key === 'chats') {
-              return chats as T;
-            }
-            return undefined;
-          },
-          put: async <T>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {
-            if (key === 'chats' && value) {
-              chats = value as LocalChatData[];
-            }
-          },
-          delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => true,
-          list: async <T = unknown>(options?: DurableObjectListOptions): Promise<Map<string, T>> => new Map(),
-          deleteAll: async (): Promise<void> => {},
-          transaction: async <T>(closure: (txn: DurableObjectTransaction) => Promise<T>): Promise<T> => {
-            const txn: DurableObjectTransaction = {
-              get: async <T = unknown>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => undefined,
-              put: async <T = unknown>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {},
-              delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => true,
-              rollback: () => { throw new Error('Rollback not supported'); },
-              list: async () => new Map(),
-              getAlarm: async () => null,
-              setAlarm: async () => {},
-              deleteAlarm: async () => {}
-            };
-            return closure(txn);
-          },
-          sync: async () => {}
-        },
-        waitUntil: () => {},
-        blockConcurrencyWhile: async (callback) => callback(),
-        getWebSockets: () => [],
-        acceptWebSocket: () => {},
-        setWebSocketAutoResponse: () => {},
-        getWebSocketAutoResponse: () => null,
-        getWebSocketAutoResponseTimestamp: () => null,
-        setHibernatableWebSocketEventTimeout: () => {},
-        getHibernatableWebSocketEventTimeout: () => 0,
-        getTags: () => [],
-        abort: () => {}
+      const mockId: DurableObjectId = {
+        toString: () => 'default-chat',
+        equals: (other: DurableObjectId) => other.toString() === 'default-chat',
+        name: 'default-chat'
       };
-      const state = new SimpleDurableObjectState(mockState);
+      const mockStorage: DurableObjectStorage = {
+        get: async <T>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => {
+          if (key === 'chats') {
+            return chats as T;
+          }
+          return undefined;
+        },
+        put: async <T>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {
+          if (key === 'chats' && value) {
+            chats = value as LocalChatData[];
+          }
+        },
+        delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => true,
+        list: async <T = unknown>(options?: DurableObjectListOptions): Promise<Map<string, T>> => new Map(),
+        deleteAll: async (): Promise<void> => {},
+        transaction: async <T>(closure: (txn: DurableObjectTransaction) => Promise<T>): Promise<T> => {
+          const txn: DurableObjectTransaction = {
+            get: async <T = unknown>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => undefined,
+            put: async <T = unknown>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {},
+            delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => true,
+            rollback: () => { throw new Error('Rollback not supported'); },
+            list: async () => new Map(),
+            getAlarm: async () => null,
+            setAlarm: async () => {},
+            deleteAlarm: async () => {}
+          };
+          return closure(txn);
+        },
+        sync: async () => {}
+      };
+      const state = new SimpleDurableObjectState(mockId, mockStorage);
       chat = new Chat(state, { AI: env.AI, OPENAI_API_KEY: env.OPENAI_API_KEY, GEMINI_API_KEY: env.GEMINI_API_KEY });
       await chat.initializeDefaultChat();
     }
