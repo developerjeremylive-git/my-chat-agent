@@ -191,10 +191,20 @@ class SimpleDurableObjectState implements DurableObjectState {
   private webSocketAutoResponseTimestamp: number = 0;
   private hibernatableWebSocketEventTimeout: number = 0;
   private webSockets: Set<WebSocket> = new Set();
+  public id: DurableObjectId;
 
   constructor() {
     this.store = new Map<string, any>();
-    this.storage = {
+    this.storage = this.createStorage();
+    this.id = {
+      toString: () => 'mock-id',
+      equals: (other: DurableObjectId) => this.id.toString() === other.toString(),
+      name: 'mock-name'
+    };
+  }
+
+  private createStorage(): DurableObjectStorage {    
+    return {
       get: async <T>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => {
         if (Array.isArray(key)) {
           const results = new Map<string, T>();
@@ -213,20 +223,18 @@ class SimpleDurableObjectState implements DurableObjectState {
           Object.entries(key).forEach(([k, v]) => this.store.set(k, v));
         }
       },
-      delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean | number> => {
-        // Handle single key deletion
+      delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => {
         if (typeof key === 'string') {
           return this.store.delete(key);
         }
-        // Handle array of keys deletion
         if (Array.isArray(key)) {
-          let deletedCount = 0;
+          let allDeleted = true;
           for (const k of key) {
-            if (this.store.delete(k)) {
-              deletedCount++;
+            if (!this.store.delete(k)) {
+              allDeleted = false;
             }
           }
-          return deletedCount;
+          return allDeleted;
         }
         throw new Error('Invalid key type');
       },
@@ -255,8 +263,32 @@ class SimpleDurableObjectState implements DurableObjectState {
           deleteAlarm: async () => {}
         };
         return closure(txn);
-      }
+      },
+      sync: async () => {}
     };
+  }
+
+  blockConcurrencyWhile<T>(callback: () => Promise<T>): Promise<T> {
+    return callback();
+  }
+
+  waitUntil(promise: Promise<any>): void {}
+
+  getTags(): string[] {
+    return [];
+  }
+
+  abort(): void {}
+
+  acceptWebSocket(ws: WebSocket): void {
+    this.webSockets.add(ws);
+    ws.addEventListener('close', () => {
+      this.webSockets.delete(ws);
+    });
+  }
+
+  getWebSockets(): WebSocket[] {
+    return Array.from(this.webSockets);
   }
 
   setWebSocketAutoResponse(maybeReqResp?: WebSocketRequestResponsePair): void {
@@ -279,91 +311,47 @@ class SimpleDurableObjectState implements DurableObjectState {
   getHibernatableWebSocketEventTimeout(): number {
     return this.hibernatableWebSocketEventTimeout;
   }
-
-  blockConcurrencyWhile<T>(callback: () => Promise<T>): Promise<T> {
-    return callback();
-  }
-
-  waitUntil(promise: Promise<any>): void {}
-
-  id = {
-    toString: () => 'mock-id',
-    equals: (other: DurableObjectId) => this.id.toString() === other.toString()
-  };
-
-  getTags(): string[] {
-    return [];
-  }
-
-  abort(): void {}
-
-  acceptWebSocket(ws: WebSocket): void {
-    this.webSockets.add(ws);
-    ws.addEventListener('close', () => {
-      this.webSockets.delete(ws);
-    });
-  }
-
-  getWebSockets(): WebSocket[] {
-    return Array.from(this.webSockets);
-  }
 }
 
 app.get('/agents/chat/default/get-messages', async (c) => {
   try {
     const chatId = c.req.query('chatId') || 'default';
 
-    // Obtener o crear instancia de Chat
+    // Get or create Chat instance
     let chat = Chat.instance;
     if (!chat) {
       const state = new SimpleDurableObjectState();
       chat = new Chat(state, env);
+      await chat.initializeDefaultChat();
     }
 
-    // Cargar chats si es necesario
-    if (chats.length === 0) {
-      try {
-        const savedChats = await chat.storage.get('chats') as LocalChatData[];
-        if (savedChats?.length > 0) {
-          chats = savedChats.map((chat: ChatData) => ({
-            ...chat,
-            lastMessageAt: new Date(chat.lastMessageAt),
-            messages: chat.messages.map((msg: ChatMessage) => ({
-              ...msg,
-              createdAt: new Date(msg.createdAt)
-            }))
-          }));
-        } else {
-          await chat.initializeDefaultChat();
-          return c.json({ success: true, messages: [] });
-        }
-      } catch (error) {
-        console.error('Error al cargar chats:', error);
-        return c.json({
-          error: 'Error al cargar chats del almacenamiento',
-          details: error instanceof Error ? error.message : 'Error desconocido'
-        }, 500);
-      }
+    // If no current chat is set, initialize it
+    if (!chat.currentChatId) {
+      const defaultChat = await chat.initializeDefaultChat();
+      chat.setCurrentChat(defaultChat.id);
     }
 
-    // Buscar chat específico
-    const currentChat = chats.find(c => c.id === chatId);
-    if (!currentChat) {
-      return c.json({
-        error: 'Chat no encontrado',
-        details: `No se encontró un chat con ID: ${chatId}`
-      }, 404);
+    // Ensure messages is properly initialized and validated
+    let messages: ChatMessage[] = [];
+    if (chat.messages && Array.isArray(chat.messages)) {
+      messages = chat.messages.map(msg => ({
+        id: msg.id || generateId(),
+        role: msg.role || 'user',
+        content: msg.content || '',
+        createdAt: msg.createdAt || new Date()
+      }));
     }
 
+    // Return the current messages
     return c.json({
       success: true,
-      messages: currentChat.messages || []
+      messages: messages
     });
   } catch (error) {
-    console.error('Error al recuperar mensajes:', error);
+    console.error('Error retrieving messages:', error);
     return c.json({
-      error: 'Error interno del servidor',
-      details: error instanceof Error ? error.message : 'Error desconocido'
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, 500);
   }
 });
@@ -429,21 +417,16 @@ export class Chat extends AIChatAgent<Env> {
 
   constructor(state: DurableObjectState, env: Env) {
     super(state, env);
+    this.storage = state.storage;
+    this.messages = [];
+    this.currentChatId = null;
+    
     if (!Chat.instance) {
       Chat.instance = this;
-      if (state instanceof SimpleDurableObjectState) {
-        this.storage = state.storage;
-      } else {
-        this.storage = state.storage;
-      }
-      this.messages = [];
       this.initializeDefaultChat().catch(error => {
         console.error('Error initializing default chat:', error);
       });
-    } else {
-      Chat.instance.env = env;
     }
-    return Chat.instance;
   }
 
   public async initializeDefaultChat() {
@@ -508,6 +491,10 @@ export class Chat extends AIChatAgent<Env> {
   }
 
   private async saveToCurrentChat(messages: ChatMessage[]) {
+    if (!Array.isArray(messages)) {
+      console.error('Invalid messages array:', messages);
+      return;
+    }
     // Ensure all messages have a valid Date for createdAt
     const validatedMessages = messages.map(msg => ({
       id: msg.id,
@@ -518,14 +505,7 @@ export class Chat extends AIChatAgent<Env> {
     if (this.currentChatId) {
       const chatIndex = chats.findIndex(c => c.id === this.currentChatId);
       if (chatIndex !== -1) {
-        const updatedMessages = validatedMessages.map(msg => ({
-          id: msg.id,
-          role: msg.role,
-          content: msg.content,
-          createdAt: msg.createdAt
-        }));
-
-        chats[chatIndex].messages = updatedMessages;
+        chats[chatIndex].messages = validatedMessages;
         chats[chatIndex].lastMessageAt = new Date();
 
         try {
@@ -593,16 +573,17 @@ export class Chat extends AIChatAgent<Env> {
   private async handleGeminiResponse(onFinish: StreamTextOnFinishCallback<ToolSet>) {
     const geminiApiKey = env.GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || (import.meta as any).env.GEMINI_API_KEY;
     if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY no está configurada en las variables de entorno');
+      throw new Error('GEMINI_API_KEY is not configured in environment variables');
     }
 
     const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+    const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
     const response = await ai.models.generateContent({
       model: geminiModel,
       contents: [{
         parts: [
           { text: systemPrompt },
-          ...this.messages.map(msg => ({ text: msg.content }))
+          ...messageParts
         ]
       }]
     });
@@ -664,6 +645,15 @@ export class Chat extends AIChatAgent<Env> {
       });
     });
   }
+  async saveMessages(messages: ChatMessage[]) {
+    if (!Array.isArray(messages)) {
+      console.error('Invalid messages array:', messages);
+      return;
+    }
+    this.messages = messages;
+    await this.saveToCurrentChat(messages);
+  }
+
   async executeTask(description: string, task: Schedule<string>) {
     const message: ChatMessage = {
       id: generateId(),
