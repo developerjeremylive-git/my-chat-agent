@@ -20,6 +20,10 @@ import { cors } from 'hono/cors';
 import { GoogleGenAI } from "@google/genai";
 import type { ChatMessage, ChatData, LocalMessage, LocalChatData } from '@/types/chat';
 
+interface WebSocketRequestResponsePair {
+  request: string;
+  response: string;
+}
 // Almacenamiento temporal de chats (en producción debería usar una base de datos)
 let chats: LocalChatData[] = [];
 
@@ -33,7 +37,13 @@ const DEFAULT_MAX_STEPS = 5;
 // const DEFAULT_PRESENCE_PENALTY = 0;
 // const DEFAULT_SEED = 42;
 
-const app = new Hono();
+interface Env {
+  AI: any;
+  OPENAI_API_KEY?: string;
+  GEMINI_API_KEY?: string;
+}
+
+const app = new Hono<{ Bindings: Env }>();
 const workersai = createWorkersAI({ binding: env.AI });
 
 // Variables globales para almacenar el modelo seleccionado, prompt del sistema y configuración
@@ -185,123 +195,17 @@ app.get('/check-open-ai-key', async (c) => {
 
 // Endpoint to get messages for a chat
 class SimpleDurableObjectState implements DurableObjectState {
-  private store: Map<string, any>;
   public storage: DurableObjectStorage;
-  private webSocketAutoResponse: WebSocketRequestResponsePair | null = null;
-  private webSocketAutoResponseTimestamp: number = 0;
-  private hibernatableWebSocketEventTimeout: number = 0;
-  private webSockets: Set<WebSocket> = new Set();
   public id: DurableObjectId;
+  private webSockets: Set<WebSocket>;
+  private autoResponse: string | null = null;
+  private autoResponseTimestamp: number | null = null;
+  private hibernatableWebSocketEventTimeout: number = 0;
 
-  constructor() {
-    this.store = new Map<string, any>();
-    this.storage = this.createStorage();
-    this.id = {
-      toString: () => 'mock-id',
-      equals: (other: DurableObjectId) => this.id.toString() === other.toString(),
-      name: 'mock-name'
-    };
-  }
-
-  private createStorage(): DurableObjectStorage {    
-    return {
-      get: async <T>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => {
-        if (Array.isArray(key)) {
-          const results = new Map<string, T>();
-          for (const k of key) {
-            const value = this.store.get(k) as T;
-            if (value !== undefined) results.set(k, value);
-          }
-          return results as any;
-        }
-        return this.store.get(key) as T;
-      },
-      put: async <T>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {
-        if (typeof key === 'string') {
-          this.store.set(key, value);
-        } else {
-          Object.entries(key).forEach(([k, v]) => this.store.set(k, v));
-        }
-      },
-      delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => {
-        if (typeof key === 'string') {
-          return this.store.delete(key);
-        }
-        if (Array.isArray(key)) {
-          let allDeleted = true;
-          for (const k of key) {
-            if (!this.store.delete(k)) {
-              allDeleted = false;
-            }
-          }
-          return allDeleted;
-        }
-        throw new Error('Invalid key type');
-      },
-      list: async <T = unknown>(options?: DurableObjectListOptions): Promise<Map<string, T>> => {
-        if (!options?.prefix) return new Map(this.store);
-        const entries = Array.from(this.store.entries())
-          .filter(([key]) => key.startsWith(options.prefix!));
-        
-        if (options.reverse) entries.reverse();
-        if (options.limit) entries.splice(options.limit);
-        
-        return new Map(entries);
-      },
-      deleteAll: async (): Promise<void> => {
-        this.store.clear();
-      },
-      transaction: async <T>(closure: (txn: DurableObjectTransaction) => Promise<T>): Promise<T> => {
-        const txn: DurableObjectTransaction = {
-          get: this.storage.get.bind(this.storage),
-          put: this.storage.put.bind(this.storage),
-          delete: this.storage.delete.bind(this.storage),
-          rollback: () => { throw new Error('Rollback not supported in simulated storage'); },
-          list: this.storage.list.bind(this.storage),
-          getAlarm: async () => null,
-          setAlarm: async () => {},
-          deleteAlarm: async () => {}
-        };
-        return closure(txn);
-      },
-      sync: async () => {}
-    };
-  }
-
-  blockConcurrencyWhile<T>(callback: () => Promise<T>): Promise<T> {
-    return callback();
-  }
-
-  waitUntil(promise: Promise<any>): void {}
-
-  getTags(): string[] {
-    return [];
-  }
-
-  abort(): void {}
-
-  acceptWebSocket(ws: WebSocket): void {
-    this.webSockets.add(ws);
-    ws.addEventListener('close', () => {
-      this.webSockets.delete(ws);
-    });
-  }
-
-  getWebSockets(): WebSocket[] {
-    return Array.from(this.webSockets);
-  }
-
-  setWebSocketAutoResponse(maybeReqResp?: WebSocketRequestResponsePair): void {
-    this.webSocketAutoResponse = maybeReqResp ?? null;
-    this.webSocketAutoResponseTimestamp = Date.now();
-  }
-
-  getWebSocketAutoResponse(): WebSocketRequestResponsePair | null {
-    return this.webSocketAutoResponse;
-  }
-
-  getWebSocketAutoResponseTimestamp(ws: WebSocket): Date | null {
-    return this.webSocketAutoResponseTimestamp ? new Date(this.webSocketAutoResponseTimestamp) : null;
+  constructor(state: DurableObjectState) {
+    this.id = state.id;
+    this.storage = state.storage;
+    this.webSockets = new Set();
   }
 
   setHibernatableWebSocketEventTimeout(timeoutMs: number): void {
@@ -311,38 +215,218 @@ class SimpleDurableObjectState implements DurableObjectState {
   getHibernatableWebSocketEventTimeout(): number {
     return this.hibernatableWebSocketEventTimeout;
   }
+
+  getTags(): string[] {
+    return [];
+  }
+
+  abort(): void {}
+
+  async blockConcurrencyWhile<T>(callback: () => Promise<T>): Promise<T> {
+    return callback();
+  }
+
+  waitUntil(promise: Promise<any>): void {}
+
+  getWebSockets(): WebSocket[] {
+    return Array.from(this.webSockets);
+  }
+
+  acceptWebSocket(ws: WebSocket): void {
+    this.webSockets.add(ws);
+    ws.addEventListener('close', () => {
+      this.webSockets.delete(ws);
+    });
+  }
+
+  setWebSocketAutoResponse(maybeReqResp?: WebSocketRequestResponsePair): void {
+    if (!maybeReqResp) {
+      this.autoResponse = null;
+      this.autoResponseTimestamp = null;
+      return;
+    }
+    // Parse the request and response strings
+    const parsedRequest = JSON.parse(maybeReqResp.request);
+    const parsedResponse = JSON.parse(maybeReqResp.response);
+    
+    // Convert Request and Response to serializable format
+    const serializableReqResp = {
+      request: {
+        url: parsedRequest.url,
+        method: parsedRequest.method,
+        headers: parsedRequest.headers
+      },
+      response: {
+        status: parsedResponse.status,
+        statusText: parsedResponse.statusText,
+        headers: parsedResponse.headers
+      }
+    };
+    this.autoResponse = JSON.stringify(serializableReqResp);
+    this.autoResponseTimestamp = Date.now();
+  }
+
+  getWebSocketAutoResponse(): WebSocketRequestResponsePair | null {
+    if (!this.autoResponse) return null;
+    try {
+      const serializedData = JSON.parse(this.autoResponse);
+      // Return serialized string data
+      return {
+        request: JSON.stringify(serializedData.request),
+        response: JSON.stringify(serializedData.response)
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  getWebSocketAutoResponseTimestamp(ws: WebSocket): Date | null {
+    return this.autoResponseTimestamp ? new Date(this.autoResponseTimestamp) : null;
+  }
 }
 
 app.get('/agents/chat/default/get-messages', async (c) => {
   try {
-    const chatId = c.req.query('chatId') || 'default';
-
-    // Get or create Chat instance
+    const chatId = c.req.query('chatId');
     let chat = Chat.instance;
+    
+    // Si no hay instancia de Chat, crearla
     if (!chat) {
-      const state = new SimpleDurableObjectState();
-      chat = new Chat(state, env);
+      const mockState: DurableObjectState = {
+        id: {
+          toString: () => 'default-chat',
+          equals: (other: DurableObjectId) => other.toString() === 'default-chat',
+          name: 'default-chat'
+        },
+        storage: {
+          get: async <T>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => {
+            if (key === 'chats') {
+              return chats as T;
+            }
+            return undefined;
+          },
+          put: async <T>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {
+            if (key === 'chats' && value) {
+              chats = value as LocalChatData[];
+            }
+          },
+          delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => true,
+          list: async <T = unknown>(options?: DurableObjectListOptions): Promise<Map<string, T>> => new Map(),
+          deleteAll: async (): Promise<void> => {},
+          transaction: async <T>(closure: (txn: DurableObjectTransaction) => Promise<T>): Promise<T> => {
+            const txn: DurableObjectTransaction = {
+              get: async <T = unknown>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => undefined,
+              put: async <T = unknown>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {},
+              delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => true,
+              rollback: () => { throw new Error('Rollback not supported'); },
+              list: async () => new Map(),
+              getAlarm: async () => null,
+              setAlarm: async () => {},
+              deleteAlarm: async () => {}
+            };
+            return closure(txn);
+          },
+          sync: async () => {}
+        },
+        waitUntil: () => {},
+        blockConcurrencyWhile: async (callback) => callback(),
+        getWebSockets: () => [],
+        acceptWebSocket: () => {},
+        setWebSocketAutoResponse: () => {},
+        getWebSocketAutoResponse: () => null,
+        getWebSocketAutoResponseTimestamp: () => null,
+        setHibernatableWebSocketEventTimeout: () => {},
+        getHibernatableWebSocketEventTimeout: () => 0,
+        getTags: () => [],
+        abort: () => {}
+      };
+      const state = new SimpleDurableObjectState(mockState);
+      chat = new Chat(state, { AI: env.AI, OPENAI_API_KEY: env.OPENAI_API_KEY, GEMINI_API_KEY: env.GEMINI_API_KEY });
       await chat.initializeDefaultChat();
     }
 
-    // If no current chat is set, initialize it
-    if (!chat.currentChatId) {
+    // Si no se proporciona chatId, crear uno nuevo
+    if (!chatId) {
       const defaultChat = await chat.initializeDefaultChat();
-      chat.setCurrentChat(defaultChat.id);
+      return c.json({
+        success: true,
+        messages: [],
+        chatId: defaultChat.id
+      });
     }
 
-    // Ensure messages is properly initialized and validated
-    let messages: ChatMessage[] = [];
-    if (chat.messages && Array.isArray(chat.messages)) {
-      messages = chat.messages.map(msg => ({
-        id: msg.id || generateId(),
-        role: msg.role || 'user',
-        content: msg.content || '',
-        createdAt: msg.createdAt || new Date()
-      }));
+    // Get or create Chat instance
+
+    if (!chat) {
+      const mockId: DurableObjectId = {
+        toString: () => 'default-chat',
+        equals: (other: DurableObjectId) => other.toString() === 'default-chat',
+        name: 'default-chat'
+      };
+      const mockStorage: DurableObjectStorage = {
+        get: async <T>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => {
+          if (key === 'chats') {
+            return chats as T;
+          }
+          return undefined;
+        },
+        put: async <T>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {
+          if (key === 'chats' && value) {
+            chats = value as LocalChatData[];
+          }
+        },
+        delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => {
+          return true;
+        },
+        list: async <T = unknown>(options?: DurableObjectListOptions): Promise<Map<string, T>> => new Map(),
+        deleteAll: async (): Promise<void> => {},
+        transaction: async <T>(closure: (txn: DurableObjectTransaction) => Promise<T>): Promise<T> => {
+          const txn: DurableObjectTransaction = {
+            get: async <T = unknown>(key: string | string[], options?: DurableObjectGetOptions): Promise<T | undefined> => undefined,
+            put: async <T = unknown>(key: string | Record<string, T>, value?: T, options?: DurableObjectPutOptions): Promise<void> => {},
+            delete: async (key: string | string[], options?: DurableObjectPutOptions): Promise<boolean> => true,
+            rollback: () => { throw new Error('Rollback not supported'); },
+            list: async () => new Map(),
+            getAlarm: async () => null,
+            setAlarm: async () => {},
+            deleteAlarm: async () => {}
+          };
+          return closure(txn);
+        },
+        sync: async () => {}
+      };
+      const state = new SimpleDurableObjectState(mockId, mockStorage);
+      chat = new Chat(state, { AI: env.AI, OPENAI_API_KEY: env.OPENAI_API_KEY, GEMINI_API_KEY: env.GEMINI_API_KEY });
+      await chat.initializeDefaultChat();
     }
 
-    // Return the current messages
+    // Cargar los chats desde el almacenamiento
+    const savedChats = await chat.loadChatsFromStorage();
+    if (savedChats.length > 0) {
+      chats = savedChats;
+    }
+
+    // Buscar el chat específico
+    const specificChat = chats.find(c => c.id === chatId);
+    if (!specificChat) {
+      return c.json({
+        error: 'Chat no encontrado',
+        details: `No se encontró un chat con el ID: ${chatId}`
+      }, 404);
+    }
+
+    // Establecer el chat actual y sus mensajes
+    chat.setCurrentChat(chatId);
+    chat.messages = specificChat.messages;
+
+    // Validar y formatear los mensajes
+    const messages = specificChat.messages.map(msg => ({
+      id: msg.id || generateId(),
+      role: msg.role || 'user',
+      content: msg.content || '',
+      createdAt: new Date(msg.createdAt)
+    }));
+
     return c.json({
       success: true,
       messages: messages
@@ -350,8 +434,8 @@ app.get('/agents/chat/default/get-messages', async (c) => {
   } catch (error) {
     console.error('Error retrieving messages:', error);
     return c.json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Error interno del servidor',
+      details: error instanceof Error ? error.message : 'Error desconocido'
     }, 500);
   }
 });
@@ -421,6 +505,9 @@ export class Chat extends AIChatAgent<Env> {
     this.messages = [];
     this.currentChatId = null;
     
+    // Initialize messages array with proper type checking
+    this.messages = Array.isArray(this.messages) ? this.messages : [];
+    
     if (!Chat.instance) {
       Chat.instance = this;
       this.initializeDefaultChat().catch(error => {
@@ -471,7 +558,7 @@ export class Chat extends AIChatAgent<Env> {
   /**
    * Guarda los mensajes en el chat actual y actualiza el estado global
    */
-  private async loadChatsFromStorage(): Promise<LocalChatData[]> {
+  public async loadChatsFromStorage(): Promise<LocalChatData[]> {
     try {
       const savedChats = await this.storage.get('chats') as LocalChatData[];
       if (savedChats && savedChats.length > 0) {
