@@ -69,7 +69,6 @@ import { ModelSelect } from "./components/model/ModelSelect";
 import { GeminiConfigModal } from "./components/modal/GeminiConfigModal";
 import { ListHeart } from "@phosphor-icons/react/dist/ssr";
 import React from "react";
-import { generateId } from "ai";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -116,8 +115,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 function ChatComponent() {
   const { config } = useAIConfig();
   const { selectedModel } = useModel();
-  const { clearHistory, addToolResult, createChat, chats, currentChatId } = useChat();
-  const generateId = () => Math.random().toString(36).substring(2, 15);
+  const { clearHistory, addToolResult, createChat, chats } = useChat();
   // Definición del tipo para la configuración del agente
   type AgentChatConfig = {
     agent: string;
@@ -141,70 +139,6 @@ function ChatComponent() {
   }
 
   const { messages: agentMessages, append, setInput } = useAgentChat(agentConfig);
-
-  // Initialize WebSocket connection and handle real-time updates
-  useEffect(() => {
-    if (!currentChatId) return;
-
-    const wsUrl = new URL(agentConfig.endpoint);
-    wsUrl.protocol = wsUrl.protocol.replace('http', 'ws');
-    wsUrl.pathname = '/websocket';
-    wsUrl.searchParams.set('chatId', currentChatId);
-    
-    const ws = new WebSocket(wsUrl.toString());
-    
-    ws.addEventListener('open', () => {
-      console.log('WebSocket connected');
-    });
-
-    ws.addEventListener('message', (event) => {
-      const message = JSON.parse(event.data);
-      addToolResult({
-        toolCallId: message.id || generateId(),
-        result: message.content
-      });
-    });
-
-    ws.addEventListener('close', () => {
-      console.log('WebSocket disconnected');
-    });
-
-    ws.addEventListener('error', (error) => {
-      console.error('WebSocket error:', error);
-    });
-
-    // Load initial messages
-    const fetchInitialMessages = async () => {
-      try {
-        const apiUrl = new URL(agentConfig.endpoint);
-        apiUrl.pathname = '/messages';
-        apiUrl.searchParams.set('chatId', currentChatId);
-        
-        const response = await fetch(apiUrl.toString());
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          clearHistory();
-          for (const msg of data) {
-            addToolResult({
-              toolCallId: msg.id || generateId(),
-              result: msg.content
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error loading initial messages:', error);
-      }
-    };
-
-    fetchInitialMessages();
-
-    return () => {
-      ws.close();
-    };
-  }, [currentChatId, agentConfig.endpoint, clearHistory, addToolResult]);
 
   // Crear un nuevo chat automáticamente al iniciar la aplicación si no hay chats
   useEffect(() => {
