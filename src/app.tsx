@@ -2,7 +2,6 @@ import { useEffect, useState, useRef, useCallback, use } from "react";
 import { useAgent } from "agents/react";
 import { useAgentChat } from "agents/ai-react";
 import type { Message } from "@ai-sdk/react";
-import { useChat } from "@/contexts/ChatContext";
 import { APPROVAL } from "./shared";
 import type { tools } from "./tools";
 import { AIConfigProvider, useAIConfig } from "@/contexts/AIConfigContext";
@@ -77,50 +76,13 @@ const toolsRequiringConfirmation: (keyof typeof tools)[] = [
 function ChatComponent() {
   const { config } = useAIConfig();
   const { selectedModel } = useModel();
-  const { clearHistory, addToolResult, createChat, chats } = useChat();
-  const { messages: agentMessages, append, setInput } = useAgentChat({
-    agent: "chat"
-  });
-
-  // Crear un nuevo chat automáticamente al iniciar la aplicación si no hay chats
-  useEffect(() => {
-    if (chats.length === 0) {
-      createChat();
-    }
-  }, []);
   const [showOIAICreator, setShowOIAICreator] = useOIAIState(false);
   const [showGeminiConfig, setShowGeminiConfig] = useState(false);
-  const [inputText, setInputText] = useState('');
-
-  const handleAgentInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    setAgentInput(value);
-    setInputText(value);
-  };
-
-  const handleAgentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputText.trim()) return;
-
-    try {
-      append({
-        role: 'user',
-        content: inputText
-      });
-      setInputText('');
-      setAgentInput('');
-      scrollToBottom();
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
-  };
 
   const handleOIAICopy = (content: string) => {
     setInputText(content);
-    setAgentInput(content);
     setShowOIAICreator(false);
   };
-
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
@@ -143,11 +105,7 @@ function ChatComponent() {
   const [systemPrompt, setSystemPrompt] = useState(false);
   const [showAgentInterface, setShowAgentInterface] = useState(false);
   const [showToolsInterface, setShowToolsInterface] = useState(false);
-  const [agentInput, setAgentInput] = useState('');
-
-  useEffect(() => {
-    setInput(agentInput);
-  }, [agentInput, setInput]);
+  const [inputText, setInputText] = useState('');
 
   // Interfaz para la respuesta de la API
   interface SystemPromptResponse {
@@ -218,8 +176,6 @@ function ChatComponent() {
     localStorage.setItem('textSize', textSize);
   }, [textSize]);
 
-
-
   useEffect(() => {
     const handleOpenModernAgentInterface = () => {
       setShowAgentInterface(true);
@@ -233,44 +189,16 @@ function ChatComponent() {
       setSystemPrompt(true);
     };
 
-    const handleChatSelected = (event: CustomEvent<{ chatId: string, messages: Message[] }>) => {
-      // Actualizar los mensajes del agente con los mensajes del chat seleccionado
-      const newMessages = event.detail.messages.map(msg => ({
-        role: msg.role,
-        content: msg.content,
-        id: msg.id,
-        createdAt: msg.createdAt ? new Date(msg.createdAt) : new Date()
-      }));
-
-      // Limpiar el historial actual y establecer los nuevos mensajes
-      clearHistory();
-      newMessages.forEach(msg => {
-        const agentMsg = {
-          role: msg.role,
-          content: msg.content,
-          id: msg.id,
-          createdAt: msg.createdAt,
-          parts: [{ type: 'text', text: msg.content }]
-        };
-        addToolResult({
-          toolCallId: msg.id,
-          result: msg.content
-        });
-      });
-    };
-
     window.addEventListener('openModernAgentInterface', handleOpenModernAgentInterface);
     window.addEventListener('openToolsInterface', handleOpenToolsInterface);
     window.addEventListener('openSystemPrompt', handleOpenSystemPrompt);
-    window.addEventListener('chatSelected', handleChatSelected as EventListener);
 
     return () => {
       window.removeEventListener('openModernAgentInterface', handleOpenModernAgentInterface);
       window.removeEventListener('openToolsInterface', handleOpenToolsInterface);
       window.removeEventListener('openSystemPrompt', handleOpenSystemPrompt);
-      window.removeEventListener('chatSelected', handleChatSelected as EventListener);
     };
-  }, [clearHistory, addToolResult]);
+  }, []);
 
   // Scroll to bottom on mount
   useEffect(() => {
@@ -291,7 +219,19 @@ function ChatComponent() {
   }) as AgentInstance;
   console.log('Configuración:', config);
 
-
+  const {
+    messages: agentMessages,
+    input: agentInput,
+    handleInputChange: handleAgentInputChange,
+    handleSubmit: handleAgentSubmit,
+    addToolResult,
+    clearHistory
+    // isLoading,
+    // stop
+  } = useAgentChat({
+    agent,
+    maxSteps: config.maxSteps,
+  });
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -1333,9 +1273,7 @@ export default function Chat() {
   return (
     <AIConfigProvider>
       <ModelProvider>
-        <ChatProvider>
-          <ChatComponent />
-        </ChatProvider>
+        <ChatComponent />
       </ModelProvider>
     </AIConfigProvider>
   );

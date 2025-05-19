@@ -689,18 +689,6 @@ export class Chat extends AIChatAgent<Env> {
  * Worker entry point that routes incoming requests to the appropriate handler
  */
 export default {
-  // async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-  //   const url = new URL(request.url);
-    
-  //   // Inicializar la instancia de Chat si no existe
-  //   if (!Chat.instance) {
-  //     const state = new SimpleDurableObjectState(new DurableObjectId('default-chat'), new DurableObjectStorage());
-  //     Chat.instance = new Chat(state, env);
-  //     await Chat.instance.initializeDefaultChat();
-  //   }
-
-  //   return app.fetch(request, env, ctx);
-  // },
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const url = new URL(request.url);
 
@@ -783,7 +771,6 @@ export default {
     // Manejar otras rutas
     return app.fetch(request, env, ctx);
   },
-
 };
 
 
