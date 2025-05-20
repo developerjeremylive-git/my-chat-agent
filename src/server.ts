@@ -1004,16 +1004,39 @@ export class Chat extends AIChatAgent<Env> {
     }
 
     const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-    const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
-    const response = await ai.models.generateContent({
-      model: geminiModel,
-      contents: [{
-        parts: [
-          { text: systemPrompt },
-          ...messageParts
-        ]
-      }]
-    });
+    const maxRetries = 3;
+    const baseDelay = 1000; // 1 second
+    let lastError: Error | null = null;
+    let response;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
+        response = await ai.models.generateContent({
+          model: geminiModel,
+          contents: [{
+            parts: [
+              { text: systemPrompt },
+              ...messageParts
+            ]
+          }]
+        });
+        break; // Success, exit retry loop
+      } catch (error) {
+        lastError = error as Error;
+        if (error instanceof Error && error.message.includes('503')) {
+          const delay = baseDelay * Math.pow(2, attempt);
+          console.log(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    if (!response) {
+      throw lastError || new Error('Failed to generate content after retries');
+    }
 
     const message: ChatMessage = {
       id: generateId(),
@@ -1026,7 +1049,6 @@ export class Chat extends AIChatAgent<Env> {
     await this.saveMessages(messages);
     await this.saveToCurrentChat(messages);
 
-    // Notify all connected WebSocket clients about the update
     const chatConnections = wsConnections.get(this.currentChatId || '');
     if (chatConnections) {
       const update = {
@@ -1044,6 +1066,9 @@ export class Chat extends AIChatAgent<Env> {
     return createDataStreamResponse({
       execute: async (dataStream) => {
         dataStream.write(formatDataStreamPart('text', response.text ?? ''));
+        if (lastError) {
+          console.log('Request succeeded after retry');
+        }
         console.log('Transmisión de Gemini finalizada');
       }
     });
