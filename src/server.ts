@@ -26,7 +26,7 @@ interface WebSocketRequestResponsePair {
 }
 // Almacenamiento temporal de chats (en producción debería usar una base de datos)
 let chats: LocalChatData[] = [{
-  id: 'SLKw5zDIgYrGrT7b',
+  id: '3xytdwIhg9AimViz',
   title: '¡Bienvenido a tu Asistente Virtual! 🤖',
   messages: [],
   lastMessageAt: new Date('2025-05-19T23:36:05.129Z')
@@ -971,6 +971,22 @@ export class Chat extends AIChatAgent<Env> {
       ).bind(this.currentChatId)
       .all<{ id: string }>();
       const existingIds = new Set(existingMessages.results.map(m => m.id));
+
+      // First, ensure the chat exists
+      const chatExists = await this.db.prepare(
+        'SELECT id FROM chats WHERE id = ?'
+      ).bind(this.currentChatId).first<{ id: string }>();
+
+      if (!chatExists) {
+        // Create the chat if it doesn't exist
+        await this.db.prepare(
+          'INSERT INTO chats (id, title, last_message_at) VALUES (?, ?, ?)'
+        ).bind(
+          this.currentChatId,
+          'New Chat',
+          new Date().toISOString()
+        ).run();
+      }
 
       // Process messages in batches to avoid conflicts
       const processedMessages = messages.map(msg => {
