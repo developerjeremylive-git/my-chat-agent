@@ -256,16 +256,31 @@ export class ChatDO implements DurableObject {
         if (!this.currentChatId) throw new Error('No chat selected');
 
         await this.storage.transaction(async (txn) => {
+            // Obtener mensajes existentes para este chat
+            const existingMessages = await this.db.prepare(
+                'SELECT role, content FROM messages WHERE chat_id = ?'
+            ).bind(this.currentChatId).all<{ role: string; content: string }>();
+
+            const existingSet = new Set(
+                existingMessages.results.map(msg => `${msg.role}:${msg.content}`)
+            );
+
             for (const message of messages) {
-                await this.db.prepare(
-                    'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
-                ).bind(
-                    message.id,
-                    this.currentChatId,
-                    message.role,
-                    message.content,
-                    message.createdAt.toISOString()
-                ).run();
+                const messageKey = `${message.role}:${message.content}`;
+                
+                // Solo insertar si el mensaje no existe
+                if (!existingSet.has(messageKey)) {
+                    await this.db.prepare(
+                        'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
+                    ).bind(
+                        message.id,
+                        this.currentChatId,
+                        message.role,
+                        message.content,
+                        message.createdAt.toISOString()
+                    ).run();
+                    existingSet.add(messageKey);
+                }
             }
 
             // Actualizar la fecha del último mensaje
