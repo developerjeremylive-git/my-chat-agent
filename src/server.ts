@@ -289,9 +289,30 @@ app.get('/api/ws', async (c) => {
   const { 0: client, 1: server } = new WebSocketPair();
 
   server.accept();
+
+  // Set up ping interval to keep connection alive
+  const pingInterval = setInterval(() => {
+    if (server.readyState === WebSocket.OPEN) {
+      try {
+        server.send(JSON.stringify({ type: 'ping' }));
+      } catch (error) {
+        console.error('Error sending ping:', error);
+        clearInterval(pingInterval);
+      }
+    } else {
+      clearInterval(pingInterval);
+    }
+  }, 30000); // Send ping every 30 seconds
+
   server.addEventListener('message', async (event) => {
     try {
       const data = JSON.parse(event.data as string);
+      
+      // Handle pong response
+      if (data.type === 'pong') {
+        return;
+      }
+
       if (data.type === 'subscribe' && data.chatId) {
         const connections = wsConnections.get(data.chatId) || new Set<WebSocket>();
         connections.add(server);
@@ -308,10 +329,25 @@ app.get('/api/ws', async (c) => {
       }
     } catch (error) {
       console.error('Error processing WebSocket message:', error);
+      // Send error message to client
+      if (server.readyState === WebSocket.OPEN) {
+        server.send(JSON.stringify({
+          type: 'error',
+          message: 'Error processing message'
+        }));
+      }
     }
   });
 
-  server.addEventListener('close', () => {
+  server.addEventListener('error', (error) => {
+    console.error('WebSocket error:', error);
+    clearInterval(pingInterval);
+  });
+
+  server.addEventListener('close', (event) => {
+    clearInterval(pingInterval);
+    console.log(`WebSocket closed with code: ${event.code}, clean: ${event.wasClean}`);
+    
     // Remove the connection from all chats
     for (const [chatId, connections] of wsConnections.entries()) {
       connections.delete(server);
@@ -320,6 +356,7 @@ app.get('/api/ws', async (c) => {
       }
     }
   });
+
 
   return new Response(null, {
     status: 101,
@@ -851,30 +888,54 @@ export class Chat extends AIChatAgent<Env> {
     }
 
     try {
-      // Actualizar la fecha del último mensaje en el chat
+      // Update last message timestamp
       await this.db.prepare(
         'UPDATE chats SET last_message_at = ? WHERE id = ?'
       ).bind(new Date().toISOString(), this.currentChatId)
       .run();
 
-      // Eliminar mensajes anteriores del chat
-      await this.db.prepare('DELETE FROM messages WHERE chat_id = ?')
-        .bind(this.currentChatId)
-        .run();
+      // Get existing message IDs
+      const existingMessages = await this.db.prepare(
+        'SELECT id FROM messages WHERE chat_id = ?'
+      ).bind(this.currentChatId)
+      .all<{ id: string }>();
+      const existingIds = new Set(existingMessages.results.map(m => m.id));
 
-      // Insertar los nuevos mensajes
-      const messagePromises = messages.map(msg => {
+      // Process messages in batches to avoid conflicts
+      const processedMessages = messages.map(msg => {
         const createdAt = msg.createdAt instanceof Date ? msg.createdAt : new Date(msg.createdAt || Date.now());
-        return this.db.prepare(
+        let messageId = msg.id;
+        // Generate new ID if current one exists
+        while (existingIds.has(messageId)) {
+          messageId = generateId();
+        }
+        existingIds.add(messageId);
+        return {
+          id: messageId,
+          chatId: this.currentChatId,
+          role: msg.role,
+          content: msg.content,
+          createdAt: createdAt.toISOString()
+        };
+      });
+
+      // Clear existing messages
+      // await this.db.prepare('DELETE FROM messages WHERE chat_id = ?')
+      //   .bind(this.currentChatId)
+      //   .run();
+
+      // Insert new messages with unique IDs
+      const messagePromises = processedMessages.map(msg =>
+        this.db.prepare(
           'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
         ).bind(
           msg.id,
-          this.currentChatId,
+          msg.chatId,
           msg.role,
           msg.content,
-          createdAt.toISOString()
-        ).run();
-      });
+          msg.createdAt
+        ).run()
+      );
 
       await Promise.all(messagePromises);
     } catch (error) {
