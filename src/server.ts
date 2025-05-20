@@ -43,6 +43,7 @@ const DEFAULT_MAX_STEPS = 5;
 // const DEFAULT_SEED = 42;
 
 interface Env {
+  DB: D1Database;
   AI: any;
   OPENAI_API_KEY?: string;
   GEMINI_API_KEY?: string;
@@ -364,7 +365,7 @@ interface DurableObjectStorage {
   setAlarm(scheduledTime: number | Date): Promise<void>;
   deleteAlarm(): Promise<void>;
   sync(): Promise<void>;
-  database(name: string): D1Database;
+  database(name: string): D1Database | null;
   sql<T = unknown>(query: string): Promise<T>;
   transactionSync<T>(closure: (txn: DurableObjectStorage) => T): T;
   getCurrentBookmark(): string;
@@ -388,7 +389,7 @@ interface DurableObjectStorage {
   setAlarm(scheduledTime: number | Date): Promise<void>;
   deleteAlarm(): Promise<void>;
   sync(): Promise<void>;
-  database(name: string): D1Database;
+  database(name: string): D1Database | null;
   sql<T = unknown>(query: string): Promise<T>;
   transactionSync<T>(closure: (txn: DurableObjectStorage) => T): T;
   getCurrentBookmark(): string;
@@ -639,6 +640,7 @@ const model = getModel();
 //   seed
 // });
 
+
 // we use ALS to expose the agent context to the tools
 export const agentContext = new AsyncLocalStorage<Chat>();
 /**
@@ -676,8 +678,8 @@ export class Chat extends AIChatAgent<Env> {
     this.storage = state.storage;
     this.messages = [];
     this.currentChatId = null;
-    this.db = state.storage.database('database');
-
+    this.db = env.DB;
+    
     // Initialize messages array with proper type checking
     this.messages = Array.isArray(this.messages) ? this.messages : [];
 

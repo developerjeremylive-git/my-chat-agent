@@ -66,7 +66,7 @@ export class ChatDO implements DurableObject {
         this.state = state;
         this.env = env;
         this.storage = state.storage;
-        this.db = this.storage.database('chat-db');
+        this.db = this.storage.database('database');
 
         if (!ChatDO.instance) {
             ChatDO.instance = this;
