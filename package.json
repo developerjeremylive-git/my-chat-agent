@@ -26,7 +26,7 @@
     "@biomejs/biome": "^1.9.4",
     "@cloudflare/vite-plugin": "1.0.8",
     "@cloudflare/vitest-pool-workers": "^0.8.18",
-    "@cloudflare/workers-types": "^4.20250422.0",
+    "@cloudflare/workers-types": "^4.20250520.0",
     "@tailwindcss/vite": "^4.1.4",
     "@types/node": "^22.14.1",
     "@types/react": "^19.1.2",

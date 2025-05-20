@@ -365,6 +365,11 @@ interface DurableObjectStorage {
   deleteAlarm(): Promise<void>;
   sync(): Promise<void>;
   database(name: string): D1Database;
+  sql<T = unknown>(query: string): Promise<T>;
+  transactionSync<T>(closure: (txn: DurableObjectStorage) => T): T;
+  getCurrentBookmark(): string;
+  getBookmarkForTime(timestamp: number): string;
+  onNextSessionRestoreBookmark(bookmark: string): void;
 }
 
 interface DurableObjectId {
@@ -377,12 +382,18 @@ interface DurableObjectStorage {
   put(key: string, value: any): Promise<void>;
   delete(key: string): Promise<void>;
   list(options?: { prefix?: string; limit?: number; reverse?: boolean }): Promise<Map<string, any>>;
+  deleteAll(): Promise<void>;
+  transaction<T>(closure: (txn: DurableObjectStorage) => Promise<T>): Promise<T>;
+  getAlarm(): Promise<number | null>;
+  setAlarm(scheduledTime: number | Date): Promise<void>;
+  deleteAlarm(): Promise<void>;
+  sync(): Promise<void>;
   database(name: string): D1Database;
-  // sql<T = unknown>(query: string): Promise<T>;
-  // transactionSync<T>(closure: (txn: DurableObjectStorage) => T): T;
-  // getCurrentBookmark(): string;
-  // getBookmarkForTime(timestamp: number): string;
-  // onNextSessionRestoreBookmark(bookmark: string): void;
+  sql<T = unknown>(query: string): Promise<T>;
+  transactionSync<T>(closure: (txn: DurableObjectStorage) => T): T;
+  getCurrentBookmark(): string;
+  getBookmarkForTime(timestamp: number): string;
+  onNextSessionRestoreBookmark(bookmark: string): void;
 }
 
 class SimpleDurableObjectState implements DurableObjectState {
@@ -413,7 +424,12 @@ class SimpleDurableObjectState implements DurableObjectState {
       getAlarm: async () => storage.getAlarm(),
       setAlarm: async (scheduledTime) => storage.setAlarm(scheduledTime),
       deleteAlarm: async () => storage.deleteAlarm(),
-      sync: async () => storage.sync()
+      sync: async () => storage.sync(),
+      sql: async () => null,
+      transactionSync: (closure) => closure(this.storage),
+      getCurrentBookmark: () => '',
+      getBookmarkForTime: () => '',
+      onNextSessionRestoreBookmark: () => {}
     };
     this.webSockets = new Set();
   }
