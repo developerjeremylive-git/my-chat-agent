@@ -82,13 +82,24 @@ function ChatComponent() {
   const [currentMessages, setCurrentMessages] = useState<ChatMessage[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   
+  interface ChatMessagesResponse {
+    success: boolean;
+    messages: Array<{
+      id: string;
+      chatId: string;
+      role: 'assistant' | 'system' | 'user' | 'data';
+      content: string;
+      createdAt: string;
+    }>;
+  }
+
   const handleChatSelect = async (chatId: string) => {
     try {
       const response = await fetch(`/api/chats/${chatId}/messages`);
       if (response.ok) {
-        const messages = await response.json();
-        if (Array.isArray(messages)) {
-          setCurrentMessages(messages.map(msg => ({
+        const data = await response.json() as ChatMessagesResponse;
+        if (data.success && Array.isArray(data.messages)) {
+          setCurrentMessages(data.messages.map(msg => ({
             ...msg,
             createdAt: new Date(msg.createdAt)
           })));
@@ -801,11 +812,12 @@ function ChatComponent() {
                   </Card>
                 </div>
               )}
-
-              {agentMessages.map((m: Message, index) => {
+      {/* {agentMessages.map((m: Message, index) => { */}
+              {currentMessages.map((m: ChatMessage, index) => {
                 const isUser = m.role === "user";
+                const isAssistant = m.role === "assistant";
                 const showAvatar =
-                  index === 0 || agentMessages[index - 1]?.role !== m.role;
+                  index === 0 || currentMessages[index - 1]?.role !== m.role;
                 const showRole = showAvatar && !isUser;
 
                 return (
@@ -822,10 +834,10 @@ function ChatComponent() {
                         className={`flex gap-2 max-w-[85%] ${isUser ? "flex-row-reverse" : "flex-row"
                           }`}
                       >
-                        {showAvatar && !isUser ? (
+                        {showAvatar && isAssistant ? (
                           <Avatar username={"AI"} />
                         ) : (
-                          !isUser && <div className="w-8" />
+                          isAssistant && <div className="w-8" />
                         )}
 
                         <div>
