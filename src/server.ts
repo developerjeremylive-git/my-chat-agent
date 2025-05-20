@@ -708,25 +708,32 @@ export class Chat extends AIChatAgent<Env> {
     }
 
     try {
-      // Primero crear la tabla chats
-      const createChatsStmt = this.db.prepare(this.CREATE_CHATS_TABLE);
-      if (!createChatsStmt) {
-        throw new Error('Failed to prepare chats table statement');
+      // Primero verificar si las tablas ya existen
+      const tablesExist = await this.verifyTables();
+      if (tablesExist) {
+        console.log('Tables already exist, skipping initialization');
+        return;
       }
-      await createChatsStmt.run();
+
+      // Crear la tabla chats primero
+      await this.db.prepare(this.CREATE_CHATS_TABLE).run();
       console.log('Chats table created successfully');
 
-      // Luego crear la tabla messages con la restricción de clave foránea
-      const createMessagesStmt = this.db.prepare(this.CREATE_MESSAGES_TABLE);
-      if (!createMessagesStmt) {
-        throw new Error('Failed to prepare messages table statement');
+      // Verificar que la tabla chats se creó correctamente
+      const chatsExist = await this.db.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='chats'"
+      ).first<{ name: string }>();
+      if (!chatsExist) {
+        throw new Error('Failed to create chats table');
       }
-      await createMessagesStmt.run();
+
+      // Crear la tabla messages después de verificar que chats existe
+      await this.db.prepare(this.CREATE_MESSAGES_TABLE).run();
       console.log('Messages table created successfully');
 
-      // Verificar que las tablas se crearon correctamente
-      const tablesExist = await this.verifyTables();
-      if (!tablesExist) {
+      // Verificar que ambas tablas se crearon correctamente
+      const finalTablesExist = await this.verifyTables();
+      if (!finalTablesExist) {
         throw new Error('Failed to verify table creation');
       }
 
