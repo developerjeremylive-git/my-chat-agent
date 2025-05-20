@@ -78,7 +78,7 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
         // Cargar chats al montar el componente y seleccionar el chat por defecto
         const loadInitialChats = async () => {
             try {
-                // Cargar lista de chats
+                // Cargar lista de chats con sus mensajes
                 const response = await fetch('/api/chats');
                 if (!response.ok) {
                     throw new Error('Failed to fetch chats');
@@ -89,43 +89,50 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
                 const formattedChats = data.map((chat) => ({
                     ...chat,
                     lastMessageAt: new Date(chat.lastMessageAt),
-                    messages: chat.messages || []
+                    messages: []
                 }));
-                setChats(formattedChats);
+
+                // Cargar mensajes para cada chat
+                const chatsWithMessages = await Promise.all(
+                    formattedChats.map(async (chat) => {
+                        try {
+                            const messagesResponse = await fetch(`/api/chats/${chat.id}/messages`);
+                            if (messagesResponse.ok) {
+                                const messagesData = await messagesResponse.json() as { success: boolean; messages: Array<{ id: string; chatId: string; role: string; content: string; createdAt: string; }>};
+                                if (messagesData.success && Array.isArray(messagesData.messages)) {
+                                    return {
+                                        ...chat,
+                                        messages: messagesData.messages.map(msg => ({
+                                            id: msg.id,
+                                            chatId: msg.chatId,
+                                            role: ['assistant', 'system', 'user', 'data'].includes(msg.role) ? 
+                                                msg.role as 'assistant' | 'system' | 'user' | 'data' : 
+                                                'system',
+                                            content: msg.content,
+                                            createdAt: new Date(msg.createdAt)
+                                        }))
+                                    };
+                                }
+                            }
+                            return chat;
+                        } catch (error) {
+                            console.error(`Error loading messages for chat ${chat.id}:`, error);
+                            return chat;
+                        }
+                    })
+                );
+
+                setChats(chatsWithMessages);
 
                 // Buscar y seleccionar el chat por defecto
                 const defaultChatId = '3xytdwIhg9AimViz';
-                const defaultChat = formattedChats.find(chat => chat.id === defaultChatId);
+                const defaultChat = chatsWithMessages.find(chat => chat.id === defaultChatId);
                 
                 if (defaultChat) {
-                    // Cargar mensajes del chat por defecto
-                    const messagesResponse = await fetch(`/api/chats/${defaultChatId}/messages`);
-                    if (messagesResponse.ok) {
-                        const messagesData = await messagesResponse.json() as { success: boolean; messages: Array<{ id: string; chatId: string; role: string; content: string; createdAt: string; }>};
-                        if (messagesData.success && Array.isArray(messagesData.messages)) {
-                            defaultChat.messages = messagesData.messages.map(msg => {
-                                // Validar que el rol sea uno de los permitidos
-                                const role = ['assistant', 'system', 'user', 'data'].includes(msg.role) ? 
-                                    msg.role as 'assistant' | 'system' | 'user' | 'data' : 
-                                    'system';
-                                
-                                return {
-                                    id: msg.id,
-                                    chatId: msg.chatId,
-                                    role,
-                                    content: msg.content,
-                                    createdAt: new Date(msg.createdAt)
-                                };
-                            });
-                            setChats(chats => chats.map(c => 
-                                c.id === defaultChatId ? defaultChat : c
-                            ));
-                        }
-                    }
                     await selectChat(defaultChat.id);
-                } else if (formattedChats.length > 0) {
+                } else if (chatsWithMessages.length > 0) {
                     // Si no se encuentra el chat por defecto, seleccionar el primero
-                    await selectChat(formattedChats[0].id);
+                    await selectChat(chatsWithMessages[0].id);
                 }
             } catch (error) {
                 console.error('Error loading chats:', error);

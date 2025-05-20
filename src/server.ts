@@ -980,7 +980,14 @@ export class Chat extends AIChatAgent<Env> {
     const messages = await this.db.prepare(
       'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
     ).bind(chatId).all();
-    this.messages = messages.results || [];
+    
+    // Convertir los resultados al tipo Message
+    this.messages = (messages.results || []).map(msg => ({
+      id: msg.id as string,
+      role: msg.role as 'assistant' | 'system' | 'user' | 'data',
+      content: msg.content as string,
+      createdAt: new Date(msg.created_at as string)
+    }));
   }
 
   /**
@@ -990,36 +997,76 @@ export class Chat extends AIChatAgent<Env> {
     try {
       // Obtener todos los chats de la base de datos
       const chatsResult = await this.db.prepare('SELECT * FROM chats ORDER BY last_message_at DESC').all();
-      const chats = chatsResult.results as Array<{ id: string; title: string; last_message_at: string }>;
+      
+      if (!chatsResult.results || !Array.isArray(chatsResult.results)) {
+        return [];
+      }
 
-      // Para cada chat, obtener sus mensajes
-      const chatPromises = chats.map(async (chat) => {
-        const messagesResult = await this.db.prepare(
-          'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
-        ).bind(chat.id).all();
+      interface DBChat {
+        id: string;
+        title: string;
+        last_message_at: string;
+      }
 
-        const messages = messagesResult.results as Array<{
-          id: string;
-          role: string;
-          content: string;
-          created_at: string;
-        }>;
+      interface DBMessage {
+        id: string;
+        chat_id: string;
+        role: string;
+        content: string;
+        created_at: string;
+      }
 
-        return {
-          id: chat.id,
-          title: chat.title,
-          lastMessageAt: new Date(chat.last_message_at),
-          messages: messages.map(msg => ({
-            id: msg.id,
-            role: msg.role,
-            content: msg.content,
-            createdAt: new Date(msg.created_at)
-          }))
-        } as LocalChatData;
-      });
+      // Cargar los mensajes para cada chat
+      const chatsWithMessages = await Promise.all(chatsResult.results.map(async (rawChat: Record<string, unknown>) => {
+        const chat: DBChat = {
+          id: String(rawChat.id || ''),
+          title: String(rawChat.title || ''),
+          last_message_at: String(rawChat.last_message_at || new Date().toISOString())
+        };
 
-      return await Promise.all(chatPromises);
-    } catch (error) {
+        try {
+          const messages = await this.db.prepare(
+            'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
+          ).bind(chat.id).all();
+
+          // Convertir los resultados al formato esperado
+          const formattedMessages = (messages.results || []).map((rawMsg: Record<string, unknown>) => {
+            const msg: DBMessage = {
+              id: String(rawMsg.id || ''),
+              chat_id: String(rawMsg.chat_id || ''),
+              role: String(rawMsg.role || ''),
+              content: String(rawMsg.content || ''),
+              created_at: String(rawMsg.created_at || new Date().toISOString())
+            };
+
+            return {
+              id: msg.id,
+              role: (msg.role && ['assistant', 'system', 'user', 'data'].includes(msg.role)) ? 
+                msg.role as 'assistant' | 'system' | 'user' | 'data' : 'system',
+              content: msg.content,
+              createdAt: new Date(msg.created_at)
+            };
+          });
+
+          return {
+            id: chat.id,
+            title: chat.title,
+            lastMessageAt: new Date(chat.last_message_at),
+            messages: formattedMessages
+          };
+        } catch (error: unknown) {
+          console.error(`Error loading messages for chat ${chat.id}:`, error);
+          return {
+            id: chat.id,
+            title: chat.title,
+            lastMessageAt: new Date(chat.last_message_at),
+            messages: []
+          };
+        }
+      }));
+
+      return chatsWithMessages;
+    } catch (error: unknown) {
       console.error('Error loading chats from storage:', error);
       return [];
     }
