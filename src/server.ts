@@ -683,24 +683,57 @@ export class Chat extends AIChatAgent<Env> {
     }
   }
 
+  private async verifyTables(): Promise<boolean> {
+    try {
+      // Verificar la existencia de la tabla chats
+      const chatsExist = await this.db.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='chats'"
+      ).first<{ name: string }>();
+
+      // Verificar la existencia de la tabla messages
+      const messagesExist = await this.db.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='messages'"
+      ).first<{ name: string }>();
+
+      return Boolean(chatsExist && messagesExist);
+    } catch (error) {
+      console.error('Error verifying tables:', error);
+      return false;
+    }
+  }
+
   private async initializeTables() {
     if (!this.db) {
       throw new Error('Database not initialized');
     }
 
     try {
+      // Primero crear la tabla chats
       const createChatsStmt = this.db.prepare(this.CREATE_CHATS_TABLE);
-      const createMessagesStmt = this.db.prepare(this.CREATE_MESSAGES_TABLE);
+      if (!createChatsStmt) {
+        throw new Error('Failed to prepare chats table statement');
+      }
+      await createChatsStmt.run();
+      console.log('Chats table created successfully');
 
-      if (!createChatsStmt || !createMessagesStmt) {
-        throw new Error('Failed to prepare database statements');
+      // Luego crear la tabla messages con la restricción de clave foránea
+      const createMessagesStmt = this.db.prepare(this.CREATE_MESSAGES_TABLE);
+      if (!createMessagesStmt) {
+        throw new Error('Failed to prepare messages table statement');
+      }
+      await createMessagesStmt.run();
+      console.log('Messages table created successfully');
+
+      // Verificar que las tablas se crearon correctamente
+      const tablesExist = await this.verifyTables();
+      if (!tablesExist) {
+        throw new Error('Failed to verify table creation');
       }
 
-      await this.db.batch([createChatsStmt, createMessagesStmt]);
-      console.log('Database tables initialized successfully');
+      console.log('Database tables initialized and verified successfully');
     } catch (error) {
       console.error('Error initializing database tables:', error);
-      throw error; // Re-throw para manejo superior
+      throw new Error(`Failed to initialize database tables: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -824,7 +857,7 @@ export class Chat extends AIChatAgent<Env> {
 
       // Insertar los nuevos mensajes
       const messagePromises = messages.map(msg => {
-        const createdAt = msg.createdAt || new Date();
+        const createdAt = msg.createdAt instanceof Date ? msg.createdAt : new Date(msg.createdAt || Date.now());
         return this.db.prepare(
           'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
         ).bind(
