@@ -152,6 +152,26 @@ app.get('/api/chats', async (c) => {
   return c.json(chats);
 });
 
+app.get('/api/chats/:id/messages', async (c) => {
+  try {
+    const chatId = c.req.param('id');
+    const chat = Chat.instance as Chat;
+
+    if (!chat) {
+      return c.json({ success: false, error: 'Chat instance not found' }, 500);
+    }
+
+    const messages = await chat.getChatMessages(chatId);
+    return c.json({
+      success: true,
+      messages
+    });
+  } catch (error) {
+    console.error('Error fetching chat messages:', error);
+    return c.json({ success: false, error: 'Failed to fetch chat messages' }, 500);
+  }
+});
+
 app.get('/api/chats/:id', async (c) => {
   const chatId = c.req.param('id');
   const chat = chats.find(c => c.id === chatId);
@@ -1200,6 +1220,18 @@ export class Chat extends AIChatAgent<Env> {
       });
     });
   }
+  async getChatMessages(chatId: string) {
+    try {
+      const messages = await this.db.prepare(
+        'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
+      ).bind(chatId).all<ChatMessage>();
+      return messages.results;
+    } catch (error) {
+      console.error('Error getting chat messages:', error);
+      throw error;
+    }
+  }
+
   async saveMessages(messages: ChatMessage[]) {
     if (!Array.isArray(messages)) {
       console.error('Invalid messages array:', messages);

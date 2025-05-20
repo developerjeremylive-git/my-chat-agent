@@ -75,9 +75,28 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
     const [editingChat, setEditingChat] = useState<LocalChatData | null>(null);
 
     useEffect(() => {
-        // Cargar chats al montar el componente y seleccionar el primero
+        // Cargar chats al montar el componente y seleccionar el chat por defecto
         const loadInitialChats = async () => {
-            await fetchChats();
+            const response = await fetch('/api/chats');
+            const data = await response.json() as ChatData[];
+            const formattedChats = data.map((chat) => ({
+                ...chat,
+                lastMessageAt: new Date(chat.lastMessageAt),
+                messages: chat.messages.map(msg => ({
+                    ...msg,
+                    createdAt: new Date(msg.createdAt)
+                })) as LocalMessage[]
+            }));
+            setChats(formattedChats);
+
+            // Buscar el chat por defecto con ID '3xytdwIhg9AimViz'
+            const defaultChat = formattedChats.find(chat => chat.id === '3xytdwIhg9AimViz');
+            if (defaultChat) {
+                await selectChat(defaultChat.id);
+            } else if (formattedChats.length > 0) {
+                // Si no se encuentra el chat por defecto, seleccionar el primero
+                await selectChat(formattedChats[0].id);
+            }
         };
         loadInitialChats();
     }, []);
@@ -173,12 +192,21 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
 
     const selectChat = async (chatId: string) => {
         try {
-            // Obtener el chat y sus mensajes del servidor
-            const response = await fetch(`/api/chats/${chatId}`);
-            const chatData = await response.json() as ChatData | { error: string };
+            // First get the chat details
+            const chatResponse = await fetch(`/api/chats/${chatId}`);
+            const chatData = await chatResponse.json() as ChatData | { error: string };
             
             if ('error' in chatData) {
                 console.error('Error in API response:', chatData.error);
+                return;
+            }
+
+            // Then get the messages for this chat
+            const messagesResponse = await fetch(`/api/chats/${chatId}/messages`);
+            const messagesData = await messagesResponse.json() as { success: boolean; messages: ChatMessage[] };
+
+            if (!messagesData.success) {
+                console.error('Error fetching messages:', messagesData);
                 return;
             }
 
@@ -186,16 +214,22 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
                 id: chatData.id,
                 title: chatData.title,
                 lastMessageAt: new Date(chatData.lastMessageAt),
-                messages: chatData.messages ? chatData.messages.map((msg: ChatMessage) => ({
+                messages: messagesData.messages.map((msg: ChatMessage) => ({
                     ...msg,
                     createdAt: new Date(msg.createdAt)
-                })) as LocalMessage[] : []
-                };
-                setCurrentChat(chat);
-                // Emitir evento para actualizar el chat en la interfaz principal
-                window.dispatchEvent(new CustomEvent('chatSelected', { 
-                    detail: { chatId, messages: chat.messages }
-                }));
+                })) as LocalMessage[]
+            };
+
+            setCurrentChat(chat);
+
+            // Emitir evento para actualizar el chat en la interfaz principal
+            window.dispatchEvent(new CustomEvent('chatSelected', { 
+                detail: { 
+                    chatId, 
+                    messages: chat.messages,
+                    isInitialLoad: chatId === '3xytdwIhg9AimViz'
+                }
+            }));
         } catch (error) {
             console.error('Error al cargar el chat:', error);
         }
