@@ -736,7 +736,7 @@ export class Chat extends AIChatAgent<Env> {
   currentChatId: string | null = null;
   public static instance: Chat | null = null;
   public storage!: DurableObjectStorage;
-  public messages: ChatMessage[] = [];
+  private _messages: ChatMessage[] = [];
   private db: D1Database;
 
   // Definición de la tabla de mensajes
@@ -1080,10 +1080,8 @@ export class Chat extends AIChatAgent<Env> {
         response = await ai.models.generateContent({
           model: geminiModel,
           contents: [{
-            parts: [
-              { text: systemPrompt },
-              ...messageParts
-            ]
+            role: 'user',
+            parts: [{ text: systemPrompt }, ...messageParts.map(p => ({ text: p.text }))]
           }]
         });
         break; // Success, exit retry loop
@@ -1109,9 +1107,18 @@ export class Chat extends AIChatAgent<Env> {
       content: response.text ?? '',
       createdAt: new Date(),
     };
-    const messages = [...this.messages, message];
+    const messages = [...this.messages, message].map(msg => ({
+        ...msg,
+        createdAt: msg.createdAt || new Date()
+      })) as ChatMessage[];
 
-    await this.saveMessages(messages);
+    const validatedMessages = messages.map(msg => ({
+      id: msg.id || generateId(),
+      role: msg.role,
+      content: msg.content,
+      createdAt: msg.createdAt || new Date()
+    })) as ChatMessage[];
+    await this.saveMessages(validatedMessages);
     // await this.saveToCurrentChat(messages);
 
     const chatConnections = wsConnections.get(this.currentChatId || '');
@@ -1144,7 +1151,7 @@ export class Chat extends AIChatAgent<Env> {
       return createDataStreamResponse({
         execute: async (dataStream) => {
           const processedMessages = await processToolCalls({
-            messages: this.messages,
+            messages: this._messages,
             dataStream,
             tools: allTools,
             executions,
@@ -1182,13 +1189,29 @@ export class Chat extends AIChatAgent<Env> {
       console.error('Invalid messages array:', messages);
       return;
     }
-    this.messages = messages;
-    await this.saveToCurrentChat(messages);
 
-    // Emitir evento de actualización de mensajes
+    // Store messages in memory
+    this._messages = messages.map(msg => {
+        if (msg.createdAt) return msg;
+        return {
+        ...msg,
+          createdAt: new Date()
+        };
+      }) as ChatMessage[];
+
+    // Save to D1 database
+    const validatedMessages = messages.map(msg => ({
+      id: msg.id || generateId(),
+      role: msg.role,
+      content: msg.content,
+      createdAt: msg.createdAt || new Date()
+    })) as ChatMessage[];
+    await this.saveToCurrentChat(validatedMessages);
+
+    // Only emit event in browser environment
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('messagesUpdated', {
-        detail: { messages: messages }
+        detail: { messages }
       }));
     }
   }

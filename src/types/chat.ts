@@ -1,49 +1,9 @@
 import type { Message } from '@ai-sdk/react';
+import type { TextUIPart as SDKTextUIPart, ReasoningUIPart as SDKReasoningUIPart, ToolInvocationUIPart as SDKToolInvocationUIPart, SourceUIPart as SDKSourceUIPart, FileUIPart as SDKFileUIPart, StepStartUIPart as SDKStepStartUIPart } from '@ai-sdk/ui-utils';
 
-export type UIPart = TextUIPart | ReasoningUIPart | ToolInvocationUIPart | SourceUIPart | FileUIPart | StepStartUIPart;
+export type UIPart = SDKTextUIPart | SDKReasoningUIPart | SDKToolInvocationUIPart | SDKSourceUIPart | SDKFileUIPart | SDKStepStartUIPart;
 
-export interface TextUIPart {
-  type: 'text';
-  text: string;
-}
 
-export interface ReasoningUIPart {
-  type: 'reasoning';
-  reasoning: string;
-  details: Array<{
-    type: 'text';
-    text: string;
-    signature?: string;
-  } | {
-    type: 'redacted';
-    data: string;
-  }>;
-}
-
-export interface ToolInvocationUIPart {
-  type: 'tool-invocation';
-  toolInvocation: {
-    state: 'result';
-    step?: number;
-    toolName: string;
-    result?: any;
-  };
-}
-
-export interface SourceUIPart {
-  type: 'source';
-  source: string;
-}
-
-export interface FileUIPart {
-  type: 'file';
-  path: string;
-}
-
-export interface StepStartUIPart {
-  type: 'step-start';
-  step: number;
-}
 
 export interface ChatMessage extends Omit<Message, 'parts' | 'createdAt'> {
   id: string;
