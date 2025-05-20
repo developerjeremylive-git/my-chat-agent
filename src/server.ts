@@ -212,20 +212,6 @@ app.get('/api/chats/:id/messages', async (c) => {
   }
 });
 
-// Get chat summaries (id and title only)
-app.get('/api/chats/summaries', async (c) => {
-  try {
-    const chats = await c.env.DB.prepare(
-      'SELECT id, title, last_message_at FROM chats ORDER BY last_message_at DESC'
-    ).all();
-    return c.json({ chats: chats.results });
-  } catch (error) {
-    console.error('Error fetching chat summaries:', error);
-    return c.json({ error: 'Failed to fetch chat summaries' }, 500);
-  }
-});
-
-// Get full chat details including messages
 app.get('/api/chats/:id', async (c) => {
   try {
     const chatId = c.req.param('id');

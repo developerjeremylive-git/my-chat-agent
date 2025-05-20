@@ -77,24 +77,49 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
     const [editingChat, setEditingChat] = useState<LocalChatData | null>(null);
 
     useEffect(() => {
-        // Cargar solo los resúmenes de chats al montar el componente
+        // Cargar chats al montar el componente y seleccionar el chat por defecto
         const loadInitialChats = async () => {
             try {
-                // Cargar lista de chats sin mensajes
-                const response = await fetch('/api/chats/summaries');
+                // Cargar lista de chats con sus mensajes
+                const response = await fetch('/api/chats');
                 if (!response.ok) {
-                    throw new Error('Failed to fetch chat summaries');
+                    throw new Error('Failed to fetch chats');
                 }
-                const data = await response.json() as { chats: Array<{ id: string; title: string; last_message_at: string }> };
+                const data = await response.json() as ChatData[];
                 
-                // Formatear los chats con array de mensajes vacío
-                const formattedChats = data.chats.map((chat: any) => ({
+                // Formatear los chats
+                const formattedChats = data.map((chat) => ({
                     ...chat,
-                    lastMessageAt: new Date(chat.last_message_at),
+                    lastMessageAt: new Date(chat.lastMessageAt),
                     messages: []
                 }));
 
-                setChats(formattedChats);
+                // Cargar mensajes para cada chat
+                const chatsWithMessages = await Promise.all(
+                    data.map(async (chat) => {
+                        try {
+                            const messagesResponse = await fetch(`/api/chats/${chat.id}/messages`);
+                            if (messagesResponse.ok) {
+                                const messages = await messagesResponse.json();
+                                if (Array.isArray(messages)) {
+                                    return {
+                                        ...chat,
+                                        messages: messages.map(msg => ({
+                                            ...msg,
+                                            createdAt: new Date(msg.createdAt)
+                                        }))
+                                    };
+                                }
+                            }
+                            return chat;
+                        } catch (error) {
+                            console.error(`Error loading messages for chat ${chat.id}:`, error);
+                            return chat;
+                        }
+                    })
+                );
+
+                setChats(chatsWithMessages);
                 // No seleccionamos ningún chat por defecto
             } catch (error) {
                 console.error('Error loading chats:', error);
@@ -106,10 +131,10 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
     const fetchChats = async () => {
         try {
             const response = await fetch('/api/chats');
-            const data = await response.json() as { chats: Array<{ id: string; title: string; last_message_at: string }> };
-            const formattedChats = data.chats.map((chat) => ({
+            const data = await response.json() as ChatData[];
+            const formattedChats = data.map((chat) => ({
                 ...chat,
-                lastMessageAt: new Date(chat.last_message_at),
+                lastMessageAt: new Date(chat.lastMessageAt),
                 messages: []
             }));
             setChats(formattedChats);
@@ -129,7 +154,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                     title: 'Nuevo Chat'
                 })
             });
-            const data = await response.json() as { success: boolean; chat: { id: string; title: string; last_message_at: string } };
+            const data = await response.json() as { success: boolean; chat: ChatData };
             
             if (!response.ok) {
                 throw new Error('Error al crear el chat');
@@ -139,8 +164,11 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                 const newChat = data.chat;
                 setChats([...chats, { 
                     ...newChat, 
-                    lastMessageAt: new Date(newChat.last_message_at),
-                    messages: []
+                    lastMessageAt: new Date(newChat.lastMessageAt),
+                    messages: newChat.messages.map(msg => ({
+                        ...msg,
+                        createdAt: new Date(msg.createdAt)
+                    })) as LocalMessage[]
                 }]);
                 selectChat(newChat.id);
             } else {
@@ -178,7 +206,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
         try {
             // First get the chat details
             const chatResponse = await fetch(`/api/chats/${chatId}`);
-            const chatData = await chatResponse.json() as { id: string; title: string; last_message_at: string } | { error: string };
+            const chatData = await chatResponse.json() as ChatData | { error: string };
             
             if ('error' in chatData) {
                 console.error('Error in API response:', chatData.error);
@@ -197,7 +225,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
             const chat: LocalChatData = {
                 id: chatData.id,
                 title: chatData.title,
-                lastMessageAt: new Date(chatData.last_message_at),
+                lastMessageAt: new Date(chatData.lastMessageAt),
                 messages: messagesData.messages.map((msg: ChatMessage) => ({
                     ...msg,
                     createdAt: new Date(msg.createdAt)
