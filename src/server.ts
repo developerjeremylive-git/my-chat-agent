@@ -337,6 +337,49 @@ app.get('/check-open-ai-key', async (c) => {
 });
 
 // Endpoint to get messages for a chat
+interface DurableObjectState {
+  storage: DurableObjectStorage;
+  id: DurableObjectId;
+  waitUntil(promise: Promise<any>): void;
+  blockConcurrencyWhile<T>(callback: () => Promise<T>): Promise<T>;
+  acceptWebSocket(ws: WebSocket): void;
+  getWebSockets(): WebSocket[];
+  setWebSocketAutoResponse(maybeReqResp?: WebSocketRequestResponsePair): void;
+  getWebSocketAutoResponse(): WebSocketRequestResponsePair | null;
+  getWebSocketAutoResponseTimestamp(ws: WebSocket): Date | null;
+  setHibernatableWebSocketEventTimeout(timeoutMs: number): void;
+  getHibernatableWebSocketEventTimeout(): number;
+  getTags(): string[];
+  abort(): void;
+}
+
+interface DurableObjectStorage {
+  get(key: string): Promise<any>;
+  put(key: string, value: any): Promise<void>;
+  delete(key: string): Promise<void>;
+  list(options?: { prefix?: string; limit?: number; reverse?: boolean }): Promise<Map<string, any>>;
+  deleteAll(): Promise<void>;
+  transaction<T>(closure: (txn: DurableObjectStorage) => Promise<T>): Promise<T>;
+  getAlarm(): Promise<number | null>;
+  setAlarm(scheduledTime: number | Date): Promise<void>;
+  deleteAlarm(): Promise<void>;
+  sync(): Promise<void>;
+  database(name: string): D1Database;
+}
+
+interface DurableObjectId {
+  toString(): string;
+  equals(other: DurableObjectId): boolean;
+}
+
+interface DurableObjectStorage {
+  get(key: string): Promise<any>;
+  put(key: string, value: any): Promise<void>;
+  delete(key: string): Promise<void>;
+  list(options?: { prefix?: string; limit?: number; reverse?: boolean }): Promise<Map<string, any>>;
+  database(name: string): D1Database;
+}
+
 class SimpleDurableObjectState implements DurableObjectState {
   public storage: DurableObjectStorage;
   public id: DurableObjectId;
@@ -567,49 +610,102 @@ export class Chat extends AIChatAgent<Env> {
   public static instance: Chat | null = null;
   public storage!: DurableObjectStorage;
   public messages: ChatMessage[] = [];
+  private db: D1Database;
+
+  // Definición de la tabla de mensajes
+  private readonly CREATE_MESSAGES_TABLE = `
+    CREATE TABLE IF NOT EXISTS messages (
+      id TEXT PRIMARY KEY,
+      chat_id TEXT NOT NULL,
+      role TEXT NOT NULL,
+      content TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
+    )
+  `;
+
+  private readonly CREATE_CHATS_TABLE = `
+    CREATE TABLE IF NOT EXISTS chats (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      last_message_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
 
   constructor(state: DurableObjectState, env: Env) {
     super(state, env);
     this.storage = state.storage;
     this.messages = [];
     this.currentChatId = null;
+    this.db = state.storage.database('chat-db');
 
     // Initialize messages array with proper type checking
     this.messages = Array.isArray(this.messages) ? this.messages : [];
 
     if (!Chat.instance) {
       Chat.instance = this;
-      this.initializeDefaultChat().catch(error => {
-        console.error('Error initializing default chat:', error);
+      this.initializeTables().then(() => {
+        this.initializeDefaultChat().catch(error => {
+          console.error('Error initializing default chat:', error);
+        });
+      }).catch(error => {
+        console.error('Error initializing database tables:', error);
       });
     }
   }
 
-  public async initializeDefaultChat() {
-    const defaultChat: ChatData = {
-      id: generateId(),
-      title: '¡Bienvenido a tu Asistente Virtual! 🤖',
-      messages: [],
-      lastMessageAt: new Date()
-    };
-
-    // Initialize chats array with default chat if empty
-    if (chats.length === 0) {
-      chats.push(defaultChat);
-      try {
-        await this.storage.put('chats', chats);
-        this.currentChatId = defaultChat.id;
-        // Emitir evento para actualizar la interfaz
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('chatsUpdated', {
-            detail: { chats }
-          }));
-        }
-      } catch (error) {
-        console.error('Error saving default chat to storage:', error);
-      }
+  private async initializeTables() {
+    try {
+      await this.db.batch([
+        this.db.prepare(this.CREATE_CHATS_TABLE),
+        this.db.prepare(this.CREATE_MESSAGES_TABLE)
+      ]);
+      console.log('Database tables initialized successfully');
+    } catch (error) {
+      console.error('Error initializing database tables:', error);
+      throw error;
     }
-    return defaultChat;
+  }
+
+  public async initializeDefaultChat() {
+    try {
+      // Verificar si ya existe algún chat
+      const existingChats = await this.db.prepare('SELECT COUNT(*) as count FROM chats').first();
+      
+      if (!existingChats || existingChats.count === 0) {
+        const defaultChat: ChatData = {
+          id: generateId(),
+          title: '¡Bienvenido a tu Asistente Virtual! 🤖',
+          messages: [],
+          lastMessageAt: new Date()
+        };
+
+        // Insertar el chat por defecto en la base de datos
+        await this.db.prepare(
+          'INSERT INTO chats (id, title, last_message_at) VALUES (?, ?, ?)'
+        ).bind(defaultChat.id, defaultChat.title, defaultChat.lastMessageAt.toISOString())
+        .run();
+
+        this.currentChatId = defaultChat.id;
+        return defaultChat;
+      }
+
+      // Si ya existen chats, retornar el primero
+      const firstChat = await this.db.prepare('SELECT * FROM chats ORDER BY last_message_at DESC LIMIT 1').first<{ id: string; title: string; last_message_at: string }>();
+      if (!firstChat) {
+        throw new Error('No chat found in database');
+      }
+      this.currentChatId = firstChat.id;
+      return {
+        id: firstChat.id,
+        title: firstChat.title,
+        messages: [],
+        lastMessageAt: new Date(firstChat.last_message_at)
+      };
+    } catch (error) {
+      console.error('Error initializing default chat:', error);
+      throw error;
+    }
   }
 
   /**
@@ -629,21 +725,41 @@ export class Chat extends AIChatAgent<Env> {
    */
   public async loadChatsFromStorage(): Promise<LocalChatData[]> {
     try {
-      const savedChats = await this.storage.get('chats') as LocalChatData[];
-      if (savedChats && savedChats.length > 0) {
-        return savedChats.map((chat: ChatData) => ({
-          ...chat,
-          lastMessageAt: new Date(chat.lastMessageAt),
-          messages: chat.messages.map(msg => ({
-            ...msg,
-            createdAt: new Date(msg.createdAt)
+      // Obtener todos los chats de la base de datos
+      const chatsResult = await this.db.prepare('SELECT * FROM chats ORDER BY last_message_at DESC').all();
+      const chats = chatsResult.results as Array<{ id: string; title: string; last_message_at: string }>;
+
+      // Para cada chat, obtener sus mensajes
+      const chatPromises = chats.map(async (chat) => {
+        const messagesResult = await this.db.prepare(
+          'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
+        ).bind(chat.id).all();
+
+        const messages = messagesResult.results as Array<{
+          id: string;
+          role: string;
+          content: string;
+          created_at: string;
+        }>;
+
+        return {
+          id: chat.id,
+          title: chat.title,
+          lastMessageAt: new Date(chat.last_message_at),
+          messages: messages.map(msg => ({
+            id: msg.id,
+            role: msg.role,
+            content: msg.content,
+            createdAt: new Date(msg.created_at)
           }))
-        }));
-      }
+        } as LocalChatData;
+      });
+
+      return await Promise.all(chatPromises);
     } catch (error) {
       console.error('Error loading chats from storage:', error);
+      return [];
     }
-    return [];
   }
 
   private async saveToCurrentChat(messages: ChatMessage[]) {
@@ -651,25 +767,42 @@ export class Chat extends AIChatAgent<Env> {
       console.error('Invalid messages array:', messages);
       return;
     }
-    // Ensure all messages have a valid Date for createdAt
-    const validatedMessages = messages.map(msg => ({
-      id: msg.id,
-      role: msg.role,
-      content: msg.content,
-      createdAt: msg.createdAt || new Date()
-    }));
-    if (this.currentChatId) {
-      const chatIndex = chats.findIndex(c => c.id === this.currentChatId);
-      if (chatIndex !== -1) {
-        chats[chatIndex].messages = validatedMessages;
-        chats[chatIndex].lastMessageAt = new Date();
 
-        try {
-          await this.storage.put('chats', chats);
-        } catch (error) {
-          console.error('Error saving chats to storage:', error);
-        }
-      }
+    if (!this.currentChatId) {
+      console.error('No chat selected');
+      return;
+    }
+
+    try {
+      // Actualizar la fecha del último mensaje en el chat
+      await this.db.prepare(
+        'UPDATE chats SET last_message_at = ? WHERE id = ?'
+      ).bind(new Date().toISOString(), this.currentChatId)
+      .run();
+
+      // Eliminar mensajes anteriores del chat
+      await this.db.prepare('DELETE FROM messages WHERE chat_id = ?')
+        .bind(this.currentChatId)
+        .run();
+
+      // Insertar los nuevos mensajes
+      const messagePromises = messages.map(msg => {
+        const createdAt = msg.createdAt || new Date();
+        return this.db.prepare(
+          'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
+        ).bind(
+          msg.id,
+          this.currentChatId,
+          msg.role,
+          msg.content,
+          createdAt.toISOString()
+        ).run();
+      });
+
+      await Promise.all(messagePromises);
+    } catch (error) {
+      console.error('Error saving messages to database:', error);
+      throw error;
     }
   }
 
