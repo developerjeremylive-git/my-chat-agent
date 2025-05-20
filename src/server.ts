@@ -149,22 +149,27 @@ app.get('/api/system-prompt', async (c) => {
 // Middleware CORS
 // Endpoints para la gestión de chats
 app.get('/api/chats', async (c) => {
-  return c.json(chats);
+  try {
+    const chats = await c.env.DB.prepare(
+      'SELECT * FROM chats ORDER BY last_message_at DESC'
+    ).all();
+    return c.json(chats.results);
+  } catch (error) {
+    console.error('Error fetching chats:', error);
+    return c.json({ error: 'Failed to fetch chats' }, 500);
+  }
 });
 
 app.get('/api/chats/:id/messages', async (c) => {
   try {
     const chatId = c.req.param('id');
-    const chat = Chat.instance as Chat;
+    const messages = await c.env.DB.prepare(
+      'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
+    ).bind(chatId).all();
 
-    if (!chat) {
-      return c.json({ success: false, error: 'Chat instance not found' }, 500);
-    }
-
-    const messages = await chat.getChatMessages(chatId);
     return c.json({
       success: true,
-      messages
+      messages: messages.results
     });
   } catch (error) {
     console.error('Error fetching chat messages:', error);
@@ -173,24 +178,43 @@ app.get('/api/chats/:id/messages', async (c) => {
 });
 
 app.get('/api/chats/:id', async (c) => {
-  const chatId = c.req.param('id');
-  const chat = chats.find(c => c.id === chatId);
-  if (!chat) {
-    return c.json({ error: 'Chat no encontrado' }, 404);
-  }
-  
-  // Notify WebSocket clients about the chat selection
-  const connections = wsConnections.get(chatId) || new Set<WebSocket>();
-  connections.forEach(ws => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({
-        type: 'chat_selected',
-        chat
-      }));
+  try {
+    const chatId = c.req.param('id');
+    const chat = await c.env.DB.prepare(
+      'SELECT * FROM chats WHERE id = ?'
+    ).bind(chatId).first();
+
+    if (!chat) {
+      return c.json({ error: 'Chat not found' }, 404);
     }
-  });
-  
-  return c.json(chat);
+
+    // Get messages for this chat
+    const messages = await c.env.DB.prepare(
+      'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
+    ).bind(chatId).all();
+
+    // Combine chat data with messages
+    const chatWithMessages = {
+      ...chat,
+      messages: messages.results || []
+    };
+
+    // Notify WebSocket clients about the chat selection
+    const connections = wsConnections.get(chatId) || new Set<WebSocket>();
+    connections.forEach(ws => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'chat_selected',
+          chat: chatWithMessages
+        }));
+      }
+    });
+
+    return c.json(chatWithMessages);
+  } catch (error) {
+    console.error('Error fetching chat:', error);
+    return c.json({ error: 'Failed to fetch chat' }, 500);
+  }
 });
 
 app.post('/api/chats', async (c) => {
@@ -874,12 +898,15 @@ export class Chat extends AIChatAgent<Env> {
 
   public async initializeDefaultChat() {
     try {
-      // Verificar si ya existe algún chat
-      const existingChats = await this.db.prepare('SELECT COUNT(*) as count FROM chats').first();
+      // Verificar si ya existe el chat por defecto
+      const defaultChatId = '3xytdwIhg9AimViz';
+      const existingDefaultChat = await this.db.prepare('SELECT * FROM chats WHERE id = ?')
+        .bind(defaultChatId)
+        .first<{ id: string; title: string; last_message_at: string }>();
       
-      if (!existingChats || existingChats.count === 0) {
+      if (!existingDefaultChat) {
         const defaultChat: ChatData = {
-          id: generateId(),
+          id: defaultChatId,
           title: '¡Bienvenido a tu Asistente Virtual! 🤖',
           messages: [],
           lastMessageAt: new Date()
@@ -895,17 +922,13 @@ export class Chat extends AIChatAgent<Env> {
         return defaultChat;
       }
 
-      // Si ya existen chats, retornar el primero
-      const firstChat = await this.db.prepare('SELECT * FROM chats ORDER BY last_message_at DESC LIMIT 1').first<{ id: string; title: string; last_message_at: string }>();
-      if (!firstChat) {
-        throw new Error('No chat found in database');
-      }
-      this.currentChatId = firstChat.id;
+      // Si el chat por defecto existe, retornarlo
+      this.currentChatId = existingDefaultChat.id;
       return {
-        id: firstChat.id,
-        title: firstChat.title,
+        id: existingDefaultChat.id,
+        title: existingDefaultChat.title,
         messages: [],
-        lastMessageAt: new Date(firstChat.last_message_at)
+        lastMessageAt: new Date(existingDefaultChat.last_message_at)
       };
     } catch (error) {
       console.error('Error initializing default chat:', error);
@@ -916,13 +939,13 @@ export class Chat extends AIChatAgent<Env> {
   /**
    * Establece el ID del chat actual
    */
-  setCurrentChat(chatId: string) {
+  async setCurrentChat(chatId: string) {
     this.currentChatId = chatId;
-    // Cargar mensajes del chat seleccionado
-    const chat = chats.find(c => c.id === chatId);
-    if (chat) {
-      this.messages = chat.messages;
-    }
+    // Cargar mensajes del chat seleccionado desde la base de datos
+    const messages = await this.db.prepare(
+      'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
+    ).bind(chatId).all();
+    this.messages = messages.results || [];
   }
 
   /**
