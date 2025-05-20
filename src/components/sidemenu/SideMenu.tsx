@@ -109,11 +109,24 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
                     title: 'Nuevo Chat'
                 })
             });
-            const newChat = await response.json() as ChatData;
-            setChats([...chats, { ...newChat, lastMessageAt: new Date(newChat.lastMessageAt) }]);
-            selectChat(newChat.id);
+            const data = await response.json() as { success: boolean; chat: ChatData };
+            
+            if (!response.ok) {
+                throw new Error('Error al crear el chat');
+            }
+
+            if (data.success && data.chat) {
+                const newChat = data.chat;
+                setChats([...chats, { ...newChat, lastMessageAt: new Date(newChat.lastMessageAt) }]);
+                selectChat(newChat.id);
+            } else {
+                throw new Error('Formato de respuesta inválido');
+            }
         } catch (error) {
             console.error('Error al crear el chat:', error);
+            // Aquí podrías mostrar un mensaje de error al usuario
+            // Por ejemplo, usando un componente de notificación o alert
+            alert(error instanceof Error ? error.message : 'Error al crear el chat');
         }
     };
 

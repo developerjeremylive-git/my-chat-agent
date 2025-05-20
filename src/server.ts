@@ -174,19 +174,54 @@ app.get('/api/chats/:id', async (c) => {
 });
 
 app.post('/api/chats', async (c) => {
-  const { title } = await c.req.json();
-  const newChat: ChatData = {
-    id: generateId(),
-    title: title || 'Nuevo Chat',
-    messages: [],
-    lastMessageAt: new Date()
-  };
-  chats.push(newChat);
-  
-  // Create a new WebSocket connection set for this chat
-  wsConnections.set(newChat.id, new Set<WebSocket>());
-  
-  return c.json(newChat);
+  try {
+    const { title } = await c.req.json();
+    const newChat: ChatData = {
+      id: generateId(),
+      title: title || 'Nuevo Chat',
+      messages: [],
+      lastMessageAt: new Date()
+    };
+
+    // Insertar el nuevo chat en la base de datos D1
+    await c.env.DB.prepare(
+      'INSERT INTO chats (id, title, last_message_at) VALUES (?, ?, ?)'
+    ).bind(
+      newChat.id,
+      newChat.title,
+      newChat.lastMessageAt.toISOString()
+    ).run();
+
+    // Actualizar el estado en memoria
+    chats.push(newChat);
+    
+    // Crear un nuevo conjunto de conexiones WebSocket para este chat
+    wsConnections.set(newChat.id, new Set<WebSocket>());
+
+    // Notificar a los clientes WebSocket sobre el nuevo chat
+    const connections = wsConnections.get(newChat.id);
+    if (connections) {
+      connections.forEach(ws => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            type: 'chat_created',
+            chat: newChat
+          }));
+        }
+      });
+    }
+    
+    return c.json({
+      success: true,
+      chat: newChat
+    });
+  } catch (error) {
+    console.error('Error al crear el chat:', error);
+    return c.json({
+      error: 'Error al crear el chat',
+      details: error instanceof Error ? error.message : 'Error desconocido'
+    }, 500);
+  }
 });
 
 app.put('/api/chats/:id/title', async (c) => {
@@ -234,15 +269,15 @@ app.post('/api/chats/:id/messages', async (c) => {
     // Use storage.transaction() for atomic operations
     await c.env.DB.batch([
       // Insert the new message
-      c.env.DB.prepare(
-        'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
-      ).bind(
-        newMessage.id,
-        chatId,
-        newMessage.role,
-        newMessage.content,
-        newMessage.createdAt.toISOString()
-      ),
+      // c.env.DB.prepare(
+      //   'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
+      // ).bind(
+      //   newMessage.id,
+      //   chatId,
+      //   newMessage.role,
+      //   newMessage.content,
+      //   newMessage.createdAt.toISOString()
+      // ),
 
       // Update the last message timestamp
       c.env.DB.prepare(
@@ -1077,7 +1112,7 @@ export class Chat extends AIChatAgent<Env> {
     const messages = [...this.messages, message];
 
     await this.saveMessages(messages);
-    await this.saveToCurrentChat(messages);
+    // await this.saveToCurrentChat(messages);
 
     const chatConnections = wsConnections.get(this.currentChatId || '');
     if (chatConnections) {
