@@ -77,25 +77,58 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
     useEffect(() => {
         // Cargar chats al montar el componente y seleccionar el chat por defecto
         const loadInitialChats = async () => {
-            const response = await fetch('/api/chats');
-            const data = await response.json() as ChatData[];
-            const formattedChats = data.map((chat) => ({
-                ...chat,
-                lastMessageAt: new Date(chat.lastMessageAt),
-                messages: chat.messages.map(msg => ({
-                    ...msg,
-                    createdAt: new Date(msg.createdAt)
-                })) as LocalMessage[]
-            }));
-            setChats(formattedChats);
+            try {
+                // Cargar lista de chats
+                const response = await fetch('/api/chats');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch chats');
+                }
+                const data = await response.json() as ChatData[];
+                
+                // Formatear los chats
+                const formattedChats = data.map((chat) => ({
+                    ...chat,
+                    lastMessageAt: new Date(chat.lastMessageAt),
+                    messages: chat.messages || []
+                }));
+                setChats(formattedChats);
 
-            // Buscar el chat por defecto con ID '3xytdwIhg9AimViz'
-            const defaultChat = formattedChats.find(chat => chat.id === '3xytdwIhg9AimViz');
-            if (defaultChat) {
-                await selectChat(defaultChat.id);
-            } else if (formattedChats.length > 0) {
-                // Si no se encuentra el chat por defecto, seleccionar el primero
-                await selectChat(formattedChats[0].id);
+                // Buscar y seleccionar el chat por defecto
+                const defaultChatId = '3xytdwIhg9AimViz';
+                const defaultChat = formattedChats.find(chat => chat.id === defaultChatId);
+                
+                if (defaultChat) {
+                    // Cargar mensajes del chat por defecto
+                    const messagesResponse = await fetch(`/api/chats/${defaultChatId}/messages`);
+                    if (messagesResponse.ok) {
+                        const messagesData = await messagesResponse.json() as { success: boolean; messages: Array<{ id: string; chatId: string; role: string; content: string; createdAt: string; }>};
+                        if (messagesData.success && Array.isArray(messagesData.messages)) {
+                            defaultChat.messages = messagesData.messages.map(msg => {
+                                // Validar que el rol sea uno de los permitidos
+                                const role = ['assistant', 'system', 'user', 'data'].includes(msg.role) ? 
+                                    msg.role as 'assistant' | 'system' | 'user' | 'data' : 
+                                    'system';
+                                
+                                return {
+                                    id: msg.id,
+                                    chatId: msg.chatId,
+                                    role,
+                                    content: msg.content,
+                                    createdAt: new Date(msg.createdAt)
+                                };
+                            });
+                            setChats(chats => chats.map(c => 
+                                c.id === defaultChatId ? defaultChat : c
+                            ));
+                        }
+                    }
+                    await selectChat(defaultChat.id);
+                } else if (formattedChats.length > 0) {
+                    // Si no se encuentra el chat por defecto, seleccionar el primero
+                    await selectChat(formattedChats[0].id);
+                }
+            } catch (error) {
+                console.error('Error loading chats:', error);
             }
         };
         loadInitialChats();

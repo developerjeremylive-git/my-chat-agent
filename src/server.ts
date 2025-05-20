@@ -153,7 +153,19 @@ app.get('/api/chats', async (c) => {
     const chats = await c.env.DB.prepare(
       'SELECT * FROM chats ORDER BY last_message_at DESC'
     ).all();
-    return c.json(chats.results);
+
+    // Format the chats with proper date handling
+    const formattedChats = chats.results.map(chat => {
+      const lastMessageAt = typeof chat.last_message_at === 'string' ? 
+        new Date(chat.last_message_at) : new Date();
+      return {
+        ...chat,
+        lastMessageAt: lastMessageAt.toISOString(),
+        messages: [] // Initialize empty messages array
+      };
+    });
+
+    return c.json(formattedChats);
   } catch (error) {
     console.error('Error fetching chats:', error);
     return c.json({ error: 'Failed to fetch chats' }, 500);
@@ -163,13 +175,36 @@ app.get('/api/chats', async (c) => {
 app.get('/api/chats/:id/messages', async (c) => {
   try {
     const chatId = c.req.param('id');
+
+    // Primero verificar si el chat existe
+    const chat = await c.env.DB.prepare(
+      'SELECT * FROM chats WHERE id = ?'
+    ).bind(chatId).first();
+
+    if (!chat) {
+      return c.json({ success: false, error: 'Chat not found' }, 404);
+    }
+
     const messages = await c.env.DB.prepare(
       'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
     ).bind(chatId).all();
 
+    // Format messages with proper date handling
+    const formattedMessages = messages.results.map(msg => {
+      const createdAt = typeof msg.created_at === 'string' ? 
+        new Date(msg.created_at) : new Date();
+      return {
+        id: msg.id,
+        chatId: msg.chat_id,
+        role: msg.role,
+        content: msg.content,
+        createdAt: createdAt.toISOString()
+      };
+    });
+
     return c.json({
       success: true,
-      messages: messages.results
+      messages: formattedMessages
     });
   } catch (error) {
     console.error('Error fetching chat messages:', error);
