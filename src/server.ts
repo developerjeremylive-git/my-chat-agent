@@ -365,7 +365,7 @@ interface DurableObjectStorage {
   setAlarm(scheduledTime: number | Date): Promise<void>;
   deleteAlarm(): Promise<void>;
   sync(): Promise<void>;
-  database(name: string): D1Database | null;
+  database(name: string): D1Database;
   sql<T = unknown>(query: string): Promise<T>;
   transactionSync<T>(closure: (txn: DurableObjectStorage) => T): T;
   getCurrentBookmark(): string;
@@ -389,7 +389,7 @@ interface DurableObjectStorage {
   setAlarm(scheduledTime: number | Date): Promise<void>;
   deleteAlarm(): Promise<void>;
   sync(): Promise<void>;
-  database(name: string): D1Database | null;
+  database(name: string): D1Database;
   sql<T = unknown>(query: string): Promise<T>;
   transactionSync<T>(closure: (txn: DurableObjectStorage) => T): T;
   getCurrentBookmark(): string;
@@ -409,29 +409,7 @@ class SimpleDurableObjectState implements DurableObjectState {
 
   constructor(id: DurableObjectId, storage: DurableObjectStorage) {
     this.id = id;
-    this.storage = {
-      get: async (key: string) => storage.get(key),
-      put: async (key: string, value: any) => storage.put(key, value),
-      delete: async (key: string) => storage.delete(key),
-      list: async (options?: { prefix?: string; limit?: number; reverse?: boolean }) => storage.list(options),
-      database: (name: string) => {
-        if (!this._database) {
-          this._database = storage.database(name);
-        }
-        return this._database;
-      },
-      deleteAll: async () => storage.deleteAll(),
-      transaction: async (closure) => storage.transaction(closure),
-      getAlarm: async () => storage.getAlarm(),
-      setAlarm: async (scheduledTime) => storage.setAlarm(scheduledTime),
-      deleteAlarm: async () => storage.deleteAlarm(),
-      sync: async () => storage.sync(),
-      sql: async () => null,
-      transactionSync: (closure) => closure(this.storage),
-      getCurrentBookmark: () => '',
-      getBookmarkForTime: () => '',
-      onNextSessionRestoreBookmark: () => {}
-    };
+    this.storage = storage;
     this.webSockets = new Set();
   }
   setHibernatableWebSocketEventTimeout(timeoutMs: number): void {
@@ -679,6 +657,9 @@ export class Chat extends AIChatAgent<Env> {
     this.messages = [];
     this.currentChatId = null;
     this.db = env.DB;
+    if (!this.db) {
+      throw new Error('Database not initialized in environment');
+    }
     
     // Initialize messages array with proper type checking
     this.messages = Array.isArray(this.messages) ? this.messages : [];
@@ -696,15 +677,23 @@ export class Chat extends AIChatAgent<Env> {
   }
 
   private async initializeTables() {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
     try {
-      await this.db.batch([
-        this.db.prepare(this.CREATE_CHATS_TABLE),
-        this.db.prepare(this.CREATE_MESSAGES_TABLE)
-      ]);
+      const createChatsStmt = this.db.prepare(this.CREATE_CHATS_TABLE);
+      const createMessagesStmt = this.db.prepare(this.CREATE_MESSAGES_TABLE);
+
+      if (!createChatsStmt || !createMessagesStmt) {
+        throw new Error('Failed to prepare database statements');
+      }
+
+      await this.db.batch([createChatsStmt, createMessagesStmt]);
       console.log('Database tables initialized successfully');
     } catch (error) {
       console.error('Error initializing database tables:', error);
-      throw error;
+      throw error; // Re-throw para manejo superior
     }
   }
 
