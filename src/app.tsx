@@ -88,10 +88,29 @@ function ChatComponent() {
       if (response.ok) {
         const messages = await response.json();
         if (Array.isArray(messages)) {
-          setCurrentMessages(messages.map(msg => ({
-            ...msg,
-            createdAt: new Date(msg.createdAt)
-          })));
+          // Clear existing history
+          clearHistory();
+          
+          // Convert messages to agent format and add them
+          messages.forEach(msg => {
+            // Create a unique tool call ID for each message
+            const toolCallId = `chat-${msg.id}`;
+            
+            // Format the message as a tool result
+            const toolResult = {
+              toolCallId,
+              result: {
+                role: msg.role,
+                content: msg.content,
+                id: msg.id,
+                createdAt: new Date(msg.createdAt)
+              }
+            };
+            
+            // Add the message as a tool result
+            addToolResult(toolResult);
+          });
+          
           setSelectedChatId(chatId);
         }
       }
