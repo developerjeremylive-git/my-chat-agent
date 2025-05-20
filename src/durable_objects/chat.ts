@@ -163,9 +163,11 @@ export class ChatDO implements DurableObject {
             lastMessageAt: new Date()
         };
 
-        await this.db.prepare(
-            'INSERT INTO chats (id, title, last_message_at) VALUES (?, ?, ?)'
-        ).bind(chat.id, chat.title, chat.lastMessageAt.toISOString()).run();
+        await this.storage.transaction(async (txn) => {
+            await this.db.prepare(
+                'INSERT INTO chats (id, title, last_message_at) VALUES (?, ?, ?)'
+            ).bind(chat.id, chat.title, chat.lastMessageAt.toISOString()).run();
+        });
 
         return chat;
     }
@@ -251,9 +253,25 @@ export class ChatDO implements DurableObject {
     async saveMessages(messages: ChatMessage[]): Promise<void> {
         if (!this.currentChatId) throw new Error('No chat selected');
 
-        for (const message of messages) {
-            await this.addMessage(this.currentChatId, message);
-        }
+        await this.storage.transaction(async (txn) => {
+            for (const message of messages) {
+                await this.db.prepare(
+                    'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
+                ).bind(
+                    message.id,
+                    this.currentChatId,
+                    message.role,
+                    message.content,
+                    message.createdAt.toISOString()
+                ).run();
+            }
+
+            // Actualizar la fecha del último mensaje
+            await this.db.prepare(
+                'UPDATE chats SET last_message_at = ? WHERE id = ?'
+            ).bind(new Date().toISOString(), this.currentChatId).run();
+        });
+
         this.messages = messages;
 
         // Emitir evento de actualización de mensajes si estamos en el navegador
