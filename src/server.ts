@@ -211,41 +211,87 @@ app.delete('/api/chats/:id', async (c) => {
 // Assistant configuration endpoint
 // Handle chat messages
 app.post('/api/chats/:id/messages', async (c) => {
-  const chatId = c.req.param('id');
-  const { content, role = 'user' } = await c.req.json();
+  try {
+    const chatId = c.req.param('id');
+    const { content, role = 'user' } = await c.req.json();
 
-  const chatIndex = chats.findIndex(chat => chat.id === chatId);
-  if (chatIndex === -1) {
-    return c.json({ error: 'Chat no encontrado' }, 404);
+    // Verificar primero si el chat existe en la base de datos
+    const chatExists = await c.env.DB.prepare(
+      'SELECT id FROM chats WHERE id = ?'
+    ).bind(chatId).first();
+
+    if (!chatExists) {
+      return c.json({ error: 'Chat no encontrado' }, 404);
+    }
+
+    const newMessage = {
+      id: generateId(),
+      content,
+      role,
+      createdAt: new Date()
+    };
+
+    // Usar una transacción para mantener la integridad de los datos
+    await c.env.DB.prepare(
+      'BEGIN TRANSACTION'
+    ).run();
+
+    try {
+      // Insertar el nuevo mensaje
+      await c.env.DB.prepare(
+        'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
+      ).bind(
+        newMessage.id,
+        chatId,
+        newMessage.role,
+        newMessage.content,
+        newMessage.createdAt.toISOString()
+      ).run();
+
+      // Actualizar la fecha del último mensaje del chat
+      await c.env.DB.prepare(
+        'UPDATE chats SET last_message_at = ? WHERE id = ?'
+      ).bind(new Date().toISOString(), chatId).run();
+
+      await c.env.DB.prepare('COMMIT').run();
+
+      // Actualizar el chat en memoria
+      const chatIndex = chats.findIndex(chat => chat.id === chatId);
+      if (chatIndex !== -1) {
+        chats[chatIndex].messages.push(newMessage);
+        chats[chatIndex].lastMessageAt = new Date();
+
+        // Notificar a los clientes WebSocket
+        const connections = wsConnections.get(chatId) || new Set<WebSocket>();
+        connections.forEach(ws => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+              type: 'chat_updated',
+              chatId,
+              messages: chats[chatIndex].messages
+            }));
+          }
+        });
+      }
+
+      return c.json({
+        success: true,
+        message: newMessage,
+        chat: chats[chatIndex]
+      });
+    } catch (error) {
+      // Si hay un error, hacer rollback de la transacción
+      await c.env.DB.prepare('ROLLBACK').run();
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error al procesar el mensaje:', error);
+    return c.json({
+      error: 'Error al procesar el mensaje',
+      details: error instanceof Error ? error.message : 'Error desconocido'
+    }, 500);
   }
 
-  const newMessage = {
-    id: generateId(),
-    content,
-    role,
-    createdAt: new Date()
-  };
-
-  chats[chatIndex].messages.push(newMessage);
-  chats[chatIndex].lastMessageAt = new Date();
-
-  // Notify all connected WebSocket clients about the new message
-  const connections = wsConnections.get(chatId) || new Set<WebSocket>();
-  connections.forEach(ws => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({
-        type: 'chat_updated',
-        chatId,
-        messages: chats[chatIndex].messages
-      }));
-    }
-  });
-
-  return c.json({
-    success: true,
-    message: newMessage,
-    chat: chats[chatIndex]
-  });
 });
 
 app.post('/api/assistant', async (c) => {
