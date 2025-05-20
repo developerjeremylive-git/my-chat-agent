@@ -378,6 +378,11 @@ interface DurableObjectStorage {
   delete(key: string): Promise<void>;
   list(options?: { prefix?: string; limit?: number; reverse?: boolean }): Promise<Map<string, any>>;
   database(name: string): D1Database;
+  sql<T = unknown>(query: string): Promise<T>;
+  transactionSync<T>(closure: (txn: DurableObjectStorage) => T): T;
+  getCurrentBookmark(): string;
+  getBookmarkForTime(timestamp: number): string;
+  onNextSessionRestoreBookmark(bookmark: string): void;
 }
 
 class SimpleDurableObjectState implements DurableObjectState {

@@ -20,7 +20,7 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlit/e_classes": ["Chat"]
+      "new_sqlite_classes": ["Chat"]
     }
   ],
   "ai": {
