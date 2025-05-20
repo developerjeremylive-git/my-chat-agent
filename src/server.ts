@@ -676,7 +676,7 @@ export class Chat extends AIChatAgent<Env> {
     this.storage = state.storage;
     this.messages = [];
     this.currentChatId = null;
-    this.db = state.storage.database('chat-db');
+    this.db = state.storage.database('database');
 
     // Initialize messages array with proper type checking
     this.messages = Array.isArray(this.messages) ? this.messages : [];
