@@ -1,61 +1,16 @@
 import type { Message } from '@ai-sdk/react';
-import type { LanguageModelV1Source } from '@ai-sdk/provider';
+import type { TextUIPart as SDKTextUIPart, ReasoningUIPart as SDKReasoningUIPart, ToolInvocationUIPart as SDKToolInvocationUIPart, SourceUIPart as SDKSourceUIPart, FileUIPart as SDKFileUIPart, StepStartUIPart as SDKStepStartUIPart } from '@ai-sdk/ui-utils';
 
-export type UIPart = TextUIPart | ReasoningUIPart | ToolInvocationUIPart | SourceUIPart | FileUIPart | StepStartUIPart;
+export type UIPart = SDKTextUIPart | SDKReasoningUIPart | SDKToolInvocationUIPart | SDKSourceUIPart | SDKFileUIPart | SDKStepStartUIPart;
 
-export interface TextUIPart {
-  type: 'text';
-  text: string;
-}
 
-export interface ReasoningUIPart {
-  type: 'reasoning';
-  reasoning: string;
-  details: Array<{
-    type: 'text';
-    text: string;
-    signature?: string;
-  } | {
-    type: 'redacted';
-    data: string;
-  }>;
-}
-
-export interface ToolInvocationUIPart {
-  type: 'tool-invocation';
-  toolInvocation: {
-    state: 'result';
-    step?: number;
-    toolName: string;
-    toolCallId: string;
-    args: any;
-    result: any;
-  };
-}
-
-export interface SourceUIPart {
-  type: 'source';
-  source: LanguageModelV1Source;
-}
-
-export interface FileUIPart {
-  type: 'file';
-  path: string;
-  mimeType: string;
-  data: string;
-}
-
-export interface StepStartUIPart {
-  type: 'step-start';
-  step: number;
-}
 
 export interface ChatMessage extends Omit<Message, 'parts' | 'createdAt'> {
   id: string;
   role: 'assistant' | 'system' | 'user' | 'data';
   content: string;
   createdAt: Date;
-  parts?: (TextUIPart | ReasoningUIPart | ToolInvocationUIPart | SourceUIPart | FileUIPart | StepStartUIPart)[];
+  parts?: (SDKTextUIPart | SDKReasoningUIPart | SDKToolInvocationUIPart | SDKSourceUIPart | SDKFileUIPart | SDKStepStartUIPart)[];
 }
 
 export interface ChatData {
@@ -68,7 +23,7 @@ export interface ChatData {
 export interface LocalMessage extends Omit<Message, 'parts'>, ChatMessage {
   id: string;
   createdAt: Date;
-  parts?: (TextUIPart | ReasoningUIPart | ToolInvocationUIPart | SourceUIPart | FileUIPart | StepStartUIPart)[];
+  parts?: (SDKTextUIPart | SDKReasoningUIPart | SDKToolInvocationUIPart | SDKSourceUIPart | SDKFileUIPart | SDKStepStartUIPart)[];
 }
 
 export interface LocalChatData extends ChatData {
