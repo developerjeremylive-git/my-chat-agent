@@ -378,11 +378,11 @@ interface DurableObjectStorage {
   delete(key: string): Promise<void>;
   list(options?: { prefix?: string; limit?: number; reverse?: boolean }): Promise<Map<string, any>>;
   database(name: string): D1Database;
-  sql<T = unknown>(query: string): Promise<T>;
-  transactionSync<T>(closure: (txn: DurableObjectStorage) => T): T;
-  getCurrentBookmark(): string;
-  getBookmarkForTime(timestamp: number): string;
-  onNextSessionRestoreBookmark(bookmark: string): void;
+  // sql<T = unknown>(query: string): Promise<T>;
+  // transactionSync<T>(closure: (txn: DurableObjectStorage) => T): T;
+  // getCurrentBookmark(): string;
+  // getBookmarkForTime(timestamp: number): string;
+  // onNextSessionRestoreBookmark(bookmark: string): void;
 }
 
 class SimpleDurableObjectState implements DurableObjectState {
@@ -393,10 +393,28 @@ class SimpleDurableObjectState implements DurableObjectState {
   private autoResponseTimestamp: number | null = null;
   private hibernatableWebSocketEventTimeout: number = 0;
   private state: { [key: string]: any } = {};
+  private _database: D1Database | null = null;
 
   constructor(id: DurableObjectId, storage: DurableObjectStorage) {
     this.id = id;
-    this.storage = storage;
+    this.storage = {
+      get: async (key: string) => storage.get(key),
+      put: async (key: string, value: any) => storage.put(key, value),
+      delete: async (key: string) => storage.delete(key),
+      list: async (options?: { prefix?: string; limit?: number; reverse?: boolean }) => storage.list(options),
+      database: (name: string) => {
+        if (!this._database) {
+          this._database = storage.database(name);
+        }
+        return this._database;
+      },
+      deleteAll: async () => storage.deleteAll(),
+      transaction: async (closure) => storage.transaction(closure),
+      getAlarm: async () => storage.getAlarm(),
+      setAlarm: async (scheduledTime) => storage.setAlarm(scheduledTime),
+      deleteAlarm: async () => storage.deleteAlarm(),
+      sync: async () => storage.sync()
+    };
     this.webSockets = new Set();
   }
   setHibernatableWebSocketEventTimeout(timeoutMs: number): void {
