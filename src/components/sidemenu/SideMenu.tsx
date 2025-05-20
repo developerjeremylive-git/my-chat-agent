@@ -6,7 +6,7 @@ import { useChat } from '@/contexts/ChatContext';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-import type { Message, ChatData, LocalMessage, LocalChatData, ChatMessage } from '@/types/chat';
+import type { ChatData, LocalMessage, LocalChatData, ChatMessage } from '@/types/chat';
 
 interface EditTitleModalProps {
     isOpen: boolean;
@@ -75,8 +75,11 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
     const [editingChat, setEditingChat] = useState<LocalChatData | null>(null);
 
     useEffect(() => {
-        // Cargar chats al montar el componente
-        fetchChats();
+        // Cargar chats al montar el componente y seleccionar el primero
+        const loadInitialChats = async () => {
+            await fetchChats();
+        };
+        loadInitialChats();
     }, []);
 
     const fetchChats = async () => {
@@ -85,13 +88,24 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
             const data = await response.json() as ChatData[];
             const formattedChats = data.map((chat) => ({
                 ...chat,
-                lastMessageAt: new Date(chat.lastMessageAt)
+                lastMessageAt: new Date(chat.lastMessageAt),
+                messages: chat.messages.map(msg => ({
+                    ...msg,
+                    createdAt: new Date(msg.createdAt)
+                })) as LocalMessage[]
             }));
             setChats(formattedChats);
 
             // Seleccionar automáticamente el primer chat si existe
             if (formattedChats.length > 0 && !currentChat) {
-                selectChat(formattedChats[0].id);
+                await selectChat(formattedChats[0].id);
+                // Emitir evento para actualizar la interfaz principal con el primer chat
+                window.dispatchEvent(new CustomEvent('initialChatLoaded', { 
+                    detail: { 
+                        chatId: formattedChats[0].id,
+                        messages: formattedChats[0].messages 
+                    }
+                }));
             }
         } catch (error) {
             console.error('Error al cargar los chats:', error);
@@ -117,7 +131,14 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
 
             if (data.success && data.chat) {
                 const newChat = data.chat;
-                setChats([...chats, { ...newChat, lastMessageAt: new Date(newChat.lastMessageAt) }]);
+                setChats([...chats, { 
+                    ...newChat, 
+                    lastMessageAt: new Date(newChat.lastMessageAt),
+                    messages: newChat.messages.map(msg => ({
+                        ...msg,
+                        createdAt: new Date(msg.createdAt)
+                    })) as LocalMessage[]
+                }]);
                 selectChat(newChat.id);
             } else {
                 throw new Error('Formato de respuesta inválido');
@@ -165,10 +186,10 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
                 id: chatData.id,
                 title: chatData.title,
                 lastMessageAt: new Date(chatData.lastMessageAt),
-                messages: chatData.messages.map((msg: ChatMessage) => ({
+                messages: chatData.messages ? chatData.messages.map((msg: ChatMessage) => ({
                     ...msg,
                     createdAt: new Date(msg.createdAt)
-                }))
+                })) as LocalMessage[] : []
                 };
                 setCurrentChat(chat);
                 // Emitir evento para actualizar el chat en la interfaz principal

@@ -67,6 +67,7 @@ import { InputSystemPrompt } from "./components/input/InputSystemPrompt";
 import { ModelSelect } from "./components/model/ModelSelect";
 import { GeminiConfigModal } from "./components/modal/GeminiConfigModal";
 import { ListHeart } from "@phosphor-icons/react/dist/ssr";
+import type { ChatMessage } from "./types/chat";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -78,6 +79,7 @@ function ChatComponent() {
   const { selectedModel } = useModel();
   const [showOIAICreator, setShowOIAICreator] = useOIAIState(false);
   const [showGeminiConfig, setShowGeminiConfig] = useState(false);
+  const [currentMessages, setCurrentMessages] = useState<ChatMessage[]>([]);
 
   const handleOIAICopy = (content: string) => {
     setInputText(content);
@@ -170,6 +172,32 @@ function ChatComponent() {
     // Save theme preference to localStorage
     localStorage.setItem("theme", theme);
   }, [theme]);
+
+  // Escuchar el evento de carga inicial del chat
+  useEffect(() => {
+    const handleInitialChatLoaded = (event: CustomEvent<{ chatId: string; messages: ChatMessage[] }>) => {
+      setCurrentMessages(event.detail.messages || []);
+    };
+
+    window.addEventListener('initialChatLoaded', handleInitialChatLoaded as EventListener);
+
+    return () => {
+      window.removeEventListener('initialChatLoaded', handleInitialChatLoaded as EventListener);
+    };
+  }, []);
+
+  // Escuchar el evento de selección de chat
+  useEffect(() => {
+    const handleChatSelected = (event: CustomEvent<{ chatId: string; messages: ChatMessage[] }>) => {
+      setCurrentMessages(event.detail.messages || []);
+    };
+
+    window.addEventListener('chatSelected', handleChatSelected as EventListener);
+
+    return () => {
+      window.removeEventListener('chatSelected', handleChatSelected as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     // Save text size preference to localStorage
