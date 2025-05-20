@@ -80,6 +80,30 @@ function ChatComponent() {
   const [showOIAICreator, setShowOIAICreator] = useOIAIState(false);
   const [showGeminiConfig, setShowGeminiConfig] = useState(false);
   const [currentMessages, setCurrentMessages] = useState<ChatMessage[]>([]);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  
+  const handleChatSelect = async (chatId: string) => {
+    try {
+      const response = await fetch(`/api/chats/${chatId}/messages`);
+      if (response.ok) {
+        const messages = await response.json();
+        if (Array.isArray(messages)) {
+          setCurrentMessages(messages.map(msg => ({
+            ...msg,
+            createdAt: new Date(msg.createdAt)
+          })));
+          setSelectedChatId(chatId);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading chat messages:', error);
+    }
+  };
+
+  const handleNewChat = () => {
+    setCurrentMessages([]);
+    setSelectedChatId(null);
+  };
 
   const handleOIAICopy = (content: string) => {
     setInputText(content);
@@ -333,9 +357,12 @@ function ChatComponent() {
         <SideMenu
           isOpen={isSideMenuOpen}
           onClose={() => setIsSideMenuOpen(false)}
-          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenSettings={() => setShowSettingsMenu(true)}
           onOpenTools={() => setShowToolsInterface(true)}
           onClearHistory={() => setShowClearDialog(true)}
+          onChatSelect={handleChatSelect}
+          onNewChat={handleNewChat}
+          selectedChatId={selectedChatId}
         />
         <main className="flex-1 w-full px-4 py-4 relative">
           {/* Botón flotante de configuración */}

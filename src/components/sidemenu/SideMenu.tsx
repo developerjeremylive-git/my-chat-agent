@@ -20,9 +20,12 @@ interface EditTitleModalProps {
 interface SideMenuProps {
     isOpen: boolean;
     onClose: () => void;
+    onChatSelect: (chatId: string) => void;
+    onNewChat: () => void;
     onOpenSettings: () => void;
     onOpenTools: () => void;
     onClearHistory: () => void;
+    selectedChatId: string | null;
 }
 
 function EditTitleModal({ isOpen, onClose, onSave, currentTitle }: EditTitleModalProps) {
@@ -69,9 +72,8 @@ function EditTitleModal({ isOpen, onClose, onSave, currentTitle }: EditTitleModa
     );
 }
 
-export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClearHistory }: SideMenuProps) {
+export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSettings, onOpenTools, onClearHistory, selectedChatId }: SideMenuProps) {
     const [chats, setChats] = useState<LocalChatData[]>([]);
-    const [currentChat, setCurrentChat] = useState<LocalChatData | null>(null);
     const [editingChat, setEditingChat] = useState<LocalChatData | null>(null);
 
     useEffect(() => {
@@ -94,21 +96,16 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
 
                 // Cargar mensajes para cada chat
                 const chatsWithMessages = await Promise.all(
-                    formattedChats.map(async (chat) => {
+                    data.map(async (chat) => {
                         try {
                             const messagesResponse = await fetch(`/api/chats/${chat.id}/messages`);
                             if (messagesResponse.ok) {
-                                const messagesData = await messagesResponse.json() as { success: boolean; messages: Array<{ id: string; chatId: string; role: string; content: string; createdAt: string; }>};
-                                if (messagesData.success && Array.isArray(messagesData.messages)) {
+                                const messages = await messagesResponse.json();
+                                if (Array.isArray(messages)) {
                                     return {
                                         ...chat,
-                                        messages: messagesData.messages.map(msg => ({
-                                            id: msg.id,
-                                            chatId: msg.chatId,
-                                            role: ['assistant', 'system', 'user', 'data'].includes(msg.role) ? 
-                                                msg.role as 'assistant' | 'system' | 'user' | 'data' : 
-                                                'system',
-                                            content: msg.content,
+                                        messages: messages.map(msg => ({
+                                            ...msg,
                                             createdAt: new Date(msg.createdAt)
                                         }))
                                     };
@@ -123,17 +120,7 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
                 );
 
                 setChats(chatsWithMessages);
-
-                // Buscar y seleccionar el chat por defecto
-                const defaultChatId = '3xytdwIhg9AimViz';
-                const defaultChat = chatsWithMessages.find(chat => chat.id === defaultChatId);
-                
-                if (defaultChat) {
-                    await selectChat(defaultChat.id);
-                } else if (chatsWithMessages.length > 0) {
-                    // Si no se encuentra el chat por defecto, seleccionar el primero
-                    await selectChat(chatsWithMessages[0].id);
-                }
+                // No seleccionamos ningún chat por defecto
             } catch (error) {
                 console.error('Error loading chats:', error);
             }
@@ -148,26 +135,11 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
             const formattedChats = data.map((chat) => ({
                 ...chat,
                 lastMessageAt: new Date(chat.lastMessageAt),
-                messages: chat.messages.map(msg => ({
-                    ...msg,
-                    createdAt: new Date(msg.createdAt)
-                })) as LocalMessage[]
+                messages: []
             }));
             setChats(formattedChats);
-
-            // Seleccionar automáticamente el primer chat si existe
-            if (formattedChats.length > 0 && !currentChat) {
-                await selectChat(formattedChats[0].id);
-                // Emitir evento para actualizar la interfaz principal con el primer chat
-                window.dispatchEvent(new CustomEvent('initialChatLoaded', { 
-                    detail: { 
-                        chatId: formattedChats[0].id,
-                        messages: formattedChats[0].messages 
-                    }
-                }));
-            }
         } catch (error) {
-            console.error('Error al cargar los chats:', error);
+            console.error('Error loading chats:', error);
         }
     };
 
@@ -260,8 +232,6 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
                 })) as LocalMessage[]
             };
 
-            setCurrentChat(chat);
-
             // Emitir evento para actualizar el chat en la interfaz principal
             window.dispatchEvent(new CustomEvent('chatSelected', { 
                 detail: { 
@@ -275,63 +245,31 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
         }
     };
 
-    // Escuchar eventos de actualización de chats
-    useEffect(() => {
-        const handleChatsUpdated = (event: CustomEvent<{ chats: LocalChatData[] }>) => {
-            const updatedChats = event.detail.chats.map(chat => ({
-                ...chat,
-                lastMessageAt: new Date(chat.lastMessageAt),
-                messages: chat.messages.map(msg => ({
-                    ...msg,
-                    createdAt: new Date(msg.createdAt)
-                }))
-            }));
-            setChats(updatedChats);
-        };
-
-        window.addEventListener('chatsUpdated', handleChatsUpdated as EventListener);
-
-        return () => {
-            window.removeEventListener('chatsUpdated', handleChatsUpdated as EventListener);
-        };
-    }, []);
-
     return (
         <AnimatePresence>
-            {editingChat && (
-                <EditTitleModal
-                    isOpen={true}
-                    onClose={() => setEditingChat(null)}
-                    onSave={(newTitle) => {
-                        updateChatTitle(editingChat.id, newTitle);
-                        setEditingChat(null);
-                    }}
-                    currentTitle={editingChat.title}
-                />
-            )}
             {isOpen && (
                 <>
                     {/* Overlay */}
                     <motion.div
+                        className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm z-40"
                         onClick={onClose}
                     />
 
-                    {/* Menú lateral */}
+                    {/* Panel lateral */}
                     <motion.div
-                        initial={{ x: -300 }}
+                        className="fixed left-0 top-0 bottom-0 w-80 bg-white dark:bg-neutral-900 z-50
+                        border-r border-neutral-200 dark:border-neutral-700"
+                        initial={{ x: '-100%' }}
                         animate={{ x: 0 }}
-                        exit={{ x: -300 }}
-                        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                        className="fixed left-0 top-0 h-full w-[280px] bg-white dark:bg-neutral-900 shadow-xl z-50
-                      border-r border-neutral-200/50 dark:border-neutral-700/50"
+                        exit={{ x: '-100%' }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 300 }}
                     >
                         <div className="flex flex-col h-full">
-                            {/* Encabezado */}
-                            <div className="flex items-center justify-between p-4 border-b border-neutral-200/50 dark:border-neutral-700/50">
+                            {/* Cabecera */}
+                            <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-700">
                                 <h2 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
                                     Menú Principal
                                 </h2>
@@ -346,105 +284,100 @@ export function SideMenu({ isOpen, onClose, onOpenSettings, onOpenTools, onClear
                             </div>
 
                             {/* Contenido */}
-                            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                            <div className="flex-1 overflow-y-auto space-y-6 p-4">
                                 {/* Acciones principales */}
                                 <div className="space-y-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="lg"
-                                        className="w-full justify-start gap-3 p-3 rounded-xl
-                             bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
-                             hover:from-[#F48120]/20 hover:to-purple-500/20
-                             dark:from-[#F48120]/5 dark:to-purple-500/5
-                             dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15"
-                                        onClick={createChat}
+                                    <button
+                                        onClick={onNewChat}
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                                        text-neutral-700 dark:text-neutral-300
+                                        hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                                        dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                                        transition-all duration-300 transform hover:translate-x-1 group/item"
                                     >
-                                        <ChatText weight="duotone" className="w-5 h-5 text-[#F48120]" />
-                                        <span>Nuevo Chat</span>
-                                    </Button>
+                                        <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                                        <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Nuevo Chat</span>
+                                    </button>
 
-                                    <Button
-                                        variant="ghost"
-                                        size="lg"
-                                        className="w-full justify-start gap-3 p-3 rounded-xl"
+                                    <button
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                                        text-neutral-700 dark:text-neutral-300
+                                        hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                                        dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                                        transition-all duration-300 transform hover:translate-x-1 group/item"
                                         onClick={onOpenSettings}
                                     >
-                                        <Gear weight="duotone" className="w-5 h-5" />
-                                        <span>Configuración</span>
-                                    </Button>
+                                        <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                                        <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Configuración</span>
+                                    </button>
 
-                                    <Button
-                                        variant="ghost"
-                                        size="lg"
-                                        className="w-full justify-start gap-3 p-3 rounded-xl"
+                                    <button
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                                        text-neutral-700 dark:text-neutral-300
+                                        hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                                        dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                                        transition-all duration-300 transform hover:translate-x-1 group/item"
                                         onClick={onOpenTools}
                                     >
-                                        <Rocket weight="duotone" className="w-5 h-5" />
-                                        <span>Herramientas</span>
-                                    </Button>
+                                        <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                                        <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Herramientas</span>
+                                    </button>
+
+                                    <button
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
+                                        text-neutral-700 dark:text-neutral-300
+                                        hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                                        dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                                        transition-all duration-300 transform hover:translate-x-1 group/item"
+                                        onClick={onClearHistory}
+                                    >
+                                        <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
+                                        <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Limpiar historial</span>
+                                    </button>
                                 </div>
 
-                                {/* Lista de chats */}
+                                {/* Chats recientes */}
                                 <div className="space-y-2">
                                     <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 px-2">Chats Recientes</h3>
                                     <div className="space-y-1">
                                         {chats.map((chat) => (
                                             <div
                                                 key={chat.id}
-                                                className={`flex items-center justify-between p-2 rounded-lg cursor-pointer
-                                  transition-all duration-200 group/chat
-                                  ${currentChat?.id === chat.id
-                                                        ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 dark:from-[#F48120]/10 dark:to-purple-500/10'
-                                                        : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
-                                                onClick={() => selectChat(chat.id)}
+                                                className={`flex items-center justify-between p-3 cursor-pointer
+                                                    hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                                                    dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                                                    ${selectedChatId === chat.id ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20' : ''}`}
+                                                onClick={() => onChatSelect(chat.id)}
                                             >
-                                                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                                                    <ChatText
-                                                        weight="duotone"
-                                                        className={`w-4 h-4 ${currentChat?.id === chat.id ? 'text-[#F48120]' : 'text-neutral-500'}`}
-                                                    />
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-2">
-                                                            <h4 className="text-sm font-medium text-neutral-900 dark:text-white truncate">
-                                                                {chat.title}
-                                                            </h4>
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setEditingChat(chat);
-                                                                }}
-                                                                className="opacity-0 group-hover/chat:opacity-100 transition-opacity"
-                                                            >
-                                                                <PencilSimple weight="duotone" className="w-4 h-4 text-neutral-500 hover:text-[#F48120]" />
-                                                            </button>
-                                                        </div>
-                                                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                                                            {formatDistanceToNow(chat.lastMessageAt, { addSuffix: true, locale: es })}
-                                                        </p>
-                                                    </div>
+                                                <div className="flex items-center space-x-3">
+                                                    <ChatText weight="duotone" className="w-4 h-4 text-[#F48120]" />
+                                                    <span className="text-sm font-medium">{chat.title}</span>
                                                 </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditingChat(chat);
+                                                    }}
+                                                    className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-lg"
+                                                >
+                                                    <PencilSimple weight="duotone" className="w-4 h-4 text-neutral-500 hover:text-[#F48120]" />
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Pie del menú */}
-                            <div className="p-4 border-t border-neutral-200/50 dark:border-neutral-700/50">
-                                <Button
-                                    variant="ghost"
-                                    size="lg"
-                                    className="w-full justify-start gap-3 p-3 rounded-xl text-red-600 dark:text-red-400
-                           hover:bg-red-100 dark:hover:bg-red-900/20"
-                                    onClick={onClearHistory}
-                                >
-                                    <Trash weight="duotone" className="w-5 h-5" />
-                                    <span>Limpiar Historial</span>
-                                </Button>
-                            </div>
                         </div>
                     </motion.div>
                 </>
+            )}
+            {editingChat && (
+                <EditTitleModal
+                    isOpen={true}
+                    onClose={() => setEditingChat(null)}
+                    onSave={handleUpdateChatTitle}
+                    currentTitle={editingChat.title}
+                />
             )}
         </AnimatePresence>
     );
