@@ -1,56 +1,134 @@
-import { AIChatAgent } from "agents/ai-chat-agent";
-import { generateId } from "ai";
-import type { ChatMessage, ChatData } from '@/types/chat';
-import { GoogleGenerativeAI as GoogleGenAI } from '@google/generative-ai';
-import { agentContext, config, executions, formatDataStreamPart, maxSteps, model, processToolCalls, selectedModel, streamText, systemPrompt, tools } from '@/ai';
-import type { Schedule, StreamTextOnFinishCallback, ToolSet } from '@/types/agent';
-import { createDataStreamResponse } from '@/utils/stream';
-import { geminiModel } from '@/config/models';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface Env {
-  AI: any;
-  OPENAI_API_KEY?: string;
-  GEMINI_API_KEY?: string;
+  GEMINI_API_KEY: string;
+}
+
+interface WebSocketMessage {
+  type: 'message' | 'update' | 'error';
+  chatId?: string;
+  message?: ChatMessage;
+  error?: string;
+  content?: string;
+}
+
+interface D1Database {
+  prepare(query: string): D1PreparedStatement;
+  batch<T = unknown>(statements: D1PreparedStatement[]): Promise<T[]>;
+}
+
+interface D1PreparedStatement {
+  bind(...values: any[]): D1PreparedStatement;
+  first<T = unknown>(): Promise<T | null>;
+  run<T = unknown>(): Promise<T>;
+  all<T = unknown>(): Promise<{ results: T[] }>;
 }
 
 interface DurableObjectState {
   storage: DurableObjectStorage;
-  id: DurableObjectId;
-  waitUntil(promise: Promise<any>): void;
-  blockConcurrencyWhile<T>(callback: () => Promise<T>): Promise<T>;
 }
 
 interface DurableObjectStorage {
-  get(key: string): Promise<any>;
-  put(key: string, value: any): Promise<void>;
-  delete(key: string): Promise<void>;
-  list(options?: { prefix?: string }): Promise<Map<string, any>>;
   database(name: string): D1Database;
 }
 
-export class ChatDO extends AIChatAgent<Env> {
+interface ChatMessage {
+  id: string;
+  role: 'assistant' | 'system' | 'user' | 'data';
+  content: string;
+  createdAt: Date;
+}
+
+interface ChatData {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  lastMessageAt: Date;
+}
+
+function generateId(): string {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
+
+const DEFAULT_SYSTEM_PROMPT = 'You are a helpful assistant...';
+const DEFAULT_MODEL = 'gemini-pro';
+
+export class ChatDO implements DurableObject {
+  private state: DurableObjectState;
+  private env: Env;
+  private storage: DurableObjectStorage;
   private db: D1Database;
   private currentChatId: string | null = null;
   public messages: ChatMessage[] = [];
   private static instance: ChatDO | null = null;
 
   constructor(state: DurableObjectState, env: Env) {
-    super(state, env);
-    this.db = state.storage.database('chat-db');
-    
+    this.state = state;
+    this.env = env;
+    this.storage = state.storage;
+    this.db = this.storage.database('chat-db');
+
     if (!ChatDO.instance) {
       ChatDO.instance = this;
-      this.initializeTables().then(() => {
-        this.initializeDefaultChat().catch(error => {
-          console.error('Error initializing default chat:', error);
-        });
-      }).catch(error => {
+      this.initializeTables().catch(error => {
         console.error('Error initializing database tables:', error);
       });
     }
   }
 
-  private async initializeTables() {
+  async fetch(request: Request): Promise<Response> {
+    try {
+      const url = new URL(request.url);
+      const chatId = url.searchParams.get('chatId');
+
+      if (request.headers.get('Upgrade') === 'websocket') {
+        const pair = new WebSocketPair();
+        await this.handleWebSocket(pair[1], chatId);
+        return new Response(null, { status: 101, webSocket: pair[0] });
+      }
+
+      return new Response('Expected WebSocket', { status: 400 });
+    } catch (error) {
+      console.error('Error handling request:', error);
+      return new Response('Internal Server Error', { status: 500 });
+    }
+  }
+
+  private async handleWebSocket(webSocket: WebSocket, chatId: string | null): Promise<void> {
+    webSocket.accept();
+
+    if (chatId) {
+      this.setCurrentChat(chatId);
+    } else {
+      const defaultChat = await this.initializeDefaultChat();
+      this.setCurrentChat(defaultChat.id);
+    }
+
+    webSocket.addEventListener('message', async (event) => {
+      try {
+        const data = JSON.parse(event.data as string) as WebSocketMessage;
+
+        if (data.type === 'message' && data.content) {
+          const message: ChatMessage = {
+            id: generateId(),
+            role: 'user',
+            content: data.content,
+            createdAt: new Date()
+          };
+
+          await this.handleMessage(message, webSocket);
+        }
+      } catch (error) {
+        console.error('Error handling WebSocket message:', error);
+        webSocket.send(JSON.stringify({
+          type: 'error',
+          error: 'Error processing message'
+        }));
+      }
+    });
+  }
+
+  private async initializeTables(): Promise<void> {
     const createChatsTable = `
       CREATE TABLE IF NOT EXISTS chats (
         id TEXT PRIMARY KEY,
@@ -95,13 +173,13 @@ export class ChatDO extends AIChatAgent<Env> {
   async getChat(chatId: string): Promise<ChatData | null> {
     const chat = await this.db.prepare(
       'SELECT * FROM chats WHERE id = ?'
-    ).bind(chatId).first();
+    ).bind(chatId).first<{ id: string; title: string; last_message_at: string }>();
 
     if (!chat) return null;
 
     const messages = await this.db.prepare(
       'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
-    ).bind(chatId).all();
+    ).bind(chatId).all<{ id: string; role: 'assistant' | 'system' | 'user' | 'data'; content: string; created_at: string }>();
 
     return {
       id: chat.id,
@@ -119,12 +197,12 @@ export class ChatDO extends AIChatAgent<Env> {
   async getAllChats(): Promise<ChatData[]> {
     const chats = await this.db.prepare(
       'SELECT * FROM chats ORDER BY last_message_at DESC'
-    ).all();
+    ).all<{ id: string; title: string; last_message_at: string }>();
 
     return Promise.all(chats.results.map(async chat => {
       const messages = await this.db.prepare(
         'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
-      ).bind(chat.id).all();
+      ).bind(chat.id).all<{ id: string; role: 'assistant' | 'system' | 'user' | 'data'; content: string; created_at: string }>();
 
       return {
         id: chat.id,
@@ -172,7 +250,7 @@ export class ChatDO extends AIChatAgent<Env> {
 
   async saveMessages(messages: ChatMessage[]): Promise<void> {
     if (!this.currentChatId) throw new Error('No chat selected');
-    
+
     for (const message of messages) {
       await this.addMessage(this.currentChatId, message);
     }
@@ -189,8 +267,8 @@ export class ChatDO extends AIChatAgent<Env> {
   async initializeDefaultChat(): Promise<ChatData> {
     try {
       // Verificar si ya existe algún chat
-      const existingChats = await this.db.prepare('SELECT COUNT(*) as count FROM chats').first();
-      
+      const existingChats = await this.db.prepare('SELECT COUNT(*) as count FROM chats').first<{ count: number }>();
+
       if (!existingChats || existingChats.count === 0) {
         const defaultChat: ChatData = {
           id: generateId(),
@@ -203,7 +281,7 @@ export class ChatDO extends AIChatAgent<Env> {
         await this.db.prepare(
           'INSERT INTO chats (id, title, last_message_at) VALUES (?, ?, ?)'
         ).bind(defaultChat.id, defaultChat.title, defaultChat.lastMessageAt.toISOString())
-        .run();
+          .run();
 
         this.currentChatId = defaultChat.id;
         return defaultChat;
@@ -227,113 +305,91 @@ export class ChatDO extends AIChatAgent<Env> {
     }
   }
 
-  async onChatMessage(
-    onFinish: StreamTextOnFinishCallback<ToolSet>,
-    options?: { abortSignal?: AbortSignal }
-  ) {
+  // private async handleMessage(message: ChatMessage, webSocket: WebSocket): Promise<void> {
+  //   try {
+  //     await this.saveMessages([...this.messages, message]);
+
+  //     const ai = new GoogleGenerativeAI(this.env.GEMINI_API_KEY);
+  //     const model = ai.getGenerativeModel({ model: DEFAULT_MODEL });
+
+  //     const prompt = this.messages.map(msg => ({ text: msg.content || '' }));
+  //     const result = await model.generateContent({
+  //       contents: [{
+  //         parts: [
+  //           { text: DEFAULT_SYSTEM_PROMPT },
+  //           ...prompt
+  //         ]
+  //       }]
+  //     });
+
+  //     const response = result.response;
+  //     if (!response) throw new Error('No response from AI');
+
+  //     const aiMessage: ChatMessage = {
+  //       id: generateId(),
+  //       role: 'assistant',
+  //       content: response.text() || '',
+  //       createdAt: new Date()
+  //     };
+
+  //     await this.saveMessages([...this.messages, aiMessage]);
+
+  //     webSocket.send(JSON.stringify({
+  //       type: 'message',
+  //       message: aiMessage
+  //     }));
+  //   } catch (error) {
+  //     console.error('Error handling message:', error);
+  //     webSocket.send(JSON.stringify({
+  //       type: 'error',
+  //       error: 'Error generating response'
+  //     }));
+  //   }
+  // }
+
+  private async handleMessage(message: ChatMessage, webSocket: WebSocket): Promise<void> {
     try {
-      // Asegurar que existe un chat activo
-      if (!this.currentChatId) {
-        const defaultChat = await this.initializeDefaultChat();
-        this.currentChatId = defaultChat.id;
-      }
+      await this.saveMessages([...this.messages, message]);
 
-      const allTools = { ...tools };
+      const ai = new GoogleGenerativeAI(this.env.GEMINI_API_KEY);
+      const model = ai.getGenerativeModel({ model: DEFAULT_MODEL });
 
-      // Manejar la generación de respuesta según el modelo seleccionado
-      if (selectedModel === "gemini-2.0-flash") {
-        return await this.handleGeminiResponse(onFinish);
-      } else {
-        return await this.handleDefaultModelResponse(allTools, onFinish);
-      }
-    } catch (error) {
-      console.error('Error en onChatMessage:', error);
-      throw error;
-    }
-  }
+      const result = await model.generateContent({
+        contents: [{
+          role: 'user',
+          parts: [{
+            text: `${DEFAULT_SYSTEM_PROMPT}
 
-  private async handleGeminiResponse(onFinish: StreamTextOnFinishCallback<ToolSet>) {
-    const geminiApiKey = env.GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY;
-    if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY is not configured in environment variables');
-    }
+${this.messages
+                .map(msg => `${msg.role}: ${msg.content}`)
+                .join('\n')}
 
-    const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-    const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
-    const response = await ai.models.generateContent({
-      model: geminiModel,
-      contents: [{
-        parts: [
-          { text: systemPrompt },
-          ...messageParts
-        ]
-      }]
-    });
-
-    const message: ChatMessage = {
-      id: generateId(),
-      role: "assistant",
-      content: response.text ?? '',
-      createdAt: new Date(),
-    };
-    const messages = [...this.messages, message];
-
-    await this.saveMessages(messages);
-
-    return createDataStreamResponse({
-      execute: async (dataStream) => {
-        dataStream.write(formatDataStreamPart('text', response.text ?? ''));
-        console.log('Transmisión de Gemini finalizada');
-      }
-    });
-  }
-
-  private async handleDefaultModelResponse(allTools: any, onFinish: StreamTextOnFinishCallback<ToolSet>) {
-    return agentContext.run(this, async () => {
-      return createDataStreamResponse({
-        execute: async (dataStream) => {
-          const processedMessages = await processToolCalls({
-            messages: this.messages,
-            dataStream,
-            tools: allTools,
-            executions,
-          });
-
-          const result = streamText({
-            model,
-            temperature: config.temperature,
-            maxTokens: config.maxTokens,
-            topP: config.topP,
-            topK: config.topK,
-            frequencyPenalty: config.frequencyPenalty,
-            presencePenalty: config.presencePenalty,
-            seed: config.seed,
-            system: systemPrompt,
-            messages: processedMessages,
-            tools: allTools,
-            onFinish: async (args) => {
-              onFinish(args as Parameters<StreamTextOnFinishCallback<ToolSet>>[0]);
-              console.log('Stream finalizado');
-            },
-            onError: (error) => {
-              console.error("Error durante el streaming:", error);
-            },
-            maxSteps,
-          });
-
-          result.mergeIntoDataStream(dataStream);
-        },
+user: ${message.content}`
+          }]
+        }]
       });
-    });
-  }
 
-  async executeTask(description: string, task: Schedule<string>) {
-    const message: ChatMessage = {
-      id: generateId(),
-      role: "user",
-      content: `Running scheduled task: ${description}`,
-      createdAt: new Date(),
-    };
-    await this.saveMessages([...this.messages, message]);
+      if (!result.response) throw new Error('No response from AI');
+
+      const aiMessage: ChatMessage = {
+        id: generateId(),
+        role: 'assistant',
+        content: result.response.text() || '',
+        createdAt: new Date()
+      };
+
+      await this.saveMessages([...this.messages, aiMessage]);
+
+      webSocket.send(JSON.stringify({
+        type: 'message',
+        message: aiMessage
+      }));
+    } catch (error) {
+      console.error('Error handling message:', error);
+      webSocket.send(JSON.stringify({
+        type: 'error',
+        error: 'Error generating response'
+      }));
+    }
   }
 }
