@@ -99,10 +99,17 @@ function ChatComponent() {
       if (response.ok) {
         const data = await response.json() as ChatMessagesResponse;
         if (data.success && Array.isArray(data.messages)) {
-          setCurrentMessages(data.messages.map(msg => ({
-            ...msg,
-            createdAt: new Date(msg.createdAt)
-          })));
+          const formattedMessages = data.messages.map(msg => ({
+            id: msg.id,
+            role: msg.role as 'assistant' | 'system' | 'user' | 'data',
+            content: msg.content,
+            createdAt: new Date(msg.createdAt),
+            parts: msg.content.split('\n').map(text => ({
+              type: 'text' as const,
+              text: text
+            }))
+          }));
+          setCurrentMessages(formattedMessages);
           setSelectedChatId(chatId);
         }
       }
@@ -751,7 +758,7 @@ function ChatComponent() {
             )}
 
             <div className="flex-1 overflow-y-auto p-2 space-y-2 pb-16 max-h-[calc(100vh-1rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              {agentMessages.length === 0 && (
+              {(!currentMessages?.length && selectedChatId === null) && (
                 <div className="h-full flex items-center justify-center">
                   <Modal
                     isOpen={showModal}
