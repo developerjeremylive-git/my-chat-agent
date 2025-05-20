@@ -1223,7 +1223,12 @@ export class Chat extends AIChatAgent<Env> {
       content: `Running scheduled task: ${description}`,
       createdAt: new Date(),
     };
-    await this.saveMessages([...this.messages, message]);
+    const existingMessages = this.messages.map(msg => ({
+      ...msg,
+      id: msg.id || generateId(),
+      createdAt: msg.createdAt || new Date()
+    })) as ChatMessage[];
+    await this.saveMessages([...existingMessages, message]);
   }
 }
 
