@@ -656,9 +656,16 @@ export class Chat extends AIChatAgent<Env> {
     this.storage = state.storage;
     this.messages = [];
     this.currentChatId = null;
-    this.db = env.DB;
-    if (!this.db) {
-      throw new Error('Database not initialized in environment');
+    
+    // Inicialización segura de la base de datos D1
+    try {
+      if (!env.DB) {
+        throw new Error('El binding de la base de datos D1 no está configurado en el entorno');
+      }
+      this.db = env.DB;
+    } catch (error) {
+      console.error('Error al inicializar la base de datos:', error);
+      throw new Error('Error al inicializar la base de datos. Por favor, verifica la configuración de D1 en wrangler.toml');
     }
     
     // Initialize messages array with proper type checking
