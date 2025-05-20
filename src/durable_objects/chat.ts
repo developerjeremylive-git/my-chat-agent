@@ -30,6 +30,8 @@ interface DurableObjectState {
 
 interface DurableObjectStorage {
     database(name: string): D1Database;
+    transaction<T>(closure: (txn: any) => Promise<T>): Promise<T>;
+    transactionSync<T>(closure: (txn: any) => T): T;
 }
 
 interface ChatMessage {

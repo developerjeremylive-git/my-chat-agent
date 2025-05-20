@@ -918,10 +918,8 @@ export class Chat extends AIChatAgent<Env> {
           createdAt: createdAt.toISOString()
         };
       });
-
-      // Insert new messages with unique IDs using a transaction
-      await this.db.prepare('BEGIN TRANSACTION').run();
-      try {
+      // Insert new messages with unique IDs using state.storage.transaction()
+      await this.storage.transaction(async (txn) => {
         for (const msg of processedMessages) {
           await this.db.prepare(
             'INSERT OR IGNORE INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
@@ -933,11 +931,7 @@ export class Chat extends AIChatAgent<Env> {
             msg.createdAt
           ).run();
         }
-        await this.db.prepare('COMMIT').run();
-      } catch (error) {
-        await this.db.prepare('ROLLBACK').run();
-        throw error;
-      }
+      });
     } catch (error) {
       console.error('Error saving messages to database:', error);
       throw error;
