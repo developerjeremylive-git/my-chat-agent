@@ -231,14 +231,10 @@ app.post('/api/chats/:id/messages', async (c) => {
       createdAt: new Date()
     };
 
-    // Usar una transacción para mantener la integridad de los datos
-    await c.env.DB.prepare(
-      'BEGIN TRANSACTION'
-    ).run();
-
-    try {
-      // Insertar el nuevo mensaje
-      await c.env.DB.prepare(
+    // Use storage.transaction() for atomic operations
+    await c.env.DB.batch([
+      // Insert the new message
+      c.env.DB.prepare(
         'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
       ).bind(
         newMessage.id,
@@ -246,22 +242,21 @@ app.post('/api/chats/:id/messages', async (c) => {
         newMessage.role,
         newMessage.content,
         newMessage.createdAt.toISOString()
-      ).run();
+      ),
 
-      // Actualizar la fecha del último mensaje del chat
-      await c.env.DB.prepare(
+      // Update the last message timestamp
+      c.env.DB.prepare(
         'UPDATE chats SET last_message_at = ? WHERE id = ?'
-      ).bind(new Date().toISOString(), chatId).run();
+      ).bind(new Date().toISOString(), chatId)
+    ]);
 
-      await c.env.DB.prepare('COMMIT').run();
-
-      // Actualizar el chat en memoria
+      // Update in-memory chat data
       const chatIndex = chats.findIndex(chat => chat.id === chatId);
       if (chatIndex !== -1) {
         chats[chatIndex].messages.push(newMessage);
         chats[chatIndex].lastMessageAt = new Date();
 
-        // Notificar a los clientes WebSocket
+        // Notify WebSocket clients
         const connections = wsConnections.get(chatId) || new Set<WebSocket>();
         connections.forEach(ws => {
           if (ws.readyState === WebSocket.OPEN) {
@@ -279,11 +274,6 @@ app.post('/api/chats/:id/messages', async (c) => {
         message: newMessage,
         chat: chats[chatIndex]
       });
-    } catch (error) {
-      // Si hay un error, hacer rollback de la transacción
-      await c.env.DB.prepare('ROLLBACK').run();
-      throw error;
-    }
   } catch (error) {
     console.error('Error al procesar el mensaje:', error);
     return c.json({
