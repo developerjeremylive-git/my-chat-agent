@@ -375,7 +375,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                 <EditTitleModal
                     isOpen={true}
                     onClose={() => setEditingChat(null)}
-                    onSave={handleUpdateChatTitle}
+                    onSave={(newTitle) => updateChatTitle(editingChat.id, newTitle)}
                     currentTitle={editingChat.title}
                 />
             )}
