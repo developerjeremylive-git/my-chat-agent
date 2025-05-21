@@ -1282,51 +1282,51 @@ export class Chat extends AIChatAgent<Env> {
     // Guardar en la base de datos usando transacción
     try {
       await this.storage.transaction(async (txn) => {
-        await this.saveMessages(this._messages);
+        await this.saveMessagesD1(this._messages);
       });
     } catch (error) {
       console.error('Error al guardar mensajes:', error);
       throw new Error('Error al persistir los mensajes');
     }
 
-    const validatedMessages = this._messages.map(msg => ({
-      id: msg.id,
-      role: msg.role,
-      content: msg.content,
-      createdAt: msg.createdAt || new Date(),
-    })) as ChatMessage[];
+    // const validatedMessages = this.messages.map(msg => ({
+    //   id: msg.id,
+    //   role: msg.role,
+    //   content: msg.content,
+    //   createdAt: msg.createdAt || new Date(),
+    // })) as ChatMessage[];
 
     // Guardar mensajes en la base de datos D1
-    if (this.currentChatId && this.db) {
-      try {
-        // Insertar cada mensaje en la tabla messages
-        for (const msg of validatedMessages) {
-          await this.db.prepare(
-            'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
-          ).bind(
-            msg.id,
-            this.currentChatId,
-            msg.role,
-            msg.content,
-            msg.createdAt.toISOString()
-          ).run();
-        }
+    // if (this.currentChatId && this.db) {
+    //   try {
+    //     // Insertar cada mensaje en la tabla messages
+    //     for (const msg of validatedMessages) {
+    //       await this.db.prepare(
+    //         'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
+    //       ).bind(
+    //         msg.id,
+    //         this.currentChatId,
+    //         msg.role,
+    //         msg.content,
+    //         msg.createdAt.toISOString()
+    //       ).run();
+    //     }
 
-        // Actualizar la fecha del último mensaje en el chat
-        await this.db.prepare(
-          'UPDATE chats SET last_message_at = ? WHERE id = ?'
-        ).bind(
-          new Date().toISOString(),
-          this.currentChatId
-        ).run();
+    //     // Actualizar la fecha del último mensaje en el chat
+    //     await this.db.prepare(
+    //       'UPDATE chats SET last_message_at = ? WHERE id = ?'
+    //     ).bind(
+    //       new Date().toISOString(),
+    //       this.currentChatId
+    //     ).run();
 
-        console.log('Mensajes guardados exitosamente en la base de datos');
-      } catch (error) {
-        console.error('Error al guardar mensajes en la base de datos:', error);
-        throw new Error('Error al guardar mensajes en la base de datos');
-      }
-    }
-    // await this.saveToCurrentChat(validatedMessages);
+    //     console.log('Mensajes guardados exitosamente en la base de datos');
+    //   } catch (error) {
+    //     console.error('Error al guardar mensajes en la base de datos:', error);
+    //     throw new Error('Error al guardar mensajes en la base de datos');
+    //   }
+    // }
+    // await this.saveMessagesD1(this._messages);
 
     // Notificar a los clientes WebSocket
     const chatConnections = wsConnections.get(this.currentChatId || '');
