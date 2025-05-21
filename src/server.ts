@@ -1350,37 +1350,37 @@ export class Chat extends AIChatAgent<Env> {
     }
   }
 
-  async saveMessages(messages: ChatMessage[]) {
-    if (!Array.isArray(messages)) {
-      console.error('Invalid messages array:', messages);
-      return;
-    }
+  // async saveMessages(messages: ChatMessage[]) {
+  //   if (!Array.isArray(messages)) {
+  //     console.error('Invalid messages array:', messages);
+  //     return;
+  //   }
 
-    // Store messages in memory
-    this._messages = messages.map(msg => {
-        if (msg.createdAt) return msg;
-        return {
-        ...msg,
-          createdAt: new Date()
-        };
-      }) as ChatMessage[];
+  //   // Store messages in memory
+  //   this._messages = messages.map(msg => {
+  //       if (msg.createdAt) return msg;
+  //       return {
+  //       ...msg,
+  //         createdAt: new Date()
+  //       };
+  //     }) as ChatMessage[];
 
-    // Save to D1 database
-    const validatedMessages = messages.map(msg => ({
-      id: msg.id || generateId(),
-      role: msg.role,
-      content: msg.content,
-      createdAt: msg.createdAt || new Date()
-    })) as ChatMessage[];
-    await this.saveToCurrentChat(validatedMessages);
+  //   // Save to D1 database
+  //   const validatedMessages = messages.map(msg => ({
+  //     id: msg.id || generateId(),
+  //     role: msg.role,
+  //     content: msg.content,
+  //     createdAt: msg.createdAt || new Date()
+  //   })) as ChatMessage[];
+  //   await this.saveToCurrentChat(validatedMessages);
 
-    // Only emit event in browser environment
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('messagesUpdated', {
-        detail: { messages }
-      }));
-    }
-  }
+  //   // Only emit event in browser environment
+  //   if (typeof window !== 'undefined') {
+  //     window.dispatchEvent(new CustomEvent('messagesUpdated', {
+  //       detail: { messages }
+  //     }));
+  //   }
+  // }
 
   async executeTask(description: string, task: Schedule<string>) {
     const message: ChatMessage = {

@@ -19,23 +19,6 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { GoogleGenAI } from "@google/genai";
 
-// Interfaz para el estado del objeto durable
-interface DurableObjectState {
-  storage: DurableObjectStorage;
-}
-
-interface DurableObjectStorage {
-  get(key: string): Promise<any>;
-  put(key: string, value: any): Promise<void>;
-}
-
-class SimpleDurableObjectState implements DurableObjectState {
-  public storage: DurableObjectStorage = {
-    get: async () => null,
-    put: async () => {}
-  };
-}
-
 // Configuración por defecto
 const DEFAULT_MAX_STEPS = 5;
 // const DEFAULT_TEMPERATURE = 0.7;
@@ -244,25 +227,32 @@ export class Chat extends AIChatAgent<Env> {
         // },
       });
 
+      //
+      // Guardar mensajes y ejecutar callback de finalización, las cantidades de iteraciones que el usuario indico
+      await this.saveMessages([
+        ...this.messages,
+        {
+          id: generateId(),
+          role: "assistant",
+          content: response.text ?? '',
+          createdAt: new Date(),
+        },
+      ]);
       // Crear una promesa para manejar la finalización
       return createDataStreamResponse({
         execute: async (dataStream) => {
-          // Escribir la respuesta en el stream
           dataStream.write(formatDataStreamPart('text', response.text ?? ''));
           
-          // Guardar el mensaje del asistente en la memoria
-          const assistantMessage = {
-            id: generateId(),
-            role: "assistant",
-            content: response.text ?? '',
-            createdAt: new Date(),
-          };
-          
-          // Actualizar los mensajes en memoria
-          this.messages = [...this.messages, assistantMessage];
-          
-          // Guardar los mensajes actualizados
-          await this.saveMessages(this.messages);
+          // Guardar mensajes y ejecutar callback de finalización
+          // await this.saveMessages([
+          //   ...this.messages,
+          //   {
+          //     id: generateId(),
+          //     role: "assistant",
+          //     content: response.text ?? '',
+          //     createdAt: new Date(),
+          //   },
+          // ]);
           
           // Ejecutar el callback onFinish con los argumentos necesarios
           // onFinish({
