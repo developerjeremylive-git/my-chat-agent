@@ -56,7 +56,7 @@ const workersai = createWorkersAI({ binding: env.AI });
 const wsConnections = new Map<string, Set<WebSocket>>();
 
 // Variables globales para almacenar el modelo seleccionado, prompt del sistema y configuración
-let selectedModel = '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b';
+let selectedModel = 'gemini-2.0-flash';
 let geminiModel = 'gemini-2.0-flash';
 let systemPrompt = 'Eres un asistente útil que puede realizar varias tareas...';
 let maxSteps = DEFAULT_MAX_STEPS;
@@ -1412,57 +1412,62 @@ export class Chat extends AIChatAgent<Env> {
         await this.saveMessagesD1(this._messages);
       });
 
-      // Actualizar los mensajes en memoria y guardar en la base de datos
-      // const updatedMessages = [...this.messages, messageResponse];
-      // await this.saveMessages(updatedMessages);
-      console.log('Mensajes guardados exitosamente');
-      return; // Éxito, salir de la función
     } catch (error) {
       console.error('Error al guardar mensajes:', error);
     }
 
-    try {
-      await this.storage.transaction(async (txn) => {
-        // Ensure we have valid IDs
-        const userId = this.currentUserId || 'default';
-        if (!this.currentChatId) {
-          throw new Error('Chat ID is required for step counter');
-        }
+    // Actualizar los mensajes en memoria y guardar en la base de datos
+    // try {
+    //   await this.saveMessages(this._messages);
+    //   return; // Éxito, salir de la función
+    // } catch (error) {
+    //   console.error('Error al actualizar mensajes:', error);
+    // }
 
-        // Get current counter with error handling
-        const result = await this.db
-          .prepare('SELECT counter FROM step_counters WHERE user_id = ? AND chat_id = ?')
-          .bind(userId, this.currentChatId)
-          .first<{ counter: number }>();
+    // try {
+    //   await this.storage.transaction(async (txn) => {
+    //     // Ensure we have valid IDs
+    //     const userId = this.currentUserId || 'default';
+    //     if (!this.currentChatId) {
+    //       throw new Error('Chat ID is required for step counter');
+    //     }
 
-        if (!result) {
-          // If no record exists, INSERT new counter
-          const insertResult = await this.db
-            .prepare(`
-              INSERT INTO step_counters (user_id, chat_id, counter, updated_at)
-              VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-            `)
-            .bind(userId, this.currentChatId, 1)
-            .run();
-          currentCounter = 1;
-          success = insertResult?.success || false;
-        } else {
-          // If record exists, UPDATE counter
-          currentCounter = (result.counter ?? 0) + 1;
-          const updateResult = await this.db
-            .prepare(`
-              UPDATE step_counters 
-              SET counter = ?, updated_at = CURRENT_TIMESTAMP
-              WHERE user_id = ? AND chat_id = ?
-            `)
-            .bind(currentCounter, userId, this.currentChatId)
-            .run();
-          success = updateResult?.success || false;
-        }
-      });
-    } catch (error) {
-      console.error('Error al actualizar el contador:', error);
-    }
+    //     // Get current counter with error handling
+    //     const result = await this.db
+    //       .prepare('SELECT counter FROM step_counters WHERE user_id = ? AND chat_id = ?')
+    //       .bind(userId, this.currentChatId)
+    //       .first<{ counter: number }>();
+
+    //     if (!result) {
+    //       // If no record exists, INSERT new counter
+    //       const insertResult = await this.db
+    //         .prepare(`
+    //           INSERT INTO step_counters (user_id, chat_id, counter, updated_at)
+    //           VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+    //         `)
+    //         .bind(userId, this.currentChatId, 1)
+    //         .run();
+    //       currentCounter = 1;
+    //       success = insertResult?.success || false;
+    //     } else {
+    //       // If record exists, UPDATE counter
+    //       currentCounter = (result.counter ?? 0) + 1;
+    //       const updateResult = await this.db
+    //         .prepare(`
+    //           UPDATE step_counters 
+    //           SET counter = ?, updated_at = CURRENT_TIMESTAMP
+    //           WHERE user_id = ? AND chat_id = ?
+    //         `)
+    //         .bind(currentCounter, userId, this.currentChatId)
+    //         .run();
+    //       success = updateResult?.success || false;
+    //     }
+    //   });
+    // } catch (error) {
+    //   console.error('Error al actualizar el contador:', error);
+    // }
+
+
 
     // if (currentCounter !== 0 && currentCounter <= maxSteps) {
     // await this.saveMessages(this._messages);
