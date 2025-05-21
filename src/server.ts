@@ -33,7 +33,7 @@ let chats: LocalChatData[] = [{
 }];
 
 // Configuración por defecto
-const DEFAULT_MAX_STEPS = 5;
+const DEFAULT_MAX_STEPS = 1;
 // const DEFAULT_TEMPERATURE = 0.7;
 // const DEFAULT_MAX_TOKENS = 2048;
 // const DEFAULT_TOP_P = 0.95;
@@ -1217,11 +1217,6 @@ export class Chat extends AIChatAgent<Env> {
   }
 
   private async handleGeminiResponse(onFinish: StreamTextOnFinishCallback<ToolSet>) {
-    // Verificar que no excedamos el número máximo de pasos configurado
-    if (this._messages.length >= maxSteps) {
-      throw new Error(`Se ha alcanzado el límite máximo de ${maxSteps} pasos configurado por el usuario.`);
-    }
-
     const geminiApiKey = env.GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || (import.meta as any).env.GEMINI_API_KEY;
     if (!geminiApiKey) {
       throw new Error('GEMINI_API_KEY is not configured in environment variables');
