@@ -154,30 +154,30 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                     title: 'Nuevo Chat'
                 })
             });
-            const data = await response.json() as { success: boolean; chat: ChatData };
             
             if (!response.ok) {
                 throw new Error('Error al crear el chat');
             }
 
+            const data = await response.json() as { success: boolean; chat: ChatData };
+            
             if (data.success && data.chat) {
-                const newChat = data.chat;
-                setChats([...chats, { 
-                    ...newChat, 
-                    lastMessageAt: new Date(newChat.lastMessageAt),
-                    messages: newChat.messages.map(msg => ({
-                        ...msg,
-                        createdAt: new Date(msg.createdAt)
-                    })) as LocalMessage[]
-                }]);
-                selectChat(newChat.id);
+                const newChat: LocalChatData = {
+                    id: data.chat.id,
+                    title: data.chat.title,
+                    lastMessageAt: new Date(data.chat.lastMessageAt),
+                    messages: []
+                };
+                
+                setChats(prevChats => [...prevChats, newChat]);
+                await fetchChats(); // Actualizar la lista completa de chats
+                onNewChat(); // Cerrar el menú lateral
+                selectChat(newChat.id); // Seleccionar el nuevo chat
             } else {
                 throw new Error('Formato de respuesta inválido');
             }
         } catch (error) {
             console.error('Error al crear el chat:', error);
-            // Aquí podrías mostrar un mensaje de error al usuario
-            // Por ejemplo, usando un componente de notificación o alert
             alert(error instanceof Error ? error.message : 'Error al crear el chat');
         }
     };
@@ -191,14 +191,24 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                 },
                 body: JSON.stringify({ title: newTitle })
             });
-            const data = await response.json() as { success: boolean };
+            
+            if (!response.ok) {
+                throw new Error('Error al actualizar el título del chat');
+            }
+
+            const data = await response.json() as { success: boolean; chat: ChatData };
+            
             if (data.success) {
-                setChats(chats.map(chat =>
+                setChats(prevChats => prevChats.map(chat =>
                     chat.id === chatId ? { ...chat, title: newTitle } : chat
                 ));
+                await fetchChats(); // Actualizar la lista completa de chats
+            } else {
+                throw new Error('Error al actualizar el título del chat');
             }
         } catch (error) {
             console.error('Error al actualizar el título del chat:', error);
+            alert(error instanceof Error ? error.message : 'Error al actualizar el título del chat');
         }
     };
 
