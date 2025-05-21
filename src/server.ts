@@ -728,6 +728,7 @@ app.get('/agents/chat/default/get-messages', async (c) => {
         chatId: defaultChat.id
       });
     }
+
     // Load chats from storage
     const savedChats = await chat.loadChatsFromStorage();
     if (savedChats.length > 0) {
@@ -1248,6 +1249,9 @@ export class Chat extends AIChatAgent<Env> {
     const baseDelay = 1000; // 1 second
     let lastError: Error | null = null;
     let response;
+    let currentCounter = 0;
+    let success = false;
+
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
@@ -1363,6 +1367,47 @@ export class Chat extends AIChatAgent<Env> {
       });
     }
 
+    try {
+      // Ensure we have valid IDs
+      const userId = this.currentUserId || 'default';
+      if (!this.currentChatId) {
+        throw new Error('Chat ID is required for step counter');
+      }
+
+      // Get current counter with error handling
+      const result = await this.db
+        .prepare('SELECT counter FROM step_counters WHERE user_id = ? AND chat_id = ?')
+        .bind(userId, this.currentChatId)
+        .first<{ counter: number }>();
+
+      if (!result) {
+        // If no record exists, INSERT new counter
+        const insertResult = await this.db
+          .prepare(`
+            INSERT INTO step_counters (user_id, chat_id, counter, updated_at)
+            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+          `)
+          .bind(userId, this.currentChatId, 1)
+          .run();
+        currentCounter = 1;
+        success = insertResult?.success || false;
+      } else {
+        // If record exists, UPDATE counter
+        currentCounter = (result.counter ?? 0) + 1;
+        const updateResult = await this.db
+          .prepare(`
+            UPDATE step_counters 
+            SET counter = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = ? AND chat_id = ?
+          `)
+          .bind(currentCounter, userId, this.currentChatId)
+          .run();
+        success = updateResult?.success || false;
+      }
+    } catch (error) {
+      console.error('Error al actualizar el contador:', error);
+    }
+
     return createDataStreamResponse({
       execute: async (dataStream) => {
         dataStream.write(formatDataStreamPart('text', response.text ?? ''));
@@ -1371,118 +1416,100 @@ export class Chat extends AIChatAgent<Env> {
         }
         console.log('Transmisión de Gemini finalizada');
 
-        try {
-          // Ensure we have valid IDs
-          const userId = this.currentUserId || 'default';
-          if (!this.currentChatId) {
-            throw new Error('Chat ID is required for step counter');
-          }
+        if (currentCounter !== 0 && currentCounter <= maxSteps) {
+          // Guardar el mensaje en la base de datos D1
+          // if (this.currentChatId && this.db) {
+          //   try {
+          //     await this.db.prepare(
+          //       'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
+          //     ).bind(
+          //       generateId(),
+          //       this.currentChatId,
+          //       'assistant',
+          //       response.text ?? '',
+          //       new Date().toISOString()
+          //     ).run();
 
-          // Get current counter with error handling
-          const result = await this.db
-            .prepare('SELECT counter FROM step_counters WHERE user_id = ? AND chat_id = ?')
-            .bind(userId, this.currentChatId)
-            .first<{ counter: number }>();
+          //     // Actualizar la fecha del último mensaje en el chat
+          //     await this.db.prepare(
+          //       'UPDATE chats SET last_message_at = ? WHERE id = ?'
+          //     ).bind(
+          //       new Date().toISOString(),
+          //       this.currentChatId
+          //     ).run();
+          //   } catch (error) {
+          //     console.error('Error al guardar el mensaje en D1:', error);
+          //   }
+          // }
 
-          let currentCounter = 0;
-          let success = false;
-
-          if (!result) {
-            // If no record exists, INSERT new counter
-            const insertResult = await this.db
-              .prepare(`
-                INSERT INTO step_counters (user_id, chat_id, counter, updated_at)
-                VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-              `)
-              .bind(userId, this.currentChatId, 1)
-              .run();
-            currentCounter = 1;
-            success = insertResult?.success || false;
-          } else {
-            // If record exists, UPDATE counter
-            currentCounter = (result.counter ?? 0) + 1;
-            const updateResult = await this.db
-              .prepare(`
-                UPDATE step_counters 
-                SET counter = ?, updated_at = CURRENT_TIMESTAMP
-                WHERE user_id = ? AND chat_id = ?
-              `)
-              .bind(currentCounter, userId, this.currentChatId)
-              .run();
-            success = updateResult?.success || false;
-          }
-
-          if (!success) {
-            throw new Error('Failed to update step counter');
-          }
-
-          console.log(`Current step counter: ${currentCounter}`);
-
-          if (currentCounter >= maxSteps) {
-            console.log(`Se alcanzó el límite máximo de ${maxSteps} respuestas del asistente`);
-            const limitResponse = {
-              text: 'Has alcanzado el límite máximo de interacciones para esta conversación. Por favor, inicia una nueva conversación.',
-              response: {
-                id: generateId(),
-                timestamp: new Date(),
-                modelId: geminiModel,
-                messages: [],
-                body: 'Límite de interacciones alcanzado'
-              },
-              reasoning: 'Maximum steps reached',
-              reasoningDetails: [{
-                type: 'text',
-                text: `Se alcanzó el límite de ${maxSteps} interacciones para esta conversación`
-              }],
-              files: [],
-              toolCalls: [],
-              steps: [],
-              finishReason: 'stop',
-              sources: [],
-              toolResults: [],
-              usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-              warnings: [{
-                type: 'other',
-                message: `Has alcanzado el límite de ${maxSteps} interacciones. Inicia una nueva conversación.`
-              }],
-              logprobs: undefined,
-              request: {},
-              providerMetadata: {},
-              experimental_providerMetadata: {}
-              //     id: generateId(),
-              //     timestamp: new Date(),
-              //     modelId: geminiModel,
-              //     messages: [],
-              //     body: 'Límite de interacciones alcanzado'
-              //   },
-              //   reasoning: 'Maximum steps reached',
-              //   reasoningDetails: [{
-              //     type: 'text',
-              //     text: `Se alcanzó el límite de ${maxSteps} interacciones para esta conversación`
-              //   }],
-              //   files: [],
-              //   toolCalls: [],
-              //   steps: [],
-              //   finishReason: 'stop',
-              //   sources: [],
-              //   toolResults: [],
-              //   usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-              //   warnings: [{
-              //     type: 'other',
-              //     message: `Has alcanzado el límite de ${maxSteps} interacciones. Inicia una nueva conversación.`
-              //   }],
-              //   logprobs: undefined,
-              //   request: {},
-              //   providerMetadata: {},
-              //   experimental_providerMetadata: {}
-              // });
-            }
-          } else {
-            return;
-          }
-        } catch (error) {
-          console.error('Error updating step counter:', error);
-          throw error;
+          onFinish({
+            text: response.text ?? '',
+            response: {
+              id: generateId(),
+              timestamp: new Date(),
+              modelId: geminiModel,
+              messages: this._messages.filter(msg => msg.role === 'assistant').map(msg => ({
+                id: msg.id,
+                role: 'assistant' as const,
+                content: msg.content,
+                createdAt: msg.createdAt
+              })),
+              body: response.text ?? ''
+            },
+            reasoning: 'Generated response using Gemini model',
+            reasoningDetails: [{
+              type: 'text',
+              text: 'Processed user message and generated AI response'
+            }],
+            files: [],
+            toolCalls: [],
+            steps: [],
+            finishReason: 'stop',
+            sources: [],
+            toolResults: [],
+            usage: {
+              promptTokens: 0,
+              completionTokens: 0,
+              totalTokens: 0
+            },
+            warnings: [],
+            logprobs: undefined,
+            request: {},
+            providerMetadata: {},
+            experimental_providerMetadata: {}
+          });
+        } else {
+          console.log(`Se alcanzó el límite máximo de ${maxSteps} respuestas del asistente`);
+          // onFinish({
+          //   text: 'Has alcanzado el límite máximo de interacciones para esta conversación. Por favor, inicia una nueva conversación.',
+          //   response: {
+          //     id: generateId(),
+          //     timestamp: new Date(),
+          //     modelId: geminiModel,
+          //     messages: [],
+          //     body: 'Límite de interacciones alcanzado'
+          //   },
+          //   reasoning: 'Maximum steps reached',
+          //   reasoningDetails: [{
+          //     type: 'text',
+          //     text: `Se alcanzó el límite de ${maxSteps} interacciones para esta conversación`
+          //   }],
+          //   files: [],
+          //   toolCalls: [],
+          //   steps: [],
+          //   finishReason: 'stop',
+          //   sources: [],
+          //   toolResults: [],
+          //   usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+          //   warnings: [{
+          //     type: 'other',
+          //     message: `Has alcanzado el límite de ${maxSteps} interacciones. Inicia una nueva conversación.`
+          //   }],
+          //   logprobs: undefined,
+          //   request: {},
+          //   providerMetadata: {},
+          //   experimental_providerMetadata: {}
+          // });
         }
       }
     });
