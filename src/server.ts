@@ -1313,6 +1313,49 @@ export class Chat extends AIChatAgent<Env> {
       throw new Error('Error al persistir los mensajes');
     }
 
+    try {
+      await this.storage.transaction(async (txn) => {
+        // Ensure we have valid IDs
+        const userId = this.currentUserId || 'default';
+        if (!this.currentChatId) {
+          throw new Error('Chat ID is required for step counter');
+        }
+
+        // Get current counter with error handling
+        const result = await this.db
+          .prepare('SELECT counter FROM step_counters WHERE user_id = ? AND chat_id = ?')
+          .bind(userId, this.currentChatId)
+          .first<{ counter: number }>();
+
+        if (!result) {
+          // If no record exists, INSERT new counter
+          const insertResult = await this.db
+            .prepare(`
+              INSERT INTO step_counters (user_id, chat_id, counter, updated_at)
+              VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+            `)
+            .bind(userId, this.currentChatId, 1)
+            .run();
+          currentCounter = 1;
+          success = insertResult?.success || false;
+        } else {
+          // If record exists, UPDATE counter
+          currentCounter = (result.counter ?? 0) + 1;
+          const updateResult = await this.db
+            .prepare(`
+              UPDATE step_counters 
+              SET counter = ?, updated_at = CURRENT_TIMESTAMP
+              WHERE user_id = ? AND chat_id = ?
+            `)
+            .bind(currentCounter, userId, this.currentChatId)
+            .run();
+          success = updateResult?.success || false;
+        }
+      });
+    } catch (error) {
+      console.error('Error al actualizar el contador:', error);
+    }
+
     // const validatedMessages = this.messages.map(msg => ({
     //   id: msg.id,
     //   role: msg.role,
@@ -1365,47 +1408,6 @@ export class Chat extends AIChatAgent<Env> {
           ws.send(JSON.stringify(update));
         }
       });
-    }
-
-    try {
-      // Ensure we have valid IDs
-      const userId = this.currentUserId || 'default';
-      if (!this.currentChatId) {
-        throw new Error('Chat ID is required for step counter');
-      }
-
-      // Get current counter with error handling
-      const result = await this.db
-        .prepare('SELECT counter FROM step_counters WHERE user_id = ? AND chat_id = ?')
-        .bind(userId, this.currentChatId)
-        .first<{ counter: number }>();
-
-      if (!result) {
-        // If no record exists, INSERT new counter
-        const insertResult = await this.db
-          .prepare(`
-            INSERT INTO step_counters (user_id, chat_id, counter, updated_at)
-            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-          `)
-          .bind(userId, this.currentChatId, 1)
-          .run();
-        currentCounter = 1;
-        success = insertResult?.success || false;
-      } else {
-        // If record exists, UPDATE counter
-        currentCounter = (result.counter ?? 0) + 1;
-        const updateResult = await this.db
-          .prepare(`
-            UPDATE step_counters 
-            SET counter = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE user_id = ? AND chat_id = ?
-          `)
-          .bind(currentCounter, userId, this.currentChatId)
-          .run();
-        success = updateResult?.success || false;
-      }
-    } catch (error) {
-      console.error('Error al actualizar el contador:', error);
     }
 
     return createDataStreamResponse({
