@@ -846,10 +846,11 @@ export class Chat extends AIChatAgent<Env> {
 
   private readonly CREATE_STEP_COUNTERS_TABLE = `
     CREATE TABLE IF NOT EXISTS step_counters (
-      user_id TEXT PRIMARY KEY,
-      counter INTEGER DEFAULT 0,
+    user_id TEXT NOT NULL,
       chat_id TEXT NOT NULL,
+    counter INTEGER DEFAULT 0,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, chat_id),
       FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
     )
   `;
