@@ -1294,7 +1294,7 @@ function ChatComponent() {
                               headers: {
                                 'Content-Type': 'application/json',
                               },
-                              body: JSON.stringify({ model: selectedModel }),
+                              body: JSON.stringify({ modelTemp: selectedModel }),
                             }),
                             fetch('/api/assistant', {
                               method: 'POST',

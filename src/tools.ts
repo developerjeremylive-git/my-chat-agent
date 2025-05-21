@@ -128,11 +128,11 @@ const cancelScheduledTask = tool({
  * These will be provided to the AI model to describe available capabilities
  */
 export const tools = {
-  getWeatherInformation,
-  getLocalTime,
-  scheduleTask,
-  getScheduledTasks,
-  cancelScheduledTask,
+  // getWeatherInformation,
+  // getLocalTime,
+  // scheduleTask,
+  // getScheduledTasks,
+  // cancelScheduledTask,
 };
 
 /**

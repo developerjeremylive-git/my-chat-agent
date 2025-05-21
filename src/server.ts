@@ -68,20 +68,7 @@ let maxSteps = DEFAULT_MAX_STEPS;
 // let presencePenalty = DEFAULT_PRESENCE_PENALTY;
 // let seed = DEFAULT_SEED;
 
-// Endpoint para actualizar el modelo
-app.post('/api/model', async (c) => {
-  try {
-    const { model } = await c.req.json();
-    selectedModel = model;
-    return c.json({ success: true, model: selectedModel });
-  } catch (error) {
-    console.error('Error in /api/assistant:', error);
-    return c.json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, 500);
-  }
-});
+
 
 // Endpoint para actualizar la configuración del asistente
 app.post('/api/config', async (c) => {
@@ -418,6 +405,22 @@ app.post('/api/chats/:id/messages', async (c) => {
   }
 });
 
+// Endpoint para actualizar el modelo
+app.post('/api/model', async (c) => {
+  try {
+    const { modelTemp } = await c.req.json();
+    selectedModel = modelTemp;
+    // Update the model instance when the model is changed
+    model = workersai(selectedModel);
+    return c.json({ success: true, model: selectedModel });
+  } catch (error) {
+    console.error('Error in /api/assistant:', error);
+    return c.json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
 app.post('/api/assistant', async (c) => {
   try {
     const { maxStepsTemp: newMaxSteps } = await c.req.json();
@@ -789,7 +792,8 @@ import { config } from './contexts/config';
 // const model = workersai("@cf/qwen/qwq-32b");
 
 //funcionando
-const model = getModel();
+// Initialize model globally but it will be updated when /api/model is called
+let model = getModel();
 // const model = workersai("@cf/google/gemma-7b-it-lora");
 // const model = workersai("@hf/mistral/mistral-7b-instruct-v0.2");
 // const model = workersai("@cf/fblgit/una-cybertron-7b-v2-bf16");
@@ -1214,8 +1218,61 @@ export class Chat extends AIChatAgent<Env> {
       if (selectedModel === "gemini-2.0-flash") {
         return await this.handleGeminiResponse(onFinish);
       } else {
-        return await this.handleDefaultModelResponse(allTools, onFinish);
+        // return await this.handleDefaultModelResponse(allTools, onFinish);
+        // Create a streaming response that handles both text and tool outputs
+        return agentContext.run(this, async () => {
+          const dataStreamResponse = createDataStreamResponse({
+            execute: async (dataStream) => {
+              // Process any pending tool calls from previous messages
+              // This handles human-in-the-loop confirmations for tools
+              const processedMessages = await processToolCalls({
+                messages: this.messages,
+                dataStream,
+                tools: allTools,
+                executions,
+              });
+
+              const result = streamText({
+                model,
+                temperature: config.temperature,
+                maxTokens: config.maxTokens,
+                topP: config.topP,
+                topK: config.topK,
+                frequencyPenalty: config.frequencyPenalty,
+                presencePenalty: config.presencePenalty,
+                seed: config.seed,
+                // toolCallStreaming: true,
+                system: `${systemPrompt}`,
+
+                // ${unstable_getSchedulePrompt({ date: new Date() })}
+
+                // Si el usuario solicita programar una tarea, utilice la herramienta de programación para programar las tareas
+                // `,
+
+                // If the user asks to schedule a task, use the schedule tool to schedule the task.
+                messages: processedMessages,
+                tools: allTools,
+                onFinish: async (args) => {
+                  onFinish(
+                    args as Parameters<StreamTextOnFinishCallback<ToolSet>>[0]
+                  );
+                  console.log('Stream finalizado');
+                },
+                onError: (error) => {
+                  console.error("Error while streaming:", error);
+                },
+                maxSteps,
+              });
+
+              // Merge the AI response stream with tool execution outputs
+              result.mergeIntoDataStream(dataStream);
+            },
+          });
+
+          return dataStreamResponse;
+        });
       }
+
     } catch (error) {
       console.error('Error en onChatMessage:', error);
       throw error;

@@ -2,11 +2,12 @@ import type { AIModelConfig } from './AIConfigContext';
 
 export const config: AIModelConfig = {
   temperature: 0.7,
-  maxTokens: 2048,
-  topP: 0.9,
-  topK: 1,
-  frequencyPenalty: 0.3,
-  presencePenalty: 0.3,
-  seed: 1,
-  stream: true
+  maxTokens: 1024,  // Reduced to be safer with token limits
+  topP: 0.95,
+  topK: 40,
+  frequencyPenalty: 0,
+  presencePenalty: 0,
+  seed: 42,
+  stream: true,
+  maxSteps: 1  // Maximum number of steps for the model to take
 };
