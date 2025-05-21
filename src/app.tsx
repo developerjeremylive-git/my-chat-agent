@@ -67,7 +67,7 @@ import { InputSystemPrompt } from "./components/input/InputSystemPrompt";
 import { ModelSelect } from "./components/model/ModelSelect";
 import { GeminiConfigModal } from "./components/modal/GeminiConfigModal";
 import { ListHeart } from "@phosphor-icons/react/dist/ssr";
-import type { ChatMessage } from "./types/chat";
+import type { ChatMessage, FormattedChatMessage, APIResponse } from "./types/api";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -79,19 +79,19 @@ function ChatComponent() {
   const { selectedModel } = useModel();
   const [showOIAICreator, setShowOIAICreator] = useOIAIState(false);
   const [showGeminiConfig, setShowGeminiConfig] = useState(false);
-  const [currentMessages, setCurrentMessages] = useState<ChatMessage[]>([]);
+  const [currentMessages, setCurrentMessages] = useState<FormattedChatMessage[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   
   const handleChatSelect = async (chatId: string) => {
     try {
       const response = await fetch(`/api/chats/${chatId}/messages`);
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as APIResponse<ChatMessage>;
         if (data.success && Array.isArray(data.messages)) {
           const formattedMessages = data.messages.map(msg => ({
             ...msg,
             createdAt: new Date(msg.createdAt)
-          }));
+          })) as FormattedChatMessage[];
           setCurrentMessages(formattedMessages);
           setSelectedChatId(chatId);
 

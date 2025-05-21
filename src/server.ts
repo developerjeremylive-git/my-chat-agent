@@ -194,11 +194,11 @@ app.get('/api/chats/:id/messages', async (c) => {
       const createdAt = typeof msg.created_at === 'string' ? 
         new Date(msg.created_at) : new Date();
       return {
-        id: msg.id,
-        chatId: msg.chat_id,
-        role: msg.role,
-        content: msg.content,
-        createdAt: createdAt.toISOString()
+        id: msg.id as string,
+        chatId: msg.chat_id as string,
+        role: msg.role as 'assistant' | 'system' | 'user' | 'data',
+        content: msg.content as string,
+        createdAt: createdAt
       };
     });
 
@@ -377,7 +377,7 @@ app.post('/api/chats/:id/messages', async (c) => {
     // Actualizar el chat en memoria
     const chatIndex = chats.findIndex(chat => chat.id === chatId);
     if (chatIndex !== -1) {
-      chats[chatIndex].messages = formattedMessages;
+      chats[chatIndex].messages = formattedMessages as LocalMessage[];
       chats[chatIndex].lastMessageAt = newMessage.createdAt;
 
       // Notificar a los clientes WebSocket
