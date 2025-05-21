@@ -1223,6 +1223,40 @@ export class Chat extends AIChatAgent<Env> {
         return agentContext.run(this, async () => {
           const dataStreamResponse = createDataStreamResponse({
             execute: async (dataStream) => {
+
+              // Asegurarnos de que tenemos un chat activo
+              if (!this.currentChatId) {
+                const defaultChat = await this.initializeDefaultChat();
+                this.currentChatId = defaultChat.id;
+                console.log('Chat ID establecido a:', this.currentChatId);
+              }
+
+              const messageResponse: ChatMessage = {
+                id: generateId(), // Generar un nuevo ID único para el mensaje
+                role: "assistant",
+                content: this.messages[this.messages.length - 1].content ?? '',
+                createdAt: new Date(),
+              };
+
+              // Actualizar los mensajes en memoria asegurando IDs únicos
+              this._messages = [...this.messages, messageResponse].map(msg => ({
+                ...msg,
+                id: msg.id || generateId(), // Asegurar que cada mensaje tenga un ID único
+                role: msg.role || 'assistant',
+                content: msg.content || '',
+                createdAt: msg.createdAt || new Date(),
+              })) as ChatMessage[];
+
+              // Guardar en la base de datos usando transacción
+              try {
+                await this.storage.transaction(async (txn) => {
+                  await this.saveMessagesD1(this._messages);
+                });
+              } catch (error) {
+                console.error('Error al guardar mensajes:', error);
+                throw new Error('Error al persistir los mensajes');
+              }
+
               // Process any pending tool calls from previous messages
               // This handles human-in-the-loop confirmations for tools
               const processedMessages = await processToolCalls({
