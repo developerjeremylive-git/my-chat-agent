@@ -1245,7 +1245,7 @@ export class Chat extends AIChatAgent<Env> {
     }
 
     const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-    const maxRetries = 3;
+    // const maxRetries = 3;
     const baseDelay = 1000; // 1 second
     let lastError: Error | null = null;
     let response;
@@ -1253,7 +1253,7 @@ export class Chat extends AIChatAgent<Env> {
     let success = false;
 
 
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
+    // for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
         response = await ai.models.generateContent({
@@ -1263,18 +1263,19 @@ export class Chat extends AIChatAgent<Env> {
             parts: [{ text: systemPrompt }, ...messageParts.map(p => ({ text: p.text }))]
           }]
         });
-        break; // Success, exit retry loop
+        // break; // Success, exit retry loop
       } catch (error) {
         lastError = error as Error;
-        if (error instanceof Error && error.message.includes('503')) {
-          const delay = baseDelay * Math.pow(2, attempt);
-          console.log(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-        } else {
-          throw error;
-        }
+        console.log(error);
+        // if (error instanceof Error && error.message.includes('503')) {
+        //   const delay = baseDelay * Math.pow(2, attempt);
+        //   console.log(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
+        //   await new Promise(resolve => setTimeout(resolve, delay));
+        // } else {
+        //   throw error;
+        // }
       }
-    }
+    // }
 
     if (!response) {
       throw lastError || new Error('Failed to generate content after retries');
@@ -1287,7 +1288,7 @@ export class Chat extends AIChatAgent<Env> {
       console.log('Chat ID establecido a:', this.currentChatId);
     }
 
-    const message: ChatMessage = {
+    const messageResponse: ChatMessage = {
       id: generateId(), // Generar un nuevo ID único para el mensaje
       role: "assistant",
       content: response.text ?? '',
@@ -1295,7 +1296,7 @@ export class Chat extends AIChatAgent<Env> {
     };
 
     // Actualizar los mensajes en memoria asegurando IDs únicos
-    this._messages = [...this.messages, message].map(msg => ({
+    this._messages = [...this.messages, messageResponse].map(msg => ({
       ...msg,
       id: msg.id || generateId(), // Asegurar que cada mensaje tenga un ID único
       role: msg.role || 'assistant',
@@ -1393,7 +1394,35 @@ export class Chat extends AIChatAgent<Env> {
     //     throw new Error('Error al guardar mensajes en la base de datos');
     //   }
     // }
-    await this.saveMessages(this._messages);
+
+
+    // if (currentCounter !== 0 && currentCounter <= maxSteps) {
+      // await this.saveMessages(this._messages);
+    // }
+
+    const message: ChatMessage = {
+      id: generateId(),
+      role: "user",
+      content: response.text ?? '',
+      createdAt: new Date(),
+    };
+
+    // Guardar el mensaje en la base de datos D1
+    const existingMessages = this.messages.map(msg => ({
+      ...msg,
+      id: msg.id,
+      createdAt: msg.createdAt || new Date()
+    })) as ChatMessage[];
+    await this.saveMessages([...existingMessages, message]);
+    console.log('Mensajes guardados exitosamente en la base de datos');
+
+    // const existingMessages = this.messages.map(msg => ({
+    //   ...msg,
+    //   id: msg.id,
+    //   createdAt: msg.createdAt || new Date()
+    // })) as ChatMessage[];
+    // await this.saveMessages([...existingMessages, messageResponse]);
+    // console.log('Mensajes guardados exitosamente en la base de datos');
 
     // Notificar a los clientes WebSocket
     const chatConnections = wsConnections.get(this.currentChatId || '');
@@ -1418,101 +1447,101 @@ export class Chat extends AIChatAgent<Env> {
         }
         console.log('Transmisión de Gemini finalizada');
 
-        if (currentCounter !== 0 && currentCounter <= maxSteps) {
-          // Guardar el mensaje en la base de datos D1
-          // if (this.currentChatId && this.db) {
-          //   try {
-          //     await this.db.prepare(
-          //       'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
-          //     ).bind(
-          //       generateId(),
-          //       this.currentChatId,
-          //       'assistant',
-          //       response.text ?? '',
-          //       new Date().toISOString()
-          //     ).run();
+        // if (currentCounter !== 0 && currentCounter <= maxSteps) {
+        //   // Guardar el mensaje en la base de datos D1
+        //   // if (this.currentChatId && this.db) {
+        //   //   try {
+        //   //     await this.db.prepare(
+        //   //       'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
+        //   //     ).bind(
+        //   //       generateId(),
+        //   //       this.currentChatId,
+        //   //       'assistant',
+        //   //       response.text ?? '',
+        //   //       new Date().toISOString()
+        //   //     ).run();
 
-          //     // Actualizar la fecha del último mensaje en el chat
-          //     await this.db.prepare(
-          //       'UPDATE chats SET last_message_at = ? WHERE id = ?'
-          //     ).bind(
-          //       new Date().toISOString(),
-          //       this.currentChatId
-          //     ).run();
-          //   } catch (error) {
-          //     console.error('Error al guardar el mensaje en D1:', error);
-          //   }
-          // }
+        //   //     // Actualizar la fecha del último mensaje en el chat
+        //   //     await this.db.prepare(
+        //   //       'UPDATE chats SET last_message_at = ? WHERE id = ?'
+        //   //     ).bind(
+        //   //       new Date().toISOString(),
+        //   //       this.currentChatId
+        //   //     ).run();
+        //   //   } catch (error) {
+        //   //     console.error('Error al guardar el mensaje en D1:', error);
+        //   //   }
+        //   // }
 
-          onFinish({
-            text: response.text ?? '',
-            response: {
-              id: generateId(),
-              timestamp: new Date(),
-              modelId: geminiModel,
-              messages: this._messages.filter(msg => msg.role === 'assistant').map(msg => ({
-                id: msg.id,
-                role: 'assistant' as const,
-                content: msg.content,
-                createdAt: msg.createdAt
-              })),
-              body: response.text ?? ''
-            },
-            reasoning: 'Generated response using Gemini model',
-            reasoningDetails: [{
-              type: 'text',
-              text: 'Processed user message and generated AI response'
-            }],
-            files: [],
-            toolCalls: [],
-            steps: [],
-            finishReason: 'stop',
-            sources: [],
-            toolResults: [],
-            usage: {
-              promptTokens: 0,
-              completionTokens: 0,
-              totalTokens: 0
-            },
-            warnings: [],
-            logprobs: undefined,
-            request: {},
-            providerMetadata: {},
-            experimental_providerMetadata: {}
-          });
-        } else {
-          console.log(`Se alcanzó el límite máximo de ${maxSteps} respuestas del asistente`);
-          // onFinish({
-          //   text: 'Has alcanzado el límite máximo de interacciones para esta conversación. Por favor, inicia una nueva conversación.',
-          //   response: {
-          //     id: generateId(),
-          //     timestamp: new Date(),
-          //     modelId: geminiModel,
-          //     messages: [],
-          //     body: 'Límite de interacciones alcanzado'
-          //   },
-          //   reasoning: 'Maximum steps reached',
-          //   reasoningDetails: [{
-          //     type: 'text',
-          //     text: `Se alcanzó el límite de ${maxSteps} interacciones para esta conversación`
-          //   }],
-          //   files: [],
-          //   toolCalls: [],
-          //   steps: [],
-          //   finishReason: 'stop',
-          //   sources: [],
-          //   toolResults: [],
-          //   usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-          //   warnings: [{
-          //     type: 'other',
-          //     message: `Has alcanzado el límite de ${maxSteps} interacciones. Inicia una nueva conversación.`
-          //   }],
-          //   logprobs: undefined,
-          //   request: {},
-          //   providerMetadata: {},
-          //   experimental_providerMetadata: {}
-          // });
-        }
+        //   onFinish({
+        //     text: response.text ?? '',
+        //     response: {
+        //       id: generateId(),
+        //       timestamp: new Date(),
+        //       modelId: geminiModel,
+        //       messages: this._messages.filter(msg => msg.role === 'assistant').map(msg => ({
+        //         id: msg.id,
+        //         role: 'assistant' as const,
+        //         content: msg.content,
+        //         createdAt: msg.createdAt
+        //       })),
+        //       body: response.text ?? ''
+        //     },
+        //     reasoning: 'Generated response using Gemini model',
+        //     reasoningDetails: [{
+        //       type: 'text',
+        //       text: 'Processed user message and generated AI response'
+        //     }],
+        //     files: [],
+        //     toolCalls: [],
+        //     steps: [],
+        //     finishReason: 'stop',
+        //     sources: [],
+        //     toolResults: [],
+        //     usage: {
+        //       promptTokens: 0,
+        //       completionTokens: 0,
+        //       totalTokens: 0
+        //     },
+        //     warnings: [],
+        //     logprobs: undefined,
+        //     request: {},
+        //     providerMetadata: {},
+        //     experimental_providerMetadata: {}
+        //   });
+        // } else {
+        //   console.log(`Se alcanzó el límite máximo de ${maxSteps} respuestas del asistente`);
+        //   // onFinish({
+        //   //   text: 'Has alcanzado el límite máximo de interacciones para esta conversación. Por favor, inicia una nueva conversación.',
+        //   //   response: {
+        //   //     id: generateId(),
+        //   //     timestamp: new Date(),
+        //   //     modelId: geminiModel,
+        //   //     messages: [],
+        //   //     body: 'Límite de interacciones alcanzado'
+        //   //   },
+        //   //   reasoning: 'Maximum steps reached',
+        //   //   reasoningDetails: [{
+        //   //     type: 'text',
+        //   //     text: `Se alcanzó el límite de ${maxSteps} interacciones para esta conversación`
+        //   //   }],
+        //   //   files: [],
+        //   //   toolCalls: [],
+        //   //   steps: [],
+        //   //   finishReason: 'stop',
+        //   //   sources: [],
+        //   //   toolResults: [],
+        //   //   usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+        //   //   warnings: [{
+        //   //     type: 'other',
+        //   //     message: `Has alcanzado el límite de ${maxSteps} interacciones. Inicia una nueva conversación.`
+        //   //   }],
+        //   //   logprobs: undefined,
+        //   //   request: {},
+        //   //   providerMetadata: {},
+        //   //   experimental_providerMetadata: {}
+        //   // });
+        // }
       }
     });
   }

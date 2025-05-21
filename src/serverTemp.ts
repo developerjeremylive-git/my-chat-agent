@@ -55,7 +55,7 @@ app.post('/api/model', async (c) => {
 // Endpoint para actualizar la configuración del asistente
 app.post('/api/config', async (c) => {
   const config = await c.req.json();
-  
+
   // Validar y actualizar cada parámetro
   if (typeof config.maxSteps === 'number' && config.maxSteps > 0) {
     maxSteps = config.maxSteps;
@@ -242,7 +242,7 @@ export class Chat extends AIChatAgent<Env> {
       return createDataStreamResponse({
         execute: async (dataStream) => {
           dataStream.write(formatDataStreamPart('text', response.text ?? ''));
-          
+
           // Guardar mensajes y ejecutar callback de finalización
           // await this.saveMessages([
           //   ...this.messages,
@@ -253,7 +253,7 @@ export class Chat extends AIChatAgent<Env> {
           //     createdAt: new Date(),
           //   },
           // ]);
-          
+
           // Ejecutar el callback onFinish con los argumentos necesarios
           // onFinish({
           //   text: response.text ?? '',
@@ -286,76 +286,76 @@ export class Chat extends AIChatAgent<Env> {
           //   providerMetadata: {},
           //   experimental_providerMetadata: {}
           // });
-          
+
           console.log('Transmisión de Gemini finalizada');
+        }
+      });
+    } else {
+      // Create a streaming response that handles both text and tool outputs
+      return agentContext.run(this, async () => {
+        const dataStreamResponse = createDataStreamResponse({
+          execute: async (dataStream) => {
+            // Process any pending tool calls from previous messages
+            // This handles human-in-the-loop confirmations for tools
+            const processedMessages = await processToolCalls({
+              messages: this.messages,
+              dataStream,
+              tools: allTools,
+              executions,
+            });
+
+            const result = streamText({
+              model,
+              temperature: config.temperature,
+              maxTokens: config.maxTokens,
+              topP: config.topP,
+              topK: config.topK,
+              frequencyPenalty: config.frequencyPenalty,
+              presencePenalty: config.presencePenalty,
+              seed: config.seed,
+              // toolCallStreaming: true,
+              system: `${systemPrompt}`,
+
+              // ${unstable_getSchedulePrompt({ date: new Date() })}
+
+              // Si el usuario solicita programar una tarea, utilice la herramienta de programación para programar las tareas
+              // `,
+
+              // If the user asks to schedule a task, use the schedule tool to schedule the task.
+              messages: processedMessages,
+              tools: allTools,
+              onFinish: async (args) => {
+                onFinish(
+                  args as Parameters<StreamTextOnFinishCallback<ToolSet>>[0]
+                );
+                console.log('Stream finalizado');
+              },
+              onError: (error) => {
+                console.error("Error while streaming:", error);
+              },
+              maxSteps,
+            });
+
+            // Merge the AI response stream with tool execution outputs
+            result.mergeIntoDataStream(dataStream);
+          },
+        });
+
+        return dataStreamResponse;
+      });
     }
-  });
-} else {
-  // Create a streaming response that handles both text and tool outputs
-  return agentContext.run(this, async () => {
-    const dataStreamResponse = createDataStreamResponse({
-      execute: async (dataStream) => {
-        // Process any pending tool calls from previous messages
-        // This handles human-in-the-loop confirmations for tools
-        const processedMessages = await processToolCalls({
-          messages: this.messages,
-          dataStream,
-          tools: allTools,
-          executions,
-        });
-
-        const result = streamText({
-          model,
-          temperature: config.temperature,
-          maxTokens: config.maxTokens,
-          topP: config.topP,
-          topK: config.topK,
-          frequencyPenalty: config.frequencyPenalty,
-          presencePenalty: config.presencePenalty,
-          seed: config.seed,
-          // toolCallStreaming: true,
-          system: `${systemPrompt}`,
-
-          // ${unstable_getSchedulePrompt({ date: new Date() })}
-
-          // Si el usuario solicita programar una tarea, utilice la herramienta de programación para programar las tareas
-          // `,
-
-          // If the user asks to schedule a task, use the schedule tool to schedule the task.
-          messages: processedMessages,
-          tools: allTools,
-          onFinish: async (args) => {
-            onFinish(
-              args as Parameters<StreamTextOnFinishCallback<ToolSet>>[0]
-            );
-            console.log('Stream finalizado');
-          },
-          onError: (error) => {
-            console.error("Error while streaming:", error);
-          },
-          maxSteps,
-        });
-
-        // Merge the AI response stream with tool execution outputs
-        result.mergeIntoDataStream(dataStream);
-      },
-    });
-
-    return dataStreamResponse;
-  });
-}
   }
   async executeTask(description: string, task: Schedule<string>) {
-  await this.saveMessages([
-    ...this.messages,
-    {
-      id: generateId(),
-      role: "user",
-      content: `Running scheduled task: ${description}`,
-      createdAt: new Date(),
-    },
-  ]);
-}
+    await this.saveMessages([
+      ...this.messages,
+      {
+        id: generateId(),
+        role: "user",
+        content: `Running scheduled task: ${description}`,
+        createdAt: new Date(),
+      },
+    ]);
+  }
 }
 
 /**
