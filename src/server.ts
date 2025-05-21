@@ -1302,7 +1302,12 @@ export class Chat extends AIChatAgent<Env> {
             id: generateId(),
             timestamp: new Date(),
             modelId: geminiModel,
-            messages: this._messages,
+            messages: this._messages.filter(msg => msg.role === 'assistant').map(msg => ({
+              id: msg.id,
+              role: 'assistant' as const,
+              content: msg.content,
+              createdAt: msg.createdAt
+            })),
             body: response.text ?? ''
           },
           reasoning: 'Generated response using Gemini model',
@@ -1336,7 +1341,12 @@ export class Chat extends AIChatAgent<Env> {
       return createDataStreamResponse({
         execute: async (dataStream) => {
           const processedMessages = await processToolCalls({
-            messages: this._messages,
+            messages: this._messages.filter(msg => msg.role === 'assistant').map(msg => ({
+              id: msg.id,
+              role: 'assistant' as const,
+              content: msg.content,
+              createdAt: msg.createdAt
+            })),
             dataStream,
             tools: allTools,
             executions,
