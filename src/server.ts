@@ -1351,14 +1351,18 @@ export class Chat extends AIChatAgent<Env> {
         }
         console.log('Transmisión de Gemini finalizada');
 
-        // Incrementar el contador de pasos
-        this._stepCounter++;
+        // Obtener el contador actual del storage
+        const currentCounter = await this.storage.get('stepCounter') || 0;
+        const newCounter = currentCounter + 1;
+        
+        // Guardar el nuevo valor del contador
+        await this.storage.put('stepCounter', newCounter);
 
-        console.log('Paso actual:', this._stepCounter);
+        console.log('Paso actual:', newCounter);
         console.log('Límite máximo de pasos:', maxSteps);
 
         // Verificar si aún no hemos alcanzado el límite de respuestas
-        if (this._stepCounter <= maxSteps) {
+        if (newCounter <= maxSteps) {
           // Guardar el mensaje en la base de datos D1
           // if (this.currentChatId && this.db) {
           //   try {
