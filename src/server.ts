@@ -906,7 +906,12 @@ export class Chat extends AIChatAgent<Env> {
         "SELECT name FROM sqlite_master WHERE type='table' AND name='messages'"
       ).first<{ name: string }>();
 
-      return Boolean(chatsExist && messagesExist);
+      // Verificar la existencia de la tabla step_counters
+      const stepCountersExist = await this.db.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='step_counters'"
+      ).first<{ name: string }>();
+
+      return Boolean(chatsExist && messagesExist && stepCountersExist);
     } catch (error) {
       console.error('Error verifying tables:', error);
       return false;
@@ -1365,17 +1370,6 @@ export class Chat extends AIChatAgent<Env> {
           console.log('Request succeeded after retry');
         }
         console.log('Transmisión de Gemini finalizada');
-
-        // Obtener el contador actual del storage
-             // Crear la tabla step_counters si no existe
-        await this.db.prepare(`
-          CREATE TABLE IF NOT EXISTS step_counters (
-            user_id TEXT PRIMARY KEY,
-            chat_id TEXT,
-            counter INTEGER DEFAULT 0,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-          )
-        `).run();
 
         // Obtener el contador actual del usuario desde D1
         const userId = this.currentUserId || 'default';
