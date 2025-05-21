@@ -180,7 +180,7 @@ function ChatComponent() {
       console.error('Error al actualizar el prompt del sistema:', error);
     }
   };
-  const [stepMax, setStepMax] = useState(0);
+  const [stepMax, setStepMax] = useState(1);
   const [isUpdatingStepMax, setIsUpdatingStepMax] = useState(false);
   const [showAgent, setShowAgent] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -1061,7 +1061,7 @@ function ChatComponent() {
                     <Robot size={20} className="text-[#F48120]" weight="duotone" />
                     <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Asistente</span>
                     <div className="flex items-center gap-2">
-                      {stepMax > 0 && (
+                      {stepMax > 1 && (
                         <button
                           onClick={() => {
                             if (!isUpdatingStepMax) {
@@ -1088,7 +1088,7 @@ function ChatComponent() {
                         <input
                           type="number"
                           inputMode="numeric"
-                          pattern="[0-9]*"
+                          pattern="[1-9]*"
                           min="1"
                           max="10"
                           value={stepMax}
