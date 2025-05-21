@@ -86,13 +86,23 @@ function ChatComponent() {
     try {
       const response = await fetch(`/api/chats/${chatId}/messages`);
       if (response.ok) {
-        const messages = await response.json();
-        if (Array.isArray(messages)) {
-          setCurrentMessages(messages.map(msg => ({
+        const data = await response.json();
+        if (data.success && Array.isArray(data.messages)) {
+          const formattedMessages = data.messages.map(msg => ({
             ...msg,
             createdAt: new Date(msg.createdAt)
-          })));
+          }));
+          setCurrentMessages(formattedMessages);
           setSelectedChatId(chatId);
+
+          // Disparar evento para actualizar la interfaz
+          window.dispatchEvent(new CustomEvent('chatSelected', { 
+            detail: { 
+              chatId, 
+              messages: formattedMessages,
+              isInitialLoad: false
+            }
+          }));
         }
       }
     } catch (error) {

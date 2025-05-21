@@ -345,49 +345,60 @@ app.post('/api/chats/:id/messages', async (c) => {
       createdAt: new Date()
     };
 
-    // Use storage.transaction() for atomic operations
-    await c.env.DB.batch([
-      // Insert the new message
-      // c.env.DB.prepare(
-      //   'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
-      // ).bind(
-      //   newMessage.id,
-      //   chatId,
-      //   newMessage.role,
-      //   newMessage.content,
-      //   newMessage.createdAt.toISOString()
-      // ),
+    // Insertar el nuevo mensaje en la base de datos
+    await c.env.DB.prepare(
+      'INSERT INTO messages (id, chat_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'
+    ).bind(
+      newMessage.id,
+      chatId,
+      newMessage.role,
+      newMessage.content,
+      newMessage.createdAt.toISOString()
+    ).run();
 
-      // Update the last message timestamp
-      c.env.DB.prepare(
-        'UPDATE chats SET last_message_at = ? WHERE id = ?'
-      ).bind(new Date().toISOString(), chatId)
-    ]);
+    // Actualizar el timestamp del último mensaje
+    await c.env.DB.prepare(
+      'UPDATE chats SET last_message_at = ? WHERE id = ?'
+    ).bind(newMessage.createdAt.toISOString(), chatId).run();
 
-      // Update in-memory chat data
-      const chatIndex = chats.findIndex(chat => chat.id === chatId);
-      if (chatIndex !== -1) {
-        chats[chatIndex].messages.push(newMessage);
-        chats[chatIndex].lastMessageAt = new Date();
+    // Obtener todos los mensajes actualizados del chat
+    const messagesResponse = await c.env.DB.prepare(
+      'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
+    ).bind(chatId).all();
 
-        // Notify WebSocket clients
-        const connections = wsConnections.get(chatId) || new Set<WebSocket>();
-        connections.forEach(ws => {
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({
-              type: 'chat_updated',
-              chatId,
-              messages: chats[chatIndex].messages
-            }));
-          }
-        });
-      }
+    const formattedMessages = messagesResponse.results.map(msg => ({
+      id: msg.id,
+      chatId: msg.chat_id,
+      role: msg.role,
+      content: msg.content,
+      createdAt: new Date(msg.created_at)
+    }));
 
-      return c.json({
-        success: true,
-        message: newMessage,
-        chat: chats[chatIndex]
+    // Actualizar el chat en memoria
+    const chatIndex = chats.findIndex(chat => chat.id === chatId);
+    if (chatIndex !== -1) {
+      chats[chatIndex].messages = formattedMessages;
+      chats[chatIndex].lastMessageAt = newMessage.createdAt;
+
+      // Notificar a los clientes WebSocket
+      const connections = wsConnections.get(chatId) || new Set<WebSocket>();
+      connections.forEach(ws => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            type: 'chat_updated',
+            chatId,
+            messages: formattedMessages
+          }));
+        }
       });
+    }
+
+    return c.json({
+      success: true,
+      message: newMessage,
+      messages: formattedMessages,
+      chat: chats[chatIndex]
+    });
   } catch (error) {
     console.error('Error al procesar el mensaje:', error);
     return c.json({
@@ -395,7 +406,6 @@ app.post('/api/chats/:id/messages', async (c) => {
       details: error instanceof Error ? error.message : 'Error desconocido'
     }, 500);
   }
-
 });
 
 app.post('/api/assistant', async (c) => {
