@@ -1352,8 +1352,9 @@ export class Chat extends AIChatAgent<Env> {
 
   private async handleGeminiResponse(onFinish: StreamTextOnFinishCallback<ToolSet>) {
     const geminiApiKey = env.GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || (import.meta as any).env.GEMINI_API_KEY;
+
     if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY is not configured in environment variables');
+      throw new Error('GEMINI_API_KEY no está configurado en las variables de entorno');
     }
 
     const ai = new GoogleGenAI({ apiKey: geminiApiKey });
@@ -1362,8 +1363,6 @@ export class Chat extends AIChatAgent<Env> {
     let currentCounter = 0;
     let success = false;
 
-
-    // for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
       response = await ai.models.generateContent({
@@ -1377,18 +1376,10 @@ export class Chat extends AIChatAgent<Env> {
     } catch (error) {
       lastError = error as Error;
       console.log(error);
-      // if (error instanceof Error && error.message.includes('503')) {
-      //   const delay = baseDelay * Math.pow(2, attempt);
-      //   console.log(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
-      //   await new Promise(resolve => setTimeout(resolve, delay));
-      // } else {
-      //   throw error;
-      // }
     }
-    // }
 
     if (!response) {
-      throw lastError || new Error('Failed to generate content after retries');
+      throw lastError || new Error('No se pudo generar contenido después de los reintentos');
     }
 
     // Asegurarnos de que tenemos un chat activo
@@ -1415,20 +1406,19 @@ export class Chat extends AIChatAgent<Env> {
     })) as ChatMessage[];
 
     // Guardar en la base de datos usando transacción
+    try {
+      // Guardar en la base de datos usando transacción
       await this.storage.transaction(async (txn) => {
         await this.saveMessagesD1(this._messages);
       });
 
-    // Actualizar los mensajes en memoria y guardar en la base de datos
-    const updatedMessages = [...this.messages, messageResponse];
-    // this._messages = updatedMessages;
-
-    try {
-      await this.saveMessages(updatedMessages);
+      // Actualizar los mensajes en memoria y guardar en la base de datos
+      // const updatedMessages = [...this.messages, messageResponse];
+      // await this.saveMessages(updatedMessages);
       console.log('Mensajes guardados exitosamente');
+      return; // Éxito, salir de la función
     } catch (error) {
       console.error('Error al guardar mensajes:', error);
-      throw new Error('Error al persistir los mensajes');
     }
 
     try {
