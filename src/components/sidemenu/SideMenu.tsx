@@ -214,42 +214,59 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
 
     const selectChat = async (chatId: string) => {
         try {
-            // First get the chat details
+            // Obtener detalles del chat
             const chatResponse = await fetch(`/api/chats/${chatId}`);
             const chatData = await chatResponse.json() as ChatData | { error: string };
             
             if ('error' in chatData) {
-                console.error('Error in API response:', chatData.error);
+                console.error('Error en la respuesta de la API:', chatData.error);
                 return;
             }
 
-            // Then get the messages for this chat
+            // Obtener todos los mensajes del chat
             const messagesResponse = await fetch(`/api/chats/${chatId}/messages`);
-            const messagesData = await messagesResponse.json() as { success: boolean; messages: ChatMessage[] };
+            const messagesData = await messagesResponse.json();
 
-            if (!messagesData.success) {
-                console.error('Error fetching messages:', messagesData);
+            // Verificar que los mensajes sean un array válido
+            if (!Array.isArray(messagesData)) {
+                console.error('Error: Los mensajes no son un array válido');
                 return;
             }
+
+            // Procesar y formatear los mensajes
+            const formattedMessages = messagesData.map((msg: ChatMessage) => ({
+                id: msg.id,
+                role: msg.role,
+                content: msg.content,
+                createdAt: new Date(msg.createdAt),
+                parts: msg.parts || []
+            })) as LocalMessage[];
 
             const chat: LocalChatData = {
                 id: chatData.id,
                 title: chatData.title,
                 lastMessageAt: new Date(chatData.lastMessageAt),
-                messages: messagesData.messages.map((msg: ChatMessage) => ({
-                    ...msg,
-                    createdAt: new Date(msg.createdAt)
-                })) as LocalMessage[]
+                messages: formattedMessages
             };
 
-            // Emitir evento para actualizar el chat en la interfaz principal
+            // Actualizar el estado local de los chats
+            setChats(prevChats =>
+                prevChats.map(prevChat =>
+                    prevChat.id === chatId ? { ...prevChat, messages: formattedMessages } : prevChat
+                )
+            );
+
+            // Emitir evento para actualizar la interfaz principal
             window.dispatchEvent(new CustomEvent('chatSelected', { 
                 detail: { 
                     chatId, 
-                    messages: chat.messages,
-                    isInitialLoad: chatId === '3xytdwIhg9AimViz'
+                    messages: formattedMessages,
+                    isInitialLoad: false
                 }
             }));
+
+            // Seleccionar el chat actual
+            onChatSelect(chatId);
         } catch (error) {
             console.error('Error al cargar el chat:', error);
         }
