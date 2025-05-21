@@ -298,7 +298,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                                 {/* Acciones principales */}
                                 <div className="space-y-2">
                                     <button
-                                        onClick={onNewChat}
+                                        onClick={createChat}
                                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
                                         text-neutral-700 dark:text-neutral-300
                                         hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
