@@ -1346,9 +1346,12 @@ export class Chat extends AIChatAgent<Env> {
         const assistantMessageCount = lastUserMessage
           ? this._messages.filter(msg =>
             msg.role === 'assistant' &&
-            msg.createdAt > lastUserMessage.createdAt
+            new Date(msg.createdAt).getTime() > new Date(lastUserMessage.createdAt).getTime()
           ).length
           : 0;
+
+        console.log('Contador de mensajes del asistente:', assistantMessageCount);
+        console.log('Límite máximo de pasos:', maxSteps);
 
         // Verificar si aún no hemos alcanzado el límite de respuestas
         if (assistantMessageCount < maxSteps) {
