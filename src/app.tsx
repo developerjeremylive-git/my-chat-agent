@@ -1301,7 +1301,7 @@ function ChatComponent() {
                               headers: {
                                 'Content-Type': 'application/json',
                               },
-                              body: JSON.stringify({ maxSteps: stepMax }),
+                              body: JSON.stringify({ maxStepsTemp: stepMax }),
                             })
                           ]);
 

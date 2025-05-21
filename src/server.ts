@@ -412,7 +412,7 @@ app.post('/api/chats/:id/messages', async (c) => {
 
 app.post('/api/assistant', async (c) => {
   try {
-    const { maxSteps: newMaxSteps } = await c.req.json();
+    const { maxStepsTemp: newMaxSteps } = await c.req.json();
 
     // Validate maxSteps
     if (typeof newMaxSteps === 'number' && newMaxSteps > 0) {
@@ -1326,7 +1326,7 @@ export class Chat extends AIChatAgent<Env> {
     //     throw new Error('Error al guardar mensajes en la base de datos');
     //   }
     // }
-    // await this.saveMessagesD1(this._messages);
+    await this.saveMessages(this._messages);
 
     // Notificar a los clientes WebSocket
     const chatConnections = wsConnections.get(this.currentChatId || '');
