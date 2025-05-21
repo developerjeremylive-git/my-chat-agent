@@ -373,7 +373,7 @@ app.post('/api/chats/:id/messages', async (c) => {
       chatId: msg.chat_id,
       role: msg.role,
       content: msg.content,
-      createdAt: new Date(msg.created_at)
+      createdAt: new Date(msg.created_at as string)
     }));
 
     // Actualizar el chat en memoria
