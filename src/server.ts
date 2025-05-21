@@ -1261,26 +1261,24 @@ export class Chat extends AIChatAgent<Env> {
       content: response.text ?? '',
       createdAt: new Date(),
     };
-    const messages = [...this.messages, message].map(msg => ({
-        ...msg,
-        createdAt: msg.createdAt || new Date()
-      })) as ChatMessage[];
 
-    const validatedMessages = messages.map(msg => ({
+    // Actualizar los mensajes en memoria
+    this._messages = [...this.messages, message].map(msg => ({
+      ...msg,
       id: msg.id || generateId(),
-      role: msg.role,
-      content: msg.content,
       createdAt: msg.createdAt || new Date()
     })) as ChatMessage[];
-    await this.saveMessages(validatedMessages);
-    // await this.saveToCurrentChat(messages);
 
+    // Guardar en la base de datos
+    await this.saveMessages(this._messages);
+
+    // Notificar a los clientes WebSocket
     const chatConnections = wsConnections.get(this.currentChatId || '');
     if (chatConnections) {
       const update = {
         type: 'chat_updated',
         chatId: this.currentChatId,
-        messages: messages
+        messages: this._messages
       };
       chatConnections.forEach(ws => {
         if (ws.readyState === WebSocket.OPEN) {
@@ -1296,6 +1294,39 @@ export class Chat extends AIChatAgent<Env> {
           console.log('Request succeeded after retry');
         }
         console.log('Transmisión de Gemini finalizada');
+
+        // Ejecutar callback onFinish con los argumentos necesarios
+        onFinish({
+          text: response.text ?? '',
+          response: {
+            id: generateId(),
+            timestamp: new Date(),
+            modelId: geminiModel,
+            messages: this._messages,
+            body: response.text ?? ''
+          },
+          reasoning: 'Generated response using Gemini model',
+          reasoningDetails: [{
+            type: 'text',
+            text: 'Processed user message and generated AI response'
+          }],
+          files: [],
+          toolCalls: [],
+          steps: [],
+          finishReason: 'stop',
+          sources: [],
+          toolResults: [],
+          usage: {
+            promptTokens: 0,
+            completionTokens: 0,
+            totalTokens: 0
+          },
+          warnings: [],
+          logprobs: undefined,
+          request: {},
+          providerMetadata: {},
+          experimental_providerMetadata: {}
+        });
       }
     });
   }
