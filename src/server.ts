@@ -1296,17 +1296,15 @@ export class Chat extends AIChatAgent<Env> {
         }
         console.log('Transmisión de Gemini finalizada');
 
-        // Ejecutar callback onFinish con los argumentos necesarios
-        // Inicializar contador si no existe
-        if (!this._stepCounter) {
-          this._stepCounter = 0;
-        }
-
-        // Incrementar el contador
-        this._stepCounter++;
-
+        // Obtener el contador actual del storage o inicializarlo
+        const currentSteps = await this.storage.get('stepCounter') || 0;
+        const newStepCount = currentSteps + 1;
+        
+        // Guardar el nuevo contador en el storage
+        await this.storage.put('stepCounter', newStepCount);
+        
         // Verificar si aún no hemos alcanzado el límite de pasos
-        if (this._stepCounter <= maxSteps) {
+        if (newStepCount <= maxSteps) {
           onFinish({
             text: response.text ?? '',
             response: {
@@ -1345,6 +1343,36 @@ export class Chat extends AIChatAgent<Env> {
           });
         } else {
           console.log('Se alcanzó el límite máximo de pasos:', maxSteps);
+          // Resetear el contador cuando se alcanza el límite
+          await this.storage.put('stepCounter', 0);
+          // Notificar al cliente que se alcanzó el límite
+          // onFinish({
+          //   text: 'Se ha alcanzado el límite máximo de pasos. Por favor, inicie una nueva conversación.',
+          //   response: {
+          //     id: generateId(),
+          //     timestamp: new Date(),
+          //     modelId: geminiModel,
+          //     messages: [],
+          //     body: 'Límite de pasos alcanzado'
+          //   },
+          //   reasoning: 'Maximum steps reached',
+          //   reasoningDetails: [{
+          //     type: 'text',
+          //     text: 'Se alcanzó el límite máximo de pasos permitidos'
+          //   }],
+          //   files: [],
+          //   toolCalls: [],
+          //   steps: [],
+          //   finishReason: 'max_steps',
+          //   sources: [],
+          //   toolResults: [],
+          //   usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+          //   warnings: ['Se alcanzó el límite máximo de pasos'],
+          //   logprobs: undefined,
+          //   request: {},
+          //   providerMetadata: {},
+          //   experimental_providerMetadata: {}
+          // });
         }
       }
     });
