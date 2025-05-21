@@ -1267,12 +1267,22 @@ export class Chat extends AIChatAgent<Env> {
     this._messages = [...this.messages, message].map(msg => ({
       ...msg,
       id: msg.id || generateId(),
+      role: msg.role || 'assistant',
+      content: msg.content || '',
       createdAt: msg.createdAt || new Date()
     })) as ChatMessage[];
 
     // Guardar en la base de datos
     await this.saveMessages(this._messages);
-    await this.saveToCurrentChat(this._messages);
+
+    const validatedMessages = this.messages.map(msg => ({
+      id: msg.id || generateId(),
+      role: msg.role,
+      content: msg.content,
+      createdAt: msg.createdAt || new Date()
+    })) as ChatMessage[];
+    await this.saveToCurrentChat(validatedMessages);
+
     // Notificar a los clientes WebSocket
     const chatConnections = wsConnections.get(this.currentChatId || '');
     if (chatConnections) {
@@ -1349,36 +1359,36 @@ export class Chat extends AIChatAgent<Env> {
           });
         } else {
           console.log(`Se alcanzó el límite máximo de ${maxSteps} respuestas del asistente`);
-          onFinish({
-            text: 'Has alcanzado el límite máximo de interacciones para esta conversación. Por favor, inicia una nueva conversación.',
-            response: {
-              id: generateId(),
-              timestamp: new Date(),
-              modelId: geminiModel,
-              messages: [],
-              body: 'Límite de interacciones alcanzado'
-            },
-            reasoning: 'Maximum steps reached',
-            reasoningDetails: [{
-              type: 'text',
-              text: `Se alcanzó el límite de ${maxSteps} interacciones para esta conversación`
-            }],
-            files: [],
-            toolCalls: [],
-            steps: [],
-            finishReason: 'stop',
-            sources: [],
-            toolResults: [],
-            usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-            warnings: [{
-              type: 'other',
-              message: `Has alcanzado el límite de ${maxSteps} interacciones. Inicia una nueva conversación.`
-            }],
-            logprobs: undefined,
-            request: {},
-            providerMetadata: {},
-            experimental_providerMetadata: {}
-          });
+          // onFinish({
+          //   text: 'Has alcanzado el límite máximo de interacciones para esta conversación. Por favor, inicia una nueva conversación.',
+          //   response: {
+          //     id: generateId(),
+          //     timestamp: new Date(),
+          //     modelId: geminiModel,
+          //     messages: [],
+          //     body: 'Límite de interacciones alcanzado'
+          //   },
+          //   reasoning: 'Maximum steps reached',
+          //   reasoningDetails: [{
+          //     type: 'text',
+          //     text: `Se alcanzó el límite de ${maxSteps} interacciones para esta conversación`
+          //   }],
+          //   files: [],
+          //   toolCalls: [],
+          //   steps: [],
+          //   finishReason: 'stop',
+          //   sources: [],
+          //   toolResults: [],
+          //   usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+          //   warnings: [{
+          //     type: 'other',
+          //     message: `Has alcanzado el límite de ${maxSteps} interacciones. Inicia una nueva conversación.`
+          //   }],
+          //   logprobs: undefined,
+          //   request: {},
+          //   providerMetadata: {},
+          //   experimental_providerMetadata: {}
+          // });
         }
       }
     });
@@ -1484,7 +1494,14 @@ export class Chat extends AIChatAgent<Env> {
       createdAt: msg.createdAt || new Date()
     })) as ChatMessage[];
     await this.saveMessages([...existingMessages, message]);
-    await this.saveToCurrentChat([...existingMessages, message]);
+    
+    const validatedMessages = this.messages.map(msg => ({
+      id: msg.id || generateId(),
+      role: msg.role,
+      content: msg.content,
+      createdAt: msg.createdAt || new Date()
+    })) as ChatMessage[];
+    await this.saveToCurrentChat(validatedMessages);
            // Guardar mensajes y ejecutar callback de finalización
           // await this.saveMessages([
           //   ...this.messages,
