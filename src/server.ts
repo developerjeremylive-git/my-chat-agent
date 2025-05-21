@@ -1272,7 +1272,7 @@ export class Chat extends AIChatAgent<Env> {
 
     // Guardar en la base de datos
     await this.saveMessages(this._messages);
-    await this.saveMessagesD1(this._messages);
+    await this.saveToCurrentChat(this._messages);
     // Notificar a los clientes WebSocket
     const chatConnections = wsConnections.get(this.currentChatId || '');
     if (chatConnections) {
@@ -1296,13 +1296,14 @@ export class Chat extends AIChatAgent<Env> {
         }
         console.log('Transmisión de Gemini finalizada');
 
-        // Obtener el contador actual del storage o inicializarlo
-        const currentSteps = await this.storage.get('stepCounter') || 0;
+        // Obtener o inicializar el contador de pasos para el chat actual
+        const chatStepsKey = `chat_steps_${this.currentChatId}`;
+        const currentSteps = parseInt(await this.storage.get(chatStepsKey) || '0');
         const newStepCount = currentSteps + 1;
-        
-        // Guardar el nuevo contador en el storage
-        await this.storage.put('stepCounter', newStepCount);
-        
+
+        // Guardar el nuevo contador
+        await this.storage.put(chatStepsKey, newStepCount.toString());
+
         // Verificar si aún no hemos alcanzado el límite de pasos
         if (newStepCount <= maxSteps) {
           onFinish({
@@ -1343,36 +1344,36 @@ export class Chat extends AIChatAgent<Env> {
           });
         } else {
           console.log('Se alcanzó el límite máximo de pasos:', maxSteps);
-          // Resetear el contador cuando se alcanza el límite
-          await this.storage.put('stepCounter', 0);
-          // Notificar al cliente que se alcanzó el límite
-          // onFinish({
-          //   text: 'Se ha alcanzado el límite máximo de pasos. Por favor, inicie una nueva conversación.',
-          //   response: {
-          //     id: generateId(),
-          //     timestamp: new Date(),
-          //     modelId: geminiModel,
-          //     messages: [],
-          //     body: 'Límite de pasos alcanzado'
-          //   },
-          //   reasoning: 'Maximum steps reached',
-          //   reasoningDetails: [{
-          //     type: 'text',
-          //     text: 'Se alcanzó el límite máximo de pasos permitidos'
-          //   }],
-          //   files: [],
-          //   toolCalls: [],
-          //   steps: [],
-          //   finishReason: 'max_steps',
-          //   sources: [],
-          //   toolResults: [],
-          //   usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-          //   warnings: ['Se alcanzó el límite máximo de pasos'],
-          //   logprobs: undefined,
-          //   request: {},
-          //   providerMetadata: {},
-          //   experimental_providerMetadata: {}
-          // });
+          onFinish({
+            text: 'Has alcanzado el límite máximo de interacciones para esta conversación. Por favor, inicia una nueva conversación.',
+            response: {
+              id: generateId(),
+              timestamp: new Date(),
+              modelId: geminiModel,
+              messages: [],
+              body: 'Límite de interacciones alcanzado'
+            },
+            reasoning: 'Maximum steps reached',
+            reasoningDetails: [{
+              type: 'text',
+              text: `Se alcanzó el límite de ${maxSteps} interacciones para esta conversación`
+            }],
+            files: [],
+            toolCalls: [],
+            steps: [],
+            finishReason: 'stop',
+            sources: [],
+            toolResults: [],
+            usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+            warnings: [{
+              type: 'other',
+              message: `Has alcanzado el límite de ${maxSteps} interacciones. Inicia una nueva conversación.`
+            }],
+            logprobs: undefined,
+            request: {},
+            providerMetadata: {},
+            experimental_providerMetadata: {}
+          });
         }
       }
     });
@@ -1478,7 +1479,7 @@ export class Chat extends AIChatAgent<Env> {
       createdAt: msg.createdAt || new Date()
     })) as ChatMessage[];
     await this.saveMessages([...existingMessages, message]);
-    await this.saveMessagesD1([...existingMessages, message]);
+    await this.saveToCurrentChat([...existingMessages, message]);
            // Guardar mensajes y ejecutar callback de finalización
           // await this.saveMessages([
           //   ...this.messages,
