@@ -71,7 +71,7 @@ import type { ChatMessage, FormattedChatMessage, APIResponse } from "./types/api
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
-  "getWeatherInformation",
+  // "getWeatherInformation",
 ];
 
 function ChatComponent() {
