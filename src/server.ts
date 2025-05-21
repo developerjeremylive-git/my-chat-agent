@@ -1357,8 +1357,6 @@ export class Chat extends AIChatAgent<Env> {
     }
 
     const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-    // const maxRetries = 3;
-    const baseDelay = 1000; // 1 second
     let lastError: Error | null = null;
     let response;
     let currentCounter = 0;
@@ -1401,7 +1399,7 @@ export class Chat extends AIChatAgent<Env> {
     }
 
     const messageResponse: ChatMessage = {
-      id: generateId(), // Generar un nuevo ID único para el mensaje
+      id: generateId(),
       role: "assistant",
       content: response.text ?? '',
       createdAt: new Date(),
@@ -1417,10 +1415,17 @@ export class Chat extends AIChatAgent<Env> {
     })) as ChatMessage[];
 
     // Guardar en la base de datos usando transacción
-    try {
       await this.storage.transaction(async (txn) => {
         await this.saveMessagesD1(this._messages);
       });
+
+    // Actualizar los mensajes en memoria y guardar en la base de datos
+    const updatedMessages = [...this.messages, messageResponse];
+    // this._messages = updatedMessages;
+
+    try {
+      await this.saveMessages(updatedMessages);
+      console.log('Mensajes guardados exitosamente');
     } catch (error) {
       console.error('Error al guardar mensajes:', error);
       throw new Error('Error al persistir los mensajes');
