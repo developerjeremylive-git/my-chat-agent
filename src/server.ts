@@ -1161,11 +1161,12 @@ export class Chat extends AIChatAgent<Env> {
     options?: { abortSignal?: AbortSignal }
   ) {
     try {
-      // Inicializar o cargar chats si es necesario
-      await this.initializeOrLoadChats();
-
-      // Asegurar que existe un chat activo
-      await this.ensureActiveChat();
+      // Verificar que existe un chat activo
+      if (!this.currentChatId) {
+        // Si no hay chat activo, usar el chat por defecto
+        const defaultChat = await this.initializeDefaultChat();
+        this.currentChatId = defaultChat.id;
+      }
 
       const allTools = { ...tools };
 
