@@ -191,8 +191,10 @@ app.get('/api/chats/:id/messages', async (c) => {
 
     // Format messages with proper date handling
     const formattedMessages = messages.results.map(msg => {
-      const createdAt = typeof msg.created_at === 'string' ? 
-        new Date(msg.created_at) : new Date();
+      const createdAt = msg.created_at && (typeof msg.created_at === 'string' || msg.created_at instanceof Date) ?
+        new Date(msg.created_at) : 
+        typeof msg.created_at === 'number' ? new Date(msg.created_at) : 
+        new Date();
       return {
         id: msg.id as string,
         chatId: msg.chat_id as string,

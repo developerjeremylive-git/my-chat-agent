@@ -88,10 +88,12 @@ function ChatComponent() {
       if (response.ok) {
         const data = await response.json() as APIResponse<ChatMessage>;
         if (data.success && Array.isArray(data.messages)) {
-          const formattedMessages = data.messages.map(msg => ({
-            ...msg,
-            createdAt: new Date(msg.createdAt)
-          })) as FormattedChatMessage[];
+          const formattedMessages = data.messages.map(msg => {
+            return {
+              ...msg,
+              createdAt: new Date(msg.createdAt)
+            } as FormattedChatMessage;
+          });
           setCurrentMessages(formattedMessages);
           setSelectedChatId(chatId);
 
@@ -210,7 +212,11 @@ function ChatComponent() {
   // Escuchar el evento de carga inicial del chat
   useEffect(() => {
     const handleInitialChatLoaded = (event: CustomEvent<{ chatId: string; messages: ChatMessage[] }>) => {
-      setCurrentMessages(event.detail.messages || []);
+      const formattedMessages = (event.detail.messages || []).map(msg => ({
+        ...msg,
+        createdAt: new Date(msg.createdAt)
+      }));
+      setCurrentMessages(formattedMessages);
     };
 
     window.addEventListener('initialChatLoaded', handleInitialChatLoaded as EventListener);
@@ -223,7 +229,11 @@ function ChatComponent() {
   // Escuchar el evento de selección de chat
   useEffect(() => {
     const handleChatSelected = (event: CustomEvent<{ chatId: string; messages: ChatMessage[] }>) => {
-      setCurrentMessages(event.detail.messages || []);
+      const formattedMessages = (event.detail.messages || []).map(msg => ({
+        ...msg,
+        createdAt: new Date(msg.createdAt)
+      }));
+      setCurrentMessages(formattedMessages);
     };
 
     window.addEventListener('chatSelected', handleChatSelected as EventListener);
