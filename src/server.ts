@@ -1360,8 +1360,8 @@ export class Chat extends AIChatAgent<Env> {
     const ai = new GoogleGenAI({ apiKey: geminiApiKey });
     let lastError: Error | null = null;
     let response;
-    let currentCounter = 0;
-    let success = false;
+    // let currentCounter = 0;
+    // let success = false;
 
     try {
       const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
@@ -1416,58 +1416,62 @@ export class Chat extends AIChatAgent<Env> {
       console.error('Error al guardar mensajes:', error);
     }
 
-    try {
-      await this.storage.transaction(async (txn) => {
-        // Ensure we have valid IDs
-        const userId = this.currentUserId || 'default';
-        if (!this.currentChatId) {
-          throw new Error('Chat ID is required for step counter');
-        }
+    // try {
+    //   await this.storage.transaction(async (txn) => {
+    //     // Ensure we have valid IDs
+    //     const userId = this.currentUserId || 'default';
+    //     if (!this.currentChatId) {
+    //       throw new Error('Chat ID is required for step counter');
+    //     }
 
-        // Get current counter with error handling
-        const result = await this.db
-          .prepare('SELECT counter FROM step_counters WHERE user_id = ? AND chat_id = ?')
-          .bind(userId, this.currentChatId)
-          .first<{ counter: number }>();
+    //     // Get current counter with error handling
+    //     const result = await this.db
+    //       .prepare('SELECT counter FROM step_counters WHERE user_id = ? AND chat_id = ?')
+    //       .bind(userId, this.currentChatId)
+    //       .first<{ counter: number }>();
 
-        if (!result) {
-          // If no record exists, INSERT new counter
-          const insertResult = await this.db
-            .prepare(`
-              INSERT INTO step_counters (user_id, chat_id, counter, updated_at)
-              VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-            `)
-            .bind(userId, this.currentChatId, 1)
-            .run();
-          currentCounter = 1;
-          success = insertResult?.success || false;
-        } else {
-          // If record exists, UPDATE counter
-          currentCounter = (result.counter ?? 0) + 1;
-          const updateResult = await this.db
-            .prepare(`
-              UPDATE step_counters 
-              SET counter = ?, updated_at = CURRENT_TIMESTAMP
-              WHERE user_id = ? AND chat_id = ?
-            `)
-            .bind(currentCounter, userId, this.currentChatId)
-            .run();
-          success = updateResult?.success || false;
-        }
-      });
-    } catch (error) {
-      console.error('Error al actualizar el contador:', error);
-    }
+    //     if (!result) {
+    //       // If no record exists, INSERT new counter
+    //       const insertResult = await this.db
+    //         .prepare(`
+    //           INSERT INTO step_counters (user_id, chat_id, counter, updated_at)
+    //           VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+    //         `)
+    //         .bind(userId, this.currentChatId, 1)
+    //         .run();
+    //       currentCounter = 1;
+    //       success = insertResult?.success || false;
+    //     } else {
+    //       // If record exists, UPDATE counter
+    //       currentCounter = (result.counter ?? 0) + 1;
+    //       const updateResult = await this.db
+    //         .prepare(`
+    //           UPDATE step_counters 
+    //           SET counter = ?, updated_at = CURRENT_TIMESTAMP
+    //           WHERE user_id = ? AND chat_id = ?
+    //         `)
+    //         .bind(currentCounter, userId, this.currentChatId)
+    //         .run();
+    //       success = updateResult?.success || false;
+    //     }
+    //   });
+    // } catch (error) {
+    //   console.error('Error al actualizar el contador:', error);
+    // }
 
-    if (currentCounter <= maxSteps) {
-      return;
-    }
+    // if (currentCounter <= maxSteps) {
+    //   return;
+    // }
+
+
+
     // Actualizar los mensajes en memoria y guardar en la base de datos
-    try {
-      await this.saveMessages(this._messages);
-    } catch (error) {
-      console.error('Error al actualizar mensajes:', error);
-    }
+    // try {
+    //   await this.saveMessages(this._messages);
+    // } catch (error) {
+    //   console.error('Error al actualizar mensajes:', error);
+    // }
+
 
 
     // if (currentCounter !== 0 && currentCounter <= maxSteps) {

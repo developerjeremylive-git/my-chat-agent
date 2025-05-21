@@ -1056,7 +1056,7 @@ function ChatComponent() {
                   <ModelSelect />
                 </div>
 
-                {selectedModel === 'gemini-2.0-flash' && (
+                {/* {selectedModel === 'gemini-2.0-flash' && (
                   <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10">
                     <Robot size={20} className="text-[#F48120]" weight="duotone" />
                     <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Asistente</span>
@@ -1135,7 +1135,7 @@ function ChatComponent() {
 
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {/* 
 
@@ -1289,13 +1289,13 @@ function ChatComponent() {
                           // Actualizar el prompt del sistema y el modelo
                           await Promise.all([
                             updateSystemPrompt(inputText),
-                            fetch('/api/model', {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify({ modelTemp: selectedModel }),
-                            }),
+                            // fetch('/api/model', {
+                            //   method: 'POST',
+                            //   headers: {
+                            //     'Content-Type': 'application/json',
+                            //   },
+                            //   body: JSON.stringify({ modelTemp: selectedModel }),
+                            // }),
                             fetch('/api/assistant', {
                               method: 'POST',
                               headers: {
