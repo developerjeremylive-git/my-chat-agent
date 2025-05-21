@@ -56,7 +56,7 @@ const workersai = createWorkersAI({ binding: env.AI });
 const wsConnections = new Map<string, Set<WebSocket>>();
 
 // Variables globales para almacenar el modelo seleccionado, prompt del sistema y configuración
-let selectedModel = 'gemini-2.0-flash';
+let selectedModel = '@cf/deepseek-ai/deepseek-r1-distill-qwen-32b';
 let geminiModel = 'gemini-2.0-flash';
 let systemPrompt = 'Eres un asistente útil que puede realizar varias tareas...';
 let maxSteps = DEFAULT_MAX_STEPS;
@@ -70,9 +70,17 @@ let maxSteps = DEFAULT_MAX_STEPS;
 
 // Endpoint para actualizar el modelo
 app.post('/api/model', async (c) => {
-  const { model } = await c.req.json();
-  selectedModel = model;
-  return c.json({ success: true, model: selectedModel });
+  try {
+    const { model } = await c.req.json();
+    selectedModel = model;
+    return c.json({ success: true, model: selectedModel });
+  } catch (error) {
+    console.error('Error in /api/assistant:', error);
+    return c.json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
 });
 
 // Endpoint para actualizar la configuración del asistente
@@ -420,16 +428,14 @@ app.post('/api/assistant', async (c) => {
       return c.json({
         success: true,
         config: {
-          maxSteps,
-          selectedModel
+          maxSteps
         }
       });
     } else {
       return c.json({
         error: 'Invalid maxSteps value. Must be a positive number.',
         currentConfig: {
-          maxSteps,
-          selectedModel
+          maxSteps
         }
       }, 400);
     }
@@ -1254,27 +1260,27 @@ export class Chat extends AIChatAgent<Env> {
 
 
     // for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
-        response = await ai.models.generateContent({
-          model: geminiModel,
-          contents: [{
-            role: 'user',
-            parts: [{ text: systemPrompt }, ...messageParts.map(p => ({ text: p.text }))]
-          }]
-        });
-        // break; // Success, exit retry loop
-      } catch (error) {
-        lastError = error as Error;
-        console.log(error);
-        // if (error instanceof Error && error.message.includes('503')) {
-        //   const delay = baseDelay * Math.pow(2, attempt);
-        //   console.log(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
-        //   await new Promise(resolve => setTimeout(resolve, delay));
-        // } else {
-        //   throw error;
-        // }
-      }
+    try {
+      const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
+      response = await ai.models.generateContent({
+        model: geminiModel,
+        contents: [{
+          role: 'user',
+          parts: [{ text: systemPrompt }, ...messageParts.map(p => ({ text: p.text }))]
+        }]
+      });
+      // break; // Success, exit retry loop
+    } catch (error) {
+      lastError = error as Error;
+      console.log(error);
+      // if (error instanceof Error && error.message.includes('503')) {
+      //   const delay = baseDelay * Math.pow(2, attempt);
+      //   console.log(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
+      //   await new Promise(resolve => setTimeout(resolve, delay));
+      // } else {
+      //   throw error;
+      // }
+    }
     // }
 
     if (!response) {
@@ -1356,9 +1362,9 @@ export class Chat extends AIChatAgent<Env> {
     } catch (error) {
       console.error('Error al actualizar el contador:', error);
     }
-    
+
     // if (currentCounter !== 0 && currentCounter <= maxSteps) {
-      // await this.saveMessages(this._messages);
+    // await this.saveMessages(this._messages);
     // }
 
     // const existingMessages = this.messages.map(msg => ({
