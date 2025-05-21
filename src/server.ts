@@ -1264,25 +1264,32 @@ export class Chat extends AIChatAgent<Env> {
     }
 
     const message: ChatMessage = {
-      id: this.currentChatId,
+      id: generateId(), // Generar un nuevo ID único para el mensaje
       role: "assistant",
       content: response.text ?? '',
       createdAt: new Date(),
     };
 
-    // Actualizar los mensajes en memoria con el chatId correcto
+    // Actualizar los mensajes en memoria asegurando IDs únicos
     this._messages = [...this.messages, message].map(msg => ({
       ...msg,
-      id: msg.id,
+      id: msg.id || generateId(), // Asegurar que cada mensaje tenga un ID único
       role: msg.role || 'assistant',
       content: msg.content || '',
       createdAt: msg.createdAt || new Date(),
     })) as ChatMessage[];
 
-    // Guardar en la base de datos
-    await this.saveMessages(this._messages);
+    // Guardar en la base de datos usando transacción
+    try {
+      await this.storage.transaction(async (txn) => {
+        await this.saveMessages(this._messages);
+      });
+    } catch (error) {
+      console.error('Error al guardar mensajes:', error);
+      throw new Error('Error al persistir los mensajes');
+    }
 
-    const validatedMessages = this.messages.map(msg => ({
+    const validatedMessages = this._messages.map(msg => ({
       id: msg.id,
       role: msg.role,
       content: msg.content,
@@ -1322,19 +1329,19 @@ export class Chat extends AIChatAgent<Env> {
     // await this.saveToCurrentChat(validatedMessages);
 
     // Notificar a los clientes WebSocket
-    // const chatConnections = wsConnections.get(this.currentChatId || '');
-    // if (chatConnections) {
-    //   const update = {
-    //     type: 'chat_updated',
-    //     chatId: this.currentChatId,
-    //     messages: this._messages
-    //   };
-    //   chatConnections.forEach(ws => {
-    //     if (ws.readyState === WebSocket.OPEN) {
-    //       ws.send(JSON.stringify(update));
-    //     }
-    //   });
-    // }
+    const chatConnections = wsConnections.get(this.currentChatId || '');
+    if (chatConnections) {
+      const update = {
+        type: 'chat_updated',
+        chatId: this.currentChatId,
+        messages: this._messages
+      };
+      chatConnections.forEach(ws => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(update));
+        }
+      });
+    }
 
     return createDataStreamResponse({
       execute: async (dataStream) => {
@@ -1577,7 +1584,7 @@ export class Chat extends AIChatAgent<Env> {
       console.log('Chat ID establecido en executeTask:', this.currentChatId);
     }
     const message: ChatMessage = {
-      id: this.currentChatId,
+      id: generateId(),
       role: "user",
       content: `Running scheduled task: ${description}`,
       createdAt: new Date(),
