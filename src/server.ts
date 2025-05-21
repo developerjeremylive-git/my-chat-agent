@@ -1232,6 +1232,21 @@ export class Chat extends AIChatAgent<Env> {
                 executions,
               });
 
+              // Send license agreement for Llama models
+              const modelStr = String(model);
+              if (modelStr && modelStr.indexOf('qwen') !== -1) {
+                try {
+                  await streamText({
+                    model,
+                    messages: [{ role: 'user', content: 'agree' }],
+
+                  });
+                } catch (error) {
+                  console.warn('License agreement error:', error);
+                  // Continue anyway as it might have worked
+                }
+              }
+
               const result = streamText({
                 model,
                 temperature: config.temperature,
