@@ -1296,16 +1296,21 @@ export class Chat extends AIChatAgent<Env> {
         }
         console.log('Transmisión de Gemini finalizada');
 
-        // Obtener o inicializar el contador de pasos para el chat actual
-        const chatStepsKey = `chat_steps_${this.currentChatId}`;
-        const currentSteps = parseInt(await this.storage.get(chatStepsKey) || '0');
-        const newStepCount = currentSteps + 1;
+        // Encontrar el último mensaje del usuario
+        const lastUserMessage = [...this._messages]
+          .reverse()
+          .find(msg => msg.role === 'user');
 
-        // Guardar el nuevo contador
-        await this.storage.put(chatStepsKey, newStepCount.toString());
-
-        // Verificar si aún no hemos alcanzado el límite de pasos
-        if (newStepCount <= maxSteps) {
+        // Contar mensajes del asistente después del último mensaje del usuario
+        const assistantMessageCount = lastUserMessage
+          ? this._messages.filter(msg => 
+              msg.role === 'assistant' && 
+              msg.createdAt > lastUserMessage.createdAt
+            ).length
+          : 0;
+        
+        // Verificar si aún no hemos alcanzado el límite de respuestas
+        if (assistantMessageCount < maxSteps) {
           onFinish({
             text: response.text ?? '',
             response: {
@@ -1343,7 +1348,7 @@ export class Chat extends AIChatAgent<Env> {
             experimental_providerMetadata: {}
           });
         } else {
-          console.log('Se alcanzó el límite máximo de pasos:', maxSteps);
+          console.log(`Se alcanzó el límite máximo de ${maxSteps} respuestas del asistente`);
           onFinish({
             text: 'Has alcanzado el límite máximo de interacciones para esta conversación. Por favor, inicia una nueva conversación.',
             response: {
