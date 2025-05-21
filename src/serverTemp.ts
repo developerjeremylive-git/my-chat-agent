@@ -244,32 +244,25 @@ export class Chat extends AIChatAgent<Env> {
         // },
       });
 
-      //
-      // Guardar mensajes y ejecutar callback de finalización, las cantidades de iteraciones que el usuario indico
-      await this.saveMessages([
-        ...this.messages,
-        {
-          id: generateId(),
-          role: "assistant",
-          content: response.text ?? '',
-          createdAt: new Date(),
-        },
-      ]);
       // Crear una promesa para manejar la finalización
       return createDataStreamResponse({
         execute: async (dataStream) => {
+          // Escribir la respuesta en el stream
           dataStream.write(formatDataStreamPart('text', response.text ?? ''));
           
-          // Guardar mensajes y ejecutar callback de finalización
-          // await this.saveMessages([
-          //   ...this.messages,
-          //   {
-          //     id: generateId(),
-          //     role: "assistant",
-          //     content: response.text ?? '',
-          //     createdAt: new Date(),
-          //   },
-          // ]);
+          // Guardar el mensaje del asistente en la memoria
+          const assistantMessage = {
+            id: generateId(),
+            role: "assistant",
+            content: response.text ?? '',
+            createdAt: new Date(),
+          };
+          
+          // Actualizar los mensajes en memoria
+          this.messages = [...this.messages, assistantMessage];
+          
+          // Guardar los mensajes actualizados
+          await this.saveMessages(this.messages);
           
           // Ejecutar el callback onFinish con los argumentos necesarios
           // onFinish({

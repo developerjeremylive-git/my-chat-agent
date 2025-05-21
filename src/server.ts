@@ -1395,6 +1395,16 @@ export class Chat extends AIChatAgent<Env> {
       createdAt: msg.createdAt || new Date()
     })) as ChatMessage[];
     await this.saveMessages([...existingMessages, message]);
+           // Guardar mensajes y ejecutar callback de finalización
+          // await this.saveMessages([
+          //   ...this.messages,
+          //   {
+          //     id: generateId(),
+          //     role: "assistant",
+          //     content: response.text ?? '',
+          //     createdAt: new Date(),
+          //   },
+          // ]);
   }
 }
 
