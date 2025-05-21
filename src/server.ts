@@ -818,7 +818,6 @@ const model = getModel();
 // });
 
 
-// we use ALS to expose the agent context to the tools
 export const agentContext = new AsyncLocalStorage<Chat>();
 /**
  * Chat Agent implementation that handles real-time AI chat interactions
@@ -826,11 +825,13 @@ export const agentContext = new AsyncLocalStorage<Chat>();
 export class Chat extends AIChatAgent<Env> {
   private _stepCounter: number = 0;
   currentChatId: string | null = null;
+  private currentUserId: string | null = null; // ID del usuario actualmente autenticado
   public static instance: Chat | null = null;
   public storage!: DurableObjectStorage;
   private _messages: ChatMessage[] = [];
   private db: D1Database;
 
+  // ... rest of the code remains the same ...
   // Definición de la tabla de mensajes
   private readonly CREATE_MESSAGES_TABLE = `
     CREATE TABLE IF NOT EXISTS messages (
@@ -839,6 +840,16 @@ export class Chat extends AIChatAgent<Env> {
       role TEXT NOT NULL,
       content TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
+    )
+  `;
+
+  private readonly CREATE_STEP_COUNTERS_TABLE = `
+    CREATE TABLE IF NOT EXISTS step_counters (
+      user_id TEXT PRIMARY KEY,
+      counter INTEGER DEFAULT 0,
+      chat_id TEXT NOT NULL,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
     )
   `;
@@ -930,6 +941,10 @@ export class Chat extends AIChatAgent<Env> {
       // Crear la tabla messages después de verificar que chats existe
       await this.db.prepare(this.CREATE_MESSAGES_TABLE).run();
       console.log('Messages table created successfully');
+
+      // Crear la tabla step_counters
+      await this.db.prepare(this.CREATE_STEP_COUNTERS_TABLE).run();
+      console.log('Step counters table created successfully');
 
       // Verificar que ambas tablas se crearon correctamente
       const finalTablesExist = await this.verifyTables();
@@ -1352,11 +1367,30 @@ export class Chat extends AIChatAgent<Env> {
         console.log('Transmisión de Gemini finalizada');
 
         // Obtener el contador actual del storage
-        const currentCounter = await this.storage.get('stepCounter') || 0;
+             // Crear la tabla step_counters si no existe
+        await this.db.prepare(`
+          CREATE TABLE IF NOT EXISTS step_counters (
+            user_id TEXT PRIMARY KEY,
+            chat_id TEXT,
+            counter INTEGER DEFAULT 0,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+          )
+        `).run();
+
+        // Obtener el contador actual del usuario desde D1
+        const userId = this.currentUserId || 'default';
+        const result = await this.db.prepare(
+          'SELECT counter FROM step_counters WHERE user_id = ? AND chat_id = ?'
+        ).bind(userId, this.currentChatId).first<{ counter: number }>();
+
+        const currentCounter = result?.counter || 0;
         const newCounter = currentCounter + 1;
-        
-        // Guardar el nuevo valor del contador
-        await this.storage.put('stepCounter', newCounter);
+
+        // Actualizar o insertar el nuevo valor del contador
+        await this.db.prepare(`
+          INSERT OR REPLACE INTO step_counters (user_id, chat_id, counter, updated_at)
+          VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+        `).bind(userId, this.currentChatId, newCounter).run();
 
         console.log('Paso actual:', newCounter);
         console.log('Límite máximo de pasos:', maxSteps);
