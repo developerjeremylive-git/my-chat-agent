@@ -1217,6 +1217,11 @@ export class Chat extends AIChatAgent<Env> {
   }
 
   private async handleGeminiResponse(onFinish: StreamTextOnFinishCallback<ToolSet>) {
+    // Verificar que no excedamos el número máximo de pasos configurado
+    if (this._messages.length >= maxSteps) {
+      throw new Error(`Se ha alcanzado el límite máximo de ${maxSteps} pasos configurado por el usuario.`);
+    }
+
     const geminiApiKey = env.GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || (import.meta as any).env.GEMINI_API_KEY;
     if (!geminiApiKey) {
       throw new Error('GEMINI_API_KEY is not configured in environment variables');
@@ -1271,7 +1276,7 @@ export class Chat extends AIChatAgent<Env> {
 
     // Guardar en la base de datos
     await this.saveMessages(this._messages);
-
+    await this.saveMessagesD1(this._messages);
     // Notificar a los clientes WebSocket
     const chatConnections = wsConnections.get(this.currentChatId || '');
     if (chatConnections) {
@@ -1391,37 +1396,37 @@ export class Chat extends AIChatAgent<Env> {
     }
   }
 
-  // async saveMessages(messages: ChatMessage[]) {
-  //   if (!Array.isArray(messages)) {
-  //     console.error('Invalid messages array:', messages);
-  //     return;
-  //   }
+  async saveMessagesD1(messages: ChatMessage[]) {
+    if (!Array.isArray(messages)) {
+      console.error('Invalid messages array:', messages);
+      return;
+    }
 
-  //   // Store messages in memory
-  //   this._messages = messages.map(msg => {
-  //       if (msg.createdAt) return msg;
-  //       return {
-  //       ...msg,
-  //         createdAt: new Date()
-  //       };
-  //     }) as ChatMessage[];
+    // Store messages in memory
+    this._messages = messages.map(msg => {
+        if (msg.createdAt) return msg;
+        return {
+        ...msg,
+          createdAt: new Date()
+        };
+      }) as ChatMessage[];
 
-  //   // Save to D1 database
-  //   const validatedMessages = messages.map(msg => ({
-  //     id: msg.id || generateId(),
-  //     role: msg.role,
-  //     content: msg.content,
-  //     createdAt: msg.createdAt || new Date()
-  //   })) as ChatMessage[];
-  //   await this.saveToCurrentChat(validatedMessages);
+    // Save to D1 database
+    const validatedMessages = messages.map(msg => ({
+      id: msg.id || generateId(),
+      role: msg.role,
+      content: msg.content,
+      createdAt: msg.createdAt || new Date()
+    })) as ChatMessage[];
+    await this.saveToCurrentChat(validatedMessages);
 
-  //   // Only emit event in browser environment
-  //   if (typeof window !== 'undefined') {
-  //     window.dispatchEvent(new CustomEvent('messagesUpdated', {
-  //       detail: { messages }
-  //     }));
-  //   }
-  // }
+    // Only emit event in browser environment
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('messagesUpdated', {
+        detail: { messages }
+      }));
+    }
+  }
 
   async executeTask(description: string, task: Schedule<string>) {
     const message: ChatMessage = {
@@ -1436,6 +1441,7 @@ export class Chat extends AIChatAgent<Env> {
       createdAt: msg.createdAt || new Date()
     })) as ChatMessage[];
     await this.saveMessages([...existingMessages, message]);
+    await this.saveMessagesD1([...existingMessages, message]);
            // Guardar mensajes y ejecutar callback de finalización
           // await this.saveMessages([
           //   ...this.messages,

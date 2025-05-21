@@ -302,7 +302,7 @@ function ChatComponent() {
     // stop
   } = useAgentChat({
     agent,
-    maxSteps: config.maxSteps,
+    maxSteps: stepMax,
   });
 
   // Scroll to bottom when messages change
@@ -1301,7 +1301,7 @@ function ChatComponent() {
                               headers: {
                                 'Content-Type': 'application/json',
                               },
-                              body: JSON.stringify({ maxSteps: config.maxSteps || 4 }),
+                              body: JSON.stringify({ maxSteps: stepMax }),
                             })
                           ]);
 
