@@ -824,6 +824,7 @@ export const agentContext = new AsyncLocalStorage<Chat>();
  * Chat Agent implementation that handles real-time AI chat interactions
  */
 export class Chat extends AIChatAgent<Env> {
+  private _stepCounter: number = 0;
   currentChatId: string | null = null;
   public static instance: Chat | null = null;
   public storage!: DurableObjectStorage;
@@ -1296,42 +1297,55 @@ export class Chat extends AIChatAgent<Env> {
         console.log('Transmisión de Gemini finalizada');
 
         // Ejecutar callback onFinish con los argumentos necesarios
-        onFinish({
-          text: response.text ?? '',
-          response: {
-            id: generateId(),
-            timestamp: new Date(),
-            modelId: geminiModel,
-            messages: this._messages.filter(msg => msg.role === 'assistant').map(msg => ({
-              id: msg.id,
-              role: 'assistant' as const,
-              content: msg.content,
-              createdAt: msg.createdAt
-            })),
-            body: response.text ?? ''
-          },
-          reasoning: 'Generated response using Gemini model',
-          reasoningDetails: [{
-            type: 'text',
-            text: 'Processed user message and generated AI response'
-          }],
-          files: [],
-          toolCalls: [],
-          steps: [],
-          finishReason: 'stop',
-          sources: [],
-          toolResults: [],
-          usage: {
-            promptTokens: 0,
-            completionTokens: 0,
-            totalTokens: 0
-          },
-          warnings: [],
-          logprobs: undefined,
-          request: {},
-          providerMetadata: {},
-          experimental_providerMetadata: {}
-        });
+        // Inicializar contador si no existe
+        if (!this._stepCounter) {
+          this._stepCounter = 0;
+        }
+
+        // Incrementar el contador
+        this._stepCounter++;
+
+        // Verificar si aún no hemos alcanzado el límite de pasos
+        if (this._stepCounter <= maxSteps) {
+          onFinish({
+            text: response.text ?? '',
+            response: {
+              id: generateId(),
+              timestamp: new Date(),
+              modelId: geminiModel,
+              messages: this._messages.filter(msg => msg.role === 'assistant').map(msg => ({
+                id: msg.id,
+                role: 'assistant' as const,
+                content: msg.content,
+                createdAt: msg.createdAt
+              })),
+              body: response.text ?? ''
+            },
+            reasoning: 'Generated response using Gemini model',
+            reasoningDetails: [{
+              type: 'text',
+              text: 'Processed user message and generated AI response'
+            }],
+            files: [],
+            toolCalls: [],
+            steps: [],
+            finishReason: 'stop',
+            sources: [],
+            toolResults: [],
+            usage: {
+              promptTokens: 0,
+              completionTokens: 0,
+              totalTokens: 0
+            },
+            warnings: [],
+            logprobs: undefined,
+            request: {},
+            providerMetadata: {},
+            experimental_providerMetadata: {}
+          });
+        } else {
+          console.log('Se alcanzó el límite máximo de pasos:', maxSteps);
+        }
       }
     });
   }
