@@ -1368,6 +1368,16 @@ export class Chat extends AIChatAgent<Env> {
     // await this.saveMessages([...existingMessages, messageResponse]);
     // console.log('Mensajes guardados exitosamente en la base de datos');
 
+    // await this.saveMessages([
+    //   ...this.messages,
+    //   {
+    //     id: generateId(),
+    //     role: 'assistant',
+    //     content: response.text ?? '',
+    //     createdAt: new Date(),
+    //   },
+    // ]);
+
     // Notificar a los clientes WebSocket
     const chatConnections = wsConnections.get(this.currentChatId || '');
     if (chatConnections) {
