@@ -359,13 +359,15 @@ function ChatComponent() {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
+  const assistantControlsRef = useRef<HTMLDivElement>(null);
+  const assistantButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleChatWidth = (event: CustomEvent<{ width: 'narrow' | 'default' | 'full' }>) => {
       setChatWidth(event.detail.width);
     };
 
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutsideSettings = (event: MouseEvent) => {
       if (settingsMenuRef.current && settingsButtonRef.current &&
         !settingsMenuRef.current.contains(event.target as Node) &&
         !settingsButtonRef.current.contains(event.target as Node)) {
@@ -373,12 +375,22 @@ function ChatComponent() {
       }
     };
 
+    const handleClickOutsideAssistant = (event: MouseEvent) => {
+      if (assistantControlsRef.current && assistantButtonRef.current &&
+        !assistantControlsRef.current.contains(event.target as Node) &&
+        !assistantButtonRef.current.contains(event.target as Node)) {
+        setShowAssistantControls(false);
+      }
+    };
+
     window.addEventListener('toggleChatWidth', handleChatWidth as EventListener);
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutsideSettings);
+    document.addEventListener('mousedown', handleClickOutsideAssistant);
 
     return () => {
       window.removeEventListener('toggleChatWidth', handleChatWidth as EventListener);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutsideSettings);
+      document.removeEventListener('mousedown', handleClickOutsideAssistant);
     };
   }, []);
 
@@ -616,13 +628,15 @@ function ChatComponent() {
               {showSettingsMenu && createPortal(
                 <div
                   ref={settingsMenuRef}
-                  className="fixed z-50 min-w-[200px] bg-white dark:bg-neutral-900 rounded-xl shadow-xl
+                  className="fixed bottom-16 left-1/2 -translate-x-1/2 sm:absolute sm:bottom-auto sm:left-auto sm:translate-x-0 sm:mt-2 
+                         w-[calc(100vw-2rem)] sm:min-w-[200px] sm:w-auto
+                         bg-white dark:bg-neutral-900 rounded-xl shadow-xl
                          border border-neutral-200/50 dark:border-neutral-700/50
-                         backdrop-blur-lg backdrop-saturate-150"
-                  style={{
+                         backdrop-blur-lg backdrop-saturate-150 z-50"
+                  style={window.innerWidth >= 640 ? {
                     left: settingsButtonRef.current?.getBoundingClientRect().right ?? 0 + 8,
                     top: settingsButtonRef.current?.getBoundingClientRect().top ?? 0
-                  }}
+                  } : {}}
                 >
                   <div className="p-2 space-y-1">
                     <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Ancho del chat</div>
@@ -1267,6 +1281,7 @@ function ChatComponent() {
                       <div className="relative group">
                         <div className="relative group">
                           <button
+                            ref={assistantButtonRef}
                             onClick={() => setShowAssistantControls(!showAssistantControls)}
                             className={`w-10 h-10 md:w-48 flex items-center justify-center md:justify-between px-3 rounded-xl 
                               ${!stepMax ? 'border-2 border-[#F48120] dark:border-[#F48120] animate-pulse shadow-lg shadow-[#F48120]/20' : 'border border-neutral-200 dark:border-neutral-700'}
@@ -1289,16 +1304,21 @@ function ChatComponent() {
                             </span>
                           </button>
 
-                          {showAssistantControls && (
-                            <div className="absolute bottom-full left-0 mb-2 w-48 bg-white dark:bg-neutral-900 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden transform origin-bottom transition-all duration-300 z-50">
-                              <div className="p-1 space-y-1">
+                          {showAssistantControls && createPortal(
+                            <div 
+                              ref={assistantControlsRef}
+                              className="fixed bottom-16 left-1/2 -translate-x-1/2 sm:absolute sm:bottom-full sm:left-0 sm:translate-x-0 sm:mb-2 w-[calc(100vw-2rem)] sm:w-48 max-w-xs bg-white dark:bg-neutral-900 rounded-xl shadow-xl border border-neutral-200/50 dark:border-neutral-700/50 backdrop-blur-lg backdrop-saturate-150 overflow-hidden transform origin-bottom transition-all duration-300 z-50"
+                            >
+                              <div className="p-2 space-y-1">
                                 <button
                                   onClick={() => {
                                     setStepMax(1);
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                  ${stepMax === 1 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                  ${stepMax === 1 ? 
+                                    'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' : 
+                                    'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
                                 >
                                   <span className="text-lg">🎯</span>
                                   <span className="text-sm font-medium">Sin Asistente</span>
@@ -1309,7 +1329,9 @@ function ChatComponent() {
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                    ${stepMax > 1 && stepMax <= 3 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                  ${stepMax > 1 && stepMax <= 3 ? 
+                                    'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' : 
+                                    'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
                                 >
                                   <span className="text-lg">🧠</span>
                                   <span className="text-sm font-medium">Asistente Retroalimentativo</span>
@@ -1320,7 +1342,9 @@ function ChatComponent() {
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                    ${stepMax > 3 && stepMax <= 7 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                  ${stepMax > 3 && stepMax <= 7 ? 
+                                    'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' : 
+                                    'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
                                 >
                                   <span className="text-lg">🚀</span>
                                   <span className="text-sm font-medium">Asistente Pensante</span>
@@ -1331,14 +1355,16 @@ function ChatComponent() {
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                    ${stepMax > 7 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                  ${stepMax > 7 ? 
+                                    'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' : 
+                                    'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
                                 >
                                   <span className="text-lg">🤖</span>
                                   <span className="text-sm font-medium">Asistente Profundo</span>
                                 </button>
                               </div>
                             </div>
-                          )}
+                          , document.body)}
                         </div>
 
                       </div>
