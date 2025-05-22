@@ -1333,7 +1333,34 @@ function ChatComponent() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  // handleAgentSubmit(e);
+                  const updateConfigs = async () => {
+                    try {
+                      // Actualizar el modelo primero
+                      await fetch('/api/model', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ modelTemp: selectedModel }),
+                      });
+
+                      // Luego actualizar el asistente
+                      await fetch('/api/assistant', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText }),
+                      });
+
+                      // Una vez que ambas actualizaciones están completas, manejar el envío
+                      handleAgentSubmit(e);
+                    } catch (error) {
+                      console.error('Error al actualizar configuraciones:', error);
+                    }
+                  };
+
+                  updateConfigs();
                 }
                   // handleAgentSubmit(e, {
                   //   data: {
@@ -1388,7 +1415,7 @@ function ChatComponent() {
                       shape="square"
                       className="inline-flex items-center justify-center p-2.5 text-[#F48120] hover:text-white bg-white/95 dark:bg-gray-800/95 hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full border-2 border-[#F48120]/20 dark:border-[#F48120]/10 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20 transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/95 dark:disabled:hover:bg-gray-800/95 disabled:hover:text-[#F48120] disabled:hover:scale-100"
                       disabled={pendingToolCallConfirmation || !agentInput.trim()}
-                      onClick={async (e) => {
+                      onClick={() => {
                         try {
                           if (!user) {
                             setIsLoginOpen(true);
@@ -1396,27 +1423,27 @@ function ChatComponent() {
                           }
 
                           // Actualizar el prompt del sistema y el modelo
-                          await Promise.all([
-                            // updateSystemPrompt(inputText),
-                            fetch('/api/model', {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify({ modelTemp: selectedModel }),
-                            }),
-                            fetch('/api/assistant', {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText }),
-                            })
-                          ]);
+                          // await Promise.all([
+                          // updateSystemPrompt(inputText),
+                          // fetch('/api/model', {
+                          //   method: 'POST',
+                          //   headers: {
+                          //     'Content-Type': 'application/json',
+                          //   },
+                          //   body: JSON.stringify({ modelTemp: selectedModel }),
+                          // }),
+                          // fetch('/api/assistant', {
+                          //   method: 'POST',
+                          //   headers: {
+                          //     'Content-Type': 'application/json',
+                          //   },
+                          //   body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText }),
+                          // })
+                          // ]);
 
                           // Proceder con el envío del mensaje
                           // e.preventDefault();
-                          handleAgentSubmit(e);
+                          // handleAgentSubmit(e);
                         } catch (error) {
                           console.error('Error al procesar la solicitud:', error);
                         }
@@ -1471,68 +1498,68 @@ function HasOpenAIKey() {
   // const hasOpenAiKey = use(hasOpenAiKeyPromise);
 
   // if (!hasOpenAiKey.success) {
-    return (
-      <div className="fixed top-0 left-0 right-0 z-50 bg-red-500/10 backdrop-blur-sm">
-        <div className="max-w-3xl mx-auto p-4">
-          <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-lg border border-red-200 dark:border-red-900 p-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
-                <svg
-                  className="w-5 h-5 text-red-600 dark:text-red-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-labelledby="warningIcon"
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50 bg-red-500/10 backdrop-blur-sm">
+      <div className="max-w-3xl mx-auto p-4">
+        <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-lg border border-red-200 dark:border-red-900 p-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
+              <svg
+                className="w-5 h-5 text-red-600 dark:text-red-400"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-labelledby="warningIcon"
+              >
+                <title id="warningIcon">Warning Icon</title>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">
+                OpenAI API Key Not Configured
+              </h3>
+              <p className="text-neutral-600 dark:text-neutral-300 mb-1">
+                Requests to the API, including from the frontend UI, will not
+                work until an OpenAI API key is configured.
+              </p>
+              <p className="text-neutral-600 dark:text-neutral-300">
+                Please configure an OpenAI API key by setting a{" "}
+                <a
+                  href="https://developers.cloudflare.com/workers/configuration/secrets/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-red-600 dark:text-red-400"
                 >
-                  <title id="warningIcon">Warning Icon</title>
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">
-                  OpenAI API Key Not Configured
-                </h3>
-                <p className="text-neutral-600 dark:text-neutral-300 mb-1">
-                  Requests to the API, including from the frontend UI, will not
-                  work until an OpenAI API key is configured.
-                </p>
-                <p className="text-neutral-600 dark:text-neutral-300">
-                  Please configure an OpenAI API key by setting a{" "}
-                  <a
-                    href="https://developers.cloudflare.com/workers/configuration/secrets/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-red-600 dark:text-red-400"
-                  >
-                    secret
-                  </a>{" "}
-                  named{" "}
-                  <code className="bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded text-red-600 dark:text-red-400 font-mono text-sm">
-                    OPENAI_API_KEY
-                  </code>
-                  . <br />
-                  You can also use a different model provider by following these{" "}
-                  <a
-                    href="https://github.com/cloudflare/agents-starter?tab=readme-ov-file#use-a-different-ai-model-provider"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-red-600 dark:text-red-400"
-                  >
-                    instructions.
-                  </a>
-                </p>
-              </div>
+                  secret
+                </a>{" "}
+                named{" "}
+                <code className="bg-red-100 dark:bg-red-900/30 px-1.5 py-0.5 rounded text-red-600 dark:text-red-400 font-mono text-sm">
+                  OPENAI_API_KEY
+                </code>
+                . <br />
+                You can also use a different model provider by following these{" "}
+                <a
+                  href="https://github.com/cloudflare/agents-starter?tab=readme-ov-file#use-a-different-ai-model-provider"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-red-600 dark:text-red-400"
+                >
+                  instructions.
+                </a>
+              </p>
             </div>
           </div>
         </div>
       </div>
-    );
+    </div>
+  );
   // }
   return null;
 }
