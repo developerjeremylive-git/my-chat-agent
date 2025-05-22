@@ -60,6 +60,8 @@ let selectedModel = 'gemini-2.0-flash';
 let geminiModel = 'gemini-2.0-flash';
 let systemPrompt = 'Eres un asistente útil que puede realizar varias tareas...';
 let maxSteps = DEFAULT_MAX_STEPS;
+// Track if user has agreed to llama model terms - used in model selection validation
+
 // let temperature = DEFAULT_TEMPERATURE;
 // let maxTokens = DEFAULT_MAX_TOKENS;
 // let topP = DEFAULT_TOP_P;
@@ -130,11 +132,11 @@ app.post('/api/config', async (c) => {
 // });
 
 // Endpoint para actualizar el prompt del sistema
-app.post('/api/system-prompt', async (c) => {
-  const { prompt } = await c.req.json();
-  systemPrompt = prompt;
-  return c.json({ success: true, prompt: systemPrompt });
-});
+// app.post('/api/system-prompt', async (c) => {
+//   const { prompt } = await c.req.json();
+//   systemPrompt = prompt;
+//   return c.json({ success: true, prompt: systemPrompt });
+// });
 
 // Endpoint para obtener el prompt del sistema actual
 app.get('/api/system-prompt', async (c) => {
@@ -423,15 +425,18 @@ app.post('/api/chats/:id/messages', async (c) => {
 // });
 app.post('/api/assistant', async (c) => {
   try {
-    const { maxStepsTemp: newMaxSteps, modelTemp: selectedModelTemp } = await c.req.json();
+    const { maxStepsTemp: newMaxSteps, modelTemp: selectedModelTemp, prompt: newPrompt } = await c.req.json();
     selectedModel = selectedModelTemp;
     model = workersai(selectedModelTemp);
+    systemPrompt = newPrompt;
     // Validate maxSteps
     if (typeof newMaxSteps === 'number' && newMaxSteps > 0) {
       maxSteps = newMaxSteps;
       return c.json({
         success: true,
         config: {
+          selectedModel,
+          systemPrompt,
           maxSteps,
           model
         }
@@ -440,6 +445,8 @@ app.post('/api/assistant', async (c) => {
       return c.json({
         error: 'Invalid maxSteps value. Must be a positive number.',
         currentConfig: {
+          selectedModel,
+          systemPrompt,
           maxSteps,
           model
         }
@@ -1271,12 +1278,11 @@ export class Chat extends AIChatAgent<Env> {
 
               // Send license agreement for Llama models
               const modelStr = String(model);
-              if (modelStr && modelStr.indexOf('qwen') !== -1) {
+              if (modelStr && modelStr.indexOf('qwen') !== -1 || modelStr.indexOf('llama-3.2-11b-vision-instruct') !== -1) {
                 try {
                   await streamText({
                     model,
                     messages: [{ role: 'user', content: 'agree' }],
-
                   });
                 } catch (error) {
                   console.warn('License agreement error:', error);

@@ -151,35 +151,35 @@ function ChatComponent() {
   }
 
   // Función para sincronizar el prompt del sistema con el servidor
-  const syncSystemPrompt = async () => {
-    try {
-      const response = await fetch('/api/system-prompt');
-      const data = await response.json() as SystemPromptResponse;
-      setInputText(data.prompt);
-    } catch (error) {
-      console.error('Error al obtener el prompt del sistema:', error);
-    }
-  };
+  // const syncSystemPrompt = async () => {
+  //   try {
+  //     const response = await fetch('/api/system-prompt');
+  //     const data = await response.json() as SystemPromptResponse;
+  //     setInputText(data.prompt);
+  //   } catch (error) {
+  //     console.error('Error al obtener el prompt del sistema:', error);
+  //   }
+  // };
 
-  // Sincronizar el prompt del sistema al montar el componente
-  useEffect(() => {
-    syncSystemPrompt();
-  }, []);
+  // // Sincronizar el prompt del sistema al montar el componente
+  // useEffect(() => {
+  //   syncSystemPrompt();
+  // }, []);
 
   // Función para actualizar el prompt del sistema en el servidor
-  const updateSystemPrompt = async (newPrompt: string) => {
-    try {
-      await fetch('/api/system-prompt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt: newPrompt }),
-      });
-    } catch (error) {
-      console.error('Error al actualizar el prompt del sistema:', error);
-    }
-  };
+  // const updateSystemPrompt = async (newPrompt: string) => {
+  //   try {
+  //     await fetch('/api/system-prompt', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ prompt: newPrompt }),
+  //     });
+  //   } catch (error) {
+  //     console.error('Error al actualizar el prompt del sistema:', error);
+  //   }
+  // };
   const [stepMax, setStepMax] = useState(1);
   const [isUpdatingStepMax, setIsUpdatingStepMax] = useState(false);
   const [showAgent, setShowAgent] = useState(false);
@@ -1288,7 +1288,7 @@ function ChatComponent() {
 
                           // Actualizar el prompt del sistema y el modelo
                           await Promise.all([
-                            updateSystemPrompt(inputText),
+                            // updateSystemPrompt(inputText),
                             // fetch('/api/model', {
                             //   method: 'POST',
                             //   headers: {
@@ -1301,7 +1301,7 @@ function ChatComponent() {
                               headers: {
                                 'Content-Type': 'application/json',
                               },
-                              body: JSON.stringify({ maxStepsTemp: stepMax, modelTemp: selectedModel }),
+                              body: JSON.stringify({ maxStepsTemp: stepMax, modelTemp: selectedModel, prompt: inputText }),
                             })
                           ]);
 
