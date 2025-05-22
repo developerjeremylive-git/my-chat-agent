@@ -230,21 +230,21 @@ function ChatComponent() {
   }, []);
 
   // Escuchar el evento de selección de chat
-  useEffect(() => {
-    const handleChatSelected = (event: CustomEvent<{ chatId: string; messages: ChatMessage[] }>) => {
-      const formattedMessages = (event.detail.messages || []).map(msg => ({
-        ...msg,
-        createdAt: new Date(msg.createdAt)
-      }));
-      setCurrentMessages(formattedMessages);
-    };
+  // useEffect(() => {
+  //   const handleChatSelected = (event: CustomEvent<{ chatId: string; messages: ChatMessage[] }>) => {
+  //     const formattedMessages = (event.detail.messages || []).map(msg => ({
+  //       ...msg,
+  //       createdAt: new Date(msg.createdAt)
+  //     }));
+  //     setCurrentMessages(formattedMessages);
+  //   };
 
-    window.addEventListener('chatSelected', handleChatSelected as EventListener);
+  //   window.addEventListener('chatSelected', handleChatSelected as EventListener);
 
-    return () => {
-      window.removeEventListener('chatSelected', handleChatSelected as EventListener);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener('chatSelected', handleChatSelected as EventListener);
+  //   };
+  // }, []);
 
   useEffect(() => {
     // Save text size preference to localStorage
