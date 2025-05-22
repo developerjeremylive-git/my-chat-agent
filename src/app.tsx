@@ -1281,7 +1281,7 @@ function ChatComponent() {
                               hover:from-[#F48120]/20 hover:to-purple-500/20
                               dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15`}
                           >
-                            <span className="md:hidden">
+                            <span className="md:hidden text-lg">
                               {stepMax == 1 ? '🎯' : stepMax <= 3 ? '🧠' : stepMax <= 7 ? '🚀' : '🤖'}
                             </span>
                             <span className="hidden md:block truncate">
