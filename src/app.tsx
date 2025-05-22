@@ -1054,74 +1054,9 @@ function ChatComponent() {
                 </Button>
               </Tooltip> */}
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+                <div className="flex flex-row items-center gap-2 w-full">
                   <div className="flex-1 flex transition-all duration-300 opacity-100 max-w-full">
                     <ModelSelect />
-                  </div>
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-                    <div className="flex items-center gap-4 w-full sm:w-auto p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10">
-                      <div
-                        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 cursor-pointer"
-                        style={{
-                          backgroundColor: showAssistantControlsAvanced ? '#F48120' : '#E5E5E5',
-                        }}
-                        onClick={() => {
-                          setShowAssistantControls(!showAssistantControls);
-                          setShowAssistantControlsAvanced(!showAssistantControlsAvanced);
-                        }}
-                      >
-                        <span
-                          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-300 ease-in-out ${showAssistantControlsAvanced ? 'translate-x-6' : 'translate-x-1'
-                            }`}
-                        />
-                      </div>
-                      <span className="hidden sm:inline text-sm font-medium text-neutral-700 dark:text-neutral-300">Ajuste Manual</span>
-                      <Wrench className="sm:hidden text-[#F48120]" size={20} weight="duotone" />
-                    </div>
-                    {/* Switch para habilitar/deshabilitar el asistente */}
-                    {selectedModel === 'gemini-2.0-flash' && !showAssistantControlsAvanced && (
-                      <div className="flex items-center gap-4 w-full sm:w-auto">
-                        <select
-                          className={`w-full sm:w-auto px-4 py-2 rounded-xl bg-white dark:bg-neutral-800 
-                              ${!stepMax ? 'border-2 border-[#F48120] dark:border-[#F48120] animate-pulse shadow-lg shadow-[#F48120]/20' : 'border border-neutral-200 dark:border-neutral-700'}
-                              text-sm text-neutral-700 dark:text-neutral-300 
-                              focus:outline-none focus:ring-2 focus:ring-[#F48120]/50
-                              transition-all duration-300 ease-in-out
-                              hover:border-[#F48120] dark:hover:border-[#F48120]
-                              hover:shadow-md hover:shadow-[#F48120]/10
-                              transform hover:scale-[1.02] active:scale-[0.98]
-                              cursor-pointer
-                              appearance-none
-                              bg-gradient-to-r from-white to-white dark:from-neutral-800 dark:to-neutral-800
-                              hover:from-[#F48120]/5 hover:to-purple-500/5
-                              dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10`}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (value === 'default') {
-                              setStepMax(1);
-                              return;
-                            }
-                            switch (value) {
-                              case 'retroalimentativo':
-                                setStepMax(2);
-                                break;
-                              case 'pensativo':
-                                setStepMax(4);
-                                break;
-                              case 'profundo':
-                                setStepMax(8);
-                                break;
-                            }
-                          }}
-                          value={stepMax === 1 ? 'default' : stepMax === 2 ? 'retroalimentativo' : stepMax === 4 ? 'pensativo' : 'profundo'}
-                        >
-                          <option value="default">🎯 Sin Asistente</option>
-                          <option value="retroalimentativo">🧠 Asistente Retroalimentativo</option>
-                          <option value="pensativo">🚀 Asistente Pensativo</option>
-                          <option value="profundo">🤖 Asistente Profundo</option>
-                        </select>
-                      </div>
-                    )}
                   </div>
 
                   {selectedModel === 'gemini-2.0-flash' && showAssistantControlsAvanced && (
@@ -1206,6 +1141,109 @@ function ChatComponent() {
                       </div>
                     </div>
                   )}
+
+                  <div className="flex flex-row items-center gap-2">
+                    {/* Switch para habilitar/deshabilitar el asistente */}
+                    {selectedModel === 'gemini-2.0-flash' && !showAssistantControlsAvanced && (
+                      <div className="relative group">
+                        <div className="relative group">
+                          <button
+                            onClick={() => setShowAssistantControls(!showAssistantControls)}
+                            className={`w-10 h-10 md:w-48 flex items-center justify-center md:justify-between px-3 rounded-xl 
+                              ${!stepMax ? 'border-2 border-[#F48120] dark:border-[#F48120] animate-pulse shadow-lg shadow-[#F48120]/20' : 'border border-neutral-200 dark:border-neutral-700'}
+                              text-sm text-neutral-700 dark:text-neutral-300 
+                              focus:outline-none focus:ring-2 focus:ring-[#F48120]/50
+                              transition-all duration-300 ease-in-out
+                              hover:border-[#F48120] dark:hover:border-[#F48120]
+                              hover:shadow-md hover:shadow-[#F48120]/10
+                              transform hover:scale-[1.02] active:scale-[0.98]
+                              cursor-pointer
+                              bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5
+                              hover:from-[#F48120]/20 hover:to-purple-500/20
+                              dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15`}
+                          >
+                            <span className="md:hidden">
+                              {stepMax === 1 ? '🎯' : stepMax === 2 ? '🧠' : stepMax === 4 ? '🚀' : '🤖'}
+                            </span>
+                            <span className="hidden md:block truncate">
+                              {stepMax === 1 ? '🎯 Sin Asistente' : stepMax === 2 ? '🧠 Asistente Retroalimentativo' : stepMax === 4 ? '🚀 Asistente Pensativo' : '🤖 Asistente Profundo'}
+                            </span>
+                          </button>
+
+                          {showAssistantControls && (
+                            <div className="absolute bottom-full left-0 mb-2 w-48 bg-white dark:bg-neutral-900 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden transform origin-bottom transition-all duration-300 z-50">
+                              <div className="p-1 space-y-1">
+                                <button
+                                  onClick={() => {
+                                    setStepMax(1);
+                                    setShowAssistantControls(false);
+                                  }}
+                                  className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
+                                    ${stepMax === 1 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                >
+                                  <span className="text-lg">🎯</span>
+                                  <span className="text-sm font-medium">Sin Asistente</span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setStepMax(2);
+                                    setShowAssistantControls(false);
+                                  }}
+                                  className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
+                                    ${stepMax === 2 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                >
+                                  <span className="text-lg">🧠</span>
+                                  <span className="text-sm font-medium">Asistente Retroalimentativo</span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setStepMax(4);
+                                    setShowAssistantControls(false);
+                                  }}
+                                  className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
+                                    ${stepMax === 4 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                >
+                                  <span className="text-lg">🚀</span>
+                                  <span className="text-sm font-medium">Asistente Pensativo</span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setStepMax(8);
+                                    setShowAssistantControls(false);
+                                  }}
+                                  className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
+                                    ${stepMax === 8 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                >
+                                  <span className="text-lg">🤖</span>
+                                  <span className="text-sm font-medium">Asistente Profundo</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                      </div>
+                    )}
+
+                    <div className="flex items-center p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10 hover:shadow-lg transition-all duration-300">
+                      <div
+                        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 cursor-pointer"
+                        style={{
+                          backgroundColor: showAssistantControlsAvanced ? '#F48120' : '#E5E5E5',
+                        }}
+                        onClick={() => {
+                          setShowAssistantControls(!showAssistantControls);
+                          setShowAssistantControlsAvanced(!showAssistantControlsAvanced);
+                        }}
+                      >
+                        <span
+                          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-300 ease-in-out ${showAssistantControlsAvanced ? 'translate-x-6' : 'translate-x-1'}`}
+                        />
+                      </div>
+                      <Wrench className="ml-2 text-[#F48120]" size={20} weight="duotone" />
+                    </div>
+                  </div>
+
                 </div>
                 {/* 
 
