@@ -1289,20 +1289,20 @@ function ChatComponent() {
                           // Actualizar el prompt del sistema y el modelo
                           await Promise.all([
                             updateSystemPrompt(inputText),
-                            fetch('/api/model', {
-                              method: 'POST',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify({ modelTemp: selectedModel }),
-                            }),
-                            // fetch('/api/assistant', {
+                            // fetch('/api/model', {
                             //   method: 'POST',
                             //   headers: {
                             //     'Content-Type': 'application/json',
                             //   },
-                            //   body: JSON.stringify({ maxStepsTemp: stepMax }),
-                            // })
+                            //   body: JSON.stringify({ modelTemp: selectedModel }),
+                            // }),
+                            fetch('/api/assistant', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({ maxStepsTemp: stepMax, modelTemp: selectedModel }),
+                            })
                           ]);
 
                           // Proceder con el envío del mensaje

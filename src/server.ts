@@ -406,39 +406,42 @@ app.post('/api/chats/:id/messages', async (c) => {
 });
 
 // Endpoint para actualizar el modelo
-app.post('/api/model', async (c) => {
-  try {
-    const { modelTemp } = await c.req.json();
-    selectedModel = modelTemp;
-    // Update the model instance when the model is changed
-    model = workersai(selectedModel);
-    return c.json({ success: true, model: selectedModel });
-  } catch (error) {
-    console.error('Error in /api/assistant:', error);
-    return c.json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, 500);
-  }
-});
+// app.post('/api/model', async (c) => {
+//   try {
+//     const { modelTemp } = await c.req.json();
+//     selectedModel = modelTemp;
+//     // Update the model instance when the model is changed
+//     model = workersai(selectedModel);
+//     return c.json({ success: true, model: selectedModel });
+//   } catch (error) {
+//     console.error('Error in /api/assistant:', error);
+//     return c.json({
+//       error: 'Internal server error',
+//       details: error instanceof Error ? error.message : 'Unknown error'
+//     }, 500);
+//   }
+// });
 app.post('/api/assistant', async (c) => {
   try {
-    const { maxStepsTemp: newMaxSteps } = await c.req.json();
-
+    const { maxStepsTemp: newMaxSteps, modelTemp: selectedModelTemp } = await c.req.json();
+    selectedModel = selectedModelTemp;
+    model = workersai(selectedModelTemp);
     // Validate maxSteps
     if (typeof newMaxSteps === 'number' && newMaxSteps > 0) {
       maxSteps = newMaxSteps;
       return c.json({
         success: true,
         config: {
-          maxSteps
+          maxSteps,
+          model
         }
       });
     } else {
       return c.json({
         error: 'Invalid maxSteps value. Must be a positive number.',
         currentConfig: {
-          maxSteps
+          maxSteps,
+          model
         }
       }, 400);
     }
