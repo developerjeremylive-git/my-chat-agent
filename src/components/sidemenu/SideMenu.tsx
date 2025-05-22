@@ -95,31 +95,31 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                 }));
 
                 // Cargar mensajes para cada chat
-                const chatsWithMessages = await Promise.all(
-                    data.map(async (chat) => {
-                        try {
-                            const messagesResponse = await fetch(`/api/chats/${chat.id}/messages`);
-                            if (messagesResponse.ok) {
-                                const messages = await messagesResponse.json();
-                                if (Array.isArray(messages)) {
-                                    return {
-                                        ...chat,
-                                        messages: messages.map(msg => ({
-                                            ...msg,
-                                            createdAt: new Date(msg.createdAt)
-                                        }))
-                                    };
-                                }
-                            }
-                            return chat;
-                        } catch (error) {
-                            console.error(`Error loading messages for chat ${chat.id}:`, error);
-                            return chat;
-                        }
-                    })
-                );
+                // const chatsWithMessages = await Promise.all(
+                //     data.map(async (chat) => {
+                //         try {
+                //             const messagesResponse = await fetch(`/api/chats/${chat.id}/messages`);
+                //             if (messagesResponse.ok) {
+                //                 const messages = await messagesResponse.json();
+                //                 if (Array.isArray(messages)) {
+                //                     return {
+                //                         ...chat,
+                //                         messages: messages.map(msg => ({
+                //                             ...msg,
+                //                             createdAt: new Date(msg.createdAt)
+                //                         }))
+                //                     };
+                //                 }
+                //             }
+                //             return chat;
+                //         } catch (error) {
+                //             console.error(`Error loading messages for chat ${chat.id}:`, error);
+                //             return chat;
+                //         }
+                //     })
+                // );
 
-                setChats(chatsWithMessages);
+                setChats(formattedChats);
                 // No seleccionamos ningún chat por defecto
             } catch (error) {
                 console.error('Error loading chats:', error);

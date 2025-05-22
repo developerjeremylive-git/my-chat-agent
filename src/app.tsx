@@ -1463,14 +1463,14 @@ export default function Chat() {
   );
 }
 
-const hasOpenAiKeyPromise = fetch("/check-open-ai-key").then((res) =>
-  res.json<{ success: boolean }>()
-);
+// const hasOpenAiKeyPromise = fetch("/check-open-ai-key").then((res) =>
+//   res.json<{ success: boolean }>()
+// );
 
 function HasOpenAIKey() {
-  const hasOpenAiKey = use(hasOpenAiKeyPromise);
+  // const hasOpenAiKey = use(hasOpenAiKeyPromise);
 
-  if (!hasOpenAiKey.success) {
+  // if (!hasOpenAiKey.success) {
     return (
       <div className="fixed top-0 left-0 right-0 z-50 bg-red-500/10 backdrop-blur-sm">
         <div className="max-w-3xl mx-auto p-4">
@@ -1533,6 +1533,6 @@ function HasOpenAIKey() {
         </div>
       </div>
     );
-  }
+  // }
   return null;
 }
