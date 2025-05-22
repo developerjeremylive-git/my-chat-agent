@@ -69,6 +69,7 @@ import { ModelSelect } from "./components/model/ModelSelect";
 import { GeminiConfigModal } from "./components/modal/GeminiConfigModal";
 import { ListHeart } from "@phosphor-icons/react/dist/ssr";
 import type { ChatMessage, FormattedChatMessage, APIResponse } from "./types/api";
+import { updateModel } from "./services/modelService";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -1057,7 +1058,14 @@ function ChatComponent() {
 
                 <div className="flex flex-row items-center gap-2 w-full">
                   <div className="flex-1 flex transition-all duration-300 opacity-100 max-w-full">
-                    <ModelSelect />
+                    <ModelSelect onModelChange={async (modelName) => {
+                      try {
+                        await updateModel(modelName);
+                      } catch (error) {
+                        console.error('Error al actualizar el modelo:', error);
+                      }
+                    }} />
+                     {/* <ModelSelect onModelChange={(modelName) => updateModel(modelName)} />? */}
                   </div>
 
                   {selectedModel === 'gemini-2.0-flash' && showAssistantControlsAvanced && (
@@ -1336,13 +1344,13 @@ function ChatComponent() {
                   const updateConfigs = async () => {
                     try {
                       // Actualizar el modelo primero
-                      await fetch('/api/model', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ modelTemp: selectedModel }),
-                      });
+                      // await fetch('/api/model', {
+                      //   method: 'POST',
+                      //   headers: {
+                      //     'Content-Type': 'application/json',
+                      //   },
+                      //   body: JSON.stringify({ modelTemp: selectedModel }),
+                      // });
 
                       // Luego actualizar el asistente
                       await fetch('/api/assistant', {

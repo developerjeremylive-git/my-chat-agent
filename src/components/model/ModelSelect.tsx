@@ -17,6 +17,7 @@ interface Model {
 
 interface ModelSelectProps {
   className?: string;
+  onModelChange: (modelName: string) => void;
 }
 
 // Modelos de Google Gemini
@@ -193,7 +194,7 @@ const distilledModels: Model[] = [
 
 const models: Model[] = [...geminiModels, ...reasoningModels, ...distilledModels];
 
-export function ModelSelect({ className }: ModelSelectProps) {
+export function ModelSelect({ className, onModelChange }: ModelSelectProps) {
   const { selectedModel: contextModel, setSelectedModel: setContextModel } = useModel();
   const [selectedModel, setSelectedModel] = useState<Model>(
     models.find(model => model.name === contextModel) || models[0]
@@ -268,9 +269,14 @@ export function ModelSelect({ className }: ModelSelectProps) {
                     'transition-all duration-200 hover:scale-[0.99]',
                     selectedModel.name === model.name && 'bg-neutral-100/80 dark:bg-neutral-800 shadow-sm dark:shadow-neutral-950'
                   )}
-                  onClick={() => {
-                    setSelectedModel(model);
-                    setContextModel(model.name);
+                  onClick={async () => {
+                    try {
+                      onModelChange?.(model.name);
+                      setSelectedModel(model);
+                      setContextModel(model.name);
+                    } catch (error) {
+                      console.error('Error al actualizar el modelo:', error);
+                    }
                   }}
                 >
                   <Tooltip.Root>
@@ -362,9 +368,14 @@ export function ModelSelect({ className }: ModelSelectProps) {
                     'transition-all duration-200 hover:scale-[0.99]',
                     selectedModel.name === model.name && 'bg-neutral-100/80 dark:bg-neutral-800 shadow-sm dark:shadow-neutral-950'
                   )}
-                  onClick={() => {
-                    setSelectedModel(model);
-                    setContextModel(model.name);
+                  onClick={async () => {
+                    try {
+                      onModelChange?.(model.name);
+                      setSelectedModel(model);
+                      setContextModel(model.name);
+                    } catch (error) {
+                      console.error('Error al actualizar el modelo:', error);
+                    }
                   }}
                 >
                   <Tooltip.Root>
@@ -463,9 +474,14 @@ export function ModelSelect({ className }: ModelSelectProps) {
                     'transition-all duration-200 hover:scale-[0.99]',
                     selectedModel.name === model.name && 'bg-neutral-100/80 dark:bg-neutral-800 shadow-sm dark:shadow-neutral-950'
                   )}
-                  onClick={() => {
-                    setSelectedModel(model);
-                    setContextModel(model.name);
+                  onClick={async () => {
+                    try {
+                      onModelChange?.(model.name);
+                      setSelectedModel(model);
+                      setContextModel(model.name);
+                    } catch (error) {
+                      console.error('Error al actualizar el modelo:', error);
+                    }
                   }}
                 >
                   <Tooltip.Root>
