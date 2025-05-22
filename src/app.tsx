@@ -446,7 +446,7 @@ function ChatComponent() {
                 <PaintBrushBroad size={20} className="text-[#F48120]" weight="duotone" />
               </Button>
 
-              <Button
+              {/* <Button
                 variant="ghost"
                 size="sm"
                 className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
@@ -457,7 +457,7 @@ function ChatComponent() {
                 onClick={() => setShowToolsInterface(true)}
               >
                 <Rocket size={20} weight="duotone" className="text-[#F48120]" />
-              </Button>
+              </Button> */}
 
               {/* <Tooltip content="Configurar Gemini API">
               <Button
