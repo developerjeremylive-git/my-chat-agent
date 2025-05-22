@@ -1224,7 +1224,7 @@ function ChatComponent() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  handleAgentSubmit(e);
+                  // handleAgentSubmit(e);
                 }
                   // handleAgentSubmit(e, {
                   //   data: {
@@ -1289,13 +1289,13 @@ function ChatComponent() {
                           // Actualizar el prompt del sistema y el modelo
                           await Promise.all([
                             // updateSystemPrompt(inputText),
-                            // fetch('/api/model', {
-                            //   method: 'POST',
-                            //   headers: {
-                            //     'Content-Type': 'application/json',
-                            //   },
-                            //   body: JSON.stringify({ modelTemp: selectedModel }),
-                            // }),
+                            fetch('/api/model', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({ modelTemp: selectedModel }),
+                            }),
                             fetch('/api/assistant', {
                               method: 'POST',
                               headers: {
@@ -1307,7 +1307,7 @@ function ChatComponent() {
 
                           // Proceder con el envío del mensaje
                           // e.preventDefault();
-                          // handleAgentSubmit(e);
+                          handleAgentSubmit(e);
                         } catch (error) {
                           console.error('Error al procesar la solicitud:', error);
                         }
