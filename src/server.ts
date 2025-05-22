@@ -452,7 +452,8 @@ app.post('/api/chats/:id/messages', async (c) => {
 // });
 app.post('/api/assistant', async (c) => {
   try {
-    const { maxStepsTemp: newMaxSteps, prompt: newPrompt } = await c.req.json();
+    const { maxStepsTemp: newMaxSteps, prompt: newPrompt, modelTemp: newModel } = await c.req.json();
+    selectedModel = newModel;
     systemPrompt = newPrompt;
     // Validate maxSteps
     if (typeof newMaxSteps === 'number' && newMaxSteps > 0) {

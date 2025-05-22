@@ -1344,22 +1344,13 @@ function ChatComponent() {
                   e.preventDefault();
                   const updateConfigs = async () => {
                     try {
-                      // Actualizar el modelo primero
-                      await fetch('/api/model', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ modelTemp: selectedModel }),
-                      });
-
                       // Luego actualizar el asistente
                       await fetch('/api/assistant', {
                         method: 'POST',
                         headers: {
                           'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText }),
+                        body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText, modelTemp: selectedModel }),
                       });
 
                       // Una vez que ambas actualizaciones están completas, manejar el envío
