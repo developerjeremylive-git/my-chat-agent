@@ -412,8 +412,11 @@ app.post('/api/model', async (c) => {
   try {
     const { modelTemp } = await c.req.json();
     selectedModel = modelTemp;
-    // Update the model instance when the model is changed
-    model = workersai(selectedModel);
+    if (selectedModel === 'gemini-2.0-flash') {
+      geminiModel = 'gemini-2.0-flash';
+    } else {
+      model = workersai(selectedModel);
+    }
     return c.json({ success: true, model: selectedModel });
   } catch (error) {
     console.error('Error in /api/assistant:', error);
@@ -427,7 +430,6 @@ app.post('/api/assistant', async (c) => {
   try {
     const { maxStepsTemp: newMaxSteps, modelTemp: selectedModelTemp, prompt: newPrompt } = await c.req.json();
     selectedModel = selectedModelTemp;
-    model = workersai(selectedModelTemp);
     systemPrompt = newPrompt;
     // Validate maxSteps
     if (typeof newMaxSteps === 'number' && newMaxSteps > 0) {
