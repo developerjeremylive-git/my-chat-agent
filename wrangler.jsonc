@@ -34,5 +34,12 @@
       "database_name": "database",
       "database_id": "bccc0a52-01a9-44c8-87ed-6cd658842536"
     }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "MODEL_CONFIG",
+      "id": "8a6552293bb845b38cdcfb687c7fe846",  // This will be filled in after creating the KV namespace
+      "preview_id": ""  // Optional: For preview environments
+    }
   ]
 }

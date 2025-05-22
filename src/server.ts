@@ -47,6 +47,7 @@ interface Env {
   AI: any;
   OPENAI_API_KEY?: string;
   GEMINI_API_KEY?: string;
+  MODEL_CONFIG: KVNamespace; // Add KV namespace binding
 }
 
 const app = new Hono<{ Bindings: Env }>();
@@ -55,10 +56,34 @@ const workersai = createWorkersAI({ binding: env.AI });
 // WebSocket connections store
 const wsConnections = new Map<string, Set<WebSocket>>();
 
+// Default values
+const DEFAULT_MODEL = 'gemini-2.0-flash';
+const DEFAULT_SYSTEM_PROMPT = 'Eres un asistente útil que puede realizar varias tareas...';
+
+// Helper function to get the selected model from KV
+async function getSelectedModel(env: Env): Promise<string> {
+  try {
+    return await env.MODEL_CONFIG.get('selectedModel') || DEFAULT_MODEL;
+  } catch (error) {
+    console.error('Error getting selected model from KV:', error);
+    return DEFAULT_MODEL;
+  }
+}
+
+// Helper function to set the selected model in KV
+async function setSelectedModel(env: Env, model: string): Promise<void> {
+  try {
+    await env.MODEL_CONFIG.put('selectedModel', model);
+  } catch (error) {
+    console.error('Error setting selected model in KV:', error);
+    throw error;
+  }
+}
+
 // Variables globales para almacenar el modelo seleccionado, prompt del sistema y configuración
-let selectedModel = 'gemini-2.0-flash';
-let geminiModel = 'gemini-2.0-flash';
-let systemPrompt = 'Eres un asistente útil que puede realizar varias tareas...';
+let selectedModel = DEFAULT_MODEL;
+let geminiModel = DEFAULT_MODEL;
+let systemPrompt = DEFAULT_SYSTEM_PROMPT;
 let maxSteps = DEFAULT_MAX_STEPS;
 // Track if user has agreed to llama model terms - used in model selection validation
 
@@ -69,8 +94,6 @@ let maxSteps = DEFAULT_MAX_STEPS;
 // let frequencyPenalty = DEFAULT_FREQUENCY_PENALTY;
 // let presencePenalty = DEFAULT_PRESENCE_PENALTY;
 // let seed = DEFAULT_SEED;
-
-
 
 // Endpoint para actualizar la configuración del asistente
 app.post('/api/config', async (c) => {
@@ -152,7 +175,10 @@ app.post('/api/model', async (c) => {
       return c.json({ error: 'Model name is required' }, 400);
     }
 
-    // Update the selected model
+    // Update the selected model in KV store
+    await setSelectedModel(c.env, modelTemp);
+    
+    // Update in-memory cache
     selectedModel = modelTemp;
     
     // If it's a Gemini model, also update the Gemini-specific model
@@ -165,6 +191,17 @@ app.post('/api/model', async (c) => {
   } catch (error) {
     console.error('Error updating model:', error);
     return c.json({ error: 'Failed to update model' }, 500);
+  }
+});
+
+// Endpoint to get the current selected model
+app.get('/api/model', async (c) => {
+  try {
+    const currentModel = await getSelectedModel(c.env);
+    return c.json({ model: currentModel });
+  } catch (error) {
+    console.error('Error getting current model:', error);
+    return c.json({ error: 'Failed to get current model' }, 500);
   }
 });
 
@@ -454,6 +491,7 @@ app.post('/api/chats/:id/messages', async (c) => {
 app.post('/api/assistant', async (c) => {
   try {
     const { maxStepsTemp: newMaxSteps, prompt: newPrompt, modelTemp: newModel } = await c.req.json();
+    await setSelectedModel(c.env, newModel);
     selectedModel = newModel;
     systemPrompt = newPrompt;
     // Validate maxSteps
