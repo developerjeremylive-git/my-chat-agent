@@ -159,8 +159,9 @@ app.post('/api/model', async (c) => {
     if (modelTemp.startsWith('gemini')) {
       geminiModel = modelTemp;
     }
-
-    return c.json({ success: true, model: selectedModel });
+    
+    // Return success response
+    return c.json({ success: true, model: modelTemp });
   } catch (error) {
     console.error('Error updating model:', error);
     return c.json({ error: 'Failed to update model' }, 500);

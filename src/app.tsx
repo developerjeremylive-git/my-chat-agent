@@ -69,7 +69,6 @@ import { ModelSelect } from "./components/model/ModelSelect";
 import { GeminiConfigModal } from "./components/modal/GeminiConfigModal";
 import { ListHeart } from "@phosphor-icons/react/dist/ssr";
 import type { ChatMessage, FormattedChatMessage, APIResponse } from "./types/api";
-import { updateModel } from "./services/modelService";
 
 // List of tools that require human confirmation
 const toolsRequiringConfirmation: (keyof typeof tools)[] = [
@@ -1181,14 +1180,20 @@ function ChatComponent() {
 
                 <div className="flex flex-row items-center gap-2 w-full">
                   <div className="flex-1 flex transition-all duration-300 opacity-100 max-w-full">
-                    <ModelSelect />
-                    {/* <ModelSelect onModelChange={async (modelName) => {
+                    {/* <ModelSelect /> */}
+                    <ModelSelect onModelChange={async (modelName: string) => {
                       try {
-                        await updateModel(modelName);
+                        await fetch('/api/model', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({ modelTemp: modelName }),
+                        });
                       } catch (error) {
                         console.error('Error al actualizar el modelo:', error);
                       }
-                    }} /> */}
+                    }} />
                     {/* <ModelSelect onModelChange={(modelName) => updateModel(modelName)} />? */}
                   </div>
 
@@ -1305,7 +1310,7 @@ function ChatComponent() {
                           </button>
 
                           {showAssistantControls && createPortal(
-                            <div 
+                            <div
                               ref={assistantControlsRef}
                               className="fixed bottom-16 left-1/2 -translate-x-1/2 sm:absolute sm:bottom-full sm:left-0 sm:translate-x-0 sm:mb-2 w-[calc(100vw-2rem)] sm:w-48 max-w-xs bg-white dark:bg-neutral-900 rounded-xl shadow-xl border border-neutral-200/50 dark:border-neutral-700/50 backdrop-blur-lg backdrop-saturate-150 overflow-hidden transform origin-bottom transition-all duration-300 z-50"
                             >
@@ -1316,9 +1321,9 @@ function ChatComponent() {
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                  ${stepMax === 1 ? 
-                                    'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' : 
-                                    'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+                                  ${stepMax === 1 ?
+                                      'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' :
+                                      'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
                                 >
                                   <span className="text-lg">🎯</span>
                                   <span className="text-sm font-medium">Sin Asistente</span>
@@ -1329,9 +1334,9 @@ function ChatComponent() {
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                  ${stepMax > 1 && stepMax <= 3 ? 
-                                    'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' : 
-                                    'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+                                  ${stepMax > 1 && stepMax <= 3 ?
+                                      'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' :
+                                      'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
                                 >
                                   <span className="text-lg">🧠</span>
                                   <span className="text-sm font-medium">Asistente Retroalimentativo</span>
@@ -1342,9 +1347,9 @@ function ChatComponent() {
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                  ${stepMax > 3 && stepMax <= 7 ? 
-                                    'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' : 
-                                    'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+                                  ${stepMax > 3 && stepMax <= 7 ?
+                                      'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' :
+                                      'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
                                 >
                                   <span className="text-lg">🚀</span>
                                   <span className="text-sm font-medium">Asistente Pensante</span>
@@ -1355,16 +1360,16 @@ function ChatComponent() {
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                  ${stepMax > 7 ? 
-                                    'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' : 
-                                    'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
+                                  ${stepMax > 7 ?
+                                      'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' :
+                                      'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
                                 >
                                   <span className="text-lg">🤖</span>
                                   <span className="text-sm font-medium">Asistente Profundo</span>
                                 </button>
                               </div>
                             </div>
-                          , document.body)}
+                            , document.body)}
                         </div>
 
                       </div>
