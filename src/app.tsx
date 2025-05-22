@@ -48,7 +48,8 @@ import {
   PlusCircle,
   Stop,
   ListBullets,
-  ChatCenteredDots
+  ChatCenteredDots,
+  PaintBrushBroad
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -441,7 +442,7 @@ function ChatComponent() {
                          flex items-center justify-center"
                 onClick={() => setShowSettingsMenu(!showSettingsMenu)}
               >
-                <Wrench size={20} className="text-[#F48120]" weight="duotone" />
+                <PaintBrushBroad size={20} className="text-[#F48120]" weight="duotone" />
               </Button>
 
               <Button
@@ -1163,10 +1164,10 @@ function ChatComponent() {
                               dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15`}
                           >
                             <span className="md:hidden">
-                              {stepMax === 1 ? '🎯' : stepMax === 2 ? '🧠' : stepMax === 4 ? '🚀' : '🤖'}
+                              {stepMax == 1 ? '🎯' : stepMax <= 3 ? '🧠' : stepMax <= 7 ? '🚀' : '🤖'}
                             </span>
                             <span className="hidden md:block truncate">
-                              {stepMax === 1 ? '🎯 Sin Asistente' : stepMax === 2 ? '🧠 Asistente Retroalimentativo' : stepMax === 4 ? '🚀 Asistente Pensativo' : '🤖 Asistente Profundo'}
+                              {stepMax == 1 ? '🎯 Sin Asistente' : stepMax <= 3 ? '🧠 Asistente Retroalimentativo' : stepMax <= 7 ? '🚀 Asistente Pensante' : '🤖 Asistente Profundo'}
                             </span>
                           </button>
 
@@ -1175,44 +1176,44 @@ function ChatComponent() {
                               <div className="p-1 space-y-1">
                                 <button
                                   onClick={() => {
-                                    setStepMax(1);
+                                    setStepMax(3);
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                    ${stepMax === 1 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                  ${stepMax === 1 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
                                 >
                                   <span className="text-lg">🎯</span>
                                   <span className="text-sm font-medium">Sin Asistente</span>
                                 </button>
                                 <button
                                   onClick={() => {
-                                    setStepMax(2);
+                                    setStepMax(3);
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                    ${stepMax === 2 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                    ${stepMax > 1 && stepMax <= 3 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
                                 >
                                   <span className="text-lg">🧠</span>
                                   <span className="text-sm font-medium">Asistente Retroalimentativo</span>
                                 </button>
                                 <button
                                   onClick={() => {
-                                    setStepMax(4);
+                                    setStepMax(7);
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                    ${stepMax === 4 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                    ${stepMax > 3 && stepMax <= 7 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
                                 >
                                   <span className="text-lg">🚀</span>
-                                  <span className="text-sm font-medium">Asistente Pensativo</span>
+                                  <span className="text-sm font-medium">Asistente Pensante</span>
                                 </button>
                                 <button
                                   onClick={() => {
-                                    setStepMax(8);
+                                    setStepMax(10);
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                    ${stepMax === 8 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                    ${stepMax > 7 ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120]' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
                                 >
                                   <span className="text-lg">🤖</span>
                                   <span className="text-sm font-medium">Asistente Profundo</span>
