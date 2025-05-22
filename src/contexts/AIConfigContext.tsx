@@ -48,6 +48,7 @@ export function AIConfigProvider({ children }: AIConfigProviderProps) {
           presencePenalty: 0.3,
           seed: 1,
           stream: true,
+          maxSteps: 1,
         };
   });
 
