@@ -15,9 +15,13 @@ interface Model {
   features?: string[];
 }
 
-interface ModelSelectProps {
+interface ModelSelectPropsTemp {
   className?: string;
   onModelChange: (modelName: string) => void;
+}
+
+interface ModelSelectProps {
+  className?: string;
 }
 
 // Modelos de Google Gemini
@@ -194,7 +198,8 @@ const distilledModels: Model[] = [
 
 const models: Model[] = [...geminiModels, ...reasoningModels, ...distilledModels];
 
-export function ModelSelect({ className, onModelChange }: ModelSelectProps) {
+// export function ModelSelect({ className, onModelChange }: ModelSelectPropsTemp) {
+export function ModelSelect({ className }: ModelSelectProps) {
   const { selectedModel: contextModel, setSelectedModel: setContextModel } = useModel();
   const [selectedModel, setSelectedModel] = useState<Model>(
     models.find(model => model.name === contextModel) || models[0]
@@ -252,7 +257,7 @@ export function ModelSelect({ className, onModelChange }: ModelSelectProps) {
           <DropdownMenu.Content
             className="min-w-[600px] max-h-[85vh] overflow-y-auto bg-white/95 dark:bg-neutral-900/95 rounded-xl p-2 shadow-xl border border-neutral-200 dark:border-neutral-700/50 z-50 backdrop-blur-xl ml-4 scrollbar-thin scrollbar-thumb-[#F48120] scrollbar-track-transparent hover:scrollbar-thumb-[#F48120]/80 md:min-w-[800px]"
             sideOffset={5}
-          > 
+          >
             {/* geminiModels   */}
             <div className="mt-4 mb-2 px-3 py-2">
               <h3 className="text-sm font-semibold text-purple-500 dark:text-purple-400 mb-1">Modelos Gemini</h3>
@@ -271,7 +276,6 @@ export function ModelSelect({ className, onModelChange }: ModelSelectProps) {
                   )}
                   onClick={async () => {
                     try {
-                      onModelChange?.(model.name);
                       setSelectedModel(model);
                       setContextModel(model.name);
                     } catch (error) {
@@ -370,7 +374,6 @@ export function ModelSelect({ className, onModelChange }: ModelSelectProps) {
                   )}
                   onClick={async () => {
                     try {
-                      onModelChange?.(model.name);
                       setSelectedModel(model);
                       setContextModel(model.name);
                     } catch (error) {
@@ -476,7 +479,6 @@ export function ModelSelect({ className, onModelChange }: ModelSelectProps) {
                   )}
                   onClick={async () => {
                     try {
-                      onModelChange?.(model.name);
                       setSelectedModel(model);
                       setContextModel(model.name);
                     } catch (error) {

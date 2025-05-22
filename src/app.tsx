@@ -1058,13 +1058,14 @@ function ChatComponent() {
 
                 <div className="flex flex-row items-center gap-2 w-full">
                   <div className="flex-1 flex transition-all duration-300 opacity-100 max-w-full">
-                    <ModelSelect onModelChange={async (modelName) => {
+                    <ModelSelect/>
+                    {/* <ModelSelect onModelChange={async (modelName) => {
                       try {
                         await updateModel(modelName);
                       } catch (error) {
                         console.error('Error al actualizar el modelo:', error);
                       }
-                    }} />
+                    }} /> */}
                      {/* <ModelSelect onModelChange={(modelName) => updateModel(modelName)} />? */}
                   </div>
 
@@ -1344,13 +1345,13 @@ function ChatComponent() {
                   const updateConfigs = async () => {
                     try {
                       // Actualizar el modelo primero
-                      // await fetch('/api/model', {
-                      //   method: 'POST',
-                      //   headers: {
-                      //     'Content-Type': 'application/json',
-                      //   },
-                      //   body: JSON.stringify({ modelTemp: selectedModel }),
-                      // });
+                      await fetch('/api/model', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ modelTemp: selectedModel }),
+                      });
 
                       // Luego actualizar el asistente
                       await fetch('/api/assistant', {

@@ -143,6 +143,30 @@ app.get('/api/system-prompt', async (c) => {
   return c.json({ prompt: systemPrompt });
 });
 
+// Endpoint to update the selected model
+app.post('/api/model', async (c) => {
+  try {
+    const { modelTemp } = await c.req.json();
+    
+    if (!modelTemp) {
+      return c.json({ error: 'Model name is required' }, 400);
+    }
+
+    // Update the selected model
+    selectedModel = modelTemp;
+    
+    // If it's a Gemini model, also update the Gemini-specific model
+    if (modelTemp.startsWith('gemini')) {
+      geminiModel = modelTemp;
+    }
+
+    return c.json({ success: true, model: selectedModel });
+  } catch (error) {
+    console.error('Error updating model:', error);
+    return c.json({ error: 'Failed to update model' }, 500);
+  }
+});
+
 // Middleware CORS
 // Endpoints para la gestión de chats
 app.get('/api/chats', async (c) => {
@@ -408,24 +432,24 @@ app.post('/api/chats/:id/messages', async (c) => {
 });
 
 // Endpoint para actualizar el modelo
-app.post('/api/model', async (c) => {
-  try {
-    const { modelTemp } = await c.req.json();
-    selectedModel = modelTemp;
-    if (selectedModel === 'gemini-2.0-flash') {
-      geminiModel = 'gemini-2.0-flash';
-    } else {
-      model = workersai(selectedModel);
-    }
-    return c.json({ success: true, model: selectedModel });
-  } catch (error) {
-    console.error('Error in /api/assistant:', error);
-    return c.json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, 500);
-  }
-});
+// app.post('/api/model', async (c) => {
+//   try {
+//     const { modelTemp } = await c.req.json();
+//     selectedModel = modelTemp;
+//     if (selectedModel === 'gemini-2.0-flash') {
+//       geminiModel = 'gemini-2.0-flash';
+//     } else {
+//       model = workersai(selectedModel);
+//     }
+//     return c.json({ success: true, model: selectedModel });
+//   } catch (error) {
+//     console.error('Error in /api/assistant:', error);
+//     return c.json({
+//       error: 'Internal server error',
+//       details: error instanceof Error ? error.message : 'Unknown error'
+//     }, 500);
+//   }
+// });
 app.post('/api/assistant', async (c) => {
   try {
     const { maxStepsTemp: newMaxSteps, prompt: newPrompt } = await c.req.json();
