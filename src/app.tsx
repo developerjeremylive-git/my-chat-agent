@@ -125,6 +125,32 @@ function ChatComponent() {
   };
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAutoHidden, setIsAutoHidden] = useState(false);
+
+  // Auto-hide sidebar after inactivity on desktop
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    const handleActivity = () => {
+      setIsAutoHidden(false);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (window.innerWidth >= 1024) { // lg breakpoint
+          setIsAutoHidden(true);
+        }
+      }, 5000); // 5 seconds of inactivity
+    };
+
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+    window.addEventListener('scroll', handleActivity);
+
+    return () => {
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      window.removeEventListener('scroll', handleActivity);
+      clearTimeout(timeoutId);
+    };
+  }, []);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
 
   // Efecto para cerrar el menú de configuración cuando se abre la barra lateral
@@ -390,7 +416,90 @@ function ChatComponent() {
         />
         <main className="flex-1 w-full px-4 py-4 relative">
           {/* Botón flotante de configuración */}
-          <div className="fixed left-4 top-1/2 -translate-y-1/2 z-10">
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden fixed top-0 left-0 right-0 px-4 py-3 flex justify-between items-center z-20 bg-gradient-to-b from-white/80 to-white/0 dark:from-neutral-900/80 dark:to-neutral-900/0 backdrop-blur-sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="relative w-10 h-10 rounded-full bg-gradient-to-r from-[#F48120] to-purple-500 p-[1.5px] group
+                         hover:shadow-lg hover:shadow-[#F48120]/25 dark:hover:shadow-purple-500/25
+                         transform hover:scale-110 active:scale-95 transition-all duration-300"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            >
+              <div className="absolute inset-[1px] rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center
+                            overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-[#F48120] before:to-purple-500 before:opacity-0
+                            before:transition-opacity before:duration-300 group-hover:before:opacity-100">
+                <List size={20} className="relative z-10 text-[#F48120] group-hover:text-white transition-colors duration-300" weight="duotone" />
+              </div>
+            </Button>
+
+            <Button
+              ref={settingsButtonRef}
+              variant="ghost"
+              size="sm"
+              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                         flex items-center justify-center"
+              onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+            >
+              <PaintBrushBroad size={20} className="text-[#F48120]" weight="duotone" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="md"
+              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                flex items-center justify-center"
+              onClick={() => setShowOIAICreator(true)}
+            >
+              <PlusCircle className="text-[#F48120]" size={29} weight="duotone" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
+                border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
+                flex items-center justify-center"
+              onClick={() => setShowClearDialog(true)}
+            >
+              <Trash className="text-[#F48120]" size={20} weight="duotone" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="relative w-10 h-10 rounded-full bg-gradient-to-r from-[#F48120] to-purple-500 p-[1.5px] group
+                         hover:shadow-lg hover:sha  dow-[#F48120]/25 dark:hover:shadow-purple-500/25
+                         transform hover:scale-110 active:scale-95 transition-all duration-300"
+              onClick={() => setIsSettingsOpen(true)}
+            >
+              <div className="absolute inset-[1px] rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center
+                            overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-[#F48120] before:to-purple-500 before:opacity-0
+                            before:transition-opacity before:duration-300 group-hover:before:opacity-100">
+                <Gear size={20} className="relative z-10 text-[#F48120] group-hover:text-white transition-colors duration-300" weight="duotone" />
+              </div>
+            </Button>
+          </div>
+
+          {/* Desktop Sidebar */}
+          <div
+            className={`fixed left-0 top-1/2 -translate-y-1/2 z-10 transition-all duration-300 ease-in-out group
+                      ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                      ${isAutoHidden ? 'lg:-translate-x-full' : ''}
+                      hover:translate-x-0`}>
+            {/* Hover indicator */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full 
+                          w-1.5 h-20 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-r-lg
+                          opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                          lg:opacity-100 pointer-events-none"></div>
             <div className="relative flex flex-col gap-2 p-2 bg-white dark:bg-neutral-900 rounded-xl shadow-xl
                          border border-neutral-200/50 dark:border-neutral-700/50
                          backdrop-blur-lg backdrop-saturate-150">
