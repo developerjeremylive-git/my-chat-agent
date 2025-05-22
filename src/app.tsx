@@ -1176,7 +1176,7 @@ function ChatComponent() {
                               <div className="p-1 space-y-1">
                                 <button
                                   onClick={() => {
-                                    setStepMax(3);
+                                    setStepMax(1);
                                     setShowAssistantControls(false);
                                   }}
                                   className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
