@@ -428,8 +428,7 @@ app.post('/api/model', async (c) => {
 });
 app.post('/api/assistant', async (c) => {
   try {
-    const { maxStepsTemp: newMaxSteps, modelTemp: selectedModelTemp, prompt: newPrompt } = await c.req.json();
-    selectedModel = selectedModelTemp;
+    const { maxStepsTemp: newMaxSteps, prompt: newPrompt } = await c.req.json();
     systemPrompt = newPrompt;
     // Validate maxSteps
     if (typeof newMaxSteps === 'number' && newMaxSteps > 0) {
@@ -791,7 +790,7 @@ app.get('/agents/chat/default/get-messages', async (c) => {
 });
 
 // Función para obtener el modelo actual
-const getModel = () => workersai(selectedModel);
+// const getModel = () => workersai(selectedModel);
 
 // Stream the AI response using GPT-4
 import { config } from './contexts/config';
@@ -805,7 +804,8 @@ import { config } from './contexts/config';
 
 //funcionando
 // Initialize model globally but it will be updated when /api/model is called
-let model = getModel();
+// let model = getModel();
+let model = workersai("@cf/deepseek-ai/deepseek-r1-distill-qwen-32b");
 // const model = workersai("@cf/google/gemma-7b-it-lora");
 // const model = workersai("@hf/mistral/mistral-7b-instruct-v0.2");
 // const model = workersai("@cf/fblgit/una-cybertron-7b-v2-bf16");
