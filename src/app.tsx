@@ -1181,7 +1181,7 @@ function ChatComponent() {
                   {selectedModel === 'gemini-2.0-flash' && showAssistantControlsAvanced && (
                     <div className="flex flex-col gap-2 w-full sm:w-auto">
                       <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10">
-                        <Robot size={20} className="text-[#F48120]" weight="duotone" />
+                        <Robot size={20} className="text-[#F48120] hidden md:block" weight="duotone" />
                         <span className="hidden sm:inline text-sm font-medium text-neutral-700 dark:text-neutral-300">Asistente</span>
                         <div className="flex items-center gap-2 flex-1 justify-end sm:justify-start">
                           {stepMax > 1 && (
@@ -1359,7 +1359,7 @@ function ChatComponent() {
                             className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-300 ease-in-out ${showAssistantControlsAvanced ? 'translate-x-6' : 'translate-x-1'}`}
                           />
                         </div>
-                        <Wrench className="ml-2 text-[#F48120]" size={20} weight="duotone" />
+                        <Wrench className="ml-2 text-[#F48120] hidden md:block" size={20} weight="duotone" />
                       </div>
                     )}
                   </div>
