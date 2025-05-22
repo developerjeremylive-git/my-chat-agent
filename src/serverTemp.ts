@@ -203,45 +203,59 @@ export class Chat extends AIChatAgent<Env> {
         throw new Error('GEMINI_API_KEY is not set in environment variables');
       }
       const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-      const response = await ai.models.generateContent({
-        model: geminiModel,
-        contents: [
-          {
-            parts: [
-              { text: systemPrompt },
-              ...this.messages.map(msg => ({ text: msg.content }))
-            ]
-          }
-        ],
-        // config: {
-        //   // systemInstruction: "You are a cat. Your name is Neko.",
-        //   // systemInstruction: systemPrompt,
-        //   // maxOutputTokens: 500,
-        //   temperature: config.temperature,
-        //   topP: config.topP,
-        //   topK: config.topK,
-        //   frequencyPenalty: config.frequencyPenalty,
-        //   presencePenalty: config.presencePenalty,
-        //   seed: config.seed,
-        //   // toolCallStreaming: true,
-        // },
-      });
-
-      //
-      // Guardar mensajes y ejecutar callback de finalización, las cantidades de iteraciones que el usuario indico
-      await this.saveMessages([
-        ...this.messages,
-        {
-          id: generateId(),
-          role: "assistant",
-          content: response.text ?? '',
-          createdAt: new Date(),
-        },
-      ]);
+      
       // Crear una promesa para manejar la finalización
       return createDataStreamResponse({
         execute: async (dataStream) => {
-          dataStream.write(formatDataStreamPart('text', response.text ?? ''));
+          let lastError = null;
+          let currentStep = 0;
+
+          while (currentStep < maxSteps) {
+            try {
+              const response = await ai.models.generateContent({
+                model: geminiModel,
+                contents: [
+                  {
+                    parts: [
+                      { text: systemPrompt },
+                      ...this.messages.map(msg => ({ text: msg.content }))
+                    ]
+                  }
+                ],
+              });
+
+              if (!response || !response.text) {
+                throw new Error('No se pudo generar contenido en el paso ' + (currentStep + 1));
+              }
+
+              // Crear mensaje de respuesta
+              const messageResponse = {
+                id: generateId(),
+                role: "assistant",
+                content: response.text,
+                createdAt: new Date(),
+              };
+
+              // Guardar el mensaje en la base de datos
+              await this.saveMessages([
+                ...this.messages,
+                messageResponse,
+              ]);
+
+              // Enviar la respuesta al stream para actualizar la UI
+              dataStream.write(formatDataStreamPart('text', `[Paso ${currentStep + 1}/${maxSteps}] ${response.text}`));
+
+              currentStep++;
+            } catch (error) {
+              console.error(`Error en el paso ${currentStep + 1}:`, error);
+              lastError = error;
+              break;
+            }
+          }
+
+          if (lastError) {
+            throw lastError;
+          }
 
           // Guardar mensajes y ejecutar callback de finalización
           // await this.saveMessages([

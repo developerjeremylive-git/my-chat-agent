@@ -1369,63 +1369,29 @@ export class Chat extends AIChatAgent<Env> {
     }
 
     const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-    let lastError: Error | null = null;
+    // let lastError: Error | null = null;
     let response;
     // let currentCounter = 0;
     // let success = false;
+   
+    // try {
+    //   const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
+    //   response = await ai.models.generateContent({
+    //     model: geminiModel,
+    //     contents: [{
+    //       role: 'user',
+    //       parts: [{ text: systemPrompt }, ...messageParts.map(p => ({ text: p.text }))]
+    //     }]
+    //   });
+    //   // break; // Success, exit retry loop
+    // } catch (error) {
+    //   lastError = error as Error;
+    //   console.log(error);
+    // }
 
-    try {
-      const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
-      response = await ai.models.generateContent({
-        model: geminiModel,
-        contents: [{
-          role: 'user',
-          parts: [{ text: systemPrompt }, ...messageParts.map(p => ({ text: p.text }))]
-        }]
-      });
-      // break; // Success, exit retry loop
-    } catch (error) {
-      lastError = error as Error;
-      console.log(error);
-    }
 
-    if (!response) {
-      throw lastError || new Error('No se pudo generar contenido después de los reintentos');
-    }
 
-    // Asegurarnos de que tenemos un chat activo
-    if (!this.currentChatId) {
-      const defaultChat = await this.initializeDefaultChat();
-      this.currentChatId = defaultChat.id;
-      console.log('Chat ID establecido a:', this.currentChatId);
-    }
 
-    const messageResponse: ChatMessage = {
-      id: generateId(),
-      role: "assistant",
-      content: response.text ?? '',
-      createdAt: new Date(),
-    };
-
-    // Actualizar los mensajes en memoria asegurando IDs únicos
-    this._messages = [...this.messages, messageResponse].map(msg => ({
-      ...msg,
-      id: msg.id || generateId(), // Asegurar que cada mensaje tenga un ID único
-      role: msg.role || 'assistant',
-      content: msg.content || '',
-      createdAt: msg.createdAt || new Date(),
-    })) as ChatMessage[];
-
-    // Guardar en la base de datos usando transacción
-    try {
-      // Guardar en la base de datos usando transacción
-      await this.storage.transaction(async (txn) => {
-        await this.saveMessagesD1(this._messages);
-      });
-
-    } catch (error) {
-      console.error('Error al guardar mensajes:', error);
-    }
 
     // try {
     //   await this.storage.transaction(async (txn) => {
@@ -1523,10 +1489,83 @@ export class Chat extends AIChatAgent<Env> {
 
     return createDataStreamResponse({
       execute: async (dataStream) => {
-        dataStream.write(formatDataStreamPart('text', response.text ?? ''));
-        if (lastError) {
-          console.log('Request succeeded after retry');
+        let lastError = null;
+        let currentStep = 0;
+    
+        while (currentStep < maxSteps) {
+          try {
+            const response = await ai.models.generateContent({
+              model: geminiModel,
+              contents: [
+                {
+                  parts: [
+                    { text: systemPrompt },
+                    ...this.messages.map(msg => ({ text: msg.content }))
+                  ]
+                }
+              ],
+            });
+    
+            if (!response || !response.text) {
+              throw new Error('No se pudo generar contenido en el paso ' + (currentStep + 1));
+            }
+    
+            // Crear mensaje de respuesta
+            const messageResponse = {
+              id: generateId(),
+              role: "assistant",
+              content: response.text,
+              createdAt: new Date(),
+            };
+    
+            // Asegurarnos de que tenemos un chat activo
+            if (!this.currentChatId) {
+              const defaultChat = await this.initializeDefaultChat();
+              this.currentChatId = defaultChat.id;
+              console.log('Chat ID establecido a:', this.currentChatId);
+            }
+        
+            // Actualizar los mensajes en memoria asegurando IDs únicos
+            this._messages = [...this.messages, messageResponse].map(msg => ({
+              ...msg,
+              id: msg.id || generateId(), // Asegurar que cada mensaje tenga un ID único
+              role: msg.role || 'assistant',
+              content: msg.content || '',
+              createdAt: msg.createdAt || new Date(),
+            })) as ChatMessage[];
+        
+            // Guardar en la base de datos usando transacción
+            try {
+              // Guardar en la base de datos usando transacción
+              await this.storage.transaction(async (txn) => {
+                await this.saveMessagesD1(this._messages);
+              });
+        
+            } catch (error) {
+              console.error('Error al guardar mensajes:', error);
+            }
+        
+            // Enviar la respuesta al stream para actualizar la UI
+            dataStream.write(formatDataStreamPart('text', `### Respuesta ${currentStep + 1} de ${maxSteps}
+
+> ${response.text}
+`));
+    
+            currentStep++;
+          } catch (error) {
+            console.error(`Error en el paso ${currentStep + 1}:`, error);
+            lastError = error;
+            break;
+          }
         }
+
+        if (lastError) {
+          throw lastError;
+        }
+        // // dataStream.write(formatDataStreamPart('text', response.text ?? ''));
+        // if (lastError) {
+        //   console.log('Request succeeded after retry');
+        // }
         console.log('Transmisión de Gemini finalizada');
       }
     });
