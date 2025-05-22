@@ -1370,7 +1370,7 @@ export class Chat extends AIChatAgent<Env> {
 
     const ai = new GoogleGenAI({ apiKey: geminiApiKey });
     // let lastError: Error | null = null;
-    let response;
+    // let response;
     // let currentCounter = 0;
     // let success = false;
    
