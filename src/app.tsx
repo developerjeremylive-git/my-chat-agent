@@ -394,7 +394,7 @@ function ChatComponent() {
             <div className="relative flex flex-col gap-2 p-2 bg-white dark:bg-neutral-900 rounded-xl shadow-xl
                          border border-neutral-200/50 dark:border-neutral-700/50
                          backdrop-blur-lg backdrop-saturate-150">
-              <Button
+              {/* <Button
                 variant="ghost"
                 size="sm"
                 className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
@@ -405,7 +405,7 @@ function ChatComponent() {
                 onClick={() => setIsSideMenuOpen(true)}
               >
                 <ChatCenteredDots size={20} className="text-[#F48120]" weight="duotone" />
-              </Button>
+              </Button> */}
               <Button
                 variant="ghost"
                 size="sm"
