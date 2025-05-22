@@ -1054,89 +1054,93 @@ function ChatComponent() {
                 </Button>
               </Tooltip> */}
 
-                <div className={`flex-1 flex transition-all duration-300 opacity-100 max-w-full`}>
-                  <ModelSelect />
-                </div>
-                <div className="flex items-center gap-4">
-                  {/* Switch para habilitar/deshabilitar el asistente */}
-                  <div className="flex items-center gap-4">
-                    <select
-                      className={`px-4 py-2 rounded-xl bg-white dark:bg-neutral-800 
-                            ${!stepMax ? 'border-2 border-[#F48120] dark:border-[#F48120] animate-pulse shadow-lg shadow-[#F48120]/20' : 'border border-neutral-200 dark:border-neutral-700'}
-                            text-sm text-neutral-700 dark:text-neutral-300 
-                            focus:outline-none focus:ring-2 focus:ring-[#F48120]/50
-                            transition-all duration-300 ease-in-out
-                            hover:border-[#F48120] dark:hover:border-[#F48120]
-                            hover:shadow-md hover:shadow-[#F48120]/10
-                            transform hover:scale-[1.02] active:scale-[0.98]
-                            cursor-pointer
-                            appearance-none
-                            bg-gradient-to-r from-white to-white dark:from-neutral-800 dark:to-neutral-800
-                            hover:from-[#F48120]/5 hover:to-purple-500/5
-                            dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10`}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === 'default') {
-                          setStepMax(1);
-                          return;
-                        }
-                        switch (value) {
-                          case 'retroalimentativo':
-                            setStepMax(2);
-                            break;
-                          case 'pensativo':
-                            setStepMax(4);
-                            break;
-                          case 'profundo':
-                            setStepMax(8);
-                            break;
-                        }
-                      }}
-                      value={stepMax === 1 ? 'default' : stepMax === 2 ? 'retroalimentativo' : stepMax === 4 ? 'pensativo' : 'profundo'}
-                    >
-                      <option value="default">🎯 Sin Asistente</option>
-                      <option value="retroalimentativo">🧠 Asistente Retroalimentativo</option>
-                      <option value="pensativo">🚀 Asistente Pensativo</option>
-                      <option value="profundo">🤖 Asistente Profundo</option>
-                    </select>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+                  <div className="flex-1 flex transition-all duration-300 opacity-100 max-w-full">
+                    <ModelSelect />
                   </div>
-                  <div className="flex items-center gap-4 ml-4 p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10">
-                    <div
-                      className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 cursor-pointer"
-                      style={{
-                        backgroundColor: showAssistantControlsAvanced ? '#F48120' : '#E5E5E5',
-                      }}
-                      onClick={() => {
-                        setShowAssistantControls(!showAssistantControls);
-                        setShowAssistantControlsAvanced(!showAssistantControlsAvanced);
-                      }}
-                    >
-                      <span
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-300 ease-in-out ${showAssistantControlsAvanced ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                      />
-
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+                    <div className="flex items-center gap-4 w-full sm:w-auto p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10">
+                      <div
+                        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 cursor-pointer"
+                        style={{
+                          backgroundColor: showAssistantControlsAvanced ? '#F48120' : '#E5E5E5',
+                        }}
+                        onClick={() => {
+                          setShowAssistantControls(!showAssistantControls);
+                          setShowAssistantControlsAvanced(!showAssistantControlsAvanced);
+                        }}
+                      >
+                        <span
+                          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-300 ease-in-out ${showAssistantControlsAvanced ? 'translate-x-6' : 'translate-x-1'
+                            }`}
+                        />
+                      </div>
+                      <span className="hidden sm:inline text-sm font-medium text-neutral-700 dark:text-neutral-300">Ajuste Manual</span>
+                      <Wrench className="sm:hidden text-[#F48120]" size={20} weight="duotone" />
                     </div>
-                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Ajuste Manual</span>
+                    {/* Switch para habilitar/deshabilitar el asistente */}
+                    {selectedModel === 'gemini-2.0-flash' && !showAssistantControlsAvanced && (
+                      <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <select
+                          className={`w-full sm:w-auto px-4 py-2 rounded-xl bg-white dark:bg-neutral-800 
+                              ${!stepMax ? 'border-2 border-[#F48120] dark:border-[#F48120] animate-pulse shadow-lg shadow-[#F48120]/20' : 'border border-neutral-200 dark:border-neutral-700'}
+                              text-sm text-neutral-700 dark:text-neutral-300 
+                              focus:outline-none focus:ring-2 focus:ring-[#F48120]/50
+                              transition-all duration-300 ease-in-out
+                              hover:border-[#F48120] dark:hover:border-[#F48120]
+                              hover:shadow-md hover:shadow-[#F48120]/10
+                              transform hover:scale-[1.02] active:scale-[0.98]
+                              cursor-pointer
+                              appearance-none
+                              bg-gradient-to-r from-white to-white dark:from-neutral-800 dark:to-neutral-800
+                              hover:from-[#F48120]/5 hover:to-purple-500/5
+                              dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10`}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === 'default') {
+                              setStepMax(1);
+                              return;
+                            }
+                            switch (value) {
+                              case 'retroalimentativo':
+                                setStepMax(2);
+                                break;
+                              case 'pensativo':
+                                setStepMax(4);
+                                break;
+                              case 'profundo':
+                                setStepMax(8);
+                                break;
+                            }
+                          }}
+                          value={stepMax === 1 ? 'default' : stepMax === 2 ? 'retroalimentativo' : stepMax === 4 ? 'pensativo' : 'profundo'}
+                        >
+                          <option value="default">🎯 Sin Asistente</option>
+                          <option value="retroalimentativo">🧠 Asistente Retroalimentativo</option>
+                          <option value="pensativo">🚀 Asistente Pensativo</option>
+                          <option value="profundo">🤖 Asistente Profundo</option>
+                        </select>
+                      </div>
+                    )}
                   </div>
-                </div>
-                {selectedModel === 'gemini-2.0-flash' && showAssistantControlsAvanced && (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10">
-                      <Robot size={20} className="text-[#F48120]" weight="duotone" />
-                      <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Asistente</span>
-                      <div className="flex items-center gap-2">
-                        {stepMax > 1 && (
-                          <button
-                            onClick={() => {
-                              if (!isUpdatingStepMax) {
-                                setIsUpdatingStepMax(true);
-                                setStepMax(stepMax - 1);
-                                setTimeout(() => setIsUpdatingStepMax(false), 300);
-                              }
-                            }}
-                            disabled={isUpdatingStepMax}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg
+
+                  {selectedModel === 'gemini-2.0-flash' && showAssistantControlsAvanced && (
+                    <div className="flex flex-col gap-2 w-full sm:w-auto">
+                      <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10">
+                        <Robot size={20} className="text-[#F48120]" weight="duotone" />
+                        <span className="hidden sm:inline text-sm font-medium text-neutral-700 dark:text-neutral-300">Asistente</span>
+                        <div className="flex items-center gap-2 flex-1 justify-end sm:justify-start">
+                          {stepMax > 1 && (
+                            <button
+                              onClick={() => {
+                                if (!isUpdatingStepMax) {
+                                  setIsUpdatingStepMax(true);
+                                  setStepMax(stepMax - 1);
+                                  setTimeout(() => setIsUpdatingStepMax(false), 300);
+                                }
+                              }}
+                              disabled={isUpdatingStepMax}
+                              className="w-8 h-8 flex items-center justify-center rounded-lg
                                bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
                                hover:from-[#F48120]/20 hover:to-purple-500/20
                                dark:from-[#F48120]/5 dark:to-purple-500/5
@@ -1144,48 +1148,48 @@ function ChatComponent() {
                                border border-[#F48120]/20 hover:border-[#F48120]/40
                                dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                                transform hover:scale-95 active:scale-90 transition-all duration-200"
-                          >
-                            <span className="text-[#F48120] font-bold">-</span>
-                          </button>
-                        )}
+                            >
+                              <span className="text-[#F48120] font-bold">-</span>
+                            </button>
+                          )}
 
-                        <div className="relative flex items-center gap-2">
-                          <input
-                            type="number"
-                            inputMode="numeric"
-                            pattern="[1-9]*"
-                            min="1"
-                            max="10"
-                            value={stepMax}
-                            onChange={(e) => {
-                              const value = parseInt(e.target.value);
-                              if (!isNaN(value) && value >= 1 && value <= 10) {
-                                setStepMax(value);
-                              }
-                            }}
-                            className="w-12 text-center px-2 py-1 text-sm bg-white dark:bg-neutral-800
+                          <div className="relative flex items-center gap-2">
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              pattern="[1-9]*"
+                              min="1"
+                              max="10"
+                              value={stepMax}
+                              onChange={(e) => {
+                                const value = parseInt(e.target.value);
+                                if (!isNaN(value) && value >= 1 && value <= 10) {
+                                  setStepMax(value);
+                                }
+                              }}
+                              className="w-12 text-center px-2 py-1 text-sm bg-white dark:bg-neutral-800
                                border border-neutral-200 dark:border-neutral-700 rounded-lg
                                focus:outline-none focus:ring-2 focus:ring-[#F48120]/50
                                [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          />
-                          {isUpdatingStepMax && (
-                            <div className="ml-4 absolute -center-1 flex items-center">
-                              <div className="animate-spin h-4 w-4 border-2 border-[#F48120] border-t-transparent rounded-full"></div>
-                            </div>
-                          )}
-                        </div>
+                            />
+                            {isUpdatingStepMax && (
+                              <div className="ml-4 absolute -center-1 flex items-center">
+                                <div className="animate-spin h-4 w-4 border-2 border-[#F48120] border-t-transparent rounded-full"></div>
+                              </div>
+                            )}
+                          </div>
 
-                        {stepMax < 10 && (
-                          <button
-                            onClick={() => {
-                              if (!isUpdatingStepMax) {
-                                setIsUpdatingStepMax(true);
-                                setStepMax(stepMax + 1);
-                                setTimeout(() => setIsUpdatingStepMax(false), 300);
-                              }
-                            }}
-                            disabled={isUpdatingStepMax}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg
+                          {stepMax < 10 && (
+                            <button
+                              onClick={() => {
+                                if (!isUpdatingStepMax) {
+                                  setIsUpdatingStepMax(true);
+                                  setStepMax(stepMax + 1);
+                                  setTimeout(() => setIsUpdatingStepMax(false), 300);
+                                }
+                              }}
+                              disabled={isUpdatingStepMax}
+                              className="w-8 h-8 flex items-center justify-center rounded-lg
                                bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
                                hover:from-[#F48120]/20 hover:to-purple-500/20
                                dark:from-[#F48120]/5 dark:to-purple-500/5
@@ -1193,16 +1197,16 @@ function ChatComponent() {
                                border border-[#F48120]/20 hover:border-[#F48120]/40
                                dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                                transform hover:scale-95 active:scale-90 transition-all duration-200"
-                          >
-                            <span className="text-[#F48120] font-bold">+</span>
-                          </button>
-                        )}
+                            >
+                              <span className="text-[#F48120] font-bold">+</span>
+                            </button>
+                          )}
 
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-
+                  )}
+                </div>
                 {/* 
 
               <Tooltip content="Crear Agente">
