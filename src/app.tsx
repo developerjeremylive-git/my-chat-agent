@@ -1058,7 +1058,7 @@ function ChatComponent() {
 
                 <div className="flex flex-row items-center gap-2 w-full">
                   <div className="flex-1 flex transition-all duration-300 opacity-100 max-w-full">
-                    <ModelSelect/>
+                    <ModelSelect />
                     {/* <ModelSelect onModelChange={async (modelName) => {
                       try {
                         await updateModel(modelName);
@@ -1066,7 +1066,7 @@ function ChatComponent() {
                         console.error('Error al actualizar el modelo:', error);
                       }
                     }} /> */}
-                     {/* <ModelSelect onModelChange={(modelName) => updateModel(modelName)} />? */}
+                    {/* <ModelSelect onModelChange={(modelName) => updateModel(modelName)} />? */}
                   </div>
 
                   {selectedModel === 'gemini-2.0-flash' && showAssistantControlsAvanced && (
@@ -1234,24 +1234,25 @@ function ChatComponent() {
 
                       </div>
                     )}
-
-                    <div className="flex items-center p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10 hover:shadow-lg transition-all duration-300">
-                      <div
-                        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 cursor-pointer"
-                        style={{
-                          backgroundColor: showAssistantControlsAvanced ? '#F48120' : '#E5E5E5',
-                        }}
-                        onClick={() => {
-                          setShowAssistantControls(!showAssistantControls);
-                          setShowAssistantControlsAvanced(!showAssistantControlsAvanced);
-                        }}
-                      >
-                        <span
-                          className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-300 ease-in-out ${showAssistantControlsAvanced ? 'translate-x-6' : 'translate-x-1'}`}
-                        />
+                    {selectedModel === 'gemini-2.0-flash' && (
+                      <div className="flex items-center p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10 hover:shadow-lg transition-all duration-300">
+                        <div
+                          className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 cursor-pointer"
+                          style={{
+                            backgroundColor: showAssistantControlsAvanced ? '#F48120' : '#E5E5E5',
+                          }}
+                          onClick={() => {
+                            setShowAssistantControls(!showAssistantControls);
+                            setShowAssistantControlsAvanced(!showAssistantControlsAvanced);
+                          }}
+                        >
+                          <span
+                            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-300 ease-in-out ${showAssistantControlsAvanced ? 'translate-x-6' : 'translate-x-1'}`}
+                          />
+                        </div>
+                        <Wrench className="ml-2 text-[#F48120]" size={20} weight="duotone" />
                       </div>
-                      <Wrench className="ml-2 text-[#F48120]" size={20} weight="duotone" />
-                    </div>
+                    )}
                   </div>
 
                 </div>
@@ -1469,14 +1470,16 @@ function ChatComponent() {
           onConfirm={clearHistory}
         />
 
-        {showAgentInterface && (
-          <ModernAgentInterface
-            isOpen={showAgentInterface}
-            onClose={() => setShowAgentInterface(false)}
-          />
-        )}
-      </div>
-    </ChatProvider>
+        {
+          showAgentInterface && (
+            <ModernAgentInterface
+              isOpen={showAgentInterface}
+              onClose={() => setShowAgentInterface(false)}
+            />
+          )
+        }
+      </div >
+    </ChatProvider >
   );
 }
 
