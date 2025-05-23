@@ -5,7 +5,7 @@ import { ArrowsOut, Plus, FloppyDisk, CaretDown, Trash, PencilSimple } from "@ph
 import { Modal } from "../modal/Modal";
 
 export const inputClasses = cn(
-  "bg-ob-btn-secondary-bg text-ob-base-300 border-ob-border focus:border-ob-border-active placeholder:text-ob-base-100 add-disable border border-1 transition-colors focus:outline-none"
+  "bg-ob-btn-secondary-bg text-ob-base-300 dark:text-white border-ob-border focus:border-ob-border-active placeholder:text-ob-base-100 dark:placeholder:text-gray-400 add-disable border border-1 transition-colors focus:outline-none"
 );
 
 export type InputProps = Omit<
