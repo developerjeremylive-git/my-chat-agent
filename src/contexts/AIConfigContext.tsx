@@ -10,7 +10,7 @@ export interface AIModelConfig {
   presencePenalty: number;
   seed: number;
   stream: boolean;
-  maxSteps: number;
+  // maxSteps: number;
 }
 
 export interface AIConfigContextType {
