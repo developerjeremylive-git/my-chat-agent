@@ -1226,37 +1226,68 @@ function ChatComponent() {
                   {/* Assistant Controls Section */}
                   <div className="flex flex-row items-center gap-2 lg:gap-3">
                     {selectedModel === 'gemini-2.0-flash' && !showAssistantControlsAvanced && (
-                      <div className="relative group">
-                        <div className="relative">
-                          {/* Glow effect */}
-                          <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/30 to-purple-500/30 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                      <div className="relative group w-full max-w-[280px] mx-auto">
+                        <div className="relative w-full">
+                          {/* Enhanced Glow effect */}
+                          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#F48120]/40 via-purple-500/40 to-[#F48120]/40 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-all duration-500 animate-tilt"></div>
                           
                           <button
                             ref={assistantButtonRef}
                             onClick={() => setShowAssistantControls(!showAssistantControls)}
-                            className={`relative w-12 h-12 lg:w-auto lg:h-12 lg:min-w-[200px] flex items-center justify-center lg:justify-between px-3 lg:px-4 rounded-xl 
-                              ${!stepMax ? 'border-2 border-[#F48120] dark:border-[#F48120] animate-pulse shadow-lg shadow-[#F48120]/30' : 'border border-neutral-200/50 dark:border-neutral-700/50'}
-                              text-sm font-medium text-neutral-700 dark:text-neutral-300 
-                              focus:outline-none focus:ring-2 focus:ring-[#F48120]/50
+                            className={`relative w-full h-14 lg:h-12 flex items-center justify-between px-4 rounded-xl 
+                              backdrop-blur-sm overflow-hidden
+                              ${!stepMax ? 'border-2 border-[#F48120] animate-pulse' : 'border border-neutral-200/50 dark:border-neutral-700/50'}
+                              text-sm font-medium text-neutral-700 dark:text-neutral-200 
+                              focus:outline-none focus:ring-2 focus:ring-[#F48120]/50 focus:ring-offset-2 focus:ring-offset-white/80 dark:focus:ring-offset-neutral-900/80
                               transition-all duration-300 ease-in-out
                               hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50
-                              hover:shadow-lg hover:shadow-[#F48120]/20
                               transform hover:scale-[1.02] active:scale-[0.98]
-                              cursor-pointer overflow-hidden
-                              bg-gradient-to-r from-white to-neutral-50 dark:from-neutral-900 dark:to-neutral-800
-                              hover:from-[#F48120]/5 hover:to-purple-500/5
-                              dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10`}
+                              cursor-pointer 
+                              bg-gradient-to-br from-white/80 to-neutral-50/90 dark:from-neutral-900/80 dark:to-neutral-800/90
+                              hover:bg-gradient-to-br hover:from-white/90 hover:to-neutral-100/90 dark:hover:from-neutral-800/90 dark:hover:to-neutral-700/90
+                              shadow-sm hover:shadow-md hover:shadow-[#F48120]/10 dark:shadow-neutral-900/30`}
                           >
-                            {/* Background pattern */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            {/* Animated gradient background */}
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#F48120]/5 via-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                             
-                            {/* Mobile icon */}
-                            <span className="lg:hidden text-xl relative z-10">
-                              {stepMax == 1 ? '🎯' : stepMax <= 3 ? '🧠' : stepMax <= 7 ? '🚀' : '🤖'}
-                            </span>
+                            {/* Mobile & Tablet content */}
+                            <div className="relative z-10 w-full flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="relative">
+                                  <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-0 group-hover:opacity-30 blur-sm transition-opacity duration-300"></div>
+                                  <span className="relative z-10 text-2xl">
+                                    {stepMax == 1 ? '🎯' : stepMax <= 3 ? '🧠' : stepMax <= 7 ? '🚀' : '🤖'}
+                                  </span>
+                                </div>
+                                <div className="text-left">
+                                  <div className="text-sm font-semibold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
+                                    {stepMax == 1 ? 'Básico' : stepMax <= 3 ? 'Equilibrado' : stepMax <= 7 ? 'Avanzado' : 'Experto'}
+                                  </div>
+                                  <div className="text-xs text-neutral-500 dark:text-neutral-400 -mt-0.5">
+                                    Nivel {stepMax}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                <div className="w-16 h-1.5 bg-neutral-200/70 dark:bg-neutral-700/70 rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-inner"
+                                    style={{ width: `${(stepMax / 10) * 100}%` }}
+                                  >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent w-full h-full"></div>
+                                  </div>
+                                </div>
+                                <div className="w-6 h-6 flex items-center justify-center rounded-lg bg-gradient-to-br from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/20 dark:to-purple-500/20 border border-[#F48120]/10 dark:border-[#F48120]/20">
+                                  <span className="text-xs font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
+                                    {stepMax}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
                             
                             {/* Desktop content */}
-                            <div className="hidden lg:flex items-center gap-3 relative z-10">
+                            {/* <div className="hidden lg:flex items-center gap-3 relative z-10">
                               <span className="text-xl">
                                 {stepMax == 1 ? '🎯' : stepMax <= 3 ? '🧠' : stepMax <= 7 ? '🚀' : '🤖'}
                               </span>
@@ -1265,7 +1296,6 @@ function ChatComponent() {
                               </span>
                             </div>
                             
-                            {/* Level indicator */}
                             <div className="hidden lg:flex items-center gap-2 relative z-10">
                               <div className="w-8 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
                                 <div 
@@ -1274,7 +1304,7 @@ function ChatComponent() {
                                 ></div>
                               </div>
                               <span className="text-xs font-bold text-[#F48120] min-w-[20px]">{stepMax}</span>
-                            </div>
+                            </div> */}
                           </button>
 
                           {showAssistantControls && createPortal(

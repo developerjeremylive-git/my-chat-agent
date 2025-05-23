@@ -228,16 +228,18 @@ export function ModelSelect({ className }: ModelSelectProps) {
             'hover:scale-[1.02]',
             className
           )}>
-            <div className="flex items-center justify-center">
+            <div className="flex items-center gap-2">
               {selectedModel.provider === 'DeepSeek / Meta' && <Brain className="w-5 h-5 text-blue-500" weight="duotone" />}
               {selectedModel.provider === 'Meta' && <Robot className="w-5 h-5 text-purple-500" weight="duotone" />}
               {selectedModel.provider === 'Google' && <Robot className="w-5 h-5 text-green-500" weight="duotone" />}
               {selectedModel.provider === 'Alibaba Cloud' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
               {selectedModel.provider === 'Mistral AI' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
               {selectedModel.provider === 'Qwen' && <Chats className="w-5 h-5 text-red-500" weight="duotone" />}
-
+              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 truncate max-w-[150px]">
+                {selectedModel.name.split('/').pop()}
+              </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <CaretDown className="w-4 h-4 text-neutral-500" />
             </div>
             {/* <button
