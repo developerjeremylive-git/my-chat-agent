@@ -1212,149 +1212,204 @@ function ChatComponent() {
                 </Button>
               </Tooltip> */}
 
-                <div className="flex flex-row items-center gap-2 w-full">
-                  <div className="flex-1 flex transition-all duration-300 opacity-100 max-w-full">
-                    <ModelSelect />
-                    {/* <ModelSelect onModelChange={async (modelName: string) => {
-                      try {
-                        await fetch('/api/model', {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({ modelTemp: modelName }),
-                        });
-                      } catch (error) {
-                        console.error('Error al actualizar el modelo:', error);
-                      }
-                    }} /> */}
-                    {/* <ModelSelect onModelChange={(modelName) => updateModel(modelName)} />? */}
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full">
+                  {/* Model Selection Section */}
+                  <div className="flex-1 min-w-0">
+                    <div className="relative group">
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                      <div className="relative bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 transition-all duration-300">
+                        <ModelSelect />
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex flex-row items-center gap-2">
-                    {/* Switch para habilitar/deshabilitar el asistente */}
+                  {/* Assistant Controls Section */}
+                  <div className="flex flex-row items-center gap-2 lg:gap-3">
                     {selectedModel === 'gemini-2.0-flash' && !showAssistantControlsAvanced && (
                       <div className="relative group">
-                        <div className="relative group">
+                        <div className="relative">
+                          {/* Glow effect */}
+                          <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/30 to-purple-500/30 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                          
                           <button
                             ref={assistantButtonRef}
                             onClick={() => setShowAssistantControls(!showAssistantControls)}
-                            className={`w-10 h-10 md:w-48 flex items-center justify-center md:justify-between px-3 rounded-xl 
-                              ${!stepMax ? 'border-2 border-[#F48120] dark:border-[#F48120] animate-pulse shadow-lg shadow-[#F48120]/20' : 'border border-neutral-200 dark:border-neutral-700'}
-                              text-sm text-neutral-700 dark:text-neutral-300 
+                            className={`relative w-12 h-12 lg:w-auto lg:h-12 lg:min-w-[200px] flex items-center justify-center lg:justify-between px-3 lg:px-4 rounded-xl 
+                              ${!stepMax ? 'border-2 border-[#F48120] dark:border-[#F48120] animate-pulse shadow-lg shadow-[#F48120]/30' : 'border border-neutral-200/50 dark:border-neutral-700/50'}
+                              text-sm font-medium text-neutral-700 dark:text-neutral-300 
                               focus:outline-none focus:ring-2 focus:ring-[#F48120]/50
                               transition-all duration-300 ease-in-out
-                              hover:border-[#F48120] dark:hover:border-[#F48120]
-                              hover:shadow-md hover:shadow-[#F48120]/10
+                              hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50
+                              hover:shadow-lg hover:shadow-[#F48120]/20
                               transform hover:scale-[1.02] active:scale-[0.98]
-                              cursor-pointer
-                              bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5
-                              hover:from-[#F48120]/20 hover:to-purple-500/20
-                              dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15`}
+                              cursor-pointer overflow-hidden
+                              bg-gradient-to-r from-white to-neutral-50 dark:from-neutral-900 dark:to-neutral-800
+                              hover:from-[#F48120]/5 hover:to-purple-500/5
+                              dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10`}
                           >
-                            <span className="md:hidden text-lg">
+                            {/* Background pattern */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            
+                            {/* Mobile icon */}
+                            <span className="lg:hidden text-xl relative z-10">
                               {stepMax == 1 ? '🎯' : stepMax <= 3 ? '🧠' : stepMax <= 7 ? '🚀' : '🤖'}
                             </span>
-                            <span className="hidden md:block truncate">
-                              {stepMax == 1 ? '🎯 Sin Asistente' : stepMax <= 3 ? '🧠 Asistente Retroalimentativo' : stepMax <= 7 ? '🚀 Asistente Pensante' : '🤖 Asistente Profundo'}
-                            </span>
+                            
+                            {/* Desktop content */}
+                            <div className="hidden lg:flex items-center gap-3 relative z-10">
+                              <span className="text-xl">
+                                {stepMax == 1 ? '🎯' : stepMax <= 3 ? '🧠' : stepMax <= 7 ? '🚀' : '🤖'}
+                              </span>
+                              <span className="truncate">
+                                {stepMax == 1 ? 'Sin Asistente' : stepMax <= 3 ? 'Retroalimentativo' : stepMax <= 7 ? 'Pensante' : 'Profundo'}
+                              </span>
+                            </div>
+                            
+                            {/* Level indicator */}
+                            <div className="hidden lg:flex items-center gap-2 relative z-10">
+                              <div className="w-8 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-gradient-to-r from-[#F48120] to-purple-500 transition-all duration-500 rounded-full"
+                                  style={{ width: `${(stepMax / 10) * 100}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-xs font-bold text-[#F48120] min-w-[20px]">{stepMax}</span>
+                            </div>
                           </button>
 
                           {showAssistantControls && createPortal(
                             <div
                               ref={assistantControlsRef}
-                              className="fixed bottom-16 left-1/2 -translate-x-1/2 sm:absolute sm:bottom-full sm:left-0 sm:translate-x-0 sm:mb-2 w-[calc(100vw-2rem)] sm:w-64 max-w-xs bg-white dark:bg-neutral-900 rounded-xl shadow-xl border border-neutral-200/50 dark:border-neutral-700/50 backdrop-blur-lg backdrop-saturate-150 overflow-hidden transform origin-bottom transition-all duration-300 z-50"
+                              className="fixed bottom-20 left-1/2 -translate-x-1/2 lg:absolute lg:bottom-full lg:left-0 lg:translate-x-0 lg:mb-3 w-[calc(100vw-1rem)] lg:w-80 max-w-sm bg-white/95 dark:bg-neutral-900/95 rounded-2xl shadow-2xl border border-neutral-200/30 dark:border-neutral-700/30 backdrop-blur-xl backdrop-saturate-150 overflow-hidden transform origin-bottom transition-all duration-500 z-50"
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
+                                ...(theme === 'dark' && {
+                                  background: 'linear-gradient(135deg, rgba(23,23,23,0.95) 0%, rgba(38,38,38,0.95) 100%)'
+                                })
+                              }}
                             >
-                              <div className="p-3 space-y-2">
-                                <div className="px-2 py-1">
-                                  <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-1">Nivel de Asistencia</h3>
-                                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Mayor nivel = Mejor precisión</p>
+                              {/* Decorative gradient border */}
+                              <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-sm opacity-50"></div>
+                              
+                              <div className="relative p-4 space-y-4">
+                                {/* Header */}
+                                <div className="text-center space-y-2">
+                                  <div className="flex items-center justify-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#F48120] to-purple-500 flex items-center justify-center">
+                                      <span className="text-white text-sm font-bold">{stepMax}</span>
+                                    </div>
+                                    <h3 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Nivel de Asistencia</h3>
+                                  </div>
+                                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Configura la profundidad del análisis</p>
                                 </div>
                                 
-                                {/* Level indicator */}
-                                <div className="relative h-2 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden mb-4">
-                                  <div 
-                                    className="h-full bg-gradient-to-r from-[#F48120] to-purple-500 transition-all duration-500"
-                                    style={{ width: `${(stepMax / 10) * 100}%` }}
-                                  ></div>
+                                {/* Enhanced Level indicator */}
+                                <div className="space-y-3">
+                                  <div className="relative h-3 bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-full overflow-hidden shadow-inner">
+                                    <div 
+                                      className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-lg"
+                                      style={{ width: `${(stepMax / 10) * 100}%` }}
+                                    ></div>
+                                    {/* Glow effect */}
+                                    <div 
+                                      className="absolute top-0 h-full bg-gradient-to-r from-[#F48120]/50 to-purple-500/50 rounded-full blur-sm transition-all duration-700"
+                                      style={{ width: `${(stepMax / 10) * 100}%` }}
+                                    ></div>
+                                  </div>
+                                  
+                                  {/* Level labels */}
+                                  <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1">
+                                    <span className={stepMax <= 2 ? 'text-[#F48120] font-semibold' : ''}>Rápido</span>
+                                    <span className={stepMax > 2 && stepMax <= 5 ? 'text-[#F48120] font-semibold' : ''}>Equilibrado</span>
+                                    <span className={stepMax > 5 && stepMax <= 8 ? 'text-[#F48120] font-semibold' : ''}>Profundo</span>
+                                    <span className={stepMax > 8 ? 'text-[#F48120] font-semibold' : ''}>Experto</span>
+                                  </div>
                                 </div>
 
                                 {/* Preset buttons */}
-                                <div className="space-y-1.5">
+                                <div className="grid grid-cols-2 gap-2">
                                   <button
                                     onClick={() => setStepMax(1)}
-                                    className={`w-full px-3 py-2.5 flex items-center gap-2 rounded-lg transition-all duration-200 border
+                                    className={`group relative overflow-hidden p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
                                       ${stepMax === 1 ? 
-                                        'border-[#F48120]/40 dark:border-[#F48120]/30 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10' : 
-                                        'border-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                        'bg-gradient-to-br from-[#F48120]/20 to-orange-400/20 border-2 border-[#F48120]/50 shadow-lg shadow-[#F48120]/20' : 
+                                        'bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-[#F48120]/30 hover:shadow-md'}`}
                                   >
-                                    <span className="text-lg">🎯</span>
-                                    <div className="text-left flex-1">
-                                      <div className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Básico</div>
-                                      <div className="text-xs text-neutral-500 dark:text-neutral-400">Nivel 1</div>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-[#F48120]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div className="relative flex flex-col items-center gap-2">
+                                      <span className="text-2xl transform group-hover:scale-110 transition-transform duration-300">🎯</span>
+                                      <div className="text-center">
+                                        <div className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Básico</div>
+                                        <div className="text-xs text-neutral-500 dark:text-neutral-400">Nivel 1</div>
+                                      </div>
                                     </div>
-                                    <div className="w-6 h-6 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center text-xs font-bold">1</div>
                                   </button>
-
 
                                   <button
                                     onClick={() => setStepMax(3)}
-                                    className={`w-full px-3 py-2.5 flex items-center gap-2 rounded-lg transition-all duration-200 border
+                                    className={`group relative overflow-hidden p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
                                       ${stepMax > 1 && stepMax <= 3 ? 
-                                        'border-[#F48120]/40 dark:border-[#F48120]/30 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10' : 
-                                        'border-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                        'bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-2 border-blue-500/50 shadow-lg shadow-blue-500/20' : 
+                                        'bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-blue-500/30 hover:shadow-md'}`}
                                   >
-                                    <span className="text-lg">🧠</span>
-                                    <div className="text-left flex-1">
-                                      <div className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Retroalimentativo</div>
-                                      <div className="text-xs text-neutral-500 dark:text-neutral-400">Nivel 2-3</div>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div className="relative flex flex-col items-center gap-2">
+                                      <span className="text-2xl transform group-hover:scale-110 transition-transform duration-300">🧠</span>
+                                      <div className="text-center">
+                                        <div className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Equilibrado</div>
+                                        <div className="text-xs text-neutral-500 dark:text-neutral-400">Nivel 2-3</div>
+                                      </div>
                                     </div>
-                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 flex items-center justify-center text-xs font-bold text-white">3</div>
                                   </button>
-
 
                                   <button
                                     onClick={() => setStepMax(7)}
-                                    className={`w-full px-3 py-2.5 flex items-center gap-2 rounded-lg transition-all duration-200 border
+                                    className={`group relative overflow-hidden p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
                                       ${stepMax > 3 && stepMax <= 7 ? 
-                                        'border-[#F48120]/40 dark:border-[#F48120]/30 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10' : 
-                                        'border-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                        'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-500/50 shadow-lg shadow-purple-500/20' : 
+                                        'bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-purple-500/30 hover:shadow-md'}`}
                                   >
-                                    <span className="text-lg">🚀</span>
-                                    <div className="text-left flex-1">
-                                      <div className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Avanzado</div>
-                                      <div className="text-xs text-neutral-500 dark:text-neutral-400">Nivel 4-7</div>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div className="relative flex flex-col items-center gap-2">
+                                      <span className="text-2xl transform group-hover:scale-110 transition-transform duration-300">🚀</span>
+                                      <div className="text-center">
+                                        <div className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Avanzado</div>
+                                        <div className="text-xs text-neutral-500 dark:text-neutral-400">Nivel 4-7</div>
+                                      </div>
                                     </div>
-                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 flex items-center justify-center text-xs font-bold text-white">7</div>
                                   </button>
-
 
                                   <button
                                     onClick={() => setStepMax(10)}
-                                    className={`w-full px-3 py-2.5 flex items-center gap-2 rounded-lg transition-all duration-200 border
+                                    className={`group relative overflow-hidden p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
                                       ${stepMax > 7 ? 
-                                        'border-[#F48120]/40 dark:border-[#F48120]/30 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10' : 
-                                        'border-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                        'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' : 
+                                        'bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-emerald-500/30 hover:shadow-md'}`}
                                   >
-                                    <span className="text-lg">🤖</span>
-                                    <div className="text-left flex-1">
-                                      <div className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Profesional</div>
-                                      <div className="text-xs text-neutral-500 dark:text-neutral-400">Nivel 8-10</div>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    <div className="relative flex flex-col items-center gap-2">
+                                      <span className="text-2xl transform group-hover:scale-110 transition-transform duration-300">🤖</span>
+                                      <div className="text-center">
+                                        <div className="text-sm font-bold text-neutral-800 dark:text-neutral-200">Experto</div>
+                                        <div className="text-xs text-neutral-500 dark:text-neutral-400">Nivel 8-10</div>
+                                      </div>
                                     </div>
-                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 flex items-center justify-center text-xs font-bold text-white">10</div>
                                   </button>
                                 </div>
 
                                 {/* Custom level selector */}
-                                <div className="pt-2 mt-2 border-t border-neutral-200/50 dark:border-neutral-700/50">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Nivel personalizado</span>
-                                    <div className="px-2 py-0.5 bg-neutral-100 dark:bg-neutral-800 rounded-md text-xs font-bold">
-                                      {stepMax}/10
+                                <div className="pt-4 mt-4 border-t border-gradient-to-r from-neutral-200/30 via-[#F48120]/20 to-neutral-200/30 dark:from-neutral-700/30 dark:via-[#F48120]/20 dark:to-neutral-700/30">
+                                  <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#F48120] to-purple-500 animate-pulse"></div>
+                                      <span className="text-sm font-semibold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Ajuste Fino</span>
+                                    </div>
+                                    <div className="px-3 py-1.5 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/20 dark:to-purple-500/20 rounded-full border border-[#F48120]/20 dark:border-[#F48120]/30">
+                                      <span className="text-sm font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">{stepMax}/10</span>
                                     </div>
                                   </div>
                                   
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-3">
                                     <button
                                       onClick={() => {
                                         if (!isUpdatingStepMax && stepMax > 1) {
@@ -1364,18 +1419,20 @@ function ChatComponent() {
                                         }
                                       }}
                                       disabled={isUpdatingStepMax || stepMax <= 1}
-                                      className="w-8 h-8 flex items-center justify-center rounded-lg
-                                        bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
-                                        hover:from-[#F48120]/20 hover:to-purple-500/20
-                                        disabled:opacity-50 disabled:pointer-events-none
-                                        border border-[#F48120]/20 hover:border-[#F48120]/40
-                                        dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                                        transition-all duration-200"
+                                      className="group relative w-10 h-10 flex items-center justify-center rounded-xl overflow-hidden
+                                        bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-800 dark:to-neutral-700
+                                        hover:from-red-50 hover:to-red-100 dark:hover:from-red-900/20 dark:hover:to-red-800/20
+                                        disabled:opacity-40 disabled:pointer-events-none
+                                        border border-neutral-200 dark:border-neutral-600 hover:border-red-300 dark:hover:border-red-600
+                                        transition-all duration-300 transform hover:scale-110 active:scale-95
+                                        shadow-sm hover:shadow-md"
                                     >
-                                      <Minus size={16} className="text-[#F48120]" />
+                                      <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                      <Minus size={18} className="relative z-10 text-red-500 group-hover:text-red-600 transition-colors duration-300" weight="bold" />
                                     </button>
 
-                                    <div className="relative flex-1">
+                                    <div className="relative flex-1 h-12 flex items-center">
+                                      <div className="absolute inset-0 bg-gradient-to-r from-neutral-100 via-neutral-50 to-neutral-100 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-600"></div>
                                       <input
                                         type="range"
                                         min="1"
@@ -1389,11 +1446,29 @@ function ChatComponent() {
                                             setTimeout(() => setIsUpdatingStepMax(false), 150);
                                           }
                                         }}
-                                        className="w-full h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-[#F48120] [&::-webkit-slider-thumb]:to-purple-500 [&::-webkit-slider-thumb]:border-0 [&::-webkit-slider-thumb]:shadow-sm"
+                                        className="relative z-10 w-full h-full bg-transparent appearance-none cursor-pointer
+                                          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:w-6 
+                                          [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-br 
+                                          [&::-webkit-slider-thumb]:from-[#F48120] [&::-webkit-slider-thumb]:to-purple-500 
+                                          [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white 
+                                          [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
+                                          [&::-webkit-slider-thumb]:transition-all [&::-webkit-slider-thumb]:duration-300
+                                          [&::-webkit-slider-thumb]:hover:scale-125 [&::-webkit-slider-thumb]:active:scale-110"
                                       />
-                                      <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full pointer-events-none"
-                                        style={{ width: `${(stepMax / 10) * 100}%` }}
+                                      <div className="absolute top-1/2 left-2 right-2 h-2 -translate-y-1/2 bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 rounded-full shadow-inner transition-all duration-500"
+                                        style={{ 
+                                          width: `calc(${(stepMax / 10) * 100}% - 1rem)`,
+                                          marginLeft: '0.5rem'
+                                        }}
                                       ></div>
+                                      {/* Tick marks */}
+                                      <div className="absolute top-1/2 left-2 right-2 -translate-y-1/2 flex justify-between pointer-events-none">
+                                        {Array.from({ length: 10 }, (_, i) => (
+                                          <div key={i} className={`w-1 h-1 rounded-full transition-all duration-300 ${
+                                            i + 1 <= stepMax ? 'bg-white shadow-sm' : 'bg-neutral-300 dark:bg-neutral-600'
+                                          }`}></div>
+                                        ))}
+                                      </div>
                                     </div>
 
                                     <button
@@ -1405,21 +1480,28 @@ function ChatComponent() {
                                         }
                                       }}
                                       disabled={isUpdatingStepMax || stepMax >= 10}
-                                      className="w-8 h-8 flex items-center justify-center rounded-lg
-                                        bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
-                                        hover:from-[#F48120]/20 hover:to-purple-500/20
-                                        disabled:opacity-50 disabled:pointer-events-none
-                                        border border-[#F48120]/20 hover:border-[#F48120]/40
-                                        dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                                        transition-all duration-200"
+                                      className="group relative w-10 h-10 flex items-center justify-center rounded-xl overflow-hidden
+                                        bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-800 dark:to-neutral-700
+                                        hover:from-green-50 hover:to-green-100 dark:hover:from-green-900/20 dark:hover:to-green-800/20
+                                        disabled:opacity-40 disabled:pointer-events-none
+                                        border border-neutral-200 dark:border-neutral-600 hover:border-green-300 dark:hover:border-green-600
+                                        transition-all duration-300 transform hover:scale-110 active:scale-95
+                                        shadow-sm hover:shadow-md"
                                     >
-                                      <Plus size={16} className="text-[#F48120]" />
+                                      <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                      <Plus size={18} className="relative z-10 text-green-500 group-hover:text-green-600 transition-colors duration-300" weight="bold" />
                                     </button>
                                   </div>
                                   
-                                  <div className="mt-2 flex justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                                    <span>Más rápido</span>
-                                    <span>Más preciso</span>
+                                  <div className="mt-3 flex justify-between items-center text-xs">
+                                    <div className="flex items-center gap-1">
+                                      <div className="w-2 h-2 rounded-full bg-[#F48120]"></div>
+                                      <span className="text-neutral-600 dark:text-neutral-400 font-medium">Velocidad</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-neutral-600 dark:text-neutral-400 font-medium">Precisión</span>
+                                      <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -1498,140 +1580,104 @@ function ChatComponent() {
               </div>
             )}
 
-            <div className="flex p-2 max-h-[calc(100vh-1rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              <Tooltip content={systemPrompt ? "Minimizar" : "Expandir"}>
-                <Button
-                  variant="ghost"
-                  size="md"
-                  shape="square"
-                  className="mb-1 mr-1 pt-1"
-                  onClick={() => setSystemPrompt(!systemPrompt)}
+            <div className="relative p-3 lg:p-4 max-h-[calc(100vh-1rem)] bg-gradient-to-t from-white/95 via-white/90 to-transparent dark:from-neutral-900/95 dark:via-neutral-900/90 dark:to-transparent backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/50">
+              {/* Decorative top border */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div>
+              
+              <div className="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 lg:gap-4">
+                {/* Expand/Collapse Button */}
+                <div className="flex justify-center lg:justify-start">
+                  <Tooltip content={systemPrompt ? "Minimizar" : "Expandir"}>
+                    <Button
+                      variant="ghost"
+                      size="md"
+                      shape="square"
+                      className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200/50 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-[#F48120]/30 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 active:scale-95 group overflow-hidden"
+                      onClick={() => setSystemPrompt(!systemPrompt)}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#F48120]/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      {systemPrompt ? (
+                        <CaretCircleDown size={22} className="relative z-10 text-[#F48120] group-hover:text-orange-500 transition-colors duration-300" weight="duotone" />
+                      ) : (
+                        <CaretCircleDoubleUp size={22} className="relative z-10 text-[#F48120] group-hover:text-orange-500 transition-colors duration-300" weight="duotone" />
+                      )}
+                    </Button>
+                  </Tooltip>
+                </div>
+
+                {/* Input Form */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const updateConfigs = async () => {
+                      try {
+                        await fetch('/api/assistant', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText, modelTemp: selectedModel }),
+                        });
+                        handleAgentSubmit(e);
+                      } catch (error) {
+                        console.error('Error al actualizar configuraciones:', error);
+                      }
+                    };
+                    updateConfigs();
+                  }}
+                  className="flex-1 min-w-0"
                 >
-                  {systemPrompt ? (
-                    <CaretCircleDown size={20} className="text-[#F48120]" weight="duotone" />
-                  ) : (
-                    <CaretCircleDoubleUp size={20} className="text-[#F48120]" weight="duotone" />
-                  )}
-                </Button>
-              </Tooltip>
+                  <div className="relative group">
+                    {/* Glow effect */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
+                    
+                    <div className="relative flex items-center gap-3 p-3 lg:p-4 bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
+                      {/* Background pattern */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                      
+                      {/* Input field */}
+                      <div className="flex-1 relative z-10">
+                        <Input
+                          disabled={pendingToolCallConfirmation}
+                          placeholder={
+                            pendingToolCallConfirmation
+                              ? "Por favor responde a la confirmación de herramienta arriba..."
+                              : "✨ Escribe tu consulta aquí..."
+                          }
+                          className="w-full bg-transparent border-0 focus:ring-0 text-base lg:text-lg placeholder:text-neutral-400 dark:placeholder:text-neutral-500 font-medium"
+                          value={agentInput}
+                          onChange={handleAgentInputChange}
+                          onValueChange={undefined}
+                        />
+                      </div>
 
-              {/* Input Area */}
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const updateConfigs = async () => {
-                    try {
-                      // Luego actualizar el asistente
-                      await fetch('/api/assistant', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText, modelTemp: selectedModel }),
-                      });
-
-                      // Una vez que ambas actualizaciones están completas, manejar el envío
-                      handleAgentSubmit(e);
-                    } catch (error) {
-                      console.error('Error al actualizar configuraciones:', error);
-                    }
-                  };
-
-                  updateConfigs();
-                }
-                  // handleAgentSubmit(e, {
-                  //   data: {
-                  //     annotations: {
-                  //       hello: "world",
-                  //     },
-                  //   },
-                  // })
-                }
-                className="ml-9 p-2 bg-input-background absolute bottom-0 left-0 right-0 z-10 border-neutral-300 dark:border-neutral-800"
-              >
-                {/* <div className={`transition-all duration-300 ${!systemPrompt ? 'opacity-100 max-w-full' : 'opacity-0 overflow-hidden'}`}>
-              <h2 className='text-lg font-medium text-neutral-800 dark:text-neutral-200'>
-                <span className="text-[#F48120] mr-2 ml-1">💡Escribe Tu Consulta</span>
-              </h2>
-            </div> */}
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 relative">
-                    <div className="flex">
-                      {/* <p className="mt-2">
-                    <span className="text-[#F48120] mr-2 ml-1 ">Usuario</span>
-                  </p> */}
-                      {/* Action Buttons Frame */}
-                      <Input
-                        disabled={pendingToolCallConfirmation}
-                        placeholder={
-                          pendingToolCallConfirmation
-                            ? "Please respond to the tool confirmation above..."
-                            : "Empieza a escribir tu consulta..."
-                        }
-                        className="pl-4 pr-10 py-2 w-full rounded-full"
-                        value={agentInput}
-                        onChange={handleAgentInputChange}
-                        onValueChange={undefined}
-                      />
+                      {/* Send button */}
+                      <div className="relative z-10">
+                        <Button
+                          type="submit"
+                          shape="square"
+                          className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-[#F48120] to-purple-500 hover:from-orange-500 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group overflow-hidden"
+                          disabled={pendingToolCallConfirmation || !agentInput.trim()}
+                          onClick={() => {
+                            try {
+                              if (!user) {
+                                setIsLoginOpen(true);
+                                return;
+                              }
+                            } catch (error) {
+                              console.error('Error al procesar la solicitud:', error);
+                            }
+                          }}
+                        >
+                          {/* Button glow effect */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                          <PaperPlaneRight size={20} className="relative z-10 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" weight="bold" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="relative">
-                    {/* {isLoading ? (
-                    <button
-                      type="button"
-                      onClick={stop}
-                      className="inline-flex items-center justify-center p-2.5 text-red-500 hover:text-white bg-white/95 dark:bg-gray-800/95 hover:bg-gradient-to-br hover:from-red-500 hover:to-rose-600 rounded-full border-2 border-red-200/50 dark:border-red-700/30 shadow-lg shadow-red-500/10 hover:shadow-red-500/20 transition-all duration-300 transform hover:scale-105 active:scale-95"
-                      aria-label="Detener generación"
-                    >
-                      <Stop size={18} weight="bold" />
-                    </button>
-                  ) : ( */}
-                    <Button
-                      type="submit"
-                      shape="square"
-                      className="inline-flex items-center justify-center p-2.5 text-[#F48120] hover:text-white bg-white/95 dark:bg-gray-800/95 hover:bg-gradient-to-br hover:from-[#F48120] hover:to-purple-500 rounded-full border-2 border-[#F48120]/20 dark:border-[#F48120]/10 shadow-lg shadow-[#F48120]/10 hover:shadow-[#F48120]/20 transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white/95 dark:disabled:hover:bg-gray-800/95 disabled:hover:text-[#F48120] disabled:hover:scale-100"
-                      disabled={pendingToolCallConfirmation || !agentInput.trim()}
-                      onClick={() => {
-                        try {
-                          if (!user) {
-                            setIsLoginOpen(true);
-                            return;
-                          }
-
-                          // Actualizar el prompt del sistema y el modelo
-                          // await Promise.all([
-                          // updateSystemPrompt(inputText),
-                          // fetch('/api/model', {
-                          //   method: 'POST',
-                          //   headers: {
-                          //     'Content-Type': 'application/json',
-                          //   },
-                          //   body: JSON.stringify({ modelTemp: selectedModel }),
-                          // }),
-                          // fetch('/api/assistant', {
-                          //   method: 'POST',
-                          //   headers: {
-                          //     'Content-Type': 'application/json',
-                          //   },
-                          //   body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText }),
-                          // })
-                          // ]);
-
-                          // Proceder con el envío del mensaje
-                          // e.preventDefault();
-                          // handleAgentSubmit(e);
-                        } catch (error) {
-                          console.error('Error al procesar la solicitud:', error);
-                        }
-                      }}
-                    >
-                      <PaperPlaneRight size={18} weight="bold" />
-                    </Button>
-                    {/* )} */}
-                  </div>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
         </main>
