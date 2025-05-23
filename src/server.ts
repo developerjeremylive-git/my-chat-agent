@@ -74,6 +74,10 @@ async function getSelectedModel(env: Env): Promise<string> {
 async function setSelectedModel(env: Env, model: string): Promise<void> {
   try {
     await env.MODEL_CONFIG.put('selectedModel', model);
+    selectedModel = model;
+    if (model.startsWith('gemini')) {
+      geminiModel = model;
+    }
   } catch (error) {
     console.error('Error setting selected model in KV:', error);
     throw error;
@@ -170,22 +174,22 @@ app.get('/api/system-prompt', async (c) => {
 app.post('/api/model', async (c) => {
   try {
     const { modelTemp } = await c.req.json();
-    
+
     if (!modelTemp) {
       return c.json({ error: 'Model name is required' }, 400);
     }
 
     // Update the selected model in KV store
     await setSelectedModel(c.env, modelTemp);
-    
+
     // Update in-memory cache
     selectedModel = modelTemp;
-    
+
     // If it's a Gemini model, also update the Gemini-specific model
     if (modelTemp.startsWith('gemini')) {
       geminiModel = modelTemp;
     }
-    
+
     // Return success response
     return c.json({ success: true, model: modelTemp });
   } catch (error) {
@@ -1281,6 +1285,9 @@ export class Chat extends AIChatAgent<Env> {
     options?: { abortSignal?: AbortSignal }
   ) {
     try {
+      // Obtener el modelo actual desde KV
+      const currentModel = await getSelectedModel(this.env);
+
       // Verificar que existe un chat activo
       if (!this.currentChatId) {
         // Si no hay chat activo, usar el chat por defecto
@@ -1291,7 +1298,7 @@ export class Chat extends AIChatAgent<Env> {
       const allTools = { ...tools };
 
       // Manejar la generación de respuesta según el modelo seleccionado
-      if (selectedModel === "gemini-2.0-flash") {
+      if (currentModel === "gemini-2.0-flash") {
         return await this.handleGeminiResponse(onFinish);
       } else {
         // return await this.handleDefaultModelResponse(allTools, onFinish);
@@ -1437,7 +1444,7 @@ export class Chat extends AIChatAgent<Env> {
     // let response;
     // let currentCounter = 0;
     // let success = false;
-   
+
     // try {
     //   const messageParts = this.messages.map(msg => ({ text: msg.content || '' }));
     //   response = await ai.models.generateContent({
@@ -1555,7 +1562,7 @@ export class Chat extends AIChatAgent<Env> {
       execute: async (dataStream) => {
         let lastError = null;
         let currentStep = 0;
-    
+
         while (currentStep < maxSteps) {
           try {
             const response = await ai.models.generateContent({
@@ -1569,11 +1576,11 @@ export class Chat extends AIChatAgent<Env> {
                 }
               ],
             });
-    
+
             if (!response || !response.text) {
               throw new Error('No se pudo generar contenido en el paso ' + (currentStep + 1));
             }
-    
+
             // Crear mensaje de respuesta
             const messageResponse = {
               id: generateId(),
@@ -1581,14 +1588,14 @@ export class Chat extends AIChatAgent<Env> {
               content: response.text,
               createdAt: new Date(),
             };
-    
+
             // Asegurarnos de que tenemos un chat activo
             if (!this.currentChatId) {
               const defaultChat = await this.initializeDefaultChat();
               this.currentChatId = defaultChat.id;
               console.log('Chat ID establecido a:', this.currentChatId);
             }
-        
+
             // Actualizar los mensajes en memoria asegurando IDs únicos
             this._messages = [...this.messages, messageResponse].map(msg => ({
               ...msg,
@@ -1597,24 +1604,24 @@ export class Chat extends AIChatAgent<Env> {
               content: msg.content || '',
               createdAt: msg.createdAt || new Date(),
             })) as ChatMessage[];
-        
+
             // Guardar en la base de datos usando transacción
             try {
               // Guardar en la base de datos usando transacción
               await this.storage.transaction(async (txn) => {
                 await this.saveMessagesD1(this._messages);
               });
-        
+
             } catch (error) {
               console.error('Error al guardar mensajes:', error);
             }
-        
+
             // Enviar la respuesta al stream para actualizar la UI
             dataStream.write(formatDataStreamPart('text', `### Respuesta ${currentStep + 1} de ${maxSteps}
 
 > ${response.text}
 `));
-    
+
             currentStep++;
           } catch (error) {
             console.error(`Error en el paso ${currentStep + 1}:`, error);
