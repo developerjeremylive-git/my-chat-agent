@@ -5,6 +5,7 @@ import { X, ArrowsOut, PaperPlaneRight, ArrowsIn } from "@phosphor-icons/react";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 type ModalProps = {
@@ -97,16 +98,16 @@ export const Modal = ({
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
+  const modalContent = (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div 
-        className="fade fixed inset-0 bg-black"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-[min(95vw,1400px)] mx-auto">
+      <div className="relative w-full max-w-[min(95vw,800px)] mx-auto my-8">
         <Card
-          className={cn("reveal reveal-sm relative z-50 w-full max-h-[min(90vh,900px)] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl dark:bg-gray-900", className)}
+          className={cn("reveal reveal-sm relative z-50 w-full max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:bg-gray-900 transform transition-all duration-300", className)}
           ref={modalRef}
           tabIndex={-1}
         >
@@ -171,4 +172,7 @@ export const Modal = ({
       </div>
     </div>
   );
+
+  // Use createPortal to render the modal outside the component hierarchy
+  return createPortal(modalContent, document.body);
 };
