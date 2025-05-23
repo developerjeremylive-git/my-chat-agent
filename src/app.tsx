@@ -52,7 +52,8 @@ import {
   PaintBrushBroad,
   Minus,
   Plus,
-  GearSix
+  GearSix,
+  DotsThreeVertical
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -359,6 +360,34 @@ function ChatComponent() {
 
   const [chatWidth, setChatWidth] = useState<'narrow' | 'default' | 'full'>('default');
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Cerrar menú al hacer clic fuera de él
+  useEffect(() => {
+    const handleClickAnywhere = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const menu = menuRef.current;
+      const button = menuButtonRef.current;
+      
+      // Verificar si el clic fue fuera del menú y del botón
+      if (menu && button && !menu.contains(target) && !button.contains(target)) {
+        // console.log('Clic fuera del menú, cerrando...');
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      // console.log('Añadiendo event listener para cerrar menú');
+      document.addEventListener('mousedown', handleClickAnywhere);
+    }
+
+    return () => {
+      // console.log('Limpiando event listener de cierre de menú');
+      document.removeEventListener('mousedown', handleClickAnywhere);
+    };
+  }, [showMenu]);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
   const settingsMenuRef = useRef<HTMLDivElement>(null);
   const assistantControlsRef = useRef<HTMLDivElement>(null);
@@ -447,45 +476,70 @@ function ChatComponent() {
               </div>
             </Button>
 
-            <Button
-              ref={settingsButtonRef}
-              variant="ghost"
-              size="sm"
-              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+            {/* Dropdown Menu */}
+            <div className="relative">
+              <Button
+                ref={menuButtonRef}
+                variant="ghost"
+                size="sm"
+                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
                          dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
                          border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                          transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
                          flex items-center justify-center"
-              onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-            >
-              <PaintBrushBroad size={20} className="text-[#F48120]" weight="duotone" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="md"
-              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                flex items-center justify-center"
-              onClick={() => setShowOIAICreator(true)}
-            >
-              <PlusCircle className="text-[#F48120]" size={29} weight="duotone" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                flex items-center justify-center"
-              onClick={() => setShowClearDialog(true)}
-            >
-              <Trash className="text-[#F48120]" size={20} weight="duotone" />
-            </Button>
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // console.log('Botón de menú clickeado');
+                  setShowMenu(prev => !prev);
+                }}
+              >
+                <DotsThreeVertical size={20} className="text-[#F48120]" weight="duotone" />
+              </Button>
+              
+              {showMenu && (
+                <div 
+                  ref={menuRef}
+                  className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-auto sm:mt-2 w-[calc(100%-1rem)] sm:w-56 max-w-sm origin-top-right rounded-xl bg-white dark:bg-neutral-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden
+                            border border-[#F48120]/20 dark:border-[#F48120]/10 transition-all duration-100 ease-in-out transform"
+                     style={{
+                       maxHeight: 'calc(100vh - 5rem)',
+                       overflowY: 'auto'
+                     }}>
+                  <div className="py-1" role="none">
+                    <button
+                      className="w-full text-left px-4 py-3 sm:py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
+                      onClick={() => {
+                        setShowSettingsMenu(true);
+                        setShowMenu(false);
+                      }}
+                    >
+                      <PaintBrushBroad size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
+                      <span className="truncate">Apariencia</span>
+                    </button>
+                    <button
+                      className="w-full text-left px-4 py-3 sm:py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
+                      onClick={() => {
+                        setShowOIAICreator(true);
+                        setShowMenu(false);
+                      }}
+                    >
+                      <PlusCircle size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
+                      <span className="truncate">Nueva Consulta del Sistema</span>
+                    </button>
+                    <button
+                      className="w-full text-left px-4 py-3 sm:py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
+                      onClick={() => {
+                        setShowClearDialog(true);
+                        setShowMenu(false);
+                      }}
+                    >
+                      <Trash size={16} className="text-red-500 flex-shrink-0" weight="duotone" />
+                      <span className="truncate">Limpiar Chat</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             <Button
               variant="ghost"
