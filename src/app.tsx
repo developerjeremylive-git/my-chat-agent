@@ -322,7 +322,10 @@ function ChatComponent() {
   const agent = useAgent({
     agent: "chat",
   }) as AgentInstance;
-  console.log('Configuración:', config);
+  
+  // useEffect(() => {
+  //   console.log('Configuración:', config);
+  // }, [config]);
 
   const {
     messages: agentMessages,

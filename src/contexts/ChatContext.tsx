@@ -39,7 +39,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       const ws = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/api/ws`);
 
       ws.onopen = () => {
-        console.log('WebSocket connected');
+        // console.log('WebSocket connected');
         if (currentChat) {
           ws.send(JSON.stringify({
             type: 'subscribe',
