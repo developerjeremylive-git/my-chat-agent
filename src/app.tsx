@@ -51,7 +51,8 @@ import {
   ChatCenteredDots,
   PaintBrushBroad,
   Minus,
-  Plus
+  Plus,
+  GearSix
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -843,6 +844,37 @@ function ChatComponent() {
             </div>
           </div>
           <div className={`h-[calc(100vh-2rem)] w-full ${getMainWidth()} mx-auto flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800 transition-all duration-300`}>
+            {/* Header with buttons */}
+            <div className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-2 flex items-center justify-between sticky top-0 z-40">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors md:hidden"
+                  aria-label="Abrir menú"
+                >
+                  <List size={20} className="text-neutral-700 dark:text-neutral-300" />
+                </button>
+                <h1 className="text-lg font-semibold text-neutral-800 dark:text-white">Asistente IA</h1>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+                  className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors relative"
+                  aria-label="Configuración"
+                >
+                  <GearSix size={20} className="text-neutral-700 dark:text-neutral-300" />
+                </button>
+                
+                <button
+                  onClick={() => setShowAgent(!showAgent)}
+                  className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                  aria-label="Herramientas de agente"
+                >
+                  <Robot size={20} className="text-neutral-700 dark:text-neutral-300" />
+                </button>
+              </div>
+            </div>
             {/* <ChatHeader
             onOpenSidebar={() => {
               setIsSidebarOpen(true);
@@ -887,7 +919,7 @@ function ChatComponent() {
               </div>
             )}
 
-            <div className="flex-1 overflow-y-auto p-2 space-y-2 pb-16 max-h-[calc(100vh-1rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24 max-h-[calc(100vh-1rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {agentMessages.length === 0 && (
                 <div className="h-full flex items-center justify-center">
                   <Modal
@@ -984,13 +1016,13 @@ function ChatComponent() {
                                   // biome-ignore lint/suspicious/noArrayIndexKey: it's fine here
                                   <div key={i}>
                                     <Card
-                                      className={`p-3 rounded-md bg-neutral-100 dark:bg-neutral-900 ${isUser
-                                        ? "rounded-br-none"
-                                        : "rounded-bl-none border-assistant-border"
+                                      className={`p-4 rounded-2xl ${isUser
+                                        ? 'bg-[#F48120]/10 dark:bg-[#F48120]/10 rounded-br-none ml-8'
+                                        : 'bg-neutral-100 dark:bg-neutral-900/80 backdrop-blur-sm rounded-bl-none mr-8 border border-neutral-200 dark:border-neutral-700'
                                         } ${part.text.startsWith("scheduled message")
                                           ? "border-accent/50"
                                           : ""
-                                        } relative ${textSize === 'small' ? 'text-sm' : textSize === 'large' ? 'text-lg' : 'text-base'}`}
+                                        } relative ${textSize === 'small' ? 'text-sm' : textSize === 'large' ? 'text-lg' : 'text-base'} shadow-sm break-words transition-all duration-200`}
                                     >
                                       {part.text.startsWith(
                                         "scheduled message"
