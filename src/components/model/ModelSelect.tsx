@@ -3,7 +3,7 @@ import { Card } from '@/components/card/Card';
 import { cn } from '@/lib/utils';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { CaretDown, Brain, Robot, Code, Cloud, Copy, Check, Chats, Calculator, Lightning, Lightbulb } from '@phosphor-icons/react';
+import { CaretDown, Brain, Robot, Code, Cloud, Copy, Check, Chats, Calculator } from '@phosphor-icons/react';
 import { useModel } from '@/contexts/ModelContext';
 
 interface Model {
@@ -256,250 +256,317 @@ export function ModelSelect({ className }: ModelSelectProps) {
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
           <DropdownMenu.Content
-            className="w-[95vw] md:min-w-[600px] max-h-[80vh] overflow-y-auto bg-white/30 dark:bg-neutral-900/30 rounded-2xl p-3 md:p-4 shadow-2xl border border-white/20 dark:border-neutral-700/30 z-50 backdrop-blur-2xl mx-auto md:ml-4 scrollbar-thin scrollbar-thumb-[#F48120] scrollbar-track-transparent hover:scrollbar-thumb-[#F48120]/80 md:min-w-[800px] animate-fade-in-up mt-3 md:mt-2"
-            sideOffset={10}
-            align="center"
-            side="bottom"
+            className="min-w-[600px] max-h-[85vh] overflow-y-auto bg-white/95 dark:bg-neutral-900/95 rounded-xl p-2 shadow-xl border border-neutral-200 dark:border-neutral-700/50 z-50 backdrop-blur-xl ml-4 scrollbar-thin scrollbar-thumb-[#F48120] scrollbar-track-transparent hover:scrollbar-thumb-[#F48120]/80 md:min-w-[800px]"
+            sideOffset={5}
           >
-            {/* Gemini Models */}
-            <div className="mb-4 md:mb-6 px-2 md:px-3 py-2 bg-gradient-to-r from-purple-500/10 to-purple-600/5 rounded-xl border border-purple-500/20 dark:border-purple-400/20">
-              <h3 className="text-base md:text-lg font-semibold text-purple-500 dark:text-purple-400 mb-1 md:mb-2 flex items-center gap-2">
-                <Robot className="w-5 h-5 md:w-6 md:h-6" weight="duotone" />
-                Modelos Gemini
-              </h3>
-              <p className="text-xs md:text-sm text-neutral-600 dark:text-neutral-400">Modelos eficientes y optimizados para rendimiento</p>
+            {/* geminiModels   */}
+            <div className="mt-4 mb-2 px-3 py-2">
+              <h3 className="text-sm font-semibold text-purple-500 dark:text-purple-400 mb-1">Modelos Gemini</h3>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Modelos eficientes y optimizados para rendimiento</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 px-1 md:px-2 mb-4 md:mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 px-2">
               {geminiModels.map((model) => (
                 <DropdownMenu.Item
                   key={model.name}
                   className={cn(
-                    'group flex flex-col gap-2 p-3 md:p-4 rounded-xl cursor-pointer outline-none transition-all duration-300',
-                    'bg-gradient-to-br from-white/40 to-white/20 dark:from-neutral-800/40 dark:to-neutral-900/20',
-                    'hover:from-white/50 hover:to-white/30 dark:hover:from-neutral-800/50 dark:hover:to-neutral-900/30',
-                    'border border-white/20 dark:border-neutral-700/30 backdrop-blur-xl',
-                    'hover:scale-[0.98] hover:shadow-lg dark:hover:shadow-[#F48120]/5',
-                    selectedModel.name === model.name && 'ring-2 ring-purple-500/50 dark:ring-purple-400/50 shadow-lg'
+                    'flex flex-col gap-1 px-3 py-2.5 rounded-lg cursor-pointer outline-none',
+                    'hover:bg-neutral-50 dark:hover:bg-neutral-800',
+                    'focus:bg-neutral-50 dark:focus:bg-neutral-800',
+                    'transition-all duration-200 hover:scale-[0.99]',
+                    selectedModel.name === model.name && 'bg-neutral-100/80 dark:bg-neutral-800 shadow-sm dark:shadow-neutral-950'
                   )}
                   onClick={async () => {
                     try {
                       setSelectedModel(model);
                       setContextModel(model.name);
+                      // onModelChange(model.name);
                     } catch (error) {
                       console.error('Error al actualizar el modelo:', error);
                     }
                   }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 md:gap-3">
-                      <div className="p-1.5 md:p-2 rounded-lg bg-green-500/10 dark:bg-green-500/20">
-                        <Robot className="w-4 h-4 md:w-6 md:h-6 text-green-500" weight="duotone" />
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <div className="flex items-center gap-2">
+                        {model.provider === 'Google' && <Robot className="w-5 h-5 text-green-500" weight="duotone" />}
+                        <div className="flex flex-col">
+                          <span className="text-xs text-neutral-600 dark:text-neutral-400">{model.provider}</span>
+                          <span className="text-sm font-medium dark:text-white">{model.name}</span>
+                        </div>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs md:text-sm text-neutral-600 dark:text-neutral-400">{model.provider}</span>
-                        <span className="text-sm md:text-base font-medium dark:text-white">{model.name}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCopy(model.name);
-                        }}
-                        className="p-1.5 md:p-2 rounded-lg bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-700/50 transition-colors"
+                    </Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        className="bg-neutral-900/95 text-white px-4 py-3 rounded-xl text-sm max-w-xs z-50 border border-neutral-700/50 shadow-2xl backdrop-blur-xl dark:shadow-[#F48120]/5"
+                        sideOffset={5}
                       >
-                        {copied ? 
-                          <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-500" weight="bold" /> :
-                          <Copy className="w-3.5 h-3.5 md:w-4 md:h-4 text-neutral-500" weight="regular" />
-                        }
-                      </button>
-                    </div>
-                  </div>
-                  <div className="space-y-2 md:space-y-3 mt-2">
-                    <p className="text-xs md:text-sm text-neutral-600 dark:text-neutral-300 line-clamp-2">{model.description}</p>
-                    <div className="grid grid-cols-2 gap-2 text-[10px] md:text-xs">
-                      <div className="p-1.5 md:p-2 rounded-lg bg-neutral-100/50 dark:bg-neutral-800/50">
-                        <span className="text-neutral-500 dark:text-neutral-400">Parámetros</span>
-                        <p className="font-medium text-neutral-700 dark:text-neutral-200">{model.params}B</p>
-                      </div>
-                      <div className="p-1.5 md:p-2 rounded-lg bg-neutral-100/50 dark:bg-neutral-800/50">
-                        <span className="text-neutral-500 dark:text-neutral-400">Contexto</span>
-                        <p className="font-medium text-neutral-700 dark:text-neutral-200">{model.context}</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-1 md:gap-1.5">
-                      {model.features?.map((feature) => (
-                        <span
-                          key={feature}
-                          className="text-[8px] md:text-[10px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">{model.name}</span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopy(model.name);
+                                }}
+                                className="p-1 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-1.5"
+                              >
+                                {copied ?
+                                  <Check className="w-3.5 h-3.5 text-green-500" weight="bold" /> :
+                                  <Copy className="w-3.5 h-3.5 text-neutral-400" weight="regular" />
+                                }
+                                <span className="text-neutral-400 text-[10px]">Copiar ID</span>
+                              </button>
+                            </div>
+                          </div>
+                          <div className="pt-2 border-t border-neutral-800">
+                            <p className="text-sm text-neutral-300">{model.description}</p>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">Parámetros</span>
+                            <span className="text-neutral-200">{model.params}B</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">Contexto</span>
+                            <span className="text-neutral-200">{model.context}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">LIMITS</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-neutral-200">30 / minute</span>
+                              <span className="text-neutral-500">•</span>
+                              <span className="text-neutral-200">1k / day</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">RELEASED</span>
+                            <span className="text-neutral-200">March 5, 2025</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {model.features?.map((feature) => (
+                              <span
+                                key={feature}
+                                className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
                 </DropdownMenu.Item>
               ))}
             </div>
-            
-            {/* Reasoning Models */}
-            <div className="mb-4 md:mb-6 px-2 md:px-3 py-2 bg-gradient-to-r from-[#F48120]/10 to-orange-600/5 rounded-xl border border-[#F48120]/20">
-              <h3 className="text-base md:text-lg font-semibold text-[#F48120] mb-1 md:mb-2 flex items-center gap-2">
-                <Brain className="w-5 h-5 md:w-6 md:h-6" weight="duotone" />
-                Modelos de Razonamiento Avanzado
-              </h3>
-              <p className="text-xs md:text-sm text-neutral-600 dark:text-neutral-400">Modelos optimizados para tareas complejas y razonamiento avanzado</p>
+            <div className="mt-4 mb-2 px-3 py-2  border-t border-neutral-200 dark:border-neutral-800">
+              <h3 className="text-sm font-semibold text-[#F48120] dark:text-[#F48120] mb-1">Modelos de Razonamiento Avanzado</h3>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Modelos optimizados para tareas complejas y razonamiento avanzado</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 px-1 md:px-2 mb-4 md:mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 px-2">
               {reasoningModels.map((model) => (
                 <DropdownMenu.Item
                   key={model.name}
                   className={cn(
-                    'group flex flex-col gap-2 p-3 md:p-4 rounded-xl cursor-pointer outline-none transition-all duration-300',
-                    'bg-gradient-to-br from-white/40 to-white/20 dark:from-neutral-800/40 dark:to-neutral-900/20',
-                    'hover:from-white/50 hover:to-white/30 dark:hover:from-neutral-800/50 dark:hover:to-neutral-900/30',
-                    'border border-white/20 dark:border-neutral-700/30 backdrop-blur-xl',
-                    'hover:scale-[0.98] hover:shadow-lg dark:hover:shadow-[#F48120]/5',
-                    selectedModel.name === model.name && 'ring-2 ring-[#F48120]/50 shadow-lg'
+                    'flex flex-col gap-1 px-3 py-2.5 rounded-lg cursor-pointer outline-none',
+                    'hover:bg-neutral-50 dark:hover:bg-neutral-800',
+                    'focus:bg-neutral-50 dark:focus:bg-neutral-800',
+                    'transition-all duration-200 hover:scale-[0.99]',
+                    selectedModel.name === model.name && 'bg-neutral-100/80 dark:bg-neutral-800 shadow-sm dark:shadow-neutral-950'
                   )}
                   onClick={async () => {
                     try {
                       setSelectedModel(model);
                       setContextModel(model.name);
+                      // onModelChange(model.name);
                     } catch (error) {
                       console.error('Error al actualizar el modelo:', error);
                     }
                   }}
                 >
-.                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 md:gap-3">
-                      <div className="p-1.5 md:p-2 rounded-lg bg-[#F48120]/10 dark:bg-[#F48120]/20">
-                        <Brain className="w-4 h-4 md:w-6 md:h-6 text-[#F48120]" weight="duotone" />
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <div className="flex items-center gap-2">
+                        {model.provider === 'DeepSeek / Meta' && <Brain className="w-5 h-5 text-blue-500" weight="duotone" />}
+                        {model.provider === 'Meta' && <Robot className="w-5 h-5 text-purple-500" weight="duotone" />}
+                        {model.provider === 'Google' && <Robot className="w-5 h-5 text-green-500" weight="duotone" />}
+                        {model.provider === 'Alibaba Cloud' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
+                        {model.provider === 'Mistral AI' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
+                        {model.provider === 'Qwen' && <Chats className="w-5 h-5 text-red-500" weight="duotone" />}
+                        {model.provider === 'FBL' && <Calculator className="w-5 h-5 text-blue-500" weight="duotone" />}
+                        <div className="flex flex-col">
+                          <span className="text-xs text-neutral-600 dark:text-neutral-400">{model.provider}</span>
+                          <span className="text-sm font-medium dark:text-white">{model.name}</span>
+                        </div>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs md:text-sm text-neutral-600 dark:text-neutral-400">{model.provider}</span>
-                        <span className="text-sm md:text-base font-medium dark:text-white">{model.name}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCopy(model.name);
-                        }}
-                        className="p-1.5 md:p-2 rounded-lg bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-700/50 transition-colors"
+                    </Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        className="bg-neutral-900/95 text-white px-4 py-3 rounded-xl text-sm max-w-xs z-50 border border-neutral-700/50 shadow-2xl backdrop-blur-xl dark:shadow-[#F48120]/5"
+                        sideOffset={5}
                       >
-                        {copied ? 
-                          <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-500" weight="bold" /> :
-                          <Copy className="w-3.5 h-3.5 md:w-4 md:h-4 text-neutral-500" weight="regular" />
-                        }
-                      </button>
-                    </div>
-                  </div>
-                  <div className="space-y-2 md:space-y-3 mt-2">
-                    <p className="text-xs md:text-sm text-neutral-600 dark:text-neutral-300 line-clamp-2">{model.description}</p>
-                    <div className="grid grid-cols-2 gap-2 text-[10px] md:text-xs">
-                      <div className="p-1.5 md:p-2 rounded-lg bg-neutral-100/50 dark:bg-neutral-800/50">
-                        <span className="text-neutral-500 dark:text-neutral-400">Parámetros</span>
-                        <p className="font-medium text-neutral-700 dark:text-neutral-200">{model.params}B</p>
-                      </div>
-                      <div className="p-1.5 md:p-2 rounded-lg bg-neutral-100/50 dark:bg-neutral-800/50">
-                        <span className="text-neutral-500 dark:text-neutral-400">Contexto</span>
-                        <p className="font-medium text-neutral-700 dark:text-neutral-200">{model.context}</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-1 md:gap-1.5">
-                      {model.features?.map((feature) => (
-                        <span
-                          key={feature}
-                          className="text-[8px] md:text-[10px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full bg-[#F48120]/10 text-[#F48120] border border-[#F48120]/20"
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">{model.name}</span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopy(model.name);
+                                }}
+                                className="p-1 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-1.5"
+                              >
+                                {copied ?
+                                  <Check className="w-3.5 h-3.5 text-green-500" weight="bold" /> :
+                                  <Copy className="w-3.5 h-3.5 text-neutral-400" weight="regular" />
+                                }
+                                <span className="text-neutral-400 text-[10px]">Copiar ID</span>
+                              </button>
+                            </div>
+                          </div>
+                          <div className="pt-2 border-t border-neutral-800">
+                            <p className="text-sm text-neutral-300">{model.description}</p>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">Parámetros</span>
+                            <span className="text-neutral-200">{model.params}B</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">Contexto</span>
+                            <span className="text-neutral-200">{model.context}</span>
+                          </div>
+
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">LIMITS</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-neutral-200">30 / minute</span>
+                              <span className="text-neutral-500">•</span>
+                              <span className="text-neutral-200">1k / day</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">RELEASED</span>
+                            <span className="text-neutral-200">March 5, 2025</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {model.features?.map((feature) => (
+                              <span
+                                key={feature}
+                                className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
                 </DropdownMenu.Item>
               ))}
             </div>
-
-            {/* Distilled Models */}
-            <div className="mb-4 md:mb-6 px-2 md:px-3 py-2 bg-gradient-to-r from-blue-500/10 to-blue-600/5 rounded-xl border border-blue-500/20">
-              <h3 className="text-base md:text-lg font-semibold text-blue-500 mb-1 md:mb-2 flex items-center gap-2">
-                <Lightbulb className="w-5 h-5 md:w-6 md:h-6" weight="duotone" />
-                Modelos Destilados
-              </h3>
-              <p className="text-xs md:text-sm text-neutral-600 dark:text-neutral-400">Modelos compactos y eficientes para tareas específicas</p>
+            <div className="mt-4 mb-2 px-3 py-2 border-t border-neutral-200 dark:border-neutral-800">
+              <h3 className="text-sm font-semibold text-purple-500 dark:text-purple-400 mb-1">Modelos Destilados y Optimizados</h3>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Modelos eficientes y optimizados para rendimiento</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 px-1 md:px-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 px-2">
               {distilledModels.map((model) => (
                 <DropdownMenu.Item
                   key={model.name}
                   className={cn(
-                    'group flex flex-col gap-2 p-3 md:p-4 rounded-xl cursor-pointer outline-none transition-all duration-300',
-                    'bg-gradient-to-br from-white/40 to-white/20 dark:from-neutral-800/40 dark:to-neutral-900/20',
-                    'hover:from-white/50 hover:to-white/30 dark:hover:from-neutral-800/50 dark:hover:to-neutral-900/30',
-                    'border border-white/20 dark:border-neutral-700/30 backdrop-blur-xl',
-                    'hover:scale-[0.98] hover:shadow-lg dark:hover:shadow-blue-500/5',
-                    selectedModel.name === model.name && 'ring-2 ring-blue-500/50 shadow-lg'
+                    'flex flex-col gap-1 px-3 py-2.5 rounded-lg cursor-pointer outline-none',
+                    'hover:bg-neutral-50 dark:hover:bg-neutral-800',
+                    'focus:bg-neutral-50 dark:focus:bg-neutral-800',
+                    'transition-all duration-200 hover:scale-[0.99]',
+                    selectedModel.name === model.name && 'bg-neutral-100/80 dark:bg-neutral-800 shadow-sm dark:shadow-neutral-950'
                   )}
                   onClick={async () => {
                     try {
                       setSelectedModel(model);
                       setContextModel(model.name);
+                      // onModelChange(model.name);
                     } catch (error) {
                       console.error('Error al actualizar el modelo:', error);
                     }
                   }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 md:gap-3">
-                      <div className="p-1.5 md:p-2 rounded-lg bg-blue-500/10 dark:bg-blue-500/20">
-                        <Lightbulb className="w-4 h-4 md:w-6 md:h-6 text-blue-500" weight="duotone" />
+                  <Tooltip.Root>
+                    <Tooltip.Trigger asChild>
+                      <div className="flex items-center gap-2">
+                        {model.provider === 'DeepSeek / Meta' && <Brain className="w-5 h-5 text-blue-500" weight="duotone" />}
+                        {model.provider === 'Meta' && <Robot className="w-5 h-5 text-purple-500" weight="duotone" />}
+                        {model.provider === 'Google' && <Robot className="w-5 h-5 text-green-500" weight="duotone" />}
+                        {model.provider === 'Alibaba Cloud' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
+                        {model.provider === 'Mistral AI' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
+                        {model.provider === 'Qwen' && <Chats className="w-5 h-5 text-red-500" weight="duotone" />}
+                        {model.provider === 'FBL' && <Calculator className="w-5 h-5 text-blue-500" weight="duotone" />}
+                        <div className="flex flex-col">
+                          <span className="text-xs text-neutral-600 dark:text-neutral-400">{model.provider}</span>
+                          <span className="text-sm font-medium dark:text-white">{model.name}</span>
+                        </div>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs md:text-sm text-neutral-600 dark:text-neutral-400">{model.provider}</span>
-                        <span className="text-sm md:text-base font-medium dark:text-white">{model.name}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCopy(model.name);
-                        }}
-                        className="p-1.5 md:p-2 rounded-lg bg-neutral-100/50 dark:bg-neutral-800/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-700/50 transition-colors"
+                    </Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        className="bg-neutral-900/95 text-white px-4 py-3 rounded-xl text-sm max-w-xs z-50 border border-neutral-700/50 shadow-2xl backdrop-blur-xl dark:shadow-[#F48120]/5"
+                        sideOffset={5}
                       >
-                        {copied ? 
-                          <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-500" weight="bold" /> :
-                          <Copy className="w-3.5 h-3.5 md:w-4 md:h-4 text-neutral-500" weight="regular" />
-                        }
-                      </button>
-                    </div>
-                  </div>
-                  <div className="space-y-2 md:space-y-3 mt-2">
-                    <p className="text-xs md:text-sm text-neutral-600 dark:text-neutral-300 line-clamp-2">{model.description}</p>
-                    <div className="grid grid-cols-2 gap-2 text-[10px] md:text-xs">
-                      <div className="p-1.5 md:p-2 rounded-lg bg-neutral-100/50 dark:bg-neutral-800/50">
-                        <span className="text-neutral-500 dark:text-neutral-400">Parámetros</span>
-                        <p className="font-medium text-neutral-700 dark:text-neutral-200">{model.params}B</p>
-                      </div>
-                      <div className="p-1.5 md:p-2 rounded-lg bg-neutral-100/50 dark:bg-neutral-800/50">
-                        <span className="text-neutral-500 dark:text-neutral-400">Contexto</span>
-                        <p className="font-medium text-neutral-700 dark:text-neutral-200">{model.context}</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-1 md:gap-1.5">
-                      {model.features?.map((feature) => (
-                        <span
-                          key={feature}
-                          className="text-[8px] md:text-[10px] px-1.5 md:px-2 py-0.5 md:py-1 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20"
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">{model.name}</span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopy(model.name);
+                                }}
+                                className="p-1 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-1.5"
+                              >
+                                {copied ?
+                                  <Check className="w-3.5 h-3.5 text-green-500" weight="bold" /> :
+                                  <Copy className="w-3.5 h-3.5 text-neutral-400" weight="regular" />
+                                }
+                                <span className="text-neutral-400 text-[10px]">Copiar ID</span>
+                              </button>
+                            </div>
+                          </div>
+                          <div className="pt-2 border-t border-neutral-800">
+                            <p className="text-sm text-neutral-300">{model.description}</p>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">Parámetros</span>
+                            <span className="text-neutral-200">{model.params}B</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">Contexto</span>
+                            <span className="text-neutral-200">{model.context}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">LIMITS</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-neutral-200">30 / minute</span>
+                              <span className="text-neutral-500">•</span>
+                              <span className="text-neutral-200">1k / day</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-400">RELEASED</span>
+                            <span className="text-neutral-200">March 5, 2025</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {model.features?.map((feature) => (
+                              <span
+                                key={feature}
+                                className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 border border-neutral-700"
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip.Root>
                 </DropdownMenu.Item>
               ))}
             </div>

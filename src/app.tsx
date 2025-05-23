@@ -1215,9 +1215,11 @@ function ChatComponent() {
                 <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full">
                   {/* Model Selection Section */}
                   <div className="flex-1 min-w-0">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-                    <div className="relative bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 transition-all duration-300">
-                      <ModelSelect />
+                    <div className="relative group">
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                      <div className="relative bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 transition-all duration-300">
+                        <ModelSelect />
+                      </div>
                     </div>
                   </div>
 
@@ -1228,7 +1230,7 @@ function ChatComponent() {
                         <div className="relative">
                           {/* Glow effect */}
                           <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/30 to-purple-500/30 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-
+                          
                           <button
                             ref={assistantButtonRef}
                             onClick={() => setShowAssistantControls(!showAssistantControls)}
@@ -1247,12 +1249,12 @@ function ChatComponent() {
                           >
                             {/* Background pattern */}
                             <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
+                            
                             {/* Mobile icon */}
                             <span className="lg:hidden text-xl relative z-10">
                               {stepMax == 1 ? '🎯' : stepMax <= 3 ? '🧠' : stepMax <= 7 ? '🚀' : '🤖'}
                             </span>
-
+                            
                             {/* Desktop content */}
                             <div className="hidden lg:flex items-center gap-3 relative z-10">
                               <span className="text-xl">
@@ -1262,11 +1264,11 @@ function ChatComponent() {
                                 {stepMax == 1 ? 'Sin Asistente' : stepMax <= 3 ? 'Retroalimentativo' : stepMax <= 7 ? 'Pensante' : 'Profundo'}
                               </span>
                             </div>
-
+                            
                             {/* Level indicator */}
                             <div className="hidden lg:flex items-center gap-2 relative z-10">
                               <div className="w-8 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
-                                <div
+                                <div 
                                   className="h-full bg-gradient-to-r from-[#F48120] to-purple-500 transition-all duration-500 rounded-full"
                                   style={{ width: `${(stepMax / 10) * 100}%` }}
                                 ></div>
@@ -1288,7 +1290,7 @@ function ChatComponent() {
                             >
                               {/* Decorative gradient border */}
                               <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-sm opacity-50"></div>
-
+                              
                               <div className="relative p-4 space-y-4">
                                 {/* Header */}
                                 <div className="text-center space-y-2">
@@ -1300,21 +1302,21 @@ function ChatComponent() {
                                   </div>
                                   <p className="text-sm text-neutral-600 dark:text-neutral-400">Configura la profundidad del análisis</p>
                                 </div>
-
+                                
                                 {/* Enhanced Level indicator */}
                                 <div className="space-y-3">
                                   <div className="relative h-3 bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-full overflow-hidden shadow-inner">
-                                    <div
+                                    <div 
                                       className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-lg"
                                       style={{ width: `${(stepMax / 10) * 100}%` }}
                                     ></div>
                                     {/* Glow effect */}
-                                    <div
+                                    <div 
                                       className="absolute top-0 h-full bg-gradient-to-r from-[#F48120]/50 to-purple-500/50 rounded-full blur-sm transition-all duration-700"
                                       style={{ width: `${(stepMax / 10) * 100}%` }}
                                     ></div>
                                   </div>
-
+                                  
                                   {/* Level labels */}
                                   <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1">
                                     <span className={stepMax <= 2 ? 'text-[#F48120] font-semibold' : ''}>Rápido</span>
@@ -1329,8 +1331,8 @@ function ChatComponent() {
                                   <button
                                     onClick={() => setStepMax(1)}
                                     className={`group relative overflow-hidden p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
-                                      ${stepMax === 1 ?
-                                        'bg-gradient-to-br from-[#F48120]/20 to-orange-400/20 border-2 border-[#F48120]/50 shadow-lg shadow-[#F48120]/20' :
+                                      ${stepMax === 1 ? 
+                                        'bg-gradient-to-br from-[#F48120]/20 to-orange-400/20 border-2 border-[#F48120]/50 shadow-lg shadow-[#F48120]/20' : 
                                         'bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-[#F48120]/30 hover:shadow-md'}`}
                                   >
                                     <div className="absolute inset-0 bg-gradient-to-br from-[#F48120]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -1346,8 +1348,8 @@ function ChatComponent() {
                                   <button
                                     onClick={() => setStepMax(3)}
                                     className={`group relative overflow-hidden p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
-                                      ${stepMax > 1 && stepMax <= 3 ?
-                                        'bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-2 border-blue-500/50 shadow-lg shadow-blue-500/20' :
+                                      ${stepMax > 1 && stepMax <= 3 ? 
+                                        'bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-2 border-blue-500/50 shadow-lg shadow-blue-500/20' : 
                                         'bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-blue-500/30 hover:shadow-md'}`}
                                   >
                                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -1363,8 +1365,8 @@ function ChatComponent() {
                                   <button
                                     onClick={() => setStepMax(7)}
                                     className={`group relative overflow-hidden p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
-                                      ${stepMax > 3 && stepMax <= 7 ?
-                                        'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-500/50 shadow-lg shadow-purple-500/20' :
+                                      ${stepMax > 3 && stepMax <= 7 ? 
+                                        'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-500/50 shadow-lg shadow-purple-500/20' : 
                                         'bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-purple-500/30 hover:shadow-md'}`}
                                   >
                                     <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -1380,8 +1382,8 @@ function ChatComponent() {
                                   <button
                                     onClick={() => setStepMax(10)}
                                     className={`group relative overflow-hidden p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
-                                      ${stepMax > 7 ?
-                                        'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' :
+                                      ${stepMax > 7 ? 
+                                        'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' : 
                                         'bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-emerald-500/30 hover:shadow-md'}`}
                                   >
                                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -1406,7 +1408,7 @@ function ChatComponent() {
                                       <span className="text-sm font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">{stepMax}/10</span>
                                     </div>
                                   </div>
-
+                                  
                                   <div className="flex items-center gap-3">
                                     <button
                                       onClick={() => {
@@ -1454,7 +1456,7 @@ function ChatComponent() {
                                           [&::-webkit-slider-thumb]:hover:scale-125 [&::-webkit-slider-thumb]:active:scale-110"
                                       />
                                       <div className="absolute top-1/2 left-2 right-2 h-2 -translate-y-1/2 bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 rounded-full shadow-inner transition-all duration-500"
-                                        style={{
+                                        style={{ 
                                           width: `calc(${(stepMax / 10) * 100}% - 1rem)`,
                                           marginLeft: '0.5rem'
                                         }}
@@ -1462,8 +1464,9 @@ function ChatComponent() {
                                       {/* Tick marks */}
                                       <div className="absolute top-1/2 left-2 right-2 -translate-y-1/2 flex justify-between pointer-events-none">
                                         {Array.from({ length: 10 }, (_, i) => (
-                                          <div key={i} className={`w-1 h-1 rounded-full transition-all duration-300 ${i + 1 <= stepMax ? 'bg-white shadow-sm' : 'bg-neutral-300 dark:bg-neutral-600'
-                                            }`}></div>
+                                          <div key={i} className={`w-1 h-1 rounded-full transition-all duration-300 ${
+                                            i + 1 <= stepMax ? 'bg-white shadow-sm' : 'bg-neutral-300 dark:bg-neutral-600'
+                                          }`}></div>
                                         ))}
                                       </div>
                                     </div>
@@ -1489,7 +1492,7 @@ function ChatComponent() {
                                       <Plus size={18} className="relative z-10 text-green-500 group-hover:text-green-600 transition-colors duration-300" weight="bold" />
                                     </button>
                                   </div>
-
+                                  
                                   <div className="mt-3 flex justify-between items-center text-xs">
                                     <div className="flex items-center gap-1">
                                       <div className="w-2 h-2 rounded-full bg-[#F48120]"></div>
@@ -1580,7 +1583,7 @@ function ChatComponent() {
             <div className="relative p-3 lg:p-4 max-h-[calc(100vh-1rem)] bg-gradient-to-t from-white/95 via-white/90 to-transparent dark:from-neutral-900/95 dark:via-neutral-900/90 dark:to-transparent backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/50">
               {/* Decorative top border */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div>
-
+              
               <div className="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 lg:gap-4">
                 {/* Expand/Collapse Button */}
                 <div className="flex justify-center lg:justify-start">
@@ -1627,11 +1630,11 @@ function ChatComponent() {
                   <div className="relative group">
                     {/* Glow effect */}
                     <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
-
+                    
                     <div className="relative flex items-center gap-3 p-3 lg:p-4 bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
                       {/* Background pattern */}
                       <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-
+                      
                       {/* Input field */}
                       <div className="flex-1 relative z-10">
                         <Input
