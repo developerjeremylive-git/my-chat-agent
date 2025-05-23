@@ -1394,7 +1394,7 @@ function ChatComponent() {
                 </Button>
               </Tooltip> */}
 
-                {/* <div className={`flex flex-col lg:flex-row items-center justify-center w-full gap-2 ml-4 ${selectedModel !== 'gemini-2.0-flash' ? 'sm:mb-2 mt-2' : ''}`}>
+                <div className={`flex flex-col lg:flex-row items-center justify-center w-full gap-2 ml-4 ${selectedModel !== 'gemini-2.0-flash' ? 'sm:mb-2 mt-2' : ''}`}>
          
                   <div className="w-full lg:w-auto lg:flex-1 max-w-[300px] lg:max-w-none">
                     <div className="relative">
@@ -1702,7 +1702,7 @@ function ChatComponent() {
                     )}
                   </div>
 
-                </div> */}
+                </div> 
                 {/* 
 
               <Tooltip content="Crear Agente">
