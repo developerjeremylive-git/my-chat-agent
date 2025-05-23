@@ -1212,12 +1212,12 @@ function ChatComponent() {
                 </Button>
               </Tooltip> */}
 
-                <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full">
+                <div className={`flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full ${selectedModel !== 'gemini-2.0-flash' ? 'mt-0.5' : ''}`}>
                   {/* Model Selection Section */}
                   <div className="flex-1 min-w-0">
                     <div className="relative group">
                       <div className="absolute -inset-0.5 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-                      <div className="relative bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 transition-all duration-300">
+                      <div className={`relative bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 transition-all duration-300 ${selectedModel !== 'gemini-2.0-flash' ? 'mt-0.5' : ''}`}>
                         <ModelSelect />
                       </div>
                     </div>
@@ -1226,59 +1226,67 @@ function ChatComponent() {
                   {/* Assistant Controls Section */}
                   <div className="flex flex-row items-center gap-2 lg:gap-3">
                     {selectedModel === 'gemini-2.0-flash' && !showAssistantControlsAvanced && (
-                      <div className="relative group w-full max-w-[280px] mx-auto">
+                      <div className="relative group w-full max-w-[300px] mx-auto">
+                        {/* Subtle outer glow on hover */}
+                        <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 via-purple-500/20 to-[#F48120]/20 rounded-2xl opacity-0 group-hover:opacity-100 blur-lg transition-all duration-500 ease-out"></div>
+                        
                         <div className="relative w-full">
-                          {/* Enhanced Glow effect */}
-                          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#F48120]/40 via-purple-500/40 to-[#F48120]/40 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-all duration-500 animate-tilt"></div>
-                          
+                          {/* Main button container */}
                           <button
                             ref={assistantButtonRef}
                             onClick={() => setShowAssistantControls(!showAssistantControls)}
-                            className={`relative w-full h-14 lg:h-12 flex items-center justify-between px-4 rounded-xl 
-                              backdrop-blur-sm overflow-hidden
-                              ${!stepMax ? 'border-2 border-[#F48120] animate-pulse' : 'border border-neutral-200/50 dark:border-neutral-700/50'}
-                              text-sm font-medium text-neutral-700 dark:text-neutral-200 
-                              focus:outline-none focus:ring-2 focus:ring-[#F48120]/50 focus:ring-offset-2 focus:ring-offset-white/80 dark:focus:ring-offset-neutral-900/80
-                              transition-all duration-300 ease-in-out
-                              hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50
-                              transform hover:scale-[1.02] active:scale-[0.98]
+                            className={`relative w-full h-16 lg:h-14 flex items-center justify-between px-5 py-1 rounded-2xl 
+                              backdrop-blur-sm overflow-hidden border
+                              ${!stepMax ? 'border-[#F48120] animate-pulse shadow-lg' : 'border-neutral-200/60 dark:border-neutral-700/60'}
+                              text-sm font-medium text-neutral-800 dark:text-neutral-100 
+                              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#F48120]/50 focus:ring-offset-white/90 dark:focus:ring-offset-neutral-900/90
+                              transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
+                              hover:border-[#F48120]/60 dark:hover:border-[#F48120]/60
+                              transform hover:scale-[1.01] active:scale-[0.99]
                               cursor-pointer 
-                              bg-gradient-to-br from-white/80 to-neutral-50/90 dark:from-neutral-900/80 dark:to-neutral-800/90
-                              hover:bg-gradient-to-br hover:from-white/90 hover:to-neutral-100/90 dark:hover:from-neutral-800/90 dark:hover:to-neutral-700/90
-                              shadow-sm hover:shadow-md hover:shadow-[#F48120]/10 dark:shadow-neutral-900/30`}
+                              bg-white/70 dark:bg-neutral-900/70
+                              shadow-sm hover:shadow-lg hover:shadow-[#F48120]/5 dark:shadow-neutral-900/20
+                              before:absolute before:inset-0 before:bg-gradient-to-br before:from-[#F48120]/5 before:via-purple-500/5 before:to-transparent 
+                              before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500`}
                           >
                             {/* Animated gradient background */}
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#F48120]/5 via-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-[#F48120]/3 via-purple-500/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                             
-                            {/* Mobile & Tablet content */}
+                            {/* Main content container */}
                             <div className="relative z-10 w-full flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="relative">
-                                  <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-0 group-hover:opacity-30 blur-sm transition-opacity duration-300"></div>
-                                  <span className="relative z-10 text-2xl">
-                                    {stepMax == 1 ? '🎯' : stepMax <= 3 ? '🧠' : stepMax <= 7 ? '🚀' : '🤖'}
-                                  </span>
+                              {/* Left section - Icon and Text */}
+                              <div className="flex items-center gap-3.5">
+                                <div className="relative flex-shrink-0">
+                                  <div className="absolute -inset-1.5 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-0 group-hover:opacity-20 blur-sm transition-opacity duration-300"></div>
+                                  <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-white/80 dark:bg-neutral-800/80 border border-neutral-100/70 dark:border-neutral-700/50 shadow-sm group-hover:shadow-md transition-all duration-300">
+                                    <span className="text-xl transform group-hover:scale-110 transition-transform duration-300">
+                                      {stepMax == 1 ? '🎯' : stepMax <= 3 ? '🧠' : stepMax <= 7 ? '🚀' : '🤖'}
+                                    </span>
+                                  </div>
                                 </div>
-                                <div className="text-left">
-                                  <div className="text-sm font-semibold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
+                                
+                                <div className="text-left space-y-0.5">
+                                  <div className="text-sm font-semibold tracking-tight bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
                                     {stepMax == 1 ? 'Básico' : stepMax <= 3 ? 'Equilibrado' : stepMax <= 7 ? 'Avanzado' : 'Experto'}
                                   </div>
-                                  <div className="text-xs text-neutral-500 dark:text-neutral-400 -mt-0.5">
+                                  <div className="text-xs text-neutral-500 dark:text-neutral-400 font-medium tracking-wide">
                                     Nivel {stepMax}
                                   </div>
                                 </div>
                               </div>
                               
-                              <div className="flex items-center gap-2">
-                                <div className="w-16 h-1.5 bg-neutral-200/70 dark:bg-neutral-700/70 rounded-full overflow-hidden">
+                              {/* Right section - Progress and Level */}
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-16 h-1.5 bg-neutral-100/70 dark:bg-neutral-800/70 rounded-full overflow-hidden border border-neutral-200/50 dark:border-neutral-700/50">
                                   <div 
                                     className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-inner"
                                     style={{ width: `${(stepMax / 10) * 100}%` }}
                                   >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent w-full h-full"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-transparent w-full h-full opacity-70"></div>
                                   </div>
                                 </div>
-                                <div className="w-6 h-6 flex items-center justify-center rounded-lg bg-gradient-to-br from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/20 dark:to-purple-500/20 border border-[#F48120]/10 dark:border-[#F48120]/20">
+                                
+                                <div className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/20 dark:to-purple-500/20 border border-[#F48120]/10 dark:border-[#F48120]/20 shadow-sm group-hover:shadow-md transition-all duration-300">
                                   <span className="text-xs font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
                                     {stepMax}
                                   </span>
