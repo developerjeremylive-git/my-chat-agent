@@ -845,7 +845,7 @@ function ChatComponent() {
           </div>
           <div className={`h-[calc(100vh-2rem)] w-full ${getMainWidth()} mx-auto flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800 transition-all duration-300`}>
             {/* Header with buttons */}
-            <div className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-2 flex items-center justify-between sticky top-0 z-40">
+            {/* <div className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 p-2 flex items-center justify-between sticky top-0 z-40">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsSidebarOpen(true)}
@@ -874,7 +874,7 @@ function ChatComponent() {
                   <Robot size={20} className="text-neutral-700 dark:text-neutral-300" />
                 </button>
               </div>
-            </div>
+            </div> */}
             {/* <ChatHeader
             onOpenSidebar={() => {
               setIsSidebarOpen(true);
@@ -1280,7 +1280,7 @@ function ChatComponent() {
                           {showAssistantControls && createPortal(
                             <div
                               ref={assistantControlsRef}
-                              className="fixed bottom-20 left-1/2 -translate-x-1/2 lg:absolute lg:bottom-full lg:left-0 lg:translate-x-0 lg:mb-3 w-[calc(100vw-1rem)] lg:w-80 max-w-sm bg-white/95 dark:bg-neutral-900/95 rounded-2xl shadow-2xl border border-neutral-200/30 dark:border-neutral-700/30 backdrop-blur-xl backdrop-saturate-150 overflow-hidden transform origin-bottom transition-all duration-500 z-50"
+                              className="fixed bottom-20 left-1/2 -translate-x-1/2 lg:fixed lg:bottom-auto lg:top-1/2 lg:left-1/2 lg:-translate-y-1/2 lg:translate-x-0 lg:mx-0 w-[calc(100vw-1rem)] lg:w-80 max-w-sm bg-white/95 dark:bg-neutral-900/95 rounded-2xl shadow-2xl border border-neutral-200/30 dark:border-neutral-700/30 backdrop-blur-xl backdrop-saturate-150 overflow-hidden transform origin-bottom lg:origin-center transition-all duration-500 z-50"
                               style={{
                                 background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
                                 ...(theme === 'dark' && {
