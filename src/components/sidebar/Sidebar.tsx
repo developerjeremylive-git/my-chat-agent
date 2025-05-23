@@ -1032,10 +1032,10 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>
           <div className="mt-4 text-xs text-center cn('text-neutral-500 hover:text-neutral-400 transition-colors duration-300', theme === 'dark' ? 'text-neutral-500' : 'text-gray-500')">
             Potenciado por Tecnología IA Avanzada
-          </div>
+          </div>  */}
         </div>
       </div>
 
