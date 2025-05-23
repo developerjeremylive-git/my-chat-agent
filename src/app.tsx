@@ -1212,19 +1212,18 @@ function ChatComponent() {
                 </Button>
               </Tooltip> */}
 
-                <div className={`flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full ${selectedModel !== 'gemini-2.0-flash' ? 'mt-0.5' : ''}`}>
+                <div className={`flex flex-col lg:flex-row items-center justify-center w-full gap-2 ml-4 ${selectedModel !== 'gemini-2.0-flash' ? 'sm:mb-2 mt-2' : ''}`}>
                   {/* Model Selection Section */}
-                  <div className="flex-1 min-w-0">
-                    <div className="relative group">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-                      <div className={`relative bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 transition-all duration-300 ${selectedModel !== 'gemini-2.0-flash' ? 'mt-0.5' : ''}`}>
+                  <div className="w-full lg:w-auto lg:flex-1 max-w-[300px] lg:max-w-none">
+                    <div className="relative">
+                      <div className="relative">
                         <ModelSelect />
                       </div>
                     </div>
                   </div>
 
                   {/* Assistant Controls Section */}
-                  <div className="flex flex-row items-center gap-2 lg:gap-3">
+                  <div className="w-full lg:w-auto">
                     {selectedModel === 'gemini-2.0-flash' && !showAssistantControlsAvanced && (
                       <div className="relative group w-full max-w-[300px] mx-auto">
                         {/* Subtle outer glow on hover */}
@@ -1234,7 +1233,12 @@ function ChatComponent() {
                           {/* Main button container */}
                           <button
                             ref={assistantButtonRef}
-                            onClick={() => setShowAssistantControls(!showAssistantControls)}
+                            onClick={(e) => {
+                              setShowAssistantControls(!showAssistantControls);
+                              // Remove focus after click to prevent focus ring from persisting
+                              e.currentTarget.blur();
+                            }}
+                            onMouseDown={(e) => e.preventDefault()} // Prevent focus on mouse down
                             className={`relative w-full h-16 lg:h-14 flex items-center justify-between px-5 py-1 rounded-2xl 
                               backdrop-blur-sm overflow-hidden border
                               ${!stepMax ? 'border-[#F48120] animate-pulse shadow-lg' : 'border-neutral-200/60 dark:border-neutral-700/60'}
@@ -1247,7 +1251,8 @@ function ChatComponent() {
                               bg-white/70 dark:bg-neutral-900/70
                               shadow-sm hover:shadow-lg hover:shadow-[#F48120]/5 dark:shadow-neutral-900/20
                               before:absolute before:inset-0 before:bg-gradient-to-br before:from-[#F48120]/5 before:via-purple-500/5 before:to-transparent 
-                              before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500`}
+                              before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500
+                              focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#F48120]/50`}
                           >
                             {/* Animated gradient background */}
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-[#F48120]/3 via-purple-500/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
@@ -1258,8 +1263,8 @@ function ChatComponent() {
                               <div className="flex items-center gap-3.5">
                                 <div className="relative flex-shrink-0">
                                   <div className="absolute -inset-1.5 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-0 group-hover:opacity-20 blur-sm transition-opacity duration-300"></div>
-                                  <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-white/80 dark:bg-neutral-800/80 border border-neutral-100/70 dark:border-neutral-700/50 shadow-sm group-hover:shadow-md transition-all duration-300">
-                                    <span className="text-xl transform group-hover:scale-110 transition-transform duration-300">
+                                  <div className="relative flex items-center justify-center w-9 h-9 bg-transparent">
+                                    <span className="text-xl transform group-hover:scale-110 transition-transform duration-300 border-0 outline-none">
                                       {stepMax == 1 ? '🎯' : stepMax <= 3 ? '🧠' : stepMax <= 7 ? '🚀' : '🤖'}
                                     </span>
                                   </div>
@@ -1282,7 +1287,7 @@ function ChatComponent() {
                                     className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-inner"
                                     style={{ width: `${(stepMax / 10) * 100}%` }}
                                   >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-transparent w-full h-full opacity-70"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-transparent w-full h-full opacity-0"></div>
                                   </div>
                                 </div>
                                 
