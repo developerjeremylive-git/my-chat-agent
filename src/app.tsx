@@ -322,7 +322,7 @@ function ChatComponent() {
   const agent = useAgent({
     agent: "chat",
   }) as AgentInstance;
-  
+
   // useEffect(() => {
   //   console.log('Configuración:', config);
   // }, [config]);
@@ -373,7 +373,7 @@ function ChatComponent() {
       const target = event.target as HTMLElement;
       const menu = menuRef.current;
       const button = menuButtonRef.current;
-      
+
       // Verificar si el clic fue fuera del menú y del botón
       if (menu && button && !menu.contains(target) && !button.contains(target)) {
         // console.log('Clic fuera del menú, cerrando...');
@@ -498,47 +498,172 @@ function ChatComponent() {
               >
                 <DotsThreeVertical size={20} className="text-[#F48120]" weight="duotone" />
               </Button>
-              
+
               {showMenu && (
-                <div 
+                <div
                   ref={menuRef}
                   className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-auto sm:mt-2 w-[calc(100%-1rem)] sm:w-56 max-w-sm origin-top-right rounded-xl bg-white dark:bg-neutral-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden
                             border border-[#F48120]/20 dark:border-[#F48120]/10 transition-all duration-100 ease-in-out transform"
-                     style={{
-                       maxHeight: 'calc(100vh - 5rem)',
-                       overflowY: 'auto'
-                     }}>
-                  <div className="py-1" role="none">
-                    <button
-                      className="w-full text-left px-4 py-3 sm:py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
-                      onClick={() => {
-                        setShowSettingsMenu(true);
-                        setShowMenu(false);
-                      }}
-                    >
-                      <PaintBrushBroad size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
-                      <span className="truncate">Apariencia</span>
-                    </button>
-                    <button
-                      className="w-full text-left px-4 py-3 sm:py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
-                      onClick={() => {
-                        setShowOIAICreator(true);
-                        setShowMenu(false);
-                      }}
-                    >
-                      <PlusCircle size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
-                      <span className="truncate">Nueva Consulta del Sistema</span>
-                    </button>
-                    <button
-                      className="w-full text-left px-4 py-3 sm:py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
-                      onClick={() => {
-                        setShowClearDialog(true);
-                        setShowMenu(false);
-                      }}
-                    >
-                      <Trash size={16} className="text-red-500 flex-shrink-0" weight="duotone" />
-                      <span className="truncate">Limpiar Chat</span>
-                    </button>
+                  style={{
+                    maxHeight: 'calc(100vh - 5rem)',
+                    overflowY: 'auto'
+                  }}>
+                  <div className="py-1 space-y-1" role="none">
+                    {/* --- Personalización Section --- */}
+                    <div>
+                      <div className="px-4 pt-2 pb-1 text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80">Personalización</div>
+                      <button
+                        className="w-full text-left px-4 py-3 sm:py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
+                        onClick={() => {
+                          setShowSettingsMenu(true);
+                          setShowMenu(false);
+                        }}
+                      >
+                        <PaintBrushBroad size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
+                        <span className="truncate">Apariencia</span>
+                      </button>
+                    </div>
+
+                    {/* --- Divider --- */}
+                    <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-2" />
+
+                    {/* --- Nivel de Asistencia Section --- */}
+                    <div>
+                      <div className="px-4 pt-2 pb-1 text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80">Nivel de Asistencia</div>
+                      {/* Compact Assistant Level Selector */}
+                      <div className="px-4 py-2 space-y-2">
+                        {/* Level Indicator Bar */}
+                        <div className="relative h-2 bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-full overflow-hidden shadow-inner">
+                          <div
+                            className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-lg"
+                            style={{ width: `${(stepMax / 10) * 100}%` }}
+                          ></div>
+                        </div>
+                        {/* Level Labels */}
+                        <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1">
+                          <span className={stepMax <= 2 ? 'text-[#F48120] font-semibold' : ''}>Rápido</span>
+                          <span className={stepMax > 2 && stepMax <= 5 ? 'text-[#F48120] font-semibold' : ''}>Equilibrado</span>
+                          <span className={stepMax > 5 && stepMax <= 8 ? 'text-[#F48120] font-semibold' : ''}>Profundo</span>
+                          <span className={stepMax > 8 ? 'text-[#F48120] font-semibold' : ''}>Experto</span>
+                        </div>
+                        {/* Preset Buttons */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => setStepMax(1)}
+                            className={`group relative overflow-hidden p-2 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
+                              ${stepMax === 1 ?
+                                'bg-gradient-to-br from-[#F48120]/20 to-orange-400/20 border-2 border-[#F48120]/50 shadow-lg shadow-[#F48120]/20' :
+                                'bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-[#F48120]/30 hover:shadow-md'}`}
+                          >
+                            <span className="text-lg">🎯</span>
+                            <div className="text-xs font-bold">Básico</div>
+                          </button>
+                          <button
+                            onClick={() => setStepMax(3)}
+                            className={`group relative overflow-hidden p-2 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
+                              ${stepMax > 1 && stepMax <= 3 ?
+                                'bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-2 border-blue-500/50 shadow-lg shadow-blue-500/20' :
+                                'bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-blue-500/30 hover:shadow-md'}`}
+                          >
+                            <span className="text-lg">🧠</span>
+                            <div className="text-xs font-bold">Equilibrado</div>
+                          </button>
+                          <button
+                            onClick={() => setStepMax(7)}
+                            className={`group relative overflow-hidden p-2 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
+                              ${stepMax > 3 && stepMax <= 7 ?
+                                'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-500/50 shadow-lg shadow-purple-500/20' :
+                                'bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-purple-500/30 hover:shadow-md'}`}
+                          >
+                            <span className="text-lg">🚀</span>
+                            <div className="text-xs font-bold">Avanzado</div>
+                          </button>
+                          <button
+                            onClick={() => setStepMax(10)}
+                            className={`group relative overflow-hidden p-2 rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]
+                              ${stepMax > 7 ?
+                                'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' :
+                                'bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-emerald-500/30 hover:shadow-md'}`}
+                          >
+                            <span className="text-lg">🤖</span>
+                            <div className="text-xs font-bold">Experto</div>
+                          </button>
+                        </div>
+                        {/* Fine-tune Slider */}
+                        <div className="flex items-center gap-2 mt-2">
+                          <button
+                            onClick={() => {
+                              if (!isUpdatingStepMax && stepMax > 1) {
+                                setIsUpdatingStepMax(true);
+                                setStepMax(stepMax - 1);
+                                setTimeout(() => setIsUpdatingStepMax(false), 150);
+                              }
+                            }}
+                            disabled={isUpdatingStepMax || stepMax <= 1}
+                            className="group w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-red-300 dark:hover:border-red-600 transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-40"
+                          >
+                            <Minus size={16} className="text-red-500 group-hover:text-red-600" weight="bold" />
+                          </button>
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            value={stepMax}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              if (!isUpdatingStepMax) {
+                                setIsUpdatingStepMax(true);
+                                setStepMax(value);
+                                setTimeout(() => setIsUpdatingStepMax(false), 150);
+                              }
+                            }}
+                            className="flex-1 h-2 bg-transparent appearance-none cursor-pointer mx-2"
+                          />
+                          <button
+                            onClick={() => {
+                              if (!isUpdatingStepMax && stepMax < 10) {
+                                setIsUpdatingStepMax(true);
+                                setStepMax(stepMax + 1);
+                                setTimeout(() => setIsUpdatingStepMax(false), 150);
+                              }
+                            }}
+                            disabled={isUpdatingStepMax || stepMax >= 10}
+                            className="group w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200 dark:border-neutral-600 hover:border-green-300 dark:hover:border-green-600 transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-40"
+                          >
+                            <Plus size={16} className="text-green-500 group-hover:text-green-600" weight="bold" />
+                          </button>
+                          <span className="ml-2 text-xs font-semibold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">{stepMax}/10</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* --- Divider --- */}
+                    <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-2" />
+
+                    {/* --- Acciones Section --- */}
+                    <div>
+                      <div className="px-4 pt-2 pb-1 text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80">Acciones</div>
+                      <button
+                        className="w-full text-left px-4 py-3 sm:py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
+                        onClick={() => {
+                          setShowOIAICreator(true);
+                          setShowMenu(false);
+                        }}
+                      >
+                        <PlusCircle size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
+                        <span className="truncate">Nueva Consulta del Sistema</span>
+                      </button>
+                      <button
+                        className="w-full text-left px-4 py-3 sm:py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
+                        onClick={() => {
+                          setShowClearDialog(true);
+                          setShowMenu(false);
+                        }}
+                      >
+                        <Trash size={16} className="text-red-500 flex-shrink-0" weight="duotone" />
+                        <span className="truncate">Limpiar Chat</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1269,8 +1394,8 @@ function ChatComponent() {
                 </Button>
               </Tooltip> */}
 
-                <div className={`flex flex-col lg:flex-row items-center justify-center w-full gap-2 ml-4 ${selectedModel !== 'gemini-2.0-flash' ? 'sm:mb-2 mt-2' : ''}`}>
-                  {/* Model Selection Section */}
+                {/* <div className={`flex flex-col lg:flex-row items-center justify-center w-full gap-2 ml-4 ${selectedModel !== 'gemini-2.0-flash' ? 'sm:mb-2 mt-2' : ''}`}>
+         
                   <div className="w-full lg:w-auto lg:flex-1 max-w-[300px] lg:max-w-none">
                     <div className="relative">
                       <div className="relative">
@@ -1279,23 +1404,19 @@ function ChatComponent() {
                     </div>
                   </div>
 
-                  {/* Assistant Controls Section */}
                   <div className="w-full lg:w-auto">
                     {selectedModel === 'gemini-2.0-flash' && !showAssistantControlsAvanced && (
                       <div className="relative group w-full max-w-[300px] mx-auto">
-                        {/* Subtle outer glow on hover */}
                         <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 via-purple-500/20 to-[#F48120]/20 rounded-2xl opacity-0 group-hover:opacity-100 blur-lg transition-all duration-500 ease-out"></div>
                         
                         <div className="relative w-full">
-                          {/* Main button container */}
                           <button
                             ref={assistantButtonRef}
                             onClick={(e) => {
                               setShowAssistantControls(!showAssistantControls);
-                              // Remove focus after click to prevent focus ring from persisting
                               e.currentTarget.blur();
                             }}
-                            onMouseDown={(e) => e.preventDefault()} // Prevent focus on mouse down
+                            onMouseDown={(e) => e.preventDefault()} 
                             className={`relative w-full h-16 lg:h-14 flex items-center justify-between px-5 py-1 rounded-2xl 
                               backdrop-blur-sm overflow-hidden border
                               ${!stepMax ? 'border-[#F48120] animate-pulse shadow-lg' : 'border-neutral-200/60 dark:border-neutral-700/60'}
@@ -1311,12 +1432,9 @@ function ChatComponent() {
                               before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500
                               focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#F48120]/50`}
                           >
-                            {/* Animated gradient background */}
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-[#F48120]/3 via-purple-500/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                             
-                            {/* Main content container */}
                             <div className="relative z-10 w-full flex items-center justify-between">
-                              {/* Left section - Icon and Text */}
                               <div className="flex items-center gap-3.5">
                                 <div className="relative flex-shrink-0">
                                   <div className="absolute -inset-1.5 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-0 group-hover:opacity-20 blur-sm transition-opacity duration-300"></div>
@@ -1337,7 +1455,6 @@ function ChatComponent() {
                                 </div>
                               </div>
                               
-                              {/* Right section - Progress and Level */}
                               <div className="flex items-center gap-2.5">
                                 <div className="w-16 h-1.5 bg-neutral-100/70 dark:bg-neutral-800/70 rounded-full overflow-hidden border border-neutral-200/50 dark:border-neutral-700/50">
                                   <div 
@@ -1355,26 +1472,6 @@ function ChatComponent() {
                                 </div>
                               </div>
                             </div>
-                            
-                            {/* Desktop content */}
-                            {/* <div className="hidden lg:flex items-center gap-3 relative z-10">
-                              <span className="text-xl">
-                                {stepMax == 1 ? '🎯' : stepMax <= 3 ? '🧠' : stepMax <= 7 ? '🚀' : '🤖'}
-                              </span>
-                              <span className="truncate">
-                                {stepMax == 1 ? 'Sin Asistente' : stepMax <= 3 ? 'Retroalimentativo' : stepMax <= 7 ? 'Pensante' : 'Profundo'}
-                              </span>
-                            </div>
-                            
-                            <div className="hidden lg:flex items-center gap-2 relative z-10">
-                              <div className="w-8 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full bg-gradient-to-r from-[#F48120] to-purple-500 transition-all duration-500 rounded-full"
-                                  style={{ width: `${(stepMax / 10) * 100}%` }}
-                                ></div>
-                              </div>
-                              <span className="text-xs font-bold text-[#F48120] min-w-[20px]">{stepMax}</span>
-                            </div> */}
                           </button>
 
                           {showAssistantControls && createPortal(
@@ -1388,11 +1485,9 @@ function ChatComponent() {
                                 })
                               }}
                             >
-                              {/* Decorative gradient border */}
                               <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-sm opacity-50"></div>
                               
                               <div className="relative p-4 space-y-4">
-                                {/* Header */}
                                 <div className="text-center space-y-2">
                                   <div className="flex items-center justify-center gap-2">
                                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#F48120] to-purple-500 flex items-center justify-center">
@@ -1403,21 +1498,18 @@ function ChatComponent() {
                                   <p className="text-sm text-neutral-600 dark:text-neutral-400">Configura la profundidad del análisis</p>
                                 </div>
                                 
-                                {/* Enhanced Level indicator */}
                                 <div className="space-y-3">
                                   <div className="relative h-3 bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-full overflow-hidden shadow-inner">
                                     <div 
                                       className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-lg"
                                       style={{ width: `${(stepMax / 10) * 100}%` }}
                                     ></div>
-                                    {/* Glow effect */}
                                     <div 
                                       className="absolute top-0 h-full bg-gradient-to-r from-[#F48120]/50 to-purple-500/50 rounded-full blur-sm transition-all duration-700"
                                       style={{ width: `${(stepMax / 10) * 100}%` }}
                                     ></div>
                                   </div>
                                   
-                                  {/* Level labels */}
                                   <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1">
                                     <span className={stepMax <= 2 ? 'text-[#F48120] font-semibold' : ''}>Rápido</span>
                                     <span className={stepMax > 2 && stepMax <= 5 ? 'text-[#F48120] font-semibold' : ''}>Equilibrado</span>
@@ -1426,7 +1518,6 @@ function ChatComponent() {
                                   </div>
                                 </div>
 
-                                {/* Preset buttons */}
                                 <div className="grid grid-cols-2 gap-2">
                                   <button
                                     onClick={() => setStepMax(1)}
@@ -1497,7 +1588,6 @@ function ChatComponent() {
                                   </button>
                                 </div>
 
-                                {/* Custom level selector */}
                                 <div className="pt-4 mt-4 border-t border-gradient-to-r from-neutral-200/30 via-[#F48120]/20 to-neutral-200/30 dark:from-neutral-700/30 dark:via-[#F48120]/20 dark:to-neutral-700/30">
                                   <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-2">
@@ -1561,7 +1651,6 @@ function ChatComponent() {
                                           marginLeft: '0.5rem'
                                         }}
                                       ></div>
-                                      {/* Tick marks */}
                                       <div className="absolute top-1/2 left-2 right-2 -translate-y-1/2 flex justify-between pointer-events-none">
                                         {Array.from({ length: 10 }, (_, i) => (
                                           <div key={i} className={`w-1 h-1 rounded-full transition-all duration-300 ${
@@ -1613,7 +1702,7 @@ function ChatComponent() {
                     )}
                   </div>
 
-                </div>
+                </div> */}
                 {/* 
 
               <Tooltip content="Crear Agente">
@@ -1683,7 +1772,7 @@ function ChatComponent() {
             <div className="relative p-3 lg:p-4 max-h-[calc(100vh-1rem)] bg-gradient-to-t from-white/95 via-white/90 to-transparent dark:from-neutral-900/95 dark:via-neutral-900/90 dark:to-transparent backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/50">
               {/* Decorative top border */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div>
-              
+
               <div className="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 lg:gap-4">
                 {/* Expand/Collapse Button */}
                 <div className="flex justify-center lg:justify-start">
@@ -1730,11 +1819,11 @@ function ChatComponent() {
                   <div className="relative group">
                     {/* Glow effect */}
                     <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
-                    
+
                     <div className="relative flex items-center gap-3 p-3 lg:p-4 bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
                       {/* Background pattern */}
                       <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-                      
+
                       {/* Input field */}
                       <div className="flex-1 relative z-10">
                         <Input
