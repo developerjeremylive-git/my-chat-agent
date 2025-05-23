@@ -49,7 +49,9 @@ import {
   Stop,
   ListBullets,
   ChatCenteredDots,
-  PaintBrushBroad
+  PaintBrushBroad,
+  Minus,
+  Plus
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -1197,89 +1199,6 @@ function ChatComponent() {
                     {/* <ModelSelect onModelChange={(modelName) => updateModel(modelName)} />? */}
                   </div>
 
-                  {selectedModel === 'gemini-2.0-flash' && showAssistantControlsAvanced && (
-                    <div className="flex flex-col gap-2 w-full sm:w-auto">
-                      <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10">
-                        <Robot size={20} className="text-[#F48120] hidden md:block" weight="duotone" />
-                        <span className="hidden sm:inline text-sm font-medium text-neutral-700 dark:text-neutral-300">Asistente</span>
-                        <div className="flex items-center gap-2 flex-1 justify-end sm:justify-start">
-                          {stepMax > 1 && (
-                            <button
-                              onClick={() => {
-                                if (!isUpdatingStepMax) {
-                                  setIsUpdatingStepMax(true);
-                                  setStepMax(stepMax - 1);
-                                  setTimeout(() => setIsUpdatingStepMax(false), 300);
-                                }
-                              }}
-                              disabled={isUpdatingStepMax}
-                              className="w-8 h-8 flex items-center justify-center rounded-lg
-                               bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
-                               hover:from-[#F48120]/20 hover:to-purple-500/20
-                               dark:from-[#F48120]/5 dark:to-purple-500/5
-                               dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                               border border-[#F48120]/20 hover:border-[#F48120]/40
-                               dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                               transform hover:scale-95 active:scale-90 transition-all duration-200"
-                            >
-                              <span className="text-[#F48120] font-bold">-</span>
-                            </button>
-                          )}
-
-                          <div className="relative flex items-center gap-2">
-                            <input
-                              type="number"
-                              inputMode="numeric"
-                              pattern="[1-9]*"
-                              min="1"
-                              max="10"
-                              value={stepMax}
-                              onChange={(e) => {
-                                const value = parseInt(e.target.value);
-                                if (!isNaN(value) && value >= 1 && value <= 10) {
-                                  setStepMax(value);
-                                }
-                              }}
-                              className="w-12 text-center px-2 py-1 text-sm bg-white dark:bg-neutral-800
-                               border border-neutral-200 dark:border-neutral-700 rounded-lg
-                               focus:outline-none focus:ring-2 focus:ring-[#F48120]/50
-                               [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                            />
-                            {isUpdatingStepMax && (
-                              <div className="ml-4 absolute -center-1 flex items-center">
-                                <div className="animate-spin h-4 w-4 border-2 border-[#F48120] border-t-transparent rounded-full"></div>
-                              </div>
-                            )}
-                          </div>
-
-                          {stepMax < 10 && (
-                            <button
-                              onClick={() => {
-                                if (!isUpdatingStepMax) {
-                                  setIsUpdatingStepMax(true);
-                                  setStepMax(stepMax + 1);
-                                  setTimeout(() => setIsUpdatingStepMax(false), 300);
-                                }
-                              }}
-                              disabled={isUpdatingStepMax}
-                              className="w-8 h-8 flex items-center justify-center rounded-lg
-                               bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
-                               hover:from-[#F48120]/20 hover:to-purple-500/20
-                               dark:from-[#F48120]/5 dark:to-purple-500/5
-                               dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                               border border-[#F48120]/20 hover:border-[#F48120]/40
-                               dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                               transform hover:scale-95 active:scale-90 transition-all duration-200"
-                            >
-                              <span className="text-[#F48120] font-bold">+</span>
-                            </button>
-                          )}
-
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   <div className="flex flex-row items-center gap-2">
                     {/* Switch para habilitar/deshabilitar el asistente */}
                     {selectedModel === 'gemini-2.0-flash' && !showAssistantControlsAvanced && (
@@ -1312,85 +1231,170 @@ function ChatComponent() {
                           {showAssistantControls && createPortal(
                             <div
                               ref={assistantControlsRef}
-                              className="fixed bottom-16 left-1/2 -translate-x-1/2 sm:absolute sm:bottom-full sm:left-0 sm:translate-x-0 sm:mb-2 w-[calc(100vw-2rem)] sm:w-48 max-w-xs bg-white dark:bg-neutral-900 rounded-xl shadow-xl border border-neutral-200/50 dark:border-neutral-700/50 backdrop-blur-lg backdrop-saturate-150 overflow-hidden transform origin-bottom transition-all duration-300 z-50"
+                              className="fixed bottom-16 left-1/2 -translate-x-1/2 sm:absolute sm:bottom-full sm:left-0 sm:translate-x-0 sm:mb-2 w-[calc(100vw-2rem)] sm:w-64 max-w-xs bg-white dark:bg-neutral-900 rounded-xl shadow-xl border border-neutral-200/50 dark:border-neutral-700/50 backdrop-blur-lg backdrop-saturate-150 overflow-hidden transform origin-bottom transition-all duration-300 z-50"
                             >
-                              <div className="p-2 space-y-1">
-                                <button
-                                  onClick={() => {
-                                    setStepMax(1);
-                                    setShowAssistantControls(false);
-                                  }}
-                                  className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                  ${stepMax === 1 ?
-                                      'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' :
-                                      'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
-                                >
-                                  <span className="text-lg">🎯</span>
-                                  <span className="text-sm font-medium">Sin Asistente</span>
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setStepMax(3);
-                                    setShowAssistantControls(false);
-                                  }}
-                                  className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                  ${stepMax > 1 && stepMax <= 3 ?
-                                      'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' :
-                                      'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
-                                >
-                                  <span className="text-lg">🧠</span>
-                                  <span className="text-sm font-medium">Asistente Retroalimentativo</span>
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setStepMax(7);
-                                    setShowAssistantControls(false);
-                                  }}
-                                  className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                  ${stepMax > 3 && stepMax <= 7 ?
-                                      'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' :
-                                      'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
-                                >
-                                  <span className="text-lg">🚀</span>
-                                  <span className="text-sm font-medium">Asistente Pensante</span>
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setStepMax(10);
-                                    setShowAssistantControls(false);
-                                  }}
-                                  className={`w-full px-3 py-2 flex items-center gap-2 rounded-lg transition-all duration-200
-                                  ${stepMax > 7 ?
-                                      'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 text-[#F48120] dark:text-white' :
-                                      'text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700'}`}
-                                >
-                                  <span className="text-lg">🤖</span>
-                                  <span className="text-sm font-medium">Asistente Profundo</span>
-                                </button>
+                              <div className="p-3 space-y-2">
+                                <div className="px-2 py-1">
+                                  <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-1">Nivel de Asistencia</h3>
+                                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Mayor nivel = Mejor precisión</p>
+                                </div>
+                                
+                                {/* Level indicator */}
+                                <div className="relative h-2 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden mb-4">
+                                  <div 
+                                    className="h-full bg-gradient-to-r from-[#F48120] to-purple-500 transition-all duration-500"
+                                    style={{ width: `${(stepMax / 10) * 100}%` }}
+                                  ></div>
+                                </div>
+
+                                {/* Preset buttons */}
+                                <div className="space-y-1.5">
+                                  <button
+                                    onClick={() => setStepMax(1)}
+                                    className={`w-full px-3 py-2.5 flex items-center gap-2 rounded-lg transition-all duration-200 border
+                                      ${stepMax === 1 ? 
+                                        'border-[#F48120]/40 dark:border-[#F48120]/30 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10' : 
+                                        'border-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                  >
+                                    <span className="text-lg">🎯</span>
+                                    <div className="text-left flex-1">
+                                      <div className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Básico</div>
+                                      <div className="text-xs text-neutral-500 dark:text-neutral-400">Nivel 1</div>
+                                    </div>
+                                    <div className="w-6 h-6 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center text-xs font-bold">1</div>
+                                  </button>
+
+
+                                  <button
+                                    onClick={() => setStepMax(3)}
+                                    className={`w-full px-3 py-2.5 flex items-center gap-2 rounded-lg transition-all duration-200 border
+                                      ${stepMax > 1 && stepMax <= 3 ? 
+                                        'border-[#F48120]/40 dark:border-[#F48120]/30 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10' : 
+                                        'border-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                  >
+                                    <span className="text-lg">🧠</span>
+                                    <div className="text-left flex-1">
+                                      <div className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Retroalimentativo</div>
+                                      <div className="text-xs text-neutral-500 dark:text-neutral-400">Nivel 2-3</div>
+                                    </div>
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 flex items-center justify-center text-xs font-bold text-white">3</div>
+                                  </button>
+
+
+                                  <button
+                                    onClick={() => setStepMax(7)}
+                                    className={`w-full px-3 py-2.5 flex items-center gap-2 rounded-lg transition-all duration-200 border
+                                      ${stepMax > 3 && stepMax <= 7 ? 
+                                        'border-[#F48120]/40 dark:border-[#F48120]/30 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10' : 
+                                        'border-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                  >
+                                    <span className="text-lg">🚀</span>
+                                    <div className="text-left flex-1">
+                                      <div className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Avanzado</div>
+                                      <div className="text-xs text-neutral-500 dark:text-neutral-400">Nivel 4-7</div>
+                                    </div>
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 flex items-center justify-center text-xs font-bold text-white">7</div>
+                                  </button>
+
+
+                                  <button
+                                    onClick={() => setStepMax(10)}
+                                    className={`w-full px-3 py-2.5 flex items-center gap-2 rounded-lg transition-all duration-200 border
+                                      ${stepMax > 7 ? 
+                                        'border-[#F48120]/40 dark:border-[#F48120]/30 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10' : 
+                                        'border-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}
+                                  >
+                                    <span className="text-lg">🤖</span>
+                                    <div className="text-left flex-1">
+                                      <div className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Profesional</div>
+                                      <div className="text-xs text-neutral-500 dark:text-neutral-400">Nivel 8-10</div>
+                                    </div>
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 flex items-center justify-center text-xs font-bold text-white">10</div>
+                                  </button>
+                                </div>
+
+                                {/* Custom level selector */}
+                                <div className="pt-2 mt-2 border-t border-neutral-200/50 dark:border-neutral-700/50">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Nivel personalizado</span>
+                                    <div className="px-2 py-0.5 bg-neutral-100 dark:bg-neutral-800 rounded-md text-xs font-bold">
+                                      {stepMax}/10
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => {
+                                        if (!isUpdatingStepMax && stepMax > 1) {
+                                          setIsUpdatingStepMax(true);
+                                          setStepMax(stepMax - 1);
+                                          setTimeout(() => setIsUpdatingStepMax(false), 150);
+                                        }
+                                      }}
+                                      disabled={isUpdatingStepMax || stepMax <= 1}
+                                      className="w-8 h-8 flex items-center justify-center rounded-lg
+                                        bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
+                                        hover:from-[#F48120]/20 hover:to-purple-500/20
+                                        disabled:opacity-50 disabled:pointer-events-none
+                                        border border-[#F48120]/20 hover:border-[#F48120]/40
+                                        dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                                        transition-all duration-200"
+                                    >
+                                      <Minus size={16} className="text-[#F48120]" />
+                                    </button>
+
+                                    <div className="relative flex-1">
+                                      <input
+                                        type="range"
+                                        min="1"
+                                        max="10"
+                                        value={stepMax}
+                                        onChange={(e) => {
+                                          const value = parseInt(e.target.value);
+                                          if (!isUpdatingStepMax) {
+                                            setIsUpdatingStepMax(true);
+                                            setStepMax(value);
+                                            setTimeout(() => setIsUpdatingStepMax(false), 150);
+                                          }
+                                        }}
+                                        className="w-full h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-[#F48120] [&::-webkit-slider-thumb]:to-purple-500 [&::-webkit-slider-thumb]:border-0 [&::-webkit-slider-thumb]:shadow-sm"
+                                      />
+                                      <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full pointer-events-none"
+                                        style={{ width: `${(stepMax / 10) * 100}%` }}
+                                      ></div>
+                                    </div>
+
+                                    <button
+                                      onClick={() => {
+                                        if (!isUpdatingStepMax && stepMax < 10) {
+                                          setIsUpdatingStepMax(true);
+                                          setStepMax(stepMax + 1);
+                                          setTimeout(() => setIsUpdatingStepMax(false), 150);
+                                        }
+                                      }}
+                                      disabled={isUpdatingStepMax || stepMax >= 10}
+                                      className="w-8 h-8 flex items-center justify-center rounded-lg
+                                        bg-gradient-to-r from-[#F48120]/10 to-purple-500/10
+                                        hover:from-[#F48120]/20 hover:to-purple-500/20
+                                        disabled:opacity-50 disabled:pointer-events-none
+                                        border border-[#F48120]/20 hover:border-[#F48120]/40
+                                        dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
+                                        transition-all duration-200"
+                                    >
+                                      <Plus size={16} className="text-[#F48120]" />
+                                    </button>
+                                  </div>
+                                  
+                                  <div className="mt-2 flex justify-between text-xs text-neutral-500 dark:text-neutral-400">
+                                    <span>Más rápido</span>
+                                    <span>Más preciso</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                             , document.body)}
                         </div>
 
-                      </div>
-                    )}
-                    {selectedModel === 'gemini-2.0-flash' && (
-                      <div className="flex items-center p-2 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 dark:from-[#F48120]/5 dark:to-purple-500/5 rounded-xl border border-[#F48120]/20 dark:border-[#F48120]/10 hover:shadow-lg transition-all duration-300">
-                        <div
-                          className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 cursor-pointer"
-                          style={{
-                            backgroundColor: showAssistantControlsAvanced ? '#F48120' : '#E5E5E5',
-                          }}
-                          onClick={() => {
-                            setShowAssistantControls(!showAssistantControls);
-                            setShowAssistantControlsAvanced(!showAssistantControlsAvanced);
-                          }}
-                        >
-                          <span
-                            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition-transform duration-300 ease-in-out ${showAssistantControlsAvanced ? 'translate-x-6' : 'translate-x-1'}`}
-                          />
-                        </div>
-                        <Wrench className="ml-2 text-[#F48120] hidden md:block" size={20} weight="duotone" />
                       </div>
                     )}
                   </div>
