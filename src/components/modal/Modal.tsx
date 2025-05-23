@@ -125,7 +125,7 @@ export const Modal = ({
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Editor de texto</h2>
           </div>
 
-          <div className="flex-1 h-[min(calc(90vh-12rem),calc(900px-12rem))] overflow-y-auto p-4 sm:p-6">
+          <div className="flex-1 h-[min(calc(90vh-12rem),calc(900px-12rem))] overflow-y-auto p-4 sm:p-6 text-gray-900 dark:text-white">
             {children}
           </div>
           <div className="sticky bottom-0 w-full border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 sm:px-6 py-3 sm:py-4 z-[60]">
