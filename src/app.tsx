@@ -460,10 +460,19 @@ function ChatComponent() {
           onNewChat={handleNewChat}
           selectedChatId={selectedChatId}
         />
-        <main className="flex-1 w-full px-4 py-4 relative">
+        <main className="flex-1 w-full px-4 pb-4 relative">
           {/* Botón flotante de configuración */}
           {/* Mobile Menu Button */}
-          <div className="lg:hidden fixed top-0 left-0 right-0 px-4 py-3 flex justify-between items-center z-20 bg-gradient-to-b from-white/80 to-white/0 dark:from-neutral-900/80 dark:to-neutral-900/0 backdrop-blur-sm">
+          <div
+  className="fixed lg:static top-0 left-0 right-0 w-full z-30 px-2 lg:px-0 py-0 flex justify-center lg:justify-center items-center bg-gradient-to-b from-white/80 to-white/0 dark:from-neutral-900/80 dark:to-neutral-900/0 backdrop-blur-sm shadow-sm"
+  style={{
+    minHeight: '56px',
+    pointerEvents: 'auto',
+  }}
+>
+  <div
+    className="flex w-full max-w-3xl xl:max-w-4xl mx-auto justify-between items-center gap-2 px-2 lg:px-6"
+  >
             <Button
               variant="ghost"
               size="sm"
@@ -684,6 +693,7 @@ function ChatComponent() {
               </div>
             </Button>
           </div>
+  </div>
 
           {/* Desktop Sidebar */}
           <div
