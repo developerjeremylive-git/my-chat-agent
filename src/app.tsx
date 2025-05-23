@@ -20,7 +20,6 @@ import { Sidebar } from "@/components/sidebar/Sidebar";
 import { SideMenu } from "@/components/sidemenu/SideMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { createPortal } from "react-dom";
-import { HeaderBar } from "@/components/HeaderBar";
 
 // Icon imports
 import {
@@ -156,10 +155,6 @@ function ChatComponent() {
     };
   }, []);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
-
-  // Menu refs for HeaderBar
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   // Efecto para cerrar el menú de configuración cuando se abre la barra lateral
   useEffect(() => {
@@ -369,8 +364,10 @@ function ChatComponent() {
   const [chatWidth, setChatWidth] = useState<'narrow' | 'default' | 'full'>('default');
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  
-  // Cerrar menú al hacer clic fuera del menú
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Cerrar menú al hacer clic fuera de él
   useEffect(() => {
     const handleClickAnywhere = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -464,27 +461,9 @@ function ChatComponent() {
           selectedChatId={selectedChatId}
         />
         <main className="flex-1 w-full px-4 py-4 relative">
-          {/* Unified HeaderBar for both Desktop and Mobile */}
-          <HeaderBar
-            isSidebarOpen={isSidebarOpen}
-            setIsSidebarOpen={setIsSidebarOpen}
-            setShowMenu={setShowMenu}
-            showMenu={showMenu}
-            menuButtonRef={menuButtonRef}
-            menuRef={menuRef}
-            setShowSettingsMenu={setShowSettingsMenu}
-            setShowOIAICreator={setShowOIAICreator}
-            setShowClearDialog={setShowClearDialog}
-            setIsSettingsOpen={setIsSettingsOpen}
-            stepMax={stepMax}
-            setStepMax={setStepMax}
-            isUpdatingStepMax={isUpdatingStepMax}
-            setIsUpdatingStepMax={setIsUpdatingStepMax}
-            theme={theme}
-            toggleTheme={toggleTheme}
-          />
-           {/* Mobile Menu Button */}
-           <div className="lg:hidden fixed top-0 left-0 right-0 px-4 py-3 flex justify-between items-center z-20 bg-gradient-to-b from-white/80 to-white/0 dark:from-neutral-900/80 dark:to-neutral-900/0 backdrop-blur-sm">
+          {/* Botón flotante de configuración */}
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden fixed top-0 left-0 right-0 px-4 py-3 flex justify-between items-center z-20 bg-gradient-to-b from-white/80 to-white/0 dark:from-neutral-900/80 dark:to-neutral-900/0 backdrop-blur-sm">
             <Button
               variant="ghost"
               size="sm"
