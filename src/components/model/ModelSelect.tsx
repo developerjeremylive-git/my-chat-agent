@@ -198,8 +198,8 @@ const distilledModels: Model[] = [
 
 const models: Model[] = [...geminiModels, ...reasoningModels, ...distilledModels];
 
-export function ModelSelect({ className, onModelChange }: ModelSelectPropsTemp) {
-// export function ModelSelect({ className }: ModelSelectProps) {
+// export function ModelSelect({ className, onModelChange }: ModelSelectPropsTemp) {
+export function ModelSelect({ className }: ModelSelectProps) {
   const { selectedModel: contextModel, setSelectedModel: setContextModel } = useModel();
   const [selectedModel, setSelectedModel] = useState<Model>(
     models.find(model => model.name === contextModel) || models[0]
@@ -279,7 +279,7 @@ export function ModelSelect({ className, onModelChange }: ModelSelectPropsTemp) 
                     try {
                       setSelectedModel(model);
                       setContextModel(model.name);
-                      onModelChange(model.name);
+                      // onModelChange(model.name);
                     } catch (error) {
                       console.error('Error al actualizar el modelo:', error);
                     }
@@ -378,7 +378,7 @@ export function ModelSelect({ className, onModelChange }: ModelSelectPropsTemp) 
                     try {
                       setSelectedModel(model);
                       setContextModel(model.name);
-                      onModelChange(model.name);
+                      // onModelChange(model.name);
                     } catch (error) {
                       console.error('Error al actualizar el modelo:', error);
                     }
@@ -484,7 +484,7 @@ export function ModelSelect({ className, onModelChange }: ModelSelectPropsTemp) 
                     try {
                       setSelectedModel(model);
                       setContextModel(model.name);
-                      onModelChange(model.name);
+                      // onModelChange(model.name);
                     } catch (error) {
                       console.error('Error al actualizar el modelo:', error);
                     }

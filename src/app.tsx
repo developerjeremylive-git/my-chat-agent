@@ -1180,8 +1180,8 @@ function ChatComponent() {
 
                 <div className="flex flex-row items-center gap-2 w-full">
                   <div className="flex-1 flex transition-all duration-300 opacity-100 max-w-full">
-                    {/* <ModelSelect /> */}
-                    <ModelSelect onModelChange={async (modelName: string) => {
+                    <ModelSelect />
+                    {/* <ModelSelect onModelChange={async (modelName: string) => {
                       try {
                         await fetch('/api/model', {
                           method: 'POST',
@@ -1193,7 +1193,7 @@ function ChatComponent() {
                       } catch (error) {
                         console.error('Error al actualizar el modelo:', error);
                       }
-                    }} />
+                    }} /> */}
                     {/* <ModelSelect onModelChange={(modelName) => updateModel(modelName)} />? */}
                   </div>
 

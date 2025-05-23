@@ -70,6 +70,29 @@ async function getSelectedModel(env: Env): Promise<string> {
   }
 }
 
+// Helper function to get the system prompt from KV
+async function getSystemPrompt(env: Env): Promise<string> {
+  try {
+    const prompt = await env.MODEL_CONFIG.get('systemPrompt');
+    return prompt || DEFAULT_SYSTEM_PROMPT;
+  } catch (error) {
+    console.error('Error getting system prompt from KV:', error);
+    return DEFAULT_SYSTEM_PROMPT;
+  }
+}
+
+// Helper function to get the max steps from KV
+async function getMaxSteps(env: Env): Promise<number> {
+  try {
+    const steps = await env.MODEL_CONFIG.get('maxSteps');
+    maxSteps = steps ? parseInt(steps, 10) : DEFAULT_MAX_STEPS;
+    return steps ? parseInt(steps, 10) : DEFAULT_MAX_STEPS;
+  } catch (error) {
+    console.error('Error getting max steps from KV:', error);
+    return DEFAULT_MAX_STEPS;
+  }
+}
+
 // Helper function to set the selected model in KV
 async function setSelectedModel(env: Env, model: string): Promise<void> {
   try {
@@ -80,6 +103,26 @@ async function setSelectedModel(env: Env, model: string): Promise<void> {
     }
   } catch (error) {
     console.error('Error setting selected model in KV:', error);
+    throw error;
+  }
+}
+
+// Helper function to set the system prompt in KV
+async function setSystemPrompt(env: Env, prompt: string): Promise<void> {
+  try {
+    await env.MODEL_CONFIG.put('systemPrompt', prompt);
+  } catch (error) {
+    console.error('Error setting system prompt in KV:', error);
+    throw error;
+  }
+}
+
+// Helper function to set the max steps in KV
+async function setMaxSteps(env: Env, steps: number): Promise<void> {
+  try {
+    await env.MODEL_CONFIG.put('maxSteps', steps.toString());
+  } catch (error) {
+    console.error('Error setting max steps in KV:', error);
     throw error;
   }
 }
@@ -99,75 +142,124 @@ let maxSteps = DEFAULT_MAX_STEPS;
 // let presencePenalty = DEFAULT_PRESENCE_PENALTY;
 // let seed = DEFAULT_SEED;
 
-// Endpoint para actualizar la configuración del asistente
-app.post('/api/config', async (c) => {
-  const config = await c.req.json();
-
-  // Validar y actualizar cada parámetro
-  if (typeof config.maxSteps === 'number' && config.maxSteps > 0) {
-    maxSteps = config.maxSteps;
-  }
-  // if (typeof config.temperature === 'number' && config.temperature >= 0 && config.temperature <= 1) {
-  //   temperature = config.temperature;
-  // }
-  // if (typeof config.maxTokens === 'number' && config.maxTokens > 0) {
-  //   maxTokens = config.maxTokens;
-  // }
-  // if (typeof config.topP === 'number' && config.topP >= 0 && config.topP <= 1) {
-  //   topP = config.topP;
-  // }
-  // if (typeof config.topK === 'number' && config.topK > 0) {
-  //   topK = config.topK;
-  // }
-  // if (typeof config.frequencyPenalty === 'number') {
-  //   frequencyPenalty = config.frequencyPenalty;
-  // }
-  // if (typeof config.presencePenalty === 'number') {
-  //   presencePenalty = config.presencePenalty;
-  // }
-  // if (typeof config.seed === 'number') {
-  //   seed = config.seed;
-  // }
-
-  // return c.json({
-  //   success: true,
-  //   config: {
-  //     maxSteps,
-  //     temperature,
-  //     maxTokens,
-  //     topP,
-  //     topK,
-  //     frequencyPenalty,
-  //     presencePenalty,
-  //     seed
-  //   }
-  // });
-});
-
 // Endpoint para obtener la configuración actual
-// app.get('/api/config', async (c) => {
-//   return c.json({
-//     maxSteps,
-//     temperature,
-//     maxTokens,
-//     topP,
-//     topK,
-//     frequencyPenalty,
-//     presencePenalty,
-//     seed
-//   });
-// });
+app.get('/api/config', async (c) => {
+  try {
+    const [model, prompt, steps] = await Promise.all([
+      getSelectedModel(c.env),
+      getSystemPrompt(c.env),
+      getMaxSteps(c.env)
+    ]);
 
-// Endpoint para actualizar el prompt del sistema
-// app.post('/api/system-prompt', async (c) => {
-//   const { prompt } = await c.req.json();
-//   systemPrompt = prompt;
-//   return c.json({ success: true, prompt: systemPrompt });
-// });
+    return c.json({
+      success: true,
+      config: {
+        selectedModel: model,
+        systemPrompt: prompt,
+        maxSteps: steps
+      }
+    });
+  } catch (error) {
+    console.error('Error getting assistant config:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to get assistant configuration',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
 
 // Endpoint para obtener el prompt del sistema actual
 app.get('/api/system-prompt', async (c) => {
-  return c.json({ prompt: systemPrompt });
+  try {
+    const prompt = await getSystemPrompt(c.env);
+    return c.json({ 
+      success: true, 
+      prompt 
+    });
+  } catch (error) {
+    console.error('Error getting system prompt:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to get system prompt',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
+
+// Endpoint para actualizar el prompt del sistema
+app.post('/api/system-prompt', async (c) => {
+  try {
+    const { prompt } = await c.req.json();
+    if (!prompt || typeof prompt !== 'string') {
+      return c.json({
+        success: false,
+        error: 'Prompt is required and must be a string'
+      }, 400);
+    }
+    
+    await setSystemPrompt(c.env, prompt);
+    systemPrompt = prompt;
+    
+    return c.json({ 
+      success: true, 
+      prompt: systemPrompt 
+    });
+  } catch (error) {
+    console.error('Error updating system prompt:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to update system prompt',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
+
+// Endpoint para obtener el número máximo de pasos
+app.get('/api/max-steps', async (c) => {
+  try {
+    const steps = await getMaxSteps(c.env);
+    return c.json({ 
+      success: true, 
+      maxSteps: steps 
+    });
+  } catch (error) {
+    console.error('Error getting max steps:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to get max steps',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
+
+// Endpoint para actualizar el número máximo de pasos
+app.post('/api/max-steps', async (c) => {
+  try {
+    const { maxSteps: newMaxSteps } = await c.req.json();
+    
+    if (typeof newMaxSteps !== 'number' || newMaxSteps <= 0) {
+      return c.json({
+        success: false,
+        error: 'maxSteps must be a positive number'
+      }, 400);
+    }
+    
+    await setMaxSteps(c.env, newMaxSteps);
+    maxSteps = newMaxSteps;
+    
+    return c.json({ 
+      success: true, 
+      maxSteps 
+    });
+  } catch (error) {
+    console.error('Error updating max steps:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to update max steps',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
 });
 
 // Endpoint to update the selected model
@@ -496,10 +588,13 @@ app.post('/api/assistant', async (c) => {
   try {
     const { maxStepsTemp: newMaxSteps, prompt: newPrompt, modelTemp: newModel } = await c.req.json();
     await setSelectedModel(c.env, newModel);
+    await setSystemPrompt(c.env, newPrompt);
+    
     selectedModel = newModel;
     systemPrompt = newPrompt;
     // Validate maxSteps
-    if (typeof newMaxSteps === 'number' && newMaxSteps > 0) {
+    if (typeof newMaxSteps === 'number' && newMaxSteps > 0 && newMaxSteps < 11) {
+      await setMaxSteps(c.env, newMaxSteps);
       maxSteps = newMaxSteps;
       return c.json({
         success: true,
@@ -1434,6 +1529,8 @@ export class Chat extends AIChatAgent<Env> {
 
   private async handleGeminiResponse(onFinish: StreamTextOnFinishCallback<ToolSet>) {
     const geminiApiKey = env.GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || (import.meta as any).env.GEMINI_API_KEY;
+    const maxSteps = await getMaxSteps(this.env);
+    const systemPrompt = await getSystemPrompt(this.env);
 
     if (!geminiApiKey) {
       throw new Error('GEMINI_API_KEY no está configurado en las variables de entorno');
