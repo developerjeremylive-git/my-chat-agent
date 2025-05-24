@@ -55,7 +55,10 @@ import {
   GearSix,
   DotsThreeVertical,
   BookmarkSimple,
-  BookmarksSimple
+  BookmarksSimple,
+  Paperclip,
+  CaretDown,
+  CaretUp
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -1775,12 +1778,11 @@ function ChatComponent() {
               </div>
 
               {/* Main input area - always visible */}
-              <div className={`relative p-3 lg:p-4 bg-gradient-to-t from-white/95 via-white/90 to-transparent dark:from-neutral-900/95 dark:via-neutral-900/90 dark:to-transparent backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/50`}>
-
+              <div className={`relative bg-gradient-to-t from-white/95 via-white/90 to-transparent dark:from-neutral-900/95 dark:via-neutral-900/90 dark:to-transparent backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/50`}>
                 {/* Decorative top border */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div>
 
-                <div className="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 lg:gap-4">
+                <div className="flex flex-row items-stretch gap-3 p-3 w-full">
                   {/* Input Form */}
                   <form
                     onSubmit={(e) => {
@@ -1807,9 +1809,11 @@ function ChatComponent() {
                       {/* Glow effect */}
                       <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
 
-                      <div className="relative flex items-center gap-3 p-3 lg:p-4 bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
+                      <div className="relative bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
                         <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-                        <div className="flex-1 relative z-10">
+
+                        {/* Input field */}
+                        <div className="relative z-10 p-3">
                           <Input
                             disabled={pendingToolCallConfirmation}
                             placeholder={pendingToolCallConfirmation
@@ -1822,43 +1826,38 @@ function ChatComponent() {
                           />
                         </div>
 
-                        {/* Minimize/Maximize button */}
-                        <div className="relative z-10">
-                          <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
-                            <Button
-                              variant="ghost"
-                              size="md"
-                              shape="square"
-                              className={`relative w-10 h-10 rounded-xl bg-gradient-to-br from-white via-neutral-50 to-white dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 border-2 border-[#F48120]/20 dark:border-[#F48120]/20 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 shadow-md hover:shadow-lg hover:shadow-[#F48120]/10 dark:hover:shadow-[#F48120]/20 transition-all duration-500 transform hover:scale-105 active:scale-95 group overflow-hidden ${systemPrompt ? 'rotate-0' : '-rotate-180'}`}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setSystemPrompt(!systemPrompt);
-                              }}
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-br from-[#F48120]/10 via-purple-500/10 to-[#F48120]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                              <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 via-purple-500/20 to-[#F48120]/20 blur opacity-0 group-hover:opacity-100 animate-pulse transition-opacity duration-500"></div>
-                              <div className={`transition-transform duration-500 ease-spring ${systemPrompt ? 'rotate-0 translate-y-0' : 'rotate-180 -translate-y-0.5'}`}>
-                                {systemPrompt ? (
-                                  <CaretCircleDown size={22} className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300 animate-bounce" weight="duotone" />
-                                ) : (
-                                  <CaretCircleDoubleUp size={22} className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300 animate-pulse" weight="duotone" />
-                                )}
-                              </div>
-                            </Button>
-                          </Tooltip>
-                        </div>
+                        {/* Buttons row below input */}
+                        <div className="relative z-10 flex items-center justify-between px-3 pb-3 pt-1">
+                          <div className="flex items-center gap-2">
+                            {/* Attachment button */}
+                            <Tooltip content="Adjuntar archivo">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                shape="square"
+                                className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-white via-neutral-50 to-white dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 border border-neutral-200/50 dark:border-neutral-600/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 shadow-sm hover:shadow transition-all duration-300 transform hover:scale-105 active:scale-95 group overflow-hidden"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  // TODO: Add file attachment logic here
+                                }}
+                              >
+                                <Paperclip size={16} className="relative z-10 text-neutral-500 group-hover:text-[#F48120] dark:group-hover:text-[#F48120] transition-colors duration-300" weight="bold" />
+                              </Button>
+                            </Tooltip>
+                          </div>
 
-                        {/* Send button */}
-                        <div className="relative z-10">
+                          {/* Send button */}
                           <Button
                             type="submit"
-                            shape="square"
-                            className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-[#F48120] to-purple-500 hover:from-orange-500 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group overflow-hidden"
+                            size="sm"
+                            className="relative px-4 h-9 rounded-xl bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-orange-500 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group overflow-hidden flex items-center gap-2"
                             disabled={pendingToolCallConfirmation || !agentInput.trim()}
-                            onClick={() => {
+                            onClick={(e) => {
                               try {
                                 if (!user) {
+                                  e.preventDefault();
                                   setIsLoginOpen(true);
                                   return;
                                 }
@@ -1867,11 +1866,41 @@ function ChatComponent() {
                               }
                             }}
                           >
-                            {/* Button glow effect */}
                             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                            <PaperPlaneRight size={20} className="relative z-10 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" weight="bold" />
+                            <span className="relative z-10 text-sm font-semibold">Enviar</span>
+                            <div className="relative z-10 w-5 h-5 flex items-center justify-center rounded-full bg-white/20 group-hover:bg-white/30 transition-colors duration-300">
+                              <PaperPlaneRight size={12} className="transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" weight="bold" />
+                            </div>
                           </Button>
                         </div>
+                      </div>
+                      <div className="flex flex-row items-stretch gap-3 p-3 w-full">
+                        {/* Right sidebar toggle button - Moved inside the form */}
+                        <div className="flex justify-center w-full mt-2">
+                          <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
+                            <Button
+                              variant="ghost"
+                              size="md"
+                              shape="circle"
+                              className={`relative w-10 h-10 rounded-full border-2 border-[#F48120]/20 dark:border-[#F48120]/20 hover:bg-[#F48120]/10 dark:hover:bg-[#F48120]/10 shadow-none hover:shadow-none transition-all duration-300 transform hover:scale-105 active:scale-95 group overflow-hidden bg-transparent ${systemPrompt ? 'rotate-0' : '-rotate-180'}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSystemPrompt(!systemPrompt);
+                              }}
+                            >
+                              <div className={`transition-transform duration-300 ease-spring ${systemPrompt ? 'rotate-0 translate-y-0' : 'rotate-180 -translate-y-0.5'}`}>
+                                {systemPrompt ? (
+                                  <CaretCircleDown size={22} className="relative z-10 text-[#F48120] group-hover:text-[#F48120] transition-colors duration-300" weight="duotone" />
+                                ) : (
+                                  <CaretCircleDoubleUp size={22} className="relative z-10 text-[#F48120] group-hover:text-[#F48120] transition-colors duration-300" weight="duotone" />
+                                )}
+                              </div>
+                            </Button>
+                          </Tooltip>
+                        </div>
+                          </Button>
+                        </Tooltip>
                       </div>
                     </div>
                   </form>

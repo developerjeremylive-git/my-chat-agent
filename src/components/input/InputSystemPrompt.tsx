@@ -140,7 +140,7 @@ export const InputSystemPrompt = ({
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
-      <div className="relative">
+      <div className="relative flex items-center">
         <input
           className={cn(
             inputClasses,
@@ -149,7 +149,7 @@ export const InputSystemPrompt = ({
               "add-size-md": size === "md",
               "add-size-base": size === "base",
             },
-            "w-full truncate cursor-pointer pr-3",
+            "w-full pr-24 truncate cursor-pointer", // Add right padding for buttons
             className
           )}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,46 +160,30 @@ export const InputSystemPrompt = ({
           value={value}
           {...props}
         />
-        
-        {/* Buttons below input */}
-        <div className="flex items-center justify-between mt-2 px-1">
-          <div className="flex space-x-2">
-            <button
-              type="button"
-              className="px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md flex items-center gap-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsPromptModalOpen(true);
-              }}
-              title="Guardar Consulta del Sistema"
-            >
-              <Plus size={14} weight="bold" />
-              <span>Nuevo</span>
-            </button>
-            
-            <button
-              ref={buttonRef}
-              type="button"
-              className="px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md flex items-center gap-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsDropdownOpen(!isDropdownOpen);
-              }}
-              title="Ver Consultas del Sistema guardadas"
-            >
-              <CaretDown size={14} weight="bold" />
-              <span>Guardados</span>
-            </button>
-          </div>
-          
-          {/* Right sidebar toggle button */}
+        <div className="absolute right-2 flex items-center space-x-1">
           <button
             type="button"
             className="p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
-            onClick={() => {}}
-            title="Mostrar herramientas"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsPromptModalOpen(true);
+            }}
+            title="Guardar Consulta del Sistema"
           >
-            <ArrowsOut size={16} />
+            <Plus size={16} />
+          </button>
+          <div className="h-4 w-px bg-neutral-300 dark:bg-neutral-600"></div>
+          <button
+            ref={buttonRef}
+            type="button"
+            className="p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsDropdownOpen(!isDropdownOpen);
+            }}
+            title="Ver Consultas del Sistema guardadas"
+          >
+            <CaretDown size={16} />
           </button>
         </div>
       </div>
