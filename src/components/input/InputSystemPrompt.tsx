@@ -140,56 +140,75 @@ export const InputSystemPrompt = ({
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
-      <div className="relative flex items-center">
-        <input
-          className={cn(
-            inputClasses,
-            {
-              "add-size-sm": size === "sm",
-              "add-size-md": size === "md",
-              "add-size-base": size === "base",
-            },
-            "w-full pr-24 truncate cursor-pointer", // Add right padding for buttons
-            className
-          )}
+      <div className="relative flex items-center w-full">
+        <div className="relative flex-1 min-w-0">
+          <input
+            className={cn(
+              inputClasses,
+              {
+                "add-size-sm": size === "sm",
+                "add-size-md": size === "md",
+                "add-size-base": size === "base",
+              },
+              "w-full pr-0 bg-transparent border-none focus:ring-0 truncate text-ellipsis overflow-hidden whitespace-nowrap",
+              className
+            )}
+            style={{
+              textOverflow: 'ellipsis',
+              paddingRight: '0.5rem',
+              paddingLeft: '0.5rem',
+            }}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             onChange?.(e);
             onValueChange?.(e.target.value);
           }}
-          onClick={() => setIsModalOpen(true)}
           value={value}
-          {...props}
-        />
-        <div className="absolute right-2 flex items-center space-x-1">
+          title={String(value || '')}
+            {...props}
+          />
+        </div>
+        <div className="flex-shrink-0 flex items-center space-x-0.5 sm:space-x-1 ml-1">
           <button
             type="button"
-            className="p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
+            className="p-1.5 sm:p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }}
+            title="Abrir editor de prompt"
+          >
+            <ArrowsOut size={14} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+          <div className="h-4 w-px bg-neutral-300 dark:bg-neutral-600 mx-0.5"></div>
+          <button
+            type="button"
+            className="p-1.5 sm:p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
             onClick={(e) => {
               e.stopPropagation();
               setIsPromptModalOpen(true);
             }}
             title="Guardar Consulta del Sistema"
           >
-            <Plus size={16} />
+            <Plus size={14} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
-          <div className="h-4 w-px bg-neutral-300 dark:bg-neutral-600"></div>
+          <div className="h-4 w-px bg-neutral-300 dark:bg-neutral-600 mx-0.5"></div>
           <button
             ref={buttonRef}
             type="button"
-            className="p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
+            className="p-1.5 sm:p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
             onClick={(e) => {
               e.stopPropagation();
               setIsDropdownOpen(!isDropdownOpen);
             }}
             title="Ver Consultas del Sistema guardadas"
           >
-            <CaretDown size={16} />
+            <CaretDown size={14} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
       </div>
 
       {isDropdownOpen && savedPrompts.length > 0 && (
-        <div className="w-full max-w-[min(calc(100%-1rem),600px)] absolute right-0 bottom-full mb-1 bg-gradient-to-br from-white to-purple-50 dark:from-neutral-900 dark:to-purple-900/10 border border-orange-200 dark:border-purple-700/50 rounded-lg shadow-lg shadow-orange-500/5 dark:shadow-purple-500/5 z-20 max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 hover:scrollbar-thumb-orange-300 dark:scrollbar-thumb-purple-700 dark:hover:scrollbar-thumb-purple-600 scrollbar-track-transparent backdrop-blur-sm">
+        <div className="w-[calc(100%+2rem)] sm:w-full max-w-[min(calc(100vw-2rem),600px)] absolute right-0 sm:right-auto bottom-full mb-1 bg-gradient-to-br from-white to-purple-50 dark:from-neutral-900 dark:to-purple-900/10 border border-orange-200 dark:border-purple-700/50 rounded-lg shadow-lg shadow-orange-500/5 dark:shadow-purple-500/5 z-20 max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 hover:scrollbar-thumb-orange-300 dark:scrollbar-thumb-purple-700 dark:hover:scrollbar-thumb-purple-600 scrollbar-track-transparent backdrop-blur-sm">
           {savedPrompts.map((prompt) => (
             <div
               key={prompt.id}
