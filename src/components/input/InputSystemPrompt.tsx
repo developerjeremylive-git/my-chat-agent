@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from 'react-dom';
 import { ArrowsOut, Plus, FloppyDisk, CaretDown, Trash, PencilSimple } from "@phosphor-icons/react";
 import { Modal } from "../modal/Modal";
@@ -43,6 +43,8 @@ export const InputSystemPrompt = ({
   const [promptToEdit, setPromptToEdit] = useState<SystemPrompt | null>(null);
   const [editPromptName, setEditPromptName] = useState("");
   const [editPromptContent, setEditPromptContent] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const loadedPrompts = localStorage.getItem("systemPrompts");
@@ -118,8 +120,26 @@ export const InputSystemPrompt = ({
     setPromptToDelete(null);
   };
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isDropdownOpen && 
+          dropdownRef.current && 
+          buttonRef.current &&
+          !dropdownRef.current.contains(event.target as Node) &&
+          !buttonRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
   return (
-    <div className="relative w-full">
+    <div className="relative w-full" ref={dropdownRef}>
       <div className="relative flex items-center">
         <input
           className={cn(
@@ -154,6 +174,7 @@ export const InputSystemPrompt = ({
           </button>
           <div className="h-4 w-px bg-neutral-300 dark:bg-neutral-600"></div>
           <button
+            ref={buttonRef}
             type="button"
             className="p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
             onClick={(e) => {
