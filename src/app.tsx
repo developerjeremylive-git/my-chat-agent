@@ -1018,15 +1018,15 @@ function ChatComponent() {
                   <div className="relative">
                     {/* Background glow effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 rounded-full blur-3xl opacity-50"></div>
-                    
+
                     {/* Main content container */}
                     <div className="relative flex flex-col items-center">
                       {/* Circular icon container with animation */}
-                      <div className="relative w-32 h-32 mb-6 animate-bounce-slow" 
-                           style={{
-                             animation: "bounce 2s infinite",
-                             animationTimingFunction: "cubic-bezier(0.28, 0.84, 0.42, 1)"
-                           }}>
+                      <div className="relative w-32 h-32 mb-6 animate-bounce-slow"
+                        style={{
+                          animation: "bounce 2s infinite",
+                          animationTimingFunction: "cubic-bezier(0.28, 0.84, 0.42, 1)"
+                        }}>
                         <div className="absolute inset-0 bg-gradient-to-r from-[#F48120] to-[#F48120]/80 rounded-full opacity-20 blur-xl"></div>
                         <div className="relative w-full h-full bg-white dark:bg-neutral-900 rounded-full border-2 border-[#F48120]/20 shadow-xl flex items-center justify-center">
                           <svg width="60" height="60" viewBox="0 0 120 120" fill="none" className="text-[#F48120]">
@@ -1040,7 +1040,7 @@ function ChatComponent() {
                             </g>
                             <defs>
                               <filter id="shadow" x="-4" y="-4" width="128" height="128" filterUnits="userSpaceOnUse">
-                                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.25"/>
+                                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.25" />
                               </filter>
                             </defs>
                           </svg>
@@ -1057,7 +1057,7 @@ function ChatComponent() {
                   </div>
                 </div>
               )}
-              
+
               {/* Rest of the messages */}
               {agentMessages.map((m: Message, index) => {
                 const isUser = m.role === "user";
@@ -1754,11 +1754,44 @@ function ChatComponent() {
                     className="flex-1 min-w-0"
                   >
                     <div className={`relative group ${agentMessages.length === 0 ? 'max-w-2xl mx-auto w-full' : ''}`}>
-                      {/* Glow effect */}
                       <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
-                      <div className="flex flex-row items-stretch gap-3 p-3 w-full">
-                        {/* Right sidebar toggle button - Moved inside the form */}
-                        <div className="flex justify-center w-full mt-4">
+
+                      <div className="relative">
+                        {/* Mobile toggle button */}
+                        <div className="w-full text-center mt-8 md:hidden absolute -top-12 z-20">
+                          <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
+                            <Button
+                              variant="ghost"
+                              size="md"
+                              shape="circular"
+                              className={`relative w-10 h-10 rounded-full border-2 border-[#F48120]/20 dark:border-[#F48120]/20 bg-white dark:bg-neutral-800 hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10 hover:border-[#F48120]/30 dark:hover:border-[#F48120]/30 shadow-sm hover:shadow transition-all duration-300 ease-out transform hover:scale-110 active:scale-95 group overflow-hidden ${systemPrompt ? 'rotate-0' : '-rotate-180'}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSystemPrompt(!systemPrompt);
+                              }}
+                            >
+                              <div className={`transition-transform duration-500 ease-spring ${systemPrompt ? 'rotate-0 translate-y-0' : 'rotate-180 -translate-y-0.5'}`}>
+                                {systemPrompt ? (
+                                  <CaretCircleDown
+                                    size={22}
+                                    className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300 animate-bounce"
+                                    weight="duotone"
+                                  />
+                                ) : (
+                                  <CaretCircleDoubleUp
+                                    size={22}
+                                    className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300 animate-pulse"
+                                    weight="duotone"
+                                  />
+                                )}
+                              </div>
+                            </Button>
+                          </Tooltip>
+                        </div>
+
+                        {/* Desktop toggle button */}
+                        <div className="hidden md:flex justify-center w-full mt-4">
                           <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
                             <Button
                               variant="ghost"
@@ -1804,7 +1837,8 @@ function ChatComponent() {
                             value={agentInput}
                             onChange={handleAgentInputChange}
                             onValueChange={undefined}
-                          />
+                            onClick={() => {setSystemPrompt(false);}}
+                         />
                         </div>
 
                         {/* Buttons row below input */}
