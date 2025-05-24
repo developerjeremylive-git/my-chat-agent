@@ -573,7 +573,7 @@ function ChatComponent() {
                       }}
                     >
                       <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
-                      <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Normal</span>
+                      <span className="font-medium group-hover:item:text-[#F48120] transition-colors duration-300">Normal</span>
                     </button>
                     <button
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
@@ -589,8 +589,8 @@ function ChatComponent() {
                         setShowSettingsMenu(false);
                       }}
                     >
-                      <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
-                      <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Completo</span>
+                      <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover:item:scale-125 transition-transform duration-300"></div>
+                      <span className="font-medium group-hover:item:text-[#F48120] transition-colors duration-300">Completo</span>
                     </button>
                     <div className="my-2 border-t border-neutral-200 dark:border-neutral-700"></div>
                     <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Tamaño del texto</div>
@@ -655,7 +655,7 @@ function ChatComponent() {
                         <Sun weight="duotone" className="w-5 h-5 text-amber-400" /> :
                         <Moon weight="duotone" className="w-5 h-5 text-blue-400" />
                       }
-                      <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">
+                      <span className="font-medium group-hover:item:text-[#F48120] transition-colors duration-300">
                         {theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
                       </span>
                     </button>
@@ -685,8 +685,8 @@ function ChatComponent() {
                       window.dispatchEvent(event);
                     }}
                   >
-                    <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
-                    <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Reducido</span>
+                    <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover:item:scale-125 transition-transform duration-300"></div>
+                    <span className="font-medium group-hover:item:text-[#F48120] transition-colors duration-300">Reducido</span>
                   </button>
                   <button
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
@@ -701,8 +701,8 @@ function ChatComponent() {
                       window.dispatchEvent(event);
                     }}
                   >
-                    <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
-                    <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Normal</span>
+                    <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover:item:scale-125 transition-transform duration-300"></div>
+                    <span className="font-medium group-hover:item:text-[#F48120] transition-colors duration-300">Normal</span>
                   </button>
                   <button
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
@@ -717,9 +717,55 @@ function ChatComponent() {
                       window.dispatchEvent(event);
                     }}
                   >
-                    <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
-                    <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Completo</span>
+                    <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover:item:scale-125 transition-transform duration-300"></div>
+                    <span className="font-medium group-hover:item:text-[#F48120] transition-colors duration-300">Completo</span>
                   </button>
+                  <div className="my-2 border-t border-neutral-200 dark:border-neutral-700"></div>
+                  <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Tamaño del texto</div>
+                  <div className="flex items-center justify-center gap-2 px-4 py-2">
+                    <button
+                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                              text-neutral-700 dark:text-neutral-300
+                              hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                              dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                              transition-all duration-300 ${textSize === 'small' ? 'bg-[#F48120]/10 text-[#F48120]' : ''}
+                              group/item`}
+                      onClick={() => {
+                        setTextSize('small');
+                        setShowSettingsMenu(false);
+                      }}
+                    >
+                      <span className="text-xs font-bold group-hover:item:text-[#F48120] transition-colors duration-300">A</span>
+                    </button>
+                    <button
+                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                              text-neutral-700 dark:text-neutral-300
+                              hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                              dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                              transition-all duration-300 ${textSize === 'normal' ? 'bg-[#F48120]/10 text-[#F48120]' : ''}
+                              group/item`}
+                      onClick={() => {
+                        setTextSize('normal');
+                        setShowSettingsMenu(false);
+                      }}
+                    >
+                      <span className="text-sm font-bold group-hover:item:text-[#F48120] transition-colors duration-300">A</span>
+                    </button>
+                    <button
+                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                              text-neutral-700 dark:text-neutral-300
+                              hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                              dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
+                              transition-all duration-300 ${textSize === 'large' ? 'bg-[#F48120]/10 text-[#F48120]' : ''}
+                              group/item`}
+                      onClick={() => {
+                        setTextSize('large');
+                        setShowSettingsMenu(false);
+                      }}
+                    >
+                      <span className="text-base font-bold group-hover:item:text-[#F48120] transition-colors duration-300">A</span>
+                    </button>
+                  </div>
                   <div className="my-2 border-t border-neutral-200 dark:border-neutral-700"></div>
                   <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Tema</div>
                   <button
@@ -728,13 +774,16 @@ function ChatComponent() {
                            hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
                            dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
                            transition-all duration-300 transform hover:translate-x-1 group/item"
-                    onClick={toggleTheme}
+                    onClick={() => {
+                      toggleTheme();
+                      setShowSettingsMenu(false);
+                    }}
                   >
                     {theme === "dark" ?
                       <Sun weight="duotone" className="w-5 h-5 text-amber-400" /> :
                       <Moon weight="duotone" className="w-5 h-5 text-blue-400" />
                     }
-                    <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">
+                    <span className="font-medium group-hover:item:text-[#F48120] transition-colors duration-300">
                       {theme === "dark" ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
                     </span>
                   </button>
@@ -965,85 +1014,51 @@ function ChatComponent() {
 
             <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${agentMessages.length === 0 ? 'flex flex-col justify-center items-center min-h-[calc(100vh-15rem)]' : 'pb-24'} max-h-[calc(100vh-5rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden mt-0`}>
               {agentMessages.length === 0 && (
-                <div className="w-full max-w-2xl mx-auto text-center px-4">
-                  <div className="mb-8">
-                    <div className="relative inline-block">
-                      <div className="absolute -inset-4 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-full blur-2xl dark:from-[#F48120]/10 dark:to-purple-500/10"></div>
-                      <div className="relative bg-gradient-to-r from-[#F48120] to-[#F48120]/80 text-white rounded-full p-5 inline-flex transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                        <Robot size={32} weight="duotone" />
+                <div className="w-full max-w-xl mx-auto text-center px-4">
+                  <div className="relative">
+                    {/* Background glow effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 rounded-full blur-3xl opacity-50"></div>
+                    
+                    {/* Main content container */}
+                    <div className="relative flex flex-col items-center">
+                      {/* Circular icon container with animation */}
+                      <div className="relative w-32 h-32 mb-6 animate-bounce-slow" 
+                           style={{
+                             animation: "bounce 2s infinite",
+                             animationTimingFunction: "cubic-bezier(0.28, 0.84, 0.42, 1)"
+                           }}>
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#F48120] to-[#F48120]/80 rounded-full opacity-20 blur-xl"></div>
+                        <div className="relative w-full h-full bg-white dark:bg-neutral-900 rounded-full border-2 border-[#F48120]/20 shadow-xl flex items-center justify-center">
+                          <svg width="60" height="60" viewBox="0 0 120 120" fill="none" className="text-[#F48120]">
+                            <g filter="url(#shadow)">
+                              <rect x="30" y="25" width="60" height="70" rx="10" stroke="currentColor" stroke-width="4" />
+                              <circle cx="45" cy="50" r="5" fill="currentColor" />
+                              <circle cx="75" cy="50" r="5" fill="currentColor" />
+                              <path d="M40 75 h40" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+                              <path d="M25 45 L15 45 M95 45 L105 45" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+                              <path d="M45 15 L45 25 M75 15 L75 25" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+                            </g>
+                            <defs>
+                              <filter id="shadow" x="-4" y="-4" width="128" height="128" filterUnits="userSpaceOnUse">
+                                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.25"/>
+                              </filter>
+                            </defs>
+                          </svg>
+                        </div>
                       </div>
+
+                      <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent mb-4">
+                        ¿En qué puedo ayudarte hoy?
+                      </h3>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                        Hazme cualquier pregunta o pídele al asistente que realice una tarea por ti.
+                      </p>
                     </div>
-                    <h3 className="mt-6 text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
-                      ¿En qué puedo ayudarte hoy?
-                    </h3>
-                    <p className="mt-3 text-neutral-600 dark:text-neutral-400 max-w-md mx-auto">
-                      Hazme cualquier pregunta o pídele al asistente que realice una tarea por ti.
-                    </p>
                   </div>
                 </div>
               )}
-              {/* {agentMessages.length === 0 && (
-                <div className="h-full flex items-center justify-center">
-                  <Modal
-                    isOpen={showModal}
-                    onClose={() => setShowModal(false)}
-                    className="w-full h-[85vh]"
-                  >
-                    <textarea
-                      className="w-full h-[80vh] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
-                      value={agentInput}
-                      onChange={handleAgentInputChange}
-                      placeholder="Escribe tu mensaje aquí..."
-                    />
-                  </Modal>
-                  <Card className="p-6 w-full max-w-md mx-auto bg-gradient-to-b from-neutral-100/80 to-neutral-50 dark:from-neutral-900/80 dark:to-neutral-950 backdrop-blur-sm border border-neutral-200/50 dark:border-neutral-800/50 shadow-xl hover:shadow-2xl transition-all duration-300">
-                    <div className="text-center space-y-6">
-                      <div className="relative">
-                        <div className="absolute -inset-4 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-full blur-2xl dark:from-[#F48120]/10 dark:to-purple-500/10"></div>
-                        <div className="bg-gradient-to-r from-[#F48120] to-[#F48120]/80 text-white rounded-full p-4 inline-flex relative transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                          <Robot size={28} weight="duotone" />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <h3 className="font-bold text-2xl bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Asistente IA</h3>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-3">
-                        <div onClick={() => {
-                          setShowModal(true);
-                          handleAgentInputChange({ target: { value: "¿Cuál es el pronóstico del tiempo para Madrid este fin de semana?" } } as any);
-                        }} className="group p-4 rounded-xl bg-[#F48120]/5 hover:bg-[#F48120]/10 dark:bg-[#F48120]/5 dark:hover:bg-[#F48120]/10 cursor-pointer transition-all duration-300 border border-transparent hover:border-[#F48120]/20">
-                          <span className="text-2xl mb-2 block">🌤️</span>
-                          <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Clima</span>
-                        </div>
-
-                        <div onClick={() => {
-                          setShowModal(true);
-                          handleAgentInputChange({ target: { value: "¿Qué hora es en Tokyo cuando son las 15:00 en Madrid?" } } as any);
-                        }} className="group p-4 rounded-xl bg-[#F48120]/5 hover:bg-[#F48120]/10 dark:bg-[#F48120]/5 dark:hover:bg-[#F48120]/10 cursor-pointer transition-all duration-300 border border-transparent hover:border-[#F48120]/20">
-                          <span className="text-2xl mb-2 block">🌍</span>
-                          <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Horarios</span>
-                        </div>
-
-                        <div onClick={() => {
-                          setShowModal(true);
-                          handleAgentInputChange({ target: { value: "¿Podrías ayudarme a crear un plan de estudio?" } } as any);
-                        }} className="group p-4 rounded-xl bg-[#F48120]/5 hover:bg-[#F48120]/10 dark:bg-[#F48120]/5 dark:hover:bg-[#F48120]/10 cursor-pointer transition-all duration-300 border border-transparent hover:border-[#F48120]/20">
-                          <span className="text-2xl mb-2 block">💡</span>
-                          <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">Ayuda</span>
-                        </div>
-                      </div>
-
-                      <div className="animate-bounce mt-8 text-neutral-500 dark:text-neutral-400">
-                        <CaretCircleDown size={24} className="mx-auto" />
-                        <p className="text-sm mt-2">Escribe tu consulta</p>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              )} */}
-
+              
+              {/* Rest of the messages */}
               {agentMessages.map((m: Message, index) => {
                 const isUser = m.role === "user";
                 const showAvatar =
@@ -1058,7 +1073,8 @@ function ChatComponent() {
                       </pre>
                     )}
                     <div
-                      className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                      className={`flex ${isUser ? "justify-end" : "justify-start"}`
+                      }
                     >
                       <div
                         className={`flex gap-2 max-w-[85%] ${isUser ? "flex-row-reverse" : "flex-row"
