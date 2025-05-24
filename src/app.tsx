@@ -484,7 +484,7 @@ function ChatComponent() {
             <div className="relative flex flex-col gap-2 p-2 bg-white dark:bg-neutral-900 rounded-xl shadow-xl
                          border border-neutral-200/50 dark:border-neutral-700/50
                          backdrop-blur-lg backdrop-saturate-150">
-              {/* <Button
+              <Button
                 variant="ghost"
                 size="sm"
                 className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
@@ -495,47 +495,7 @@ function ChatComponent() {
                 onClick={() => setIsSideMenuOpen(true)}
               >
                 <ChatCenteredDots size={20} className="text-[#F48120]" weight="duotone" />
-              </Button> */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                         flex items-center justify-center"
-                onClick={() => setIsSidebarOpen(true)}
-              >
-                <List size={20} className="text-[#F48120]" weight="duotone" />
               </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                         flex items-center justify-center"
-                onClick={() => setIsSettingsOpen(true)}
-              >
-                <Gear size={20} className="text-[#F48120]" weight="duotone" />
-              </Button>
-
-              <Button
-                ref={settingsButtonRef}
-                variant="ghost"
-                size="sm"
-                className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                         dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                         border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                         transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                         flex items-center justify-center"
-                onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-              >
-                <PaintBrushBroad size={20} className="text-[#F48120]" weight="duotone" />
-              </Button>
-
               {/* <Button
                 variant="ghost"
                 size="sm"
@@ -547,9 +507,9 @@ function ChatComponent() {
                 onClick={() => setShowToolsInterface(true)}
               >
                 <Rocket size={20} weight="duotone" className="text-[#F48120]" />
-              </Button> */}
+              </Button>
 
-              {/* <Tooltip content="Configurar Gemini API">
+              <Tooltip content="Configurar Gemini API">
               <Button
                 variant="ghost"
                 size="md"
@@ -564,35 +524,7 @@ function ChatComponent() {
               </Button>
             </Tooltip> */}
 
-              <Tooltip content="Limpiar historial">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                flex items-center justify-center"
-                  onClick={() => setShowClearDialog(true)}
-                >
-                  <Trash className="text-[#F48120]" size={20} weight="duotone" />
-                </Button>
-              </Tooltip>
 
-              <Tooltip content="Crear IA">
-                <Button
-                  variant="ghost"
-                  size="md"
-                  className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
-                dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
-                border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
-                transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
-                flex items-center justify-center"
-                  onClick={() => setShowOIAICreator(true)}
-                >
-                  <PlusCircle className="text-[#F48120]" size={29} weight="duotone" />
-                </Button>
-              </Tooltip>
 
               {showSettingsMenu && createPortal(
                 <div
@@ -1825,16 +1757,16 @@ function ChatComponent() {
                             >
                               <div className={`transition-transform duration-500 ease-spring ${systemPrompt ? 'rotate-0 translate-y-0' : 'rotate-180 -translate-y-0.5'}`}>
                                 {systemPrompt ? (
-                                  <CaretCircleDown 
-                                    size={22} 
-                                    className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300 animate-bounce" 
-                                    weight="duotone" 
+                                  <CaretCircleDown
+                                    size={22}
+                                    className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300 animate-bounce"
+                                    weight="duotone"
                                   />
                                 ) : (
-                                  <CaretCircleDoubleUp 
-                                    size={22} 
-                                    className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300 animate-pulse" 
-                                    weight="duotone" 
+                                  <CaretCircleDoubleUp
+                                    size={22}
+                                    className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300 animate-pulse"
+                                    weight="duotone"
                                   />
                                 )}
                               </div>
