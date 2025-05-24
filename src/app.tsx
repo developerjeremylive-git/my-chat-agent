@@ -53,7 +53,9 @@ import {
   Minus,
   Plus,
   GearSix,
-  DotsThreeVertical
+  DotsThreeVertical,
+  BookmarkSimple,
+  BookmarksSimple
 } from "@phosphor-icons/react";
 import AuthPopup from "./components/AuthPopup";
 import ReactMarkdown from "react-markdown";
@@ -172,6 +174,8 @@ function ChatComponent() {
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [isToolbarExpanded, setIsToolbarExpanded] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState(false);
+  const [savedQueries, setSavedQueries] = useState<string[]>([]);
+  const [showSavedQueries, setShowSavedQueries] = useState(false);
   const [showAgentInterface, setShowAgentInterface] = useState(false);
   const [showToolsInterface, setShowToolsInterface] = useState(false);
   const [inputText, setInputText] = useState('');
@@ -462,7 +466,7 @@ function ChatComponent() {
         />
         <main className="flex-1 w-full px-4 pb-4 relative">
           {/* Botón flotante de configuración */}
-     
+
           {/* Desktop Sidebar */}
           <div
             className={`fixed left-0 top-1/2 -translate-y-1/2 z-10 transition-all duration-300 ease-in-out group
@@ -806,194 +810,194 @@ function ChatComponent() {
           <div className={`h-[calc(100vh-2rem)] w-full ${getMainWidth()} mx-auto flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800 transition-all duration-300`}>
             {/* Header with buttons */}
             <div className="sticky top-0 z-50 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-lg border-b border-neutral-200/50 dark:border-neutral-700/50 px-4 py-2">
-      <div className="flex w-full max-w-5xl mx-auto justify-between items-center gap-2">
-        {/* Left side - Menu button and title */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="relative w-10 h-10 rounded-full bg-gradient-to-r from-[#F48120] to-purple-500 p-[1.5px] group
+              <div className="flex w-full max-w-5xl mx-auto justify-between items-center gap-2">
+                {/* Left side - Menu button and title */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="relative w-10 h-10 rounded-full bg-gradient-to-r from-[#F48120] to-purple-500 p-[1.5px] group
                      hover:shadow-lg hover:shadow-[#F48120]/25 dark:hover:shadow-purple-500/25
                      transform hover:scale-110 active:scale-95 transition-all duration-300"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          >
-            <div className="absolute inset-[1px] rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  >
+                    <div className="absolute inset-[1px] rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center
                         overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-[#F48120] before:to-purple-500 before:opacity-0
                         before:transition-opacity before:duration-300 group-hover:before:opacity-100">
-              <List size={20} className="relative z-10 text-[#F48120] group-hover:text-white transition-colors duration-300" weight="duotone" />
-            </div>
-          </Button>
-          <h1 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent hidden md:block">Asistente IA</h1>
-        </div>
+                      <List size={20} className="relative z-10 text-[#F48120] group-hover:text-white transition-colors duration-300" weight="duotone" />
+                    </div>
+                  </Button>
+                  <h1 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent hidden md:block">Asistente IA</h1>
+                </div>
 
-        {/* Center - Model Selector */}
-        <div className="flex-1 max-w-xl px-2">
-          <ModelSelect />
-        </div>
+                {/* Center - Model Selector */}
+                <div className="flex-1 max-w-xl px-2">
+                  <ModelSelect />
+                </div>
 
-        {/* Right side - Action buttons */}
-        <div className="flex items-center gap-2">
-          {/* Menu Dropdown */}
-          <div className="relative">
-            <Button
-              ref={menuButtonRef}
-              variant="ghost"
-              size="sm"
-              className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
+                {/* Right side - Action buttons */}
+                <div className="flex items-center gap-2">
+                  {/* Menu Dropdown */}
+                  <div className="relative">
+                    <Button
+                      ref={menuButtonRef}
+                      variant="ghost"
+                      size="sm"
+                      className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 hover:from-[#F48120]/20 hover:to-purple-500/20 
                        dark:from-[#F48120]/5 dark:to-purple-500/5 dark:hover:from-[#F48120]/15 dark:hover:to-purple-500/15
                        border border-[#F48120]/20 hover:border-[#F48120]/40 dark:border-[#F48120]/10 dark:hover:border-[#F48120]/30
                        transform hover:scale-[0.98] active:scale-[0.97] transition-all duration-300
                        flex items-center justify-center"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowMenu(prev => !prev);
-              }}
-            >
-              <DotsThreeVertical size={20} className="text-[#F48120]" weight="duotone" />
-            </Button>
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowMenu(prev => !prev);
+                      }}
+                    >
+                      <DotsThreeVertical size={20} className="text-[#F48120]" weight="duotone" />
+                    </Button>
 
-            {showMenu && (
-              <div
-                ref={menuRef}
-                className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-auto sm:mt-2 w-[calc(100%-1rem)] sm:w-72 max-w-sm origin-top-right rounded-xl bg-white dark:bg-neutral-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden
+                    {showMenu && (
+                      <div
+                        ref={menuRef}
+                        className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-auto sm:mt-2 w-[calc(100%-1rem)] sm:w-72 max-w-sm origin-top-right rounded-xl bg-white dark:bg-neutral-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden
                         border border-[#F48120]/20 dark:border-[#F48120]/10 transition-all duration-100 ease-in-out transform"
-                style={{
-                  maxHeight: 'calc(100vh - 5rem)',
-                  overflowY: 'auto'
-                }}>
-                <div className="py-1 space-y-1" role="none">
-                  {/* --- Personalización Section --- */}
-                  <div>
-                    <div className="px-4 pt-2 pb-1 text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80">Personalización</div>
-                    <button
-                      className="w-full text-left px-4 py-3 sm:py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
-                      onClick={() => {
-                        setShowSettingsMenu(true);
-                        setShowMenu(false);
-                      }}
-                    >
-                      <PaintBrushBroad size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
-                      <span className="truncate">Apariencia</span>
-                    </button>
-                  </div>
+                        style={{
+                          maxHeight: 'calc(100vh - 5rem)',
+                          overflowY: 'auto'
+                        }}>
+                        <div className="py-1 space-y-1" role="none">
+                          {/* --- Personalización Section --- */}
+                          <div>
+                            <div className="px-4 pt-2 pb-1 text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80">Personalización</div>
+                            <button
+                              className="w-full text-left px-4 py-3 sm:py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
+                              onClick={() => {
+                                setShowSettingsMenu(true);
+                                setShowMenu(false);
+                              }}
+                            >
+                              <PaintBrushBroad size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
+                              <span className="truncate">Apariencia</span>
+                            </button>
+                          </div>
 
-                  {/* --- Divider --- */}
-                  <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-2" />
+                          {/* --- Divider --- */}
+                          <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-2" />
 
-                  {/* --- Nivel de Asistencia Section --- */}
-                  <div>
-                    <div className="px-4 pt-2 pb-1 text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80">Nivel de Asistencia</div>
-                    <div className="px-4 py-2 space-y-2">
-                      <div className="relative h-2 bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-full overflow-hidden shadow-inner">
-                        <div
-                          className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-lg"
-                          style={{ width: `${(stepMax / 10) * 100}%` }}
-                        ></div>
-                      </div>
-                      <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1">
-                        <span className={stepMax <= 2 ? 'text-[#F48120] font-semibold' : ''}>Rápido</span>
-                        <span className={stepMax > 2 && stepMax <= 5 ? 'text-[#F48120] font-semibold' : ''}>Equilibrado</span>
-                        <span className={stepMax > 5 && stepMax <= 8 ? 'text-[#F48120] font-semibold' : ''}>Profundo</span>
-                        <span className={stepMax > 8 ? 'text-[#F48120] font-semibold' : ''}>Experto</span>
-                      </div>
-                      <div className="grid grid-cols-4 gap-1">
-                        <button
-                          onClick={() => setStepMax(1)}
-                          className={`p-1.5 text-xs rounded-md transition-all ${stepMax === 1 ? 'bg-[#F48120]/10 border border-[#F48120]/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
-                        >
-                          🎯 Básico
-                        </button>
-                        <button
-                          onClick={() => setStepMax(3)}
-                          className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 1 && stepMax <= 3 ? 'bg-blue-500/10 border border-blue-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
-                        >
-                          🧠 Equilibrado
-                        </button>
-                        <button
-                          onClick={() => setStepMax(7)}
-                          className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 3 && stepMax <= 7 ? 'bg-purple-500/10 border border-purple-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
-                        >
-                          🚀 Avanzado
-                        </button>
-                        <button
-                          onClick={() => setStepMax(10)}
-                          className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 7 ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
-                        >
-                          🤖 Experto
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <button
-                          onClick={() => stepMax > 1 && setStepMax(stepMax - 1)}
-                          disabled={stepMax <= 1}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 hover:border-red-300 dark:hover:border-red-600 disabled:opacity-40"
-                        >
-                          <Minus size={16} className="text-red-500" weight="bold" />
-                        </button>
-                        <div className="flex-1 text-center text-sm font-medium">
-                          Nivel {stepMax}
+                          {/* --- Nivel de Asistencia Section --- */}
+                          <div>
+                            <div className="px-4 pt-2 pb-1 text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80">Nivel de Asistencia</div>
+                            <div className="px-4 py-2 space-y-2">
+                              <div className="relative h-2 bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-full overflow-hidden shadow-inner">
+                                <div
+                                  className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-lg"
+                                  style={{ width: `${(stepMax / 10) * 100}%` }}
+                                ></div>
+                              </div>
+                              <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1">
+                                <span className={stepMax <= 2 ? 'text-[#F48120] font-semibold' : ''}>Rápido</span>
+                                <span className={stepMax > 2 && stepMax <= 5 ? 'text-[#F48120] font-semibold' : ''}>Equilibrado</span>
+                                <span className={stepMax > 5 && stepMax <= 8 ? 'text-[#F48120] font-semibold' : ''}>Profundo</span>
+                                <span className={stepMax > 8 ? 'text-[#F48120] font-semibold' : ''}>Experto</span>
+                              </div>
+                              <div className="grid grid-cols-4 gap-1">
+                                <button
+                                  onClick={() => setStepMax(1)}
+                                  className={`p-1.5 text-xs rounded-md transition-all ${stepMax === 1 ? 'bg-[#F48120]/10 border border-[#F48120]/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
+                                >
+                                  🎯 Básico
+                                </button>
+                                <button
+                                  onClick={() => setStepMax(3)}
+                                  className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 1 && stepMax <= 3 ? 'bg-blue-500/10 border border-blue-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
+                                >
+                                  🧠 Equilibrado
+                                </button>
+                                <button
+                                  onClick={() => setStepMax(7)}
+                                  className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 3 && stepMax <= 7 ? 'bg-purple-500/10 border border-purple-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
+                                >
+                                  🚀 Avanzado
+                                </button>
+                                <button
+                                  onClick={() => setStepMax(10)}
+                                  className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 7 ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
+                                >
+                                  🤖 Experto
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-2 mt-2">
+                                <button
+                                  onClick={() => stepMax > 1 && setStepMax(stepMax - 1)}
+                                  disabled={stepMax <= 1}
+                                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 hover:border-red-300 dark:hover:border-red-600 disabled:opacity-40"
+                                >
+                                  <Minus size={16} className="text-red-500" weight="bold" />
+                                </button>
+                                <div className="flex-1 text-center text-sm font-medium">
+                                  Nivel {stepMax}
+                                </div>
+                                <button
+                                  onClick={() => stepMax < 10 && setStepMax(stepMax + 1)}
+                                  disabled={stepMax >= 10}
+                                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 hover:border-green-300 dark:hover:border-green-600 disabled:opacity-40"
+                                >
+                                  <Plus size={16} className="text-green-500" weight="bold" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* --- Divider --- */}
+                          <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-2" />
+
+                          {/* --- Acciones Section --- */}
+                          <div>
+                            <div className="px-4 pt-2 pb-1 text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80">Acciones</div>
+                            <button
+                              className="w-full text-left px-4 py-3 sm:py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
+                              onClick={() => {
+                                setShowOIAICreator(true);
+                                setShowMenu(false);
+                              }}
+                            >
+                              <PlusCircle size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
+                              <span className="truncate">Nueva Consulta</span>
+                            </button>
+                            <button
+                              className="w-full text-left px-4 py-3 sm:py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
+                              onClick={() => {
+                                setShowClearDialog(true);
+                                setShowMenu(false);
+                              }}
+                            >
+                              <Trash size={16} className="text-red-500 flex-shrink-0" weight="duotone" />
+                              <span className="truncate">Limpiar Chat</span>
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => stepMax < 10 && setStepMax(stepMax + 1)}
-                          disabled={stepMax >= 10}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 hover:border-green-300 dark:hover:border-green-600 disabled:opacity-40"
-                        >
-                          <Plus size={16} className="text-green-500" weight="bold" />
-                        </button>
                       </div>
-                    </div>
+                    )}
                   </div>
 
-                  {/* --- Divider --- */}
-                  <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-2" />
-
-                  {/* --- Acciones Section --- */}
-                  <div>
-                    <div className="px-4 pt-2 pb-1 text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80">Acciones</div>
-                    <button
-                      className="w-full text-left px-4 py-3 sm:py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
-                      onClick={() => {
-                        setShowOIAICreator(true);
-                        setShowMenu(false);
-                      }}
-                    >
-                      <PlusCircle size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
-                      <span className="truncate">Nueva Consulta</span>
-                    </button>
-                    <button
-                      className="w-full text-left px-4 py-3 sm:py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
-                      onClick={() => {
-                        setShowClearDialog(true);
-                        setShowMenu(false);
-                      }}
-                    >
-                      <Trash size={16} className="text-red-500 flex-shrink-0" weight="duotone" />
-                      <span className="truncate">Limpiar Chat</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Settings Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="relative w-10 h-10 rounded-full bg-gradient-to-r from-[#F48120] to-purple-500 p-[1.5px] group
+                  {/* Settings Button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="relative w-10 h-10 rounded-full bg-gradient-to-r from-[#F48120] to-purple-500 p-[1.5px] group
                      hover:shadow-lg hover:shadow-[#F48120]/25 dark:hover:shadow-purple-500/25
                      transform hover:scale-110 active:scale-95 transition-all duration-300"
-            onClick={() => setIsSettingsOpen(true)}
-          >
-            <div className="absolute inset-[1px] rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center
+                    onClick={() => setIsSettingsOpen(true)}
+                  >
+                    <div className="absolute inset-[1px] rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center
                         overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-[#F48120] before:to-purple-500 before:opacity-0
                         before:transition-opacity before:duration-300 group-hover:before:opacity-100">
-              <Gear size={20} className="relative z-10 text-[#F48120] group-hover:text-white transition-colors duration-300" weight="duotone" />
+                      <Gear size={20} className="relative z-10 text-[#F48120] group-hover:text-white transition-colors duration-300" weight="duotone" />
+                    </div>
+                  </Button>
+                </div>
+              </div>
             </div>
-          </Button>
-        </div>
-      </div>
-    </div>
 
             {showAgent && (
               <ModernAgentTool
@@ -1680,123 +1684,198 @@ function ChatComponent() {
               </div> */}
               </div>
             </div>
-
-            {systemPrompt && (
-              <div className="mb-2 items-center justify-between ml-2 mr-2">
-                {/* <div className="flex-1"> */}
-                <div className="flex">
-                  <h2 className="mt-11.5 text-lg font-medium text-neutral-800 dark:text-neutral-200">
-                    <span className="text-[#F48120] mr-2 ml-1 flex mt-0.5">Sistema <Robot className="mr-1 ml-2 mt-1.5" /></span>
-                  </h2>
-                  <InputSystemPrompt
-                    type="text"
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    placeholder="Escribe tu consulta del sistema (Optional)"
-                    className="w-full px-4 py-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 transition-all duration-300 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/30"
-                  />
-                </div>
-                {/* </div> */}
-              </div>
-            )}
-
-            <div className={`relative p-3 lg:p-4 ${agentMessages.length === 0 ? 'mt-auto' : ''} bg-gradient-to-t from-white/95 via-white/90 to-transparent dark:from-neutral-900/95 dark:via-neutral-900/90 dark:to-transparent backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/50`}>
-              {/* Decorative top border */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div>
-
-              <div className="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 lg:gap-4">
-                {/* Expand/Collapse Button */}
-                <div className="flex justify-center lg:justify-start">
-                  <Tooltip content={systemPrompt ? "Minimizar" : "Expandir"}>
-                    <Button
-                      variant="ghost"
-                      size="md"
-                      shape="square"
-                      className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-800 dark:to-neutral-700 border border-neutral-200/50 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-[#F48120]/30 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 active:scale-95 group overflow-hidden"
-                      onClick={() => setSystemPrompt(!systemPrompt)}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-br from-[#F48120]/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      {systemPrompt ? (
-                        <CaretCircleDown size={22} className="relative z-10 text-[#F48120] group-hover:text-orange-500 transition-colors duration-300" weight="duotone" />
-                      ) : (
-                        <CaretCircleDoubleUp size={22} className="relative z-10 text-[#F48120] group-hover:text-orange-500 transition-colors duration-300" weight="duotone" />
-                      )}
-                    </Button>
-                  </Tooltip>
-                </div>
-
-                {/* Input Form */}
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const updateConfigs = async () => {
-                      try {
-                        await fetch('/api/assistant', {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText, modelTemp: selectedModel }),
-                        });
-                        handleAgentSubmit(e);
-                      } catch (error) {
-                        console.error('Error al actualizar configuraciones:', error);
-                      }
-                    };
-                    updateConfigs();
-                  }}
-                  className="flex-1 min-w-0"
-                >
-                  <div className={`relative group ${agentMessages.length === 0 ? 'max-w-2xl mx-auto w-full' : ''}`}>
-                    {/* Glow effect */}
-                    <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
-
-                    <div className="relative flex items-center gap-3 p-3 lg:p-4 bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
-                      {/* Background pattern */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-
-                      {/* Input field */}
-                      <div className="flex-1 relative z-10">
-                        <Input
-                          disabled={pendingToolCallConfirmation}
-                          placeholder={
-                            pendingToolCallConfirmation
-                              ? "Por favor responde a la confirmación de herramienta arriba..."
-                              : "✨ Escribe tu consulta aquí..."
-                          }
-                          className="w-full bg-transparent border-0 focus:ring-0 text-base lg:text-lg placeholder:text-neutral-400 dark:placeholder:text-neutral-500 font-medium px-2"
-                          value={agentInput}
-                          onChange={handleAgentInputChange}
-                          onValueChange={undefined}
+            <div className="fixed bottom-0 left-0 right-0 z-50">
+              {/* System prompt panel - slides from bottom */}
+              <div className={`transform transition-all duration-400 ease-out ${systemPrompt ? 'translate-y-0' : 'translate-y-full'}`}>
+                <div className="bg-gradient-to-b from-white/95 to-white/90 dark:from-neutral-900/95 dark:to-neutral-900/90 backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/30 shadow-lg">
+                  <div className="max-w-2xl mx-auto px-4 py-3">
+                    <div className="relative group">
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-30 group-focus-within:opacity-40 transition-opacity duration-300"></div>
+                      <div className="relative">
+                        <InputSystemPrompt
+                          type="text"
+                          value={inputText}
+                          onChange={(e) => setInputText(e.target.value)}
+                          placeholder="Configura el comportamiento del asistente..."
+                          className="w-full px-4 py-2.5 text-sm rounded-xl bg-white/80 dark:bg-neutral-900/80 border border-neutral-200/80 dark:border-neutral-700/50 hover:border-neutral-300/80 dark:hover:border-neutral-600/50 focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 shadow-sm transition-all duration-200 placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90"
                         />
-                      </div>
-
-                      {/* Send button */}
-                      <div className="relative z-10">
-                        <Button
-                          type="submit"
-                          shape="square"
-                          className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-[#F48120] to-purple-500 hover:from-orange-500 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group overflow-hidden"
-                          disabled={pendingToolCallConfirmation || !agentInput.trim()}
-                          onClick={() => {
-                            try {
-                              if (!user) {
-                                setIsLoginOpen(true);
-                                return;
+                        {/* <Tooltip content="Guardar consulta">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            shape="square"
+                            className="relative w-9 h-9 rounded-lg bg-gradient-to-br from-white via-neutral-50 to-white dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 border border-[#F48120]/20 dark:border-[#F48120]/20 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 active:scale-95 group overflow-hidden"
+                            onClick={() => {
+                              if (inputText.trim() && !savedQueries.includes(inputText)) {
+                                const newQueries = [...savedQueries, inputText];
+                                setSavedQueries(newQueries);
+                                localStorage.setItem('systemQueries', JSON.stringify(newQueries));
                               }
-                            } catch (error) {
-                              console.error('Error al procesar la solicitud:', error);
-                            }
-                          }}
-                        >
-                          {/* Button glow effect */}
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                          <PaperPlaneRight size={20} className="relative z-10 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" weight="bold" />
-                        </Button>
+                            }}
+                            disabled={!inputText.trim()}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#F48120]/10 via-purple-500/10 to-[#F48120]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <BookmarkSimple size={18} className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300" weight="duotone" />
+                          </Button>
+                        </Tooltip> */}
                       </div>
                     </div>
+
+                    {/* Saved Queries Section */}
+                    {/* <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-1.5 text-sm font-medium text-neutral-600 dark:text-neutral-300">
+                          <BookmarksSimple size={16} className="text-[#F48120]" weight="duotone" />
+                          Consultas guardadas
+                        </div>
+                        <button
+                          onClick={() => setShowSavedQueries(!showSavedQueries)}
+                          className="text-sm text-[#F48120] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-300 flex items-center gap-1.5"
+                        >
+                          {showSavedQueries ? (
+                            <>
+                              <CaretCircleDown size={16} weight="duotone" />
+                              Ocultar
+                            </>
+                          ) : (
+                            <>
+                              <CaretCircleDoubleUp size={16} weight="duotone" />
+                              Ver todas
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 transition-all duration-500 ${showSavedQueries ? 'max-h-[300px]' : 'max-h-[68px]'} overflow-y-auto pr-2`}>
+                        {savedQueries.map((query, index) => (
+                          <div key={index} className="group relative">
+                            <button
+                              onClick={() => setInputText(query)}
+                              className="w-full px-3 py-2 text-sm rounded-lg bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 border border-[#F48120]/20 dark:border-[#F48120]/20 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 shadow-sm hover:shadow-md dark:shadow-[#F48120]/5 dark:hover:shadow-[#F48120]/10 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-neutral-700 dark:text-neutral-300 hover:text-[#F48120] dark:hover:text-[#F48120] group flex items-center gap-2"
+                            >
+                              <span className="relative z-50 flex-1 text-left truncate">{query}</span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const newQueries = savedQueries.filter((_, i) => i !== index);
+                                  setSavedQueries(newQueries);
+                                  localStorage.setItem('systemQueries', JSON.stringify(newQueries));
+                                }}
+                                className="relative z-50 opacity-0 group-hover:opacity-100 hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 p-1"
+                              >
+                                <X size={14} weight="bold" />
+                              </button>
+                            </button>
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-purple-500/5 to-[#F48120]/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          </div>
+                        ))}
+                      </div>
+                    </div> */}
                   </div>
-                </form>
+                </div>
+              </div>
+
+              {/* Main input area - always visible */}
+              <div className={`relative p-3 lg:p-4 bg-gradient-to-t from-white/95 via-white/90 to-transparent dark:from-neutral-900/95 dark:via-neutral-900/90 dark:to-transparent backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/50`}>
+
+                {/* Decorative top border */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div>
+
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-end gap-3 lg:gap-4">
+                  {/* Input Form */}
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const updateConfigs = async () => {
+                        try {
+                          await fetch('/api/assistant', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText, modelTemp: selectedModel }),
+                          });
+                          handleAgentSubmit(e);
+                        } catch (error) {
+                          console.error('Error al actualizar configuraciones:', error);
+                        }
+                      };
+                      updateConfigs();
+                    }}
+                    className="flex-1 min-w-0"
+                  >
+                    <div className={`relative group ${agentMessages.length === 0 ? 'max-w-2xl mx-auto w-full' : ''}`}>
+                      {/* Glow effect */}
+                      <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
+
+                      <div className="relative flex items-center gap-3 p-3 lg:p-4 bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                        <div className="flex-1 relative z-10">
+                          <Input
+                            disabled={pendingToolCallConfirmation}
+                            placeholder={pendingToolCallConfirmation
+                              ? "Por favor responde a la confirmación de herramienta arriba..."
+                              : "✨ Escribe tu consulta aquí..."}
+                            className="w-full bg-transparent border-0 focus:ring-0 text-base lg:text-lg placeholder:text-neutral-400 dark:placeholder:text-neutral-500 font-medium px-2"
+                            value={agentInput}
+                            onChange={handleAgentInputChange}
+                            onValueChange={undefined}
+                          />
+                        </div>
+
+                        {/* Minimize/Maximize button */}
+                        <div className="relative z-10">
+                          <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
+                            <Button
+                              variant="ghost"
+                              size="md"
+                              shape="square"
+                              className={`relative w-10 h-10 rounded-xl bg-gradient-to-br from-white via-neutral-50 to-white dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 border-2 border-[#F48120]/20 dark:border-[#F48120]/20 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 shadow-md hover:shadow-lg hover:shadow-[#F48120]/10 dark:hover:shadow-[#F48120]/20 transition-all duration-500 transform hover:scale-105 active:scale-95 group overflow-hidden ${systemPrompt ? 'rotate-0' : '-rotate-180'}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSystemPrompt(!systemPrompt);
+                              }}
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-br from-[#F48120]/10 via-purple-500/10 to-[#F48120]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                              <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 via-purple-500/20 to-[#F48120]/20 blur opacity-0 group-hover:opacity-100 animate-pulse transition-opacity duration-500"></div>
+                              <div className={`transition-transform duration-500 ease-spring ${systemPrompt ? 'rotate-0 translate-y-0' : 'rotate-180 -translate-y-0.5'}`}>
+                                {systemPrompt ? (
+                                  <CaretCircleDown size={22} className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300 animate-bounce" weight="duotone" />
+                                ) : (
+                                  <CaretCircleDoubleUp size={22} className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300 animate-pulse" weight="duotone" />
+                                )}
+                              </div>
+                            </Button>
+                          </Tooltip>
+                        </div>
+
+                        {/* Send button */}
+                        <div className="relative z-10">
+                          <Button
+                            type="submit"
+                            shape="square"
+                            className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-[#F48120] to-purple-500 hover:from-orange-500 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group overflow-hidden"
+                            disabled={pendingToolCallConfirmation || !agentInput.trim()}
+                            onClick={() => {
+                              try {
+                                if (!user) {
+                                  setIsLoginOpen(true);
+                                  return;
+                                }
+                              } catch (error) {
+                                console.error('Error al procesar la solicitud:', error);
+                              }
+                            }}
+                          >
+                            {/* Button glow effect */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                            <PaperPlaneRight size={20} className="relative z-10 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" weight="bold" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>

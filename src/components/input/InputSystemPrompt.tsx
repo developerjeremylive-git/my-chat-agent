@@ -119,34 +119,8 @@ export const InputSystemPrompt = ({
   };
 
   return (
-    <div className="relative flex flex-col w-full overflow-visible">
-      <div className="flex justify-end gap-1 mb-2">
-        {/* <button
-          type="button"
-          className="p-2 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 bg-gradient-to-br from-orange-50 to-purple-50 dark:from-orange-500/5 dark:to-purple-500/5 hover:from-orange-100 hover:to-purple-100 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg border border-orange-200/50 dark:border-purple-700/30 shadow-sm hover:shadow-orange-500/10 dark:hover:shadow-purple-500/10 hover:scale-105"
-          onClick={() => setIsModalOpen(true)}
-          title="Expandir"
-        >
-          <ArrowsOut size={20} />
-        </button> */}
-        <button
-          type="button"
-          className="p-2 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 bg-gradient-to-br from-orange-50 to-purple-50 dark:from-orange-500/5 dark:to-purple-500/5 hover:from-orange-100 hover:to-purple-100 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg border border-orange-200/50 dark:border-purple-700/30 shadow-sm hover:shadow-orange-500/10 dark:hover:shadow-purple-500/10 hover:scale-105"
-          onClick={() => setIsPromptModalOpen(true)}
-          title="Guardar Consulta del Sitema"
-        >
-          <Plus size={20} />
-        </button>
-        <button
-          type="button"
-          className="p-2 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 bg-gradient-to-br from-orange-50 to-purple-50 dark:from-orange-500/5 dark:to-purple-500/5 hover:from-orange-100 hover:to-purple-100 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg border border-orange-200/50 dark:border-purple-700/30 shadow-sm hover:shadow-orange-500/10 dark:hover:shadow-purple-500/10 hover:scale-105"
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          title="Ver Consultas del Sitema guardadas"
-        >
-          <CaretDown size={20} />
-        </button>
-      </div>
-      <div className="relative flex-1">
+    <div className="relative w-full">
+      <div className="relative flex items-center">
         <input
           className={cn(
             inputClasses,
@@ -155,7 +129,7 @@ export const InputSystemPrompt = ({
               "add-size-md": size === "md",
               "add-size-base": size === "base",
             },
-            "truncate cursor-pointer",
+            "w-full pr-24 truncate cursor-pointer", // Add right padding for buttons
             className
           )}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -166,10 +140,35 @@ export const InputSystemPrompt = ({
           value={value}
           {...props}
         />
+        <div className="absolute right-2 flex items-center space-x-1">
+          <button
+            type="button"
+            className="p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsPromptModalOpen(true);
+            }}
+            title="Guardar Consulta del Sistema"
+          >
+            <Plus size={16} />
+          </button>
+          <div className="h-4 w-px bg-neutral-300 dark:bg-neutral-600"></div>
+          <button
+            type="button"
+            className="p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsDropdownOpen(!isDropdownOpen);
+            }}
+            title="Ver Consultas del Sistema guardadas"
+          >
+            <CaretDown size={16} />
+          </button>
+        </div>
       </div>
 
       {isDropdownOpen && savedPrompts.length > 0 && (
-        <div className="w-full max-w-[min(calc(100%-1rem),600px)] absolute bottom-full right-0 mb-1 bg-gradient-to-br from-white to-purple-50 dark:from-neutral-900 dark:to-purple-900/10 border border-orange-200 dark:border-purple-700/50 rounded-lg shadow-lg shadow-orange-500/5 dark:shadow-purple-500/5 z-20 max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 hover:scrollbar-thumb-orange-300 dark:scrollbar-thumb-purple-700 dark:hover:scrollbar-thumb-purple-600 scrollbar-track-transparent backdrop-blur-sm">
+        <div className="w-full max-w-[min(calc(100%-1rem),600px)] absolute right-0 bottom-full mb-1 bg-gradient-to-br from-white to-purple-50 dark:from-neutral-900 dark:to-purple-900/10 border border-orange-200 dark:border-purple-700/50 rounded-lg shadow-lg shadow-orange-500/5 dark:shadow-purple-500/5 z-20 max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 hover:scrollbar-thumb-orange-300 dark:scrollbar-thumb-purple-700 dark:hover:scrollbar-thumb-purple-600 scrollbar-track-transparent backdrop-blur-sm">
           {savedPrompts.map((prompt) => (
             <div
               key={prompt.id}
