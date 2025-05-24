@@ -1808,7 +1808,40 @@ function ChatComponent() {
                     <div className={`relative group ${agentMessages.length === 0 ? 'max-w-2xl mx-auto w-full' : ''}`}>
                       {/* Glow effect */}
                       <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
-
+                      <div className="flex flex-row items-stretch gap-3 p-3 w-full">
+                        {/* Right sidebar toggle button - Moved inside the form */}
+                        <div className="flex justify-center w-full mt-4">
+                          <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
+                            <Button
+                              variant="ghost"
+                              size="md"
+                              shape="circular"
+                              className={`relative w-10 h-10 rounded-full border-2 border-[#F48120]/20 dark:border-[#F48120]/20 bg-transparent hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10 hover:border-[#F48120]/30 dark:hover:border-[#F48120]/30 shadow-none hover:shadow-none transition-all duration-300 ease-out transform hover:scale-110 active:scale-95 group overflow-hidden ${systemPrompt ? 'rotate-0' : '-rotate-180'}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSystemPrompt(!systemPrompt);
+                              }}
+                            >
+                              <div className={`transition-transform duration-500 ease-spring ${systemPrompt ? 'rotate-0 translate-y-0' : 'rotate-180 -translate-y-0.5'}`}>
+                                {systemPrompt ? (
+                                  <CaretCircleDown 
+                                    size={22} 
+                                    className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300 animate-bounce" 
+                                    weight="duotone" 
+                                  />
+                                ) : (
+                                  <CaretCircleDoubleUp 
+                                    size={22} 
+                                    className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300 animate-pulse" 
+                                    weight="duotone" 
+                                  />
+                                )}
+                              </div>
+                            </Button>
+                          </Tooltip>
+                        </div>
+                      </div>
                       <div className="relative bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
                         <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
 
@@ -1874,34 +1907,7 @@ function ChatComponent() {
                           </Button>
                         </div>
                       </div>
-                      <div className="flex flex-row items-stretch gap-3 p-3 w-full">
-                        {/* Right sidebar toggle button - Moved inside the form */}
-                        <div className="flex justify-center w-full mt-2">
-                          <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
-                            <Button
-                              variant="ghost"
-                              size="md"
-                              shape="circle"
-                              className={`relative w-10 h-10 rounded-full border-2 border-[#F48120]/20 dark:border-[#F48120]/20 hover:bg-[#F48120]/10 dark:hover:bg-[#F48120]/10 shadow-none hover:shadow-none transition-all duration-300 transform hover:scale-105 active:scale-95 group overflow-hidden bg-transparent ${systemPrompt ? 'rotate-0' : '-rotate-180'}`}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setSystemPrompt(!systemPrompt);
-                              }}
-                            >
-                              <div className={`transition-transform duration-300 ease-spring ${systemPrompt ? 'rotate-0 translate-y-0' : 'rotate-180 -translate-y-0.5'}`}>
-                                {systemPrompt ? (
-                                  <CaretCircleDown size={22} className="relative z-10 text-[#F48120] group-hover:text-[#F48120] transition-colors duration-300" weight="duotone" />
-                                ) : (
-                                  <CaretCircleDoubleUp size={22} className="relative z-10 text-[#F48120] group-hover:text-[#F48120] transition-colors duration-300" weight="duotone" />
-                                )}
-                              </div>
-                            </Button>
-                          </Tooltip>
-                        </div>
-                          </Button>
-                        </Tooltip>
-                      </div>
+
                     </div>
                   </form>
                 </div>
