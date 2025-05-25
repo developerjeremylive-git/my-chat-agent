@@ -66,7 +66,10 @@ export default function Header({
             className="relative w-10 h-10 rounded-full bg-gradient-to-r from-[#F48120] to-purple-500 p-[1.5px] group
              hover:shadow-lg hover:shadow-[#F48120]/25 dark:hover:shadow-purple-500/25
              transform hover:scale-110 active:scale-95 transition-all duration-300"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            onClick={() => {
+              setIsSidebarOpen(!isSidebarOpen);
+              setIsSettingsOpen(false);
+            }}
           >
             <div className="absolute inset-[1px] rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center
                 overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-[#F48120] before:to-purple-500 before:opacity-0
