@@ -99,7 +99,7 @@ export const Modal = ({
   if (!isOpen) return null;
 
   const modalContent = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-70 flex items-center justify-center p-4 overflow-y-auto">
       <div 
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}

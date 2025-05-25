@@ -337,7 +337,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
   return (
     <>
       {showOiaiGuide && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowOiaiGuide(false)}>
+        <div className="fixed inset-0 z-70 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowOiaiGuide(false)}>
           <div className="bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl border border-neutral-200 dark:border-neutral-800 scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" onClick={(e) => e.stopPropagation()}>
             <div className="p-6 space-y-6">
               <div className="flex items-center justify-between sticky top-0 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm z-50 -mx-6 px-6 border-b border-neutral-200 dark:border-neutral-800 h-[60px]">
@@ -466,7 +466,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
       )}
 
       {showOIAICreator && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-70 flex items-center justify-center">
           <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[85vh] overflow-hidden relative transform transition-all duration-300 scale-100 opacity-100">
             <OIAICreator
               onCopyContent={(content) => {
@@ -512,7 +512,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
               <div className="px-2 py-2">
                 <button
                   className="flex items-center gap-2 w-full px-3 py-2 text-left text-neutral-700 dark:text-neutral-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-gradient-to-r hover:from-orange-50 hover:to-purple-50 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg transition-all duration-300"
-                  onClick={() => setShowSystemPromptDashboard(true)}
+                  onClick={() => {setShowSystemPromptDashboard(true); onClose(); }}
                 >
                   <ChatText size={20} />
                   <span>Prompts del Sistema</span>
@@ -537,7 +537,6 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                     variant="ghost"
                     className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20"
                     onClick={() => { setShowOIAICreator(true); onClose(); }}
-                    disabled={true}
                   >
                     <PlusCircle weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
                     Crear Asistente IA
@@ -564,6 +563,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowAgentDashboard(true);
+                      onClose();
                     }}
                   >
                     <Users weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />

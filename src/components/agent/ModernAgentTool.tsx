@@ -350,7 +350,7 @@ export function ModernAgentTool({ isOpen, onClose, agentToEdit, onSaveAgent }: M
   }, []);
 
   return (
-    <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center h-screen ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'} transition-all duration-300`}>
+    <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-70 flex items-center justify-center h-screen ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'} transition-all duration-300`}>
       <Card className="w-full max-w-2xl h-[78vh] bg-white dark:bg-neutral-900 p-6 m-4 relative overflow-y-auto border border-neutral-200 dark:border-neutral-800 shadow-xl">
         <Button
           variant="ghost"
