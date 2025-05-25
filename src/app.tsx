@@ -530,16 +530,26 @@ function ChatComponent() {
               {showSettingsMenu && createPortal(
                 <div
                   ref={settingsMenuRef}
-                  className="fixed bottom-16 left-1/2 -translate-x-1/2 sm:absolute sm:bottom-auto sm:left-auto sm:translate-x-0 sm:mt-2 
-                         w-[calc(100vw-2rem)] sm:min-w-[200px] sm:w-auto
-                         bg-white dark:bg-neutral-900 rounded-xl shadow-xl
-                         border border-neutral-200/50 dark:border-neutral-700/50
-                         backdrop-blur-lg backdrop-saturate-150 z-50"
-                  style={window.innerWidth >= 640 ? {
-                    left: settingsButtonRef.current?.getBoundingClientRect().right ?? 0 + 8,
-                    top: settingsButtonRef.current?.getBoundingClientRect().top ?? 0
-                  } : {}}
+                  className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                  onClick={(e) => {
+                    if (e.target === e.currentTarget) {
+                      setShowSettingsMenu(false);
+                    }
+                  }}
                 >
+                  <div 
+                    className="relative w-full max-w-md bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl overflow-hidden
+                             border border-neutral-200/50 dark:border-neutral-700/50 animate-fade-in-up"
+                  >
+                    <div className="absolute right-3 top-3">
+                      <button
+                        onClick={() => setShowSettingsMenu(false)}
+                        className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 transition-colors"
+                        aria-label="Cerrar configuración"
+                      >
+                        <X size={20} weight="bold" />
+                      </button>
+                    </div>
                   <div className="p-2 space-y-1">
                     <div className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-400 font-medium">Ancho del chat</div>
                     <button
@@ -661,9 +671,10 @@ function ChatComponent() {
                       </span>
                     </button>
                   </div>
-                </div>,
-                document.body
-              )}
+                </div>
+              </div>,
+              document.body
+            )}
               <div
                 id="settingsMenu"
                 className="absolute left-full ml-2 top-0 w-56 bg-white dark:bg-neutral-900 rounded-xl shadow-xl
