@@ -326,7 +326,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                                         <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Nuevo Chat</span>
                                     </button>
 
-                                    <button
+                                    {/* <button
                                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
                                         text-neutral-700 dark:text-neutral-300
                                         hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
@@ -360,7 +360,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                                     >
                                         <div className="w-2 h-2 rounded-full bg-[#F48120] group-hover/item:scale-125 transition-transform duration-300"></div>
                                         <span className="font-medium group-hover/item:text-[#F48120] transition-colors duration-300">Limpiar historial</span>
-                                    </button>
+                                    </button> */}
                                 </div>
 
                                 {/* Chats recientes */}
