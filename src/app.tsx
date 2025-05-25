@@ -895,7 +895,7 @@ function ChatComponent() {
                       </pre>
                     )}
                     <div
-                      className={`flex ${isUser ? "justify-end" : "justify-start"}`
+                      className={`mt-11 flex ${isUser ? "justify-end" : "justify-start"}`
                       }
                     >
                       <div

@@ -52,7 +52,7 @@ export function MessageView({ text, onCopy }: MessageViewProps) {
     };
 
     return (
-        <div className="flex flex-col gap-2 mt-11">
+        <div className="flex flex-col gap-2">
             <div className="markdown-content">
                 {renderContent()}
             </div>
