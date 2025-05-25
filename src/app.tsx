@@ -1591,7 +1591,7 @@ function ChatComponent() {
                     }}
                     className="flex-1 min-w-0"
                   >
-                    <div className={`relative group ${agentMessages.length === 0 ? 'max-w-2xl mx-auto w-full' : ''}`}>
+                    <div className="relative group max-w-4xl mx-auto w-full">
                       <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
 
                       <div className="relative">
