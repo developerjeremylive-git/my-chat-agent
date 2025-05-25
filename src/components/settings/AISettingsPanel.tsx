@@ -117,7 +117,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
     <>
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-50 w-80 transform transition-transform duration-300 ease-in-out shadow-2xl',
+          'fixed inset-y-0 right-0 z-70 w-80 transform transition-transform duration-300 ease-in-out shadow-2xl',
           'bg-gradient-to-b from-white to-gray-100 dark:from-neutral-900 dark:to-neutral-950 border-l border-neutral-200 dark:border-neutral-800 overflow-y-auto scrollbar-hide',
           'scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
           isOpen ? 'translate-x-0' : 'translate-x-full'

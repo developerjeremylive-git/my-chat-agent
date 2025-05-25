@@ -530,7 +530,7 @@ function ChatComponent() {
               {showSettingsMenu && createPortal(
                 <div
                   ref={settingsMenuRef}
-                  className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                  className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm z-70 flex items-center justify-center p-4"
                   onClick={(e) => {
                     if (e.target === e.currentTarget) {
                       setShowSettingsMenu(false);
@@ -805,16 +805,18 @@ function ChatComponent() {
           </div>
           <div className={`h-[calc(100vh-2rem)] w-full ${getMainWidth()} mx-auto flex flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800 transition-all duration-300`}>
             {/* Header Component */}
-            <Header
-              isSidebarOpen={isSidebarOpen}
-              setIsSidebarOpen={setIsSidebarOpen}
-              stepMax={stepMax}
-              setStepMax={setStepMax}
-              setShowSettingsMenu={setShowSettingsMenu}
-              setShowOIAICreator={setShowOIAICreator}
-              setShowClearDialog={setShowClearDialog}
-              setIsSettingsOpen={setIsSettingsOpen}
-            />
+            <div className="sticky top-0 z-60 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800">
+              <Header
+                isSidebarOpen={isSidebarOpen}
+                setIsSidebarOpen={setIsSidebarOpen}
+                stepMax={stepMax}
+                setStepMax={setStepMax}
+                setShowSettingsMenu={setShowSettingsMenu}
+                setShowOIAICreator={setShowOIAICreator}
+                setShowClearDialog={setShowClearDialog}
+                setIsSettingsOpen={setIsSettingsOpen}
+              />
+            </div>
 
             {showAgent && (
               <ModernAgentTool
