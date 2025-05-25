@@ -835,12 +835,17 @@ function ChatComponent() {
             )}
 
             {showOIAICreator && (
-              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-                <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[85vh] overflow-hidden relative transform transition-all duration-300 scale-100 opacity-100">
-                  <OIAICreator
-                    onCopyContent={handleOIAICopy}
-                    onClose={() => setShowOIAICreator(false)}
-                  />
+              <div className="fixed inset-0 bg-black/70 dark:bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden border border-neutral-200/50 dark:border-neutral-700/50">
+                  <div className="relative h-full flex flex-col">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#F48120] to-purple-500"></div>
+                    <div className="flex-1 overflow-y-auto p-6">
+                      <OIAICreator
+                        onCopyContent={handleOIAICopy}
+                        onClose={() => setShowOIAICreator(false)}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

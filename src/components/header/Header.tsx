@@ -212,7 +212,7 @@ export default function Header({
                       }}
                     >
                       <PlusCircle size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
-                      <span className="truncate">Nueva Consulta</span>
+                      <span className="truncate">Nuevo Comportamiento del Asistente</span>
                     </button>
                     <button
                       className="w-full text-left px-4 py-3 sm:py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-neutral-700 flex items-center space-x-2"
