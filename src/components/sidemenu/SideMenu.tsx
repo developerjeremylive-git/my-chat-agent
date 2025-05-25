@@ -40,7 +40,7 @@ function EditTitleModal({ isOpen, onClose, onSave, currentTitle }: EditTitleModa
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-70">
             <div className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-96">
                 <h3 className="text-lg font-semibold mb-4">Editar título del chat</h3>
                 <form onSubmit={handleSubmit}>
@@ -287,7 +287,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
 
                     {/* Panel lateral */}
                     <motion.div
-                        className="fixed left-0 top-0 bottom-0 w-80 bg-white dark:bg-neutral-900 z-50
+                        className="fixed left-0 top-0 bottom-0 w-80 bg-white dark:bg-neutral-900 z-70
                         border-r border-neutral-200 dark:border-neutral-700"
                         initial={{ x: '-100%' }}
                         animate={{ x: 0 }}
@@ -384,6 +384,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         setEditingChat(chat);
+                                                        onClose();
                                                     }}
                                                     className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-lg"
                                                 >
