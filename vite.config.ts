@@ -11,10 +11,20 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    exclude: ['@cloudflare/workers-types', 'vite'],
+    include: ['react', 'react-dom', '@cloudflare/workers-types/2024-02-01']
+  },
   build: {
     rollupOptions: {
       external: ['stripe']
-    }
+    },
+    commonjsOptions: {
+      include: [/node_modules/],
+      extensions: ['.js', '.cjs'],
+      strictRequires: true,
+      transformMixedEsModules: true,
+    },
   },
   define: {
     'process.env.VITE_SUPABASE_URL': JSON.stringify('https://enryddelkevswwawmkyx.supabase.co'),
