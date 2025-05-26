@@ -9,7 +9,18 @@ export interface APIMessage {
 }
 
 export function transformAPIMessagesToAgentMessages(apiMessages: APIMessage[]): Message[] {
-  return apiMessages.map(msg => {
+  if (apiMessages.length === 0) return [];
+  
+  // Asumimos que los mensajes vienen en grupos y el último grupo está al final del array
+  // Tomamos el último mensaje como referencia
+  const lastMessage = apiMessages[apiMessages.length - 1];
+  
+  // Filtramos los mensajes que pertenecen al mismo grupo que el último mensaje
+  // Aquí asumimos que los mensajes del mismo grupo tienen el mismo chatId
+  // Si hay otra propiedad que indique el grupo, deberías usarla en su lugar
+  const lastGroup = apiMessages.filter(msg => msg.chatId === lastMessage.chatId);
+  
+  return lastGroup.map(msg => {
     const createdAt = typeof msg.createdAt === 'string' 
       ? new Date(msg.createdAt)
       : msg.createdAt;
@@ -25,7 +36,7 @@ export function transformAPIMessagesToAgentMessages(apiMessages: APIMessage[]): 
         }
       ],
       createdAt
-    } as Message; // Type assertion to handle the Message interface
+    } as Message;
   });
 }
 
