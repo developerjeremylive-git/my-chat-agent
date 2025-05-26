@@ -111,90 +111,64 @@ function ChatComponent() {
           // Transform API messages to agent messages format
           const loadedMessages = transformAPIMessagesToAgentMessages(data.messages);
 
+          // Filter out any messages that aren't from user or assistant
+          const filteredMessages = loadedMessages.filter((msg: { role: string }) =>
+            msg.role === 'user' || msg.role === 'assistant'
+          );
+
+          // Map to the expected Message type for the chat context
+          const chatMessages = filteredMessages.map((msg: any) => ({
+            id: msg.id,
+            role: msg.role as 'user' | 'assistant',
+            content: msg.content,
+            parts: msg.parts || [{ type: 'text', text: msg.content }],
+            createdAt: typeof msg.createdAt === 'string'
+              ? new Date(msg.createdAt)
+              : msg.createdAt || new Date()
+          }));
+
+          // Get the last message date or use current date if no messages
+          const lastMessageDate = chatMessages.length > 0
+            ? chatMessages[chatMessages.length - 1].createdAt
+            : new Date();
+
+          // Create an updated chat with the filtered messages
+          const updatedChat = {
+            id: chatId,
+            title: currentChat?.title || `Chat ${new Date().toLocaleString()}`,
+            messages: chatMessages,
+            lastMessageAt: lastMessageDate,
+            createdAt: currentChat?.createdAt || new Date()
+          };
+
           // Update the chat context
           selectChat(chatId);
           setSelectedChatId(chatId);
-
-          // Update the chat context with the loaded messages
-          if (currentChat) {
-            // Get the last message date or use current date if no messages
-            const lastMessageDate = loadedMessages.length > 0
-              ? (() => {
-                const lastMsg = loadedMessages[loadedMessages.length - 1];
-                return typeof lastMsg.createdAt === 'string'
-                  ? new Date(lastMsg.createdAt)
-                  : lastMsg.createdAt || new Date();
-              })()
-              : new Date();
-
-            // Filter out any messages that aren't from user or assistant
-            const filteredMessages = loadedMessages.filter(msg =>
-              msg.role === 'user' || msg.role === 'assistant'
-            );
-
-            // Map to the expected Message type for the chat context
-            const chatMessages = filteredMessages.map(msg => ({
-              id: msg.id,
-              role: msg.role as 'user' | 'assistant',
-              content: msg.content,
-              createdAt: typeof msg.createdAt === 'string'
-                ? new Date(msg.createdAt)
-                : msg.createdAt || new Date()
-            }));
-
-            // Create an updated chat with the filtered messages
-            const updatedChat = {
-              ...currentChat,
-              messages: chatMessages,
-              lastMessageAt: lastMessageDate
-            };
-
-            // Update the chat in the context
-            updateChat(chatId, updatedChat);
-          }
+          
+          // Update the chat in the context
+          updateChat(chatId, updatedChat);
+          
+          // Update the current messages state
+          setCurrentMessages(chatMessages);
 
           // Clear existing messages in the agent's state
           clearHistory();
 
-          // Add each message to the agent's state
-          // We'll use the agent's built-in methods to add messages
-          // This ensures the agent's internal state is properly updated
-          loadedMessages.forEach(msg => {
-            // Create a properly formatted message for the agent
-            const message = {
-              id: msg.id,
-              role: msg.role,
-              content: msg.content,
-              parts: msg.parts || [{ type: 'text', text: msg.content }],
-              createdAt: typeof msg.createdAt === 'string'
-                ? new Date(msg.createdAt)
-                : msg.createdAt || new Date()
-            };
-
-            // Update the agent's state
-            // This is a simplified example - you might need to adjust based on your agent's API
-            // Some agent libraries might require using a specific method to add messages
-            // For example: agent.addMessage(message);
-
-            // For now, we'll update the current messages for the UI
-            setCurrentMessages(prev => [...prev, message]);
-          });
-
           // Trigger event to update the UI
           window.dispatchEvent(new CustomEvent('chatSelected', {
-            detail: {
-              chatId,
-              messages: loadedMessages,
-              isInitialLoad: false
-            }
+            detail: { chatId, messages: chatMessages }
           }));
-
-          // Add a small delay to ensure the DOM is updated before scrolling
-          setTimeout(scrollToBottom, 100);
+          
+          // Scroll to bottom to show the latest messages
+          scrollToBottom();
+        } else {
+          console.error('Failed to load chat messages: Invalid data format');
         }
+      } else {
+        console.error('Failed to load chat messages: Server returned', response.status);
       }
     } catch (error) {
-      console.error('Error loading chat messages:', error);
+      console.error('Error loading chat:', error);
     } finally {
       setIsLoadingChat(false);
     }
