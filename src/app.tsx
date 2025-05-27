@@ -184,14 +184,14 @@ function ChatComponent() {
       updateChat(chatId, updatedChat);
 
       // Update agent's message history if available
-      if (agent && typeof agent.chat === 'function') {
+      if (agent && typeof agent.chat === 'function' && chatMessages.length > 0) {
         console.log('Updating agent chat history...');
         try {
           await agent.chat({
             messages: chatMessages.map(msg => ({
               role: msg.role,
               content: msg.content,
-              parts: msg.parts
+              parts: msg.parts || []
             }))
           });
           console.log('Agent chat history updated');
@@ -200,16 +200,31 @@ function ChatComponent() {
         }
       }
       
-      // Update UI state only once at the end
-      console.log('Setting current messages in state:', chatMessages.length);
-      setCurrentMessages(chatMessages);
-      
-      // Scroll to bottom after a small delay to ensure UI is updated
-      setTimeout(() => {
-        console.log('Scrolling to bottom...');
-        scrollToBottom();
-      }, 50);
-      
+      // Clear existing agent messages if clearHistory is available
+      if (clearHistory) {
+        console.log('Clearing agent history...');
+        clearHistory();
+        
+        // Use a small delay to ensure the clear has completed
+        setTimeout(() => {
+          console.log('Setting current messages after clear...');
+          setCurrentMessages(chatMessages);
+          
+          // Scroll to bottom after updating messages
+          console.log('Scrolling to bottom...');
+          scrollToBottom();
+        }, 100);
+      } else {
+        // If no clearHistory function, just update the UI
+        console.log('Setting current messages directly...');
+        setCurrentMessages(chatMessages);
+        
+        // Scroll to bottom after updating messages
+        setTimeout(() => {
+          console.log('Scrolling to bottom...');
+          scrollToBottom();
+        }, 50);
+      }
     } catch (error) {
       console.error('Error loading chat:', error);
       // You might want to show an error toast to the user here
@@ -460,7 +475,7 @@ function ChatComponent() {
     handleInputChange: handleAgentInputChange,
     handleSubmit: handleAgentSubmit,
     addToolResult,
-    clearHistory
+    clearHistory,
     // isLoading,
     // stop
   } = useAgentChat({
