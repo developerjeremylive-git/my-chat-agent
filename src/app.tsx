@@ -183,10 +183,18 @@ function ChatComponent() {
       console.log('Updating chat in context:', updatedChat);
       updateChat(chatId, updatedChat);
       
-      // Set the current messages to trigger a re-render
-      console.log('Setting current messages:', chatMessages);
-      setCurrentMessages(chatMessages);
-      
+      // Update the chat in the context first
+      console.log('Updating chat in context with messages:', chatMessages.length);
+      updateChat(chatId, {
+        id: chatId,
+        title: currentChat?.title || `Chat ${new Date().toLocaleString()}`,
+        messages: chatMessages,
+        lastMessageAt: chatMessages.length > 0
+          ? chatMessages[chatMessages.length - 1].createdAt
+          : new Date(),
+        createdAt: currentChat?.createdAt || new Date()
+      });
+
       // Update agent's message history if available
       if (agent && typeof agent.chat === 'function') {
         console.log('Updating agent chat history...');
@@ -204,12 +212,15 @@ function ChatComponent() {
         }
       }
       
-      // Force a re-render of the messages
+      // Update UI state only once at the end
+      console.log('Setting current messages in state:', chatMessages.length);
+      setCurrentMessages(chatMessages);
+      
+      // Scroll to bottom after a small delay to ensure UI is updated
       setTimeout(() => {
-        console.log('Forcing UI update...');
-        setCurrentMessages([...chatMessages]);
+        console.log('Scrolling to bottom...');
         scrollToBottom();
-      }, 100);
+      }, 50);
       
     } catch (error) {
       console.error('Error loading chat:', error);
