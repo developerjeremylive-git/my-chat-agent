@@ -71,7 +71,7 @@ function cleanupConnections() {
 }
 
 // Clean up connections every 5 minutes
-setInterval(cleanupConnections, 5 * 60 * 1000);
+// setInterval(cleanupConnections, 5 * 60 * 1000);
 
 // Default values
 const DEFAULT_MODEL = 'gemini-2.0-flash';
