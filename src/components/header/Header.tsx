@@ -1,6 +1,6 @@
 import { Button } from "@/components/button/Button";
 import { ModelSelect } from "@/components/model/ModelSelect";
-import { DotsThreeVertical, List, Gear, Trash, PlusCircle, PaintBrushBroad, Minus, Plus } from "@phosphor-icons/react";
+import { DotsThreeVertical, List, Gear, Trash, PlusCircle, PaintBrushBroad, Minus, Plus, ChatText } from "@phosphor-icons/react";
 import { useState, useRef, useEffect } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
@@ -15,6 +15,7 @@ interface HeaderProps {
   setShowOIAICreator: (show: boolean) => void;
   setShowClearDialog: (show: boolean) => void;
   setIsSettingsOpen: (open: boolean) => void;
+  onOpenSideMenu: () => void;
 }
 
 export default function Header({
@@ -25,7 +26,8 @@ export default function Header({
   setShowSettingsMenu,
   setShowOIAICreator,
   setShowClearDialog,
-  setIsSettingsOpen
+  setIsSettingsOpen,
+  onOpenSideMenu
 }: HeaderProps) {
   const [showMenu, setShowMenu] = useState(false);
   const toggleMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -75,6 +77,23 @@ export default function Header({
                 overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-[#F48120] before:to-purple-500 before:opacity-0
                 before:transition-opacity before:duration-300 group-hover:before:opacity-100">
               <List size={20} className="relative z-10 text-[#F48120] group-hover:text-white transition-colors duration-300" weight="duotone" />
+            </div>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="relative w-10 h-10 rounded-full bg-gradient-to-r from-[#F48120] to-purple-500 p-[1.5px] group
+             hover:shadow-lg hover:shadow-[#F48120]/25 dark:hover:shadow-purple-500/25
+             transform hover:scale-110 active:scale-95 transition-all duration-300"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenSideMenu();
+            }}
+          >
+            <div className="absolute inset-[1px] rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center
+                overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-[#F48120] before:to-purple-500 before:opacity-0
+                before:transition-opacity before:duration-300 group-hover:before:opacity-100">
+              <ChatText size={20} className="relative z-10 text-[#F48120] group-hover:text-white transition-colors duration-300" weight="duotone" />
             </div>
           </Button>
           <h1 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent hidden md:block">Asistente IA</h1>

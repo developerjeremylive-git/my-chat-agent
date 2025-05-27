@@ -982,6 +982,7 @@ function ChatComponent() {
               setShowOIAICreator={setShowOIAICreator}
               setShowClearDialog={setShowClearDialog}
               setIsSettingsOpen={setIsSettingsOpen}
+              onOpenSideMenu={() => setIsSideMenuOpen(true)}
             />
           </div>
 
