@@ -1042,7 +1042,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40"
+          className="fixed inset-0 bg-black/50 z-65"
           onClick={onClose}
         />
       )}

@@ -123,7 +123,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
           isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
-        <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 border-opacity-10 flex justify-between items-center sticky top-0 bg-white dark:bg-neutral-900 z-10">
+        <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 border-opacity-10 flex justify-between items-center sticky top-0 bg-white dark:bg-neutral-900 z-70">
           <div className="flex items-center space-x-2">
             <Gear weight="duotone" className="text-[#F48120] h-7 w-6" />
             <span className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Configuración Asistente IA</span>
@@ -191,7 +191,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                         </Tooltip.Trigger>
                         <Tooltip.Portal>
                           <Tooltip.Content
-                            className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-50"
+                            className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-0"
                             sideOffset={5}
                           >
                             {preset.name === 'Creativo' && 'Ideal para brainstorming, escritura creativa y generación de ideas innovadoras. Produce respuestas únicas y originales con mayor variabilidad.'}
@@ -257,7 +257,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                     </Tooltip.Trigger>
                     <Tooltip.Portal>
                       <Tooltip.Content
-                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-50"
+                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-70"
                         sideOffset={5}
                       >
                         Controla la aleatoriedad de las respuestas. Valores más altos (0.8-1.0) generan respuestas más creativas y diversas, mientras que valores más bajos (0.2-0.4) producen respuestas más consistentes y deterministas.
@@ -290,7 +290,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                     </Tooltip.Trigger>
                     <Tooltip.Portal>
                       <Tooltip.Content
-                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-50"
+                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-70"
                         sideOffset={5}
                       >
                         El número máximo de tokens que el modelo generará en una respuesta. Un valor más alto permite respuestas más largas pero consume más recursos.
@@ -417,7 +417,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                     </Tooltip.Trigger>
                     <Tooltip.Portal>
                       <Tooltip.Content
-                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-50"
+                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-70"
                         sideOffset={5}
                       >
                         Controla la diversidad de las respuestas mediante el muestreo de núcleo. Valores más altos (0.9-1.0) permiten más variedad, mientras que valores más bajos (0.1-0.3) hacen las respuestas más enfocadas.
@@ -450,7 +450,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                     </Tooltip.Trigger>
                     <Tooltip.Portal>
                       <Tooltip.Content
-                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-50"
+                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-70"
                         sideOffset={5}
                       >
                         Limita el número de palabras más probables que el modelo puede elegir. Valores más bajos (1-10) producen respuestas más precisas, valores más altos (30-50) permiten más creatividad.
@@ -483,7 +483,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                     </Tooltip.Trigger>
                     <Tooltip.Portal>
                       <Tooltip.Content
-                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-50"
+                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-70"
                         sideOffset={5}
                       >
                         Reduce la probabilidad de que el modelo repita las mismas líneas. Valores más altos (1.0-2.0) penalizan más la repetición de palabras frecuentes.
@@ -516,7 +516,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                     </Tooltip.Trigger>
                     <Tooltip.Portal>
                       <Tooltip.Content
-                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-50"
+                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-70"
                         sideOffset={5}
                       >
                         Aumenta la probabilidad de que el modelo introduzca nuevos temas. Valores más altos (1.0-2.0) fomentan respuestas más diversas y exploratorias.
@@ -554,7 +554,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                     </Tooltip.Trigger>
                     <Tooltip.Portal>
                       <Tooltip.Content
-                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-50"
+                        className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-70"
                         sideOffset={5}
                       >
                         Un valor numérico que determina la reproducibilidad de las respuestas. Usar el mismo valor de semilla con los mismos parámetros producirá respuestas similares.
@@ -604,7 +604,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40"
+          className="fixed inset-0 bg-black/50 z-60"
           onClick={onClose}
         />
       )}

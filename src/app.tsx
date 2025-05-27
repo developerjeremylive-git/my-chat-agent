@@ -976,6 +976,7 @@ function ChatComponent() {
             <Header
               isSidebarOpen={isSidebarOpen}
               setIsSidebarOpen={setIsSidebarOpen}
+              isSettingsOpen={isSettingsOpen}
               stepMax={stepMax}
               setStepMax={setStepMax}
               setShowSettingsMenu={setShowSettingsMenu}
