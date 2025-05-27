@@ -127,8 +127,16 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                 }
                 const data = await response.json() as ChatData[];
                 
-                // Formatear los chats
-                const formattedChats = data.map((chat) => ({
+                // Formatear los chats y asegurarse de que no haya duplicados
+                const uniqueChats = data.reduce<ChatData[]>((acc, chat) => {
+                    // Skip if chat has no ID or if we've already seen this ID
+                    if (!chat.id || acc.some(c => c.id === chat.id)) {
+                        return acc;
+                    }
+                    return [...acc, chat];
+                }, []);
+
+                const formattedChats = uniqueChats.map((chat) => ({
                     ...chat,
                     lastMessageAt: new Date(chat.lastMessageAt),
                     messages: []
@@ -435,9 +443,11 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                                 <div className="space-y-2">
                                     <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 px-2">Chats Recientes</h3>
                                     <div className="space-y-1">
-                                        {chats.map((chat) => (
+                                        {chats
+                                            .filter(chat => chat?.id) // Filter out any chats without an ID
+                                            .map((chat, index) => (
                                             <div
-                                                key={chat.id}
+                                                key={chat.id || `chat-${index}`} // Fallback to index if ID is missing
                                                 className={`flex items-center justify-between p-3 cursor-pointer
                                                     hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
                                                     dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
