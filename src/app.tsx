@@ -180,20 +180,8 @@ function ChatComponent() {
         createdAt: currentChat?.createdAt || new Date()
       };
       
-      console.log('Updating chat in context:', updatedChat);
-      updateChat(chatId, updatedChat);
-      
-      // Update the chat in the context first
       console.log('Updating chat in context with messages:', chatMessages.length);
-      updateChat(chatId, {
-        id: chatId,
-        title: currentChat?.title || `Chat ${new Date().toLocaleString()}`,
-        messages: chatMessages,
-        lastMessageAt: chatMessages.length > 0
-          ? chatMessages[chatMessages.length - 1].createdAt
-          : new Date(),
-        createdAt: currentChat?.createdAt || new Date()
-      });
+      updateChat(chatId, updatedChat);
 
       // Update agent's message history if available
       if (agent && typeof agent.chat === 'function') {
