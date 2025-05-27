@@ -100,46 +100,72 @@ function ChatComponent() {
 
   const handleChatSelect = async (chatId: string) => {
     try {
+      console.log('handleChatSelect called with chatId:', chatId);
       setIsLoadingChat(true);
       
-      // First clear any existing messages from the agent
+      // Clear any existing messages
       clearHistory();
+      setCurrentMessages([]);
       
-      // Select the chat in the context first
+      // Select the chat in the context
+      console.log('Selecting chat in context...');
       selectChat(chatId);
       setSelectedChatId(chatId);
       
       // Fetch the messages for the selected chat
+      console.log('Fetching messages for chat:', chatId);
       const response = await fetch(`/api/chats/${chatId}/messages`);
       
       if (!response.ok) {
         throw new Error(`Failed to load messages: ${response.status}`);
       }
       
-      const data = await response.json() as { success: boolean; messages?: any[] };
+      // Define the expected API response type
+      interface ChatMessagesResponse {
+        success: boolean;
+        messages?: Array<{
+          id: string;
+          chatId: string;  // Required by APIMessage type
+          role: 'user' | 'assistant' | 'system' | 'data';
+          content: any;
+          createdAt: string | Date;
+          // Add other properties that might be present in the response
+          [key: string]: any;
+        }>;
+      }
+
+      const data = await response.json() as ChatMessagesResponse;
+      console.log('API Response:', data);
       
       if (!data?.success || !Array.isArray(data.messages)) {
         throw new Error('Invalid response format');
       }
       
+      console.log('Raw messages from API:', data.messages);
+      
       // Transform API messages to the format expected by the agent
       const loadedMessages = transformAPIMessagesToAgentMessages(data.messages);
+      console.log('Transformed messages:', loadedMessages);
       
       // Filter to only include user and assistant messages
-      const filteredMessages = loadedMessages.filter((msg: { role: string }) =>
+      const filteredMessages = loadedMessages.filter(msg => 
         msg.role === 'user' || msg.role === 'assistant'
       );
       
+      console.log('Filtered messages:', filteredMessages);
+      
       // Format messages for the chat context
-      const chatMessages = filteredMessages.map((msg: any) => ({
-        id: msg.id,
+      const chatMessages = filteredMessages.map(msg => ({
+        id: msg.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         role: msg.role as 'user' | 'assistant',
         content: msg.content,
-        parts: msg.parts || [{ type: 'text', text: msg.content }],
-        createdAt: typeof msg.createdAt === 'string' 
-          ? new Date(msg.createdAt) 
-          : msg.createdAt || new Date()
+        parts: Array.isArray(msg.parts) && msg.parts.length > 0 
+          ? msg.parts 
+          : [{ type: 'text', text: msg.content }],
+        createdAt: msg.createdAt || new Date()
       }));
+      
+      console.log('Formatted chat messages:', chatMessages);
       
       // Update the chat in the context with the loaded messages
       const lastMessageDate = chatMessages.length > 0
@@ -154,27 +180,34 @@ function ChatComponent() {
         createdAt: currentChat?.createdAt || new Date()
       };
       
-      // Update the chat in the context
+      console.log('Updating chat in context:', updatedChat);
       updateChat(chatId, updatedChat);
       
       // Set the current messages to trigger a re-render
+      console.log('Setting current messages:', chatMessages);
       setCurrentMessages(chatMessages);
       
-      // Instead of using agent.addMessage (which might not exist),
-      // we'll use the agent's chat method to add messages to its history
-      if (agent && 'chat' in agent) {
-        // @ts-ignore - We're checking if the method exists
-        agent.chat({
-          messages: chatMessages.map(msg => ({
-            role: msg.role,
-            content: msg.content,
-            parts: msg.parts || [{ type: 'text', text: msg.content }]
-          }))
-        });
+      // Update agent's message history if available
+      if (agent && typeof agent.chat === 'function') {
+        console.log('Updating agent chat history...');
+        try {
+          await agent.chat({
+            messages: chatMessages.map(msg => ({
+              role: msg.role,
+              content: msg.content,
+              parts: msg.parts
+            }))
+          });
+          console.log('Agent chat history updated');
+        } catch (error) {
+          console.error('Error updating agent chat history:', error);
+        }
       }
       
-      // Scroll to the bottom to show the latest messages
+      // Force a re-render of the messages
       setTimeout(() => {
+        console.log('Forcing UI update...');
+        setCurrentMessages([...chatMessages]);
         scrollToBottom();
       }, 100);
       
@@ -401,6 +434,17 @@ function ChatComponent() {
 
   interface AgentInstance {
     setConfig: (config: any) => void;
+    chat?: (options: {
+      messages: Array<{
+        role: 'user' | 'assistant' | 'system' | 'data';
+        content: string;
+        parts?: Array<{
+          type: string;
+          text?: string;
+          [key: string]: any;
+        }>;
+      }>;
+    }) => Promise<void>;
   }
 
   const agent = useAgent({
