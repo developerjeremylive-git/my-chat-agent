@@ -524,13 +524,40 @@ app.put('/api/chats/:id/title', async (c) => {
   const chatId = c.req.param('id');
   const { title } = await c.req.json();
 
-  const chatIndex = chats.findIndex(chat => chat.id === chatId);
-  if (chatIndex === -1) {
-    return c.json({ error: 'Chat no encontrado' }, 404);
-  }
+  try {
+    // Update the chat title in the database
+    const result = await c.env.DB.prepare(
+      'UPDATE chats SET title = ? WHERE id = ? RETURNING *'
+    )
+    .bind(title, chatId)
+    .first();
 
-  chats[chatIndex].title = title;
-  return c.json({ success: true, chat: chats[chatIndex] });
+    if (!result) {
+      return c.json({ error: 'Chat no encontrado' }, 404);
+    }
+
+    // Update the in-memory chats array if it exists
+    const chatIndex = chats.findIndex(chat => chat.id === chatId);
+    if (chatIndex !== -1) {
+      chats[chatIndex].title = title;
+    }
+
+    return c.json({ 
+      success: true, 
+      chat: {
+        id: result.id,
+        title: result.title,
+        lastMessageAt: result.last_message_at,
+        messages: []
+      } 
+    });
+  } catch (error) {
+    console.error('Error updating chat title:', error);
+    return c.json({ 
+      error: 'Error al actualizar el título del chat',
+      details: error instanceof Error ? error.message : 'Error desconocido'
+    }, 500);
+  }
 });
 
 app.delete('/api/chats/:id', async (c) => {
