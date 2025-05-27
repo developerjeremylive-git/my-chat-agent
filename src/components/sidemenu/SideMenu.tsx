@@ -76,6 +76,8 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
     const [chats, setChats] = useState<LocalChatData[]>([]);
     const [editingChat, setEditingChat] = useState<LocalChatData | null>(null);
     const [chatToDelete, setChatToDelete] = useState<LocalChatData | null>(null);
+    const [showNewChatModal, setShowNewChatModal] = useState(false);
+    const [newChatTitle, setNewChatTitle] = useState('Nuevo Chat');
 
     useEffect(() => {
         // Cargar chats al montar el componente y seleccionar el chat por defecto
@@ -144,7 +146,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
         }
     };
 
-    const createChat = async () => {
+    const handleCreateChat = async (title: string) => {
         try {
             const response = await fetch('/api/chats', {
                 method: 'POST',
@@ -152,7 +154,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    title: 'Nuevo Chat'
+                    title: title || 'Nuevo Chat'
                 })
             });
             
@@ -180,7 +182,14 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
         } catch (error) {
             console.error('Error al crear el chat:', error);
             alert(error instanceof Error ? error.message : 'Error al crear el chat');
+        } finally {
+            setShowNewChatModal(false);
+            setNewChatTitle('Nuevo Chat');
         }
+    };
+
+    const createChat = () => {
+        setShowNewChatModal(true);
     };
 
     const updateChatTitle = async (chatId: string, newTitle: string) => {
@@ -277,20 +286,26 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
     const handleDeleteChat = async (chatId: string) => {
         try {
             // Delete from the server
-            await fetch(`/api/chats/${chatId}`, {
+            const response = await fetch(`/api/chats/${chatId}`, {
                 method: 'DELETE',
             });
+            
+            if (!response.ok) {
+                throw new Error('Failed to delete chat');
+            }
             
             // Update local state
             const updatedChats = chats.filter(chat => chat.id !== chatId);
             setChats(updatedChats);
             
-            // If the deleted chat was selected, clear the selection
+            // If the deleted chat was selected, clear the selection and create a new chat
             if (selectedChatId === chatId) {
-                onChatSelect('');
+                // onNewChat();
+                createChat();
             }
         } catch (error) {
             console.error('Error deleting chat:', error);
+            alert('Error al eliminar el chat. Por favor, inténtalo de nuevo.');
         } finally {
             setChatToDelete(null);
         }
@@ -339,7 +354,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                                 {/* Acciones principales */}
                                 <div className="space-y-2">
                                     <button
-                                        onClick={createChat}
+                                            onClick={() => createChat()}
                                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
                                         text-neutral-700 dark:text-neutral-300
                                         hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
@@ -473,6 +488,43 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                                 </Button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* New Chat Modal */}
+            {showNewChatModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-70">
+                    <div className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-96">
+                        <h3 className="text-lg font-semibold mb-4">Nuevo Chat</h3>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            handleCreateChat(newChatTitle);
+                        }}>
+                            <input
+                                type="text"
+                                value={newChatTitle}
+                                onChange={(e) => setNewChatTitle(e.target.value)}
+                                className="w-full p-2 border rounded-lg mb-4 bg-transparent"
+                                placeholder="Ingrese el título del chat"
+                                autoFocus
+                            />
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowNewChatModal(false)}
+                                    className="px-4 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-700"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 rounded-lg bg-[#F48120] text-white"
+                                >
+                                    Crear
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
