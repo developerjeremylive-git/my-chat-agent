@@ -193,17 +193,31 @@ function ChatComponent() {
           }
           
           // Then set the new messages
-          const formattedMessages = chatMessages.map(msg => ({
-            id: msg.id,
-            role: msg.role,
-            content: msg.content,
-            parts: msg.parts || [{ type: 'text', text: msg.content }]
-          }));
+          const formattedMessages = chatMessages.map(msg => {
+            // Ensure parts is properly typed
+            const parts = msg.parts || [];
+            const messageParts = parts.length > 0 
+              ? parts 
+              : [{ type: 'text' as const, text: msg.content }];
+              
+            return {
+              id: msg.id,
+              role: msg.role,
+              content: msg.content,
+              parts: messageParts,
+              // Add createdAt with current date if not present
+              createdAt: 'createdAt' in msg && msg.createdAt 
+                ? new Date(msg.createdAt) 
+                : new Date()
+            };
+          });
           
           console.log('Formatted messages for setMessages:', formattedMessages);
-          setMessages(formattedMessages);
           
-          // Also update currentMessages to ensure UI updates
+          // Update agent's messages
+          setMessages(formattedMessages as Message[]);
+          
+          // Update UI state
           setCurrentMessages(formattedMessages);
           
           console.log('Agent messages set successfully');
