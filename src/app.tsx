@@ -183,47 +183,38 @@ function ChatComponent() {
       console.log('Updating chat in context with messages:', chatMessages.length);
       updateChat(chatId, updatedChat);
 
-      // Update agent's message history if available
-      if (agent && typeof agent.chat === 'function' && chatMessages.length > 0) {
-        console.log('Updating agent chat history...');
+      // Update agent's message history using setMessages
+      if (chatMessages.length > 0) {
+        console.log('Setting agent messages...');
         try {
-          await agent.chat({
-            messages: chatMessages.map(msg => ({
-              role: msg.role,
-              content: msg.content,
-              parts: msg.parts || []
-            }))
-          });
-          console.log('Agent chat history updated');
-        } catch (error) {
-          console.error('Error updating agent chat history:', error);
-        }
-      }
-      
-      // Clear existing agent messages if clearHistory is available
-      if (clearHistory) {
-        console.log('Clearing agent history...');
-        clearHistory();
-        
-        // Use a small delay to ensure the clear has completed
-        setTimeout(() => {
-          console.log('Setting current messages after clear...');
-          setCurrentMessages(chatMessages);
+          // First clear any existing messages
+          if (clearHistory) {
+            clearHistory();
+          }
           
-          // Scroll to bottom after updating messages
-          console.log('Scrolling to bottom...');
-          scrollToBottom();
-        }, 100);
-      } else {
-        // If no clearHistory function, just update the UI
-        console.log('Setting current messages directly...');
-        setCurrentMessages(chatMessages);
-        
-        // Scroll to bottom after updating messages
-        setTimeout(() => {
-          console.log('Scrolling to bottom...');
-          scrollToBottom();
-        }, 50);
+          // Then set the new messages
+          const formattedMessages = chatMessages.map(msg => ({
+            id: msg.id,
+            role: msg.role,
+            content: msg.content,
+            parts: msg.parts || [{ type: 'text', text: msg.content }]
+          }));
+          
+          console.log('Formatted messages for setMessages:', formattedMessages);
+          setMessages(formattedMessages);
+          
+          // Also update currentMessages to ensure UI updates
+          setCurrentMessages(formattedMessages);
+          
+          console.log('Agent messages set successfully');
+          
+          // Scroll to bottom after a small delay to ensure DOM is updated
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+        } catch (error) {
+          console.error('Error setting agent messages:', error);
+        }
       }
     } catch (error) {
       console.error('Error loading chat:', error);
@@ -476,6 +467,7 @@ function ChatComponent() {
     handleSubmit: handleAgentSubmit,
     addToolResult,
     clearHistory,
+    setMessages,
     // isLoading,
     // stop
   } = useAgentChat({
