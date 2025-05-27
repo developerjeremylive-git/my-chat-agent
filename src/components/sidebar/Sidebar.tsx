@@ -607,9 +607,9 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                     </Button>
                     {selectedSection === 'exploracion-ideas' && (
                       <div className="mt-2 space-y-2 pl-8">
-                        {promptTemplates['exploracion-ideas'].map((template) => (
+                        {promptTemplates['exploracion-ideas'].map((template, index) => (
                           <Card
-                            key={`exploracion-${template.title}`}
+                            key={index}
                             className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
                             onClick={() => handlePromptSelect(template.prompt)}
                           >
@@ -632,9 +632,9 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                     </Button>
                     {selectedSection === 'orientacion-profesional' && (
                       <div className="mt-2 space-y-2 pl-8">
-                        {promptTemplates['orientacion-profesional'].map((template) => (
+                        {promptTemplates['orientacion-profesional'].map((template, index) => (
                           <Card
-                            key={`orientacion-${template.title}`}
+                            key={index}
                             className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
                             onClick={() => handlePromptSelect(template.prompt)}
                           >
@@ -657,9 +657,9 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                     </Button>
                     {selectedSection === 'asistente-programacion' && (
                       <div className="mt-2 space-y-2 pl-8">
-                        {promptTemplates['asistente-programacion'].map((template) => (
+                        {promptTemplates['asistente-programacion'].map((template, index) => (
                           <Card
-                            key={`asistente-${template.title}`}
+                            key={index}
                             className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
                             onClick={() => handlePromptSelect(template.prompt)}
                           >
@@ -682,9 +682,9 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                     </Button>
                     {selectedSection === 'tutor-personal' && (
                       <div className="mt-2 space-y-2 pl-8">
-                        {promptTemplates['tutor-personal'].map((template) => (
+                        {promptTemplates['tutor-personal'].map((template, index) => (
                           <Card
-                            key={`tutor-${template.title}`}
+                            key={index}
                             className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
                             onClick={() => handlePromptSelect(template.prompt)}
                           >
@@ -707,9 +707,9 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                     </Button>
                     {selectedSection === 'revision-escritura' && (
                       <div className="mt-2 space-y-2 pl-8">
-                        {promptTemplates['revision-escritura'].map((template) => (
+                        {promptTemplates['revision-escritura'].map((template, index) => (
                           <Card
-                            key={`revision-${template.title}`}
+                            key={index}
                             className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
                             onClick={() => handlePromptSelect(template.prompt)}
                           >
@@ -732,9 +732,9 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                     </Button>
                     {selectedSection === 'arte-diseno' && (
                       <div className="mt-2 space-y-2 pl-8">
-                        {promptTemplates['arte-diseno'].map((template) => (
+                        {promptTemplates['arte-diseno'].map((template, index) => (
                           <Card
-                            key={`arte-${template.title}`}
+                            key={index}
                             className="p-3 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all duration-200"
                             onClick={() => handlePromptSelect(template.prompt)}
                           >

@@ -1035,16 +1035,16 @@ function ChatComponent() {
                         <div className="relative w-full h-full bg-white dark:bg-neutral-900 rounded-full border-2 border-[#F48120]/20 shadow-xl flex items-center justify-center">
                           <svg width="60" height="60" viewBox="0 0 120 120" fill="none" className="text-[#F48120]">
                             <g filter="url(#shadow)">
-                              <rect x="30" y="25" width="60" height="70" rx="10" stroke="currentColor" strokeWidth="4" />
+                              <rect x="30" y="25" width="60" height="70" rx="10" stroke="currentColor" stroke-width="4" />
                               <circle cx="45" cy="50" r="5" fill="currentColor" />
                               <circle cx="75" cy="50" r="5" fill="currentColor" />
-                              <path d="M40 75 h40" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                              <path d="M25 45 L15 45 M95 45 L105 45" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-                              <path d="M45 15 L45 25 M75 15 L75 25" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+                              <path d="M40 75 h40" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+                              <path d="M25 45 L15 45 M95 45 L105 45" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+                              <path d="M45 15 L45 25 M75 15 L75 25" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
                             </g>
                             <defs>
                               <filter id="shadow" x="-4" y="-4" width="128" height="128" filterUnits="userSpaceOnUse">
-                                <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.25" />
+                                <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.25" />
                               </filter>
                             </defs>
                           </svg>
