@@ -535,8 +535,29 @@ app.put('/api/chats/:id/title', async (c) => {
 
 app.delete('/api/chats/:id', async (c) => {
   const chatId = c.req.param('id');
-  chats = chats.filter(c => c.id !== chatId);
-  return c.json({ success: true });
+  
+  try {
+    // Delete messages first due to foreign key constraint
+    await c.env.DB.prepare(
+      'DELETE FROM messages WHERE chat_id = ?'
+    ).bind(chatId).run();
+
+    // Then delete the chat
+    const result = await c.env.DB.prepare(
+      'DELETE FROM chats WHERE id = ?'
+    ).bind(chatId).run();
+
+    if (result.success) {
+      // Also remove from in-memory array if it exists
+      chats = chats.filter(c => c.id !== chatId);
+      return c.json({ success: true });
+    } else {
+      return c.json({ success: false, error: 'Failed to delete chat' }, 500);
+    }
+  } catch (error) {
+    console.error('Error deleting chat:', error);
+    return c.json({ success: false, error: 'Internal server error' }, 500);
+  }
 });
 
 // Assistant configuration endpoint
