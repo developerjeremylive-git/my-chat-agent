@@ -345,23 +345,28 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
         <AnimatePresence>
             {isOpen && (
                 <>
-                    {/* Overlay */}
+                    {/* Full-screen overlay that covers everything */}
                     <motion.div
-                        className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40"
+                        className="fixed inset-0 bg-black/50 z-70"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
+                        style={{
+                            backdropFilter: 'blur(2px)',
+                            WebkitBackdropFilter: 'blur(2px)'
+                        }}
                     />
 
-                    {/* Panel lateral */}
+                    {/* Side Panel */}
                     <motion.div
                         className="fixed left-0 top-0 bottom-0 w-80 bg-white dark:bg-neutral-900 z-70
-                        border-r border-neutral-200 dark:border-neutral-700"
+                        border-r border-neutral-200 dark:border-neutral-700 shadow-2xl"
                         initial={{ x: '-100%' }}
                         animate={{ x: 0 }}
                         exit={{ x: '-100%' }}
-                        transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex flex-col h-full">
                             {/* Cabecera */}
