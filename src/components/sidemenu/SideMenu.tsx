@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/button/Button';
-import { X, ChatText, Gear, Brain, Rocket, Trash, PencilSimple } from '@phosphor-icons/react';
+import { X, ChatText, Gear, Brain, Rocket, Trash, PencilSimple, Plus } from '@phosphor-icons/react';
 import { useChat } from '@/contexts/ChatContext';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -72,9 +72,49 @@ function EditTitleModal({ isOpen, onClose, onSave, currentTitle }: EditTitleModa
     );
 }
 
+// Confirmation Dialog Component
+const ConfirmationDialog = ({ isOpen, onConfirm, onCancel, message }: {
+    isOpen: boolean;
+    onConfirm: () => void;
+    onCancel: () => void;
+    message: string;
+}) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/50 bg-opacity-75 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-neutral-800 rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">
+                    Confirmar eliminación
+                </h3>
+                <p className="text-neutral-600 dark:text-neutral-300 mb-6">
+                    {message}
+                </p>
+                <div className="flex justify-end space-x-3">
+                    <button
+                        onClick={onCancel}
+                        className="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                    >
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSettings, onOpenTools, onClearHistory, selectedChatId }: SideMenuProps) {
     const [chats, setChats] = useState<LocalChatData[]>([]);
     const [editingChat, setEditingChat] = useState<LocalChatData | null>(null);
+    const [chatToDelete, setChatToDelete] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const { deleteChat } = useChat();
 
     useEffect(() => {
         // Cargar chats al montar el componente y seleccionar el chat por defecto
@@ -87,8 +127,16 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                 }
                 const data = await response.json() as ChatData[];
                 
-                // Formatear los chats
-                const formattedChats = data.map((chat) => ({
+                // Formatear los chats y asegurarse de que no haya duplicados
+                const uniqueChats = data.reduce<ChatData[]>((acc, chat) => {
+                    // Skip if chat has no ID or if we've already seen this ID
+                    if (!chat.id || acc.some(c => c.id === chat.id)) {
+                        return acc;
+                    }
+                    return [...acc, chat];
+                }, []);
+
+                const formattedChats = uniqueChats.map((chat) => ({
                     ...chat,
                     lastMessageAt: new Date(chat.lastMessageAt),
                     messages: []
@@ -272,6 +320,34 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
         }
     };
 
+    const handleDeleteClick = (e: React.MouseEvent, chatId: string) => {
+        e.stopPropagation();
+        setChatToDelete(chatId);
+    };
+
+    const confirmDelete = async () => {
+        if (!chatToDelete) return;
+        
+        try {
+            setIsDeleting(true);
+            await deleteChat(chatToDelete);
+            setChatToDelete(null);
+            
+            // If the deleted chat was the currently selected one, clear the selection
+            if (selectedChatId === chatToDelete) {
+                onChatSelect('');
+            }
+        } catch (error) {
+            console.error('Error deleting chat:', error);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const cancelDelete = () => {
+        setChatToDelete(null);
+    };
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -367,29 +443,42 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                                 <div className="space-y-2">
                                     <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 px-2">Chats Recientes</h3>
                                     <div className="space-y-1">
-                                        {chats.map((chat) => (
+                                        {chats
+                                            .filter(chat => chat?.id) // Filter out any chats without an ID
+                                            .map((chat, index) => (
                                             <div
-                                                key={chat.id}
+                                                key={chat.id || `chat-${index}`} // Fallback to index if ID is missing
                                                 className={`flex items-center justify-between p-3 cursor-pointer
                                                     hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
                                                     dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
                                                     ${selectedChatId === chat.id ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20' : ''}`}
                                                 onClick={() => onChatSelect(chat.id)}
                                             >
-                                                <div className="flex items-center space-x-3">
-                                                    <ChatText weight="duotone" className="w-4 h-4 text-[#F48120]" />
-                                                    <span className="text-sm font-medium">{chat.title}</span>
+                                                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                                    <ChatText weight="duotone" className="w-4 h-4 text-[#F48120] flex-shrink-0" />
+                                                    <span className="text-sm font-medium truncate">{chat.title}</span>
                                                 </div>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setEditingChat(chat);
-                                                        onClose();
-                                                    }}
-                                                    className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-lg"
-                                                >
-                                                    <PencilSimple weight="duotone" className="w-4 h-4 text-neutral-500 hover:text-[#F48120]" />
-                                                </button>
+                                                <div className="flex space-x-1">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setEditingChat(chat);
+                                                            onClose();
+                                                        }}
+                                                        className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-lg"
+                                                        title="Editar chat"
+                                                    >
+                                                        <PencilSimple weight="duotone" className="w-4 h-4 text-neutral-500 hover:text-[#F48120]" />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleDeleteClick(e, chat.id)}
+                                                        className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-lg text-red-500 hover:text-red-600 dark:hover:text-red-400"
+                                                        title="Eliminar chat"
+                                                        disabled={isDeleting}
+                                                    >
+                                                        <Trash weight="duotone" className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -407,6 +496,12 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                     currentTitle={editingChat.title}
                 />
             )}
+            <ConfirmationDialog
+                isOpen={!!chatToDelete}
+                onConfirm={confirmDelete}
+                onCancel={cancelDelete}
+                message={`¿Estás seguro de que deseas eliminar este chat? Esta acción no se puede deshacer.`}
+            />
         </AnimatePresence>
     );
 }
