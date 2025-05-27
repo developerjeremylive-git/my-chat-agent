@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/button/Button';
-import { X, ChatText, Gear, Brain, Rocket, Trash, PencilSimple, Warning } from '@phosphor-icons/react';
+import { X, ChatText, Gear, Brain, Rocket, Trash, PencilSimple, Warning, DotsThreeVertical } from '@phosphor-icons/react';
 import { useChat } from '@/contexts/ChatContext';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -40,9 +40,25 @@ function EditTitleModal({ isOpen, onClose, onSave, currentTitle }: EditTitleModa
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-70">
-            <div className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-96">
-                <h3 className="text-lg font-semibold mb-4">Editar título del chat</h3>
+        <div 
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-70"
+            onClick={(e) => {
+                // Prevent closing when clicking inside the modal
+                e.stopPropagation();
+                e.preventDefault();
+            }}
+        >
+            <div className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-96 relative">
+                {/* Close button */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 p-1 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                    aria-label="Cerrar"
+                >
+                    <X size={20} weight="bold" className="text-neutral-500" />
+                </button>
+                
+                <h3 className="text-lg font-semibold mb-4 pr-6">Editar título del chat</h3>
                 <form onSubmit={handleSubmit}>
                     <input
                         type="text"
@@ -50,18 +66,19 @@ function EditTitleModal({ isOpen, onClose, onSave, currentTitle }: EditTitleModa
                         onChange={(e) => setTitle(e.target.value)}
                         className="w-full p-2 border rounded-lg mb-4 bg-transparent"
                         placeholder="Ingrese el nuevo título"
+                        autoFocus
                     />
                     <div className="flex justify-end gap-2">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-700"
+                            className="px-4 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
                         >
                             Cancelar
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 rounded-lg bg-[#F48120] text-white"
+                            className="px-4 py-2 rounded-lg bg-[#F48120] text-white hover:bg-[#e67300] transition-colors"
                         >
                             Guardar
                         </button>
@@ -77,7 +94,20 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
     const [editingChat, setEditingChat] = useState<LocalChatData | null>(null);
     const [chatToDelete, setChatToDelete] = useState<LocalChatData | null>(null);
     const [showNewChatModal, setShowNewChatModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [newChatTitle, setNewChatTitle] = useState('Nuevo Chat');
+    
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => {
+            if (editingChat) {
+                setEditingChat(null);
+            }
+        };
+        
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [editingChat]);
 
     useEffect(() => {
         // Cargar chats al montar el componente y seleccionar el chat por defecto
@@ -409,37 +439,62 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                                         {chats.map((chat) => (
                                             <div
                                                 key={chat.id}
-                                                className={`flex items-center justify-between p-3 cursor-pointer
-                                                    hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
+                                                className={`group relative flex items-center justify-between p-3 cursor-pointer
+                                                    hover:bg-gradient-to-r hover:from-[#F48120]/5 hover:to-purple-500/5
                                                     dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5
-                                                    ${selectedChatId === chat.id ? 'bg-gradient-to-r from-[#F48120]/20 to-purple-500/20' : ''}`}
+                                                    rounded-lg transition-colors duration-200
+                                                    ${selectedChatId === chat.id ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 border border-[#F48120]/20' : 'border border-transparent'}`}
                                                 onClick={() => onChatSelect(chat.id)}
                                             >
-                                                <div className="flex items-center space-x-3 flex-1">
-                                                    <ChatText weight="duotone" className="w-4 h-4 text-[#F48120] flex-shrink-0" />
-                                                    <span className="text-sm font-medium truncate">{chat.title}</span>
+                                                <div className="flex items-center min-w-0 flex-1">
+                                                    <ChatText 
+                                                        weight="duotone" 
+                                                        className="w-4 h-4 text-[#F48120] flex-shrink-0" 
+                                                    />
+                                                    <span 
+                                                        className="ml-3 text-sm font-medium truncate text-ellipsis overflow-hidden"
+                                                        title={chat.title}
+                                                    >
+                                                        {chat.title}
+                                                    </span>
                                                 </div>
-                                                <div className="flex space-x-1">
+                                                
+                                                <div className="relative">
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            setEditingChat(chat);
+                                                            setEditingChat(prev => prev?.id === chat.id ? null : chat);
                                                         }}
-                                                        className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-lg"
-                                                        title="Editar título"
+                                                        className="p-1.5 rounded-md hover:bg-neutral-200/50 dark:hover:bg-neutral-700/50 transition-colors"
                                                     >
-                                                        <PencilSimple weight="duotone" className="w-4 h-4 text-neutral-500 hover:text-[#F48120]" />
+                                                        <DotsThreeVertical weight="bold" className="w-4 h-4 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200" />
                                                     </button>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setChatToDelete(chat);
-                                                        }}
-                                                        className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-lg"
-                                                        title="Eliminar chat"
-                                                    >
-                                                        <Trash weight="duotone" className="w-4 h-4 text-neutral-500 hover:text-red-500" />
-                                                    </button>
+                                                    
+                                                    {/* Dropdown Menu */}
+                                                    {editingChat?.id === chat.id && (
+                                                        <div 
+                                                            className="absolute right-0 mt-1 w-40 bg-white dark:bg-neutral-800 rounded-md shadow-lg py-1 z-10 border border-neutral-200 dark:border-neutral-700"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <button
+                                                                onClick={() => {
+                                                                    setEditingChat(chat);
+                                                                    setShowEditModal(true);
+                                                                }}
+                                                                className="w-full text-left px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 flex items-center"
+                                                            >
+                                                                <PencilSimple weight="duotone" className="w-4 h-4 mr-2" />
+                                                                Editar título
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setChatToDelete(chat)}
+                                                                className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 flex items-center"
+                                                            >
+                                                                <Trash weight="duotone" className="w-4 h-4 mr-2" />
+                                                                Eliminar chat
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         ))}
@@ -450,11 +505,18 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                     </motion.div>
                 </>
             )}
-            {editingChat && (
+            {showEditModal && editingChat && (
                 <EditTitleModal
                     isOpen={true}
-                    onClose={() => setEditingChat(null)}
-                    onSave={(newTitle) => updateChatTitle(editingChat.id, newTitle)}
+                    onClose={() => {
+                        setShowEditModal(false);
+                        setEditingChat(null);
+                    }}
+                    onSave={async (newTitle) => {
+                        await updateChatTitle(editingChat.id, newTitle);
+                        setShowEditModal(false);
+                        setEditingChat(null);
+                    }}
                     currentTitle={editingChat.title}
                 />
             )}
