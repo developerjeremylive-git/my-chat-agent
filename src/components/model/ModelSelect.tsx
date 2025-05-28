@@ -219,7 +219,7 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
           <div className={cn(
-            'flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer',
+            'flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer w-full',
             'bg-white dark:bg-neutral-900/50',
             'border border-neutral-200 dark:border-neutral-800',
             'hover:bg-gradient-to-r hover:from-[#F48120]/5 hover:to-purple-500/5 dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10',
@@ -229,18 +229,18 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
             'hover:scale-[1.02]',
             className
           )}>
-            <div className="flex items-center gap-2">
-              {selectedModel.provider === 'DeepSeek / Meta' && <Brain className="w-5 h-5 text-blue-500" weight="duotone" />}
-              {selectedModel.provider === 'Meta' && <Robot className="w-5 h-5 text-purple-500" weight="duotone" />}
-              {selectedModel.provider === 'Google' && <Robot className="w-5 h-5 text-green-500" weight="duotone" />}
-              {selectedModel.provider === 'Alibaba Cloud' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
-              {selectedModel.provider === 'Mistral AI' && <Cloud className="w-5 h-5 text-orange-500" weight="duotone" />}
-              {selectedModel.provider === 'Qwen' && <Chats className="w-5 h-5 text-red-500" weight="duotone" />}
-              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 truncate max-w-[150px]">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              {selectedModel.provider === 'DeepSeek / Meta' && <Brain className="flex-shrink-0 w-5 h-5 text-blue-500" weight="duotone" />}
+              {selectedModel.provider === 'Meta' && <Robot className="flex-shrink-0 w-5 h-5 text-purple-500" weight="duotone" />}
+              {selectedModel.provider === 'Google' && <Robot className="flex-shrink-0 w-5 h-5 text-green-500" weight="duotone" />}
+              {selectedModel.provider === 'Alibaba Cloud' && <Cloud className="flex-shrink-0 w-5 h-5 text-orange-500" weight="duotone" />}
+              {selectedModel.provider === 'Mistral AI' && <Cloud className="flex-shrink-0 w-5 h-5 text-orange-500" weight="duotone" />}
+              {selectedModel.provider === 'Qwen' && <Chats className="flex-shrink-0 w-5 h-5 text-red-500" weight="duotone" />}
+              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 truncate">
                 {selectedModel.name.split('/').pop()}
               </span>
             </div>
-            <div className="flex items-center">
+            <div className="flex-shrink-0 ml-2">
               <CaretDown className="w-4 h-4 text-neutral-500" />
             </div>
             {/* <button
