@@ -54,24 +54,58 @@ const app = new Hono<{ Bindings: Env }>();
 const workersai = createWorkersAI({ binding: env.AI });
 
 // WebSocket connections store (in-memory, request-specific)
-const wsConnections = new Map<string, Set<WebSocket>>();
+const chatRooms = new Map<string, Set<WebSocket>>();
 
 // Clean up dead WebSocket connections
-function cleanupConnections() {
-  for (const [chatId, connections] of wsConnections.entries()) {
-    for (const ws of connections) {
-      if (ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
-        connections.delete(ws);
-      }
+function cleanupConnections(roomId: string = 'global') {
+  if (!chatRooms.has(roomId)) return;
+  
+  const room = chatRooms.get(roomId)!;
+  const deadConnections: WebSocket[] = [];
+  
+  room.forEach(ws => {
+    if (ws.readyState !== WebSocket.OPEN) {
+      deadConnections.push(ws);
     }
-    if (connections.size === 0) {
-      wsConnections.delete(chatId);
-    }
+  });
+  
+  deadConnections.forEach(ws => {
+    room.delete(ws);
+  });
+  
+  if (room.size === 0) {
+    chatRooms.delete(roomId);
   }
 }
 
-// Clean up connections every 5 minutes
-// setInterval(cleanupConnections, 5 * 60 * 1000);
+// Helper function to broadcast to a room
+function broadcastToRoom(roomId: string, message: any) {
+  if (!chatRooms.has(roomId)) return;
+  
+  const room = chatRooms.get(roomId)!;
+  const deadConnections: WebSocket[] = [];
+  const messageStr = JSON.stringify(message);
+  
+  room.forEach(ws => {
+    try {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(messageStr);
+      } else {
+        deadConnections.push(ws);
+      }
+    } catch (error) {
+      console.error('Error sending WebSocket message:', error);
+      deadConnections.push(ws);
+    }
+  });
+  
+  // Clean up dead connections
+  deadConnections.forEach(ws => room.delete(ws));
+  
+  if (room.size === 0) {
+    chatRooms.delete(roomId);
+  }
+}
 
 // Default values
 const DEFAULT_MODEL = 'gemini-2.0-flash';
@@ -410,38 +444,10 @@ app.get('/api/chats/:id', async (c) => {
 
     // Notify all active WebSocket connections about the chat selection
     if (chatId) {
-      const chatConnections = wsConnections.get(chatId) || new Set<WebSocket>();
-      const deadConnections: WebSocket[] = [];
-      
-      // Prepare the update message
-      const update = {
+      broadcastToRoom(chatId, {
         type: 'chat_selected',
         chat: chatWithMessages
-      };
-
-      // Send update to all connections in this chat room
-      chatConnections.forEach(ws => {
-        try {
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify(update));
-          } else {
-            deadConnections.push(ws);
-          }
-        } catch (error) {
-          console.error('Error notifying WebSocket client:', error);
-          deadConnections.push(ws);
-        }
       });
-
-      // Clean up dead connections
-      deadConnections.forEach(ws => chatConnections.delete(ws));
-      
-      // Update the connections map
-      if (chatConnections.size > 0) {
-        wsConnections.set(chatId, chatConnections);
-      } else {
-        wsConnections.delete(chatId);
-      }
     }
 
     return c.json(chatWithMessages);
@@ -474,38 +480,10 @@ app.post('/api/chats', async (c) => {
     chats.push(newChat);
 
     // Notificar a los clientes WebSocket sobre el nuevo chat
-    const chatConnections = wsConnections.get('global') || new Set<WebSocket>();
-    const deadConnections: WebSocket[] = [];
-    
-    // Prepare the new chat notification
-    const update = {
+    broadcastToRoom('global', {
       type: 'chat_created',
       chat: newChat
-    };
-
-    // Send update to all connections in the global room
-    chatConnections.forEach(ws => {
-      try {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify(update));
-        } else {
-          deadConnections.push(ws);
-        }
-      } catch (error) {
-        console.error('Error notifying WebSocket client:', error);
-        deadConnections.push(ws);
-      }
     });
-
-    // Clean up dead connections
-    deadConnections.forEach(ws => chatConnections.delete(ws));
-    
-    // Update the connections map if there are still active connections
-    if (chatConnections.size > 0) {
-      wsConnections.set('global', chatConnections);
-    } else {
-      wsConnections.delete('global');
-    }
 
     return c.json({
       success: true,
@@ -646,39 +624,11 @@ app.post('/api/chats/:id/messages', async (c) => {
       chats[chatIndex].lastMessageAt = newMessage.createdAt;
 
       // Notificar a los clientes WebSocket
-      const chatConnections = wsConnections.get(chatId) || new Set<WebSocket>();
-      const deadConnections: WebSocket[] = [];
-      
-      // Prepare the update message
-      const update = {
+      broadcastToRoom(chatId, {
         type: 'chat_updated',
         chatId,
         messages: formattedMessages
-      };
-
-      // Send update to all connections in this chat room
-      chatConnections.forEach(ws => {
-        try {
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify(update));
-          } else {
-            deadConnections.push(ws);
-          }
-        } catch (error) {
-          console.error('Error notifying WebSocket client:', error);
-          deadConnections.push(ws);
-        }
       });
-
-      // Clean up dead connections
-      deadConnections.forEach(ws => chatConnections.delete(ws));
-      
-      // Update the connections map if there are still active connections
-      if (chatConnections.size > 0) {
-        wsConnections.set(chatId, chatConnections);
-      } else {
-        wsConnections.delete(chatId);
-      }
     }
 
     return c.json({
@@ -715,6 +665,7 @@ app.post('/api/chats/:id/messages', async (c) => {
 //     }, 500);
 //   }
 // });
+
 app.post('/api/assistant', async (c) => {
   try {
     const { maxStepsTemp: newMaxSteps, prompt: newPrompt, modelTemp: newModel, selectedChatId: newChatId } = await c.req.json();
@@ -767,113 +718,48 @@ app.post('/api/assistant', async (c) => {
 });
 
 // WebSocket endpoint
-app.get('/api/ws', async (c) => {
-  const upgradeHeader = c.req.header('upgrade');
-  if (!upgradeHeader || !upgradeHeader.includes('websocket')) {
-    return c.text('Expected websocket', 400);
+app.get('/ws', async (c) => {
+  const upgradeHeader = c.req.header('Upgrade');
+  if (upgradeHeader !== 'websocket') {
+    return c.text('Expected Upgrade: websocket', 426);
   }
   
-  const connectionId = c.req.header('cf-connecting-ip') || `conn-${Date.now()}`;
-
-  const { 0: client, 1: server } = new WebSocketPair();
+  const webSocketPair = new WebSocketPair();
+  const [client, server] = Object.values(webSocketPair);
   
-  // Accept the WebSocket connection
   server.accept();
   
-  // Add this connection to the global room by default
-  const globalConnections = wsConnections.get('global') || new Set<WebSocket>();
-  globalConnections.add(server);
-  wsConnections.set('global', globalConnections);
+  // Add to global room by default
+  if (!chatRooms.has('global')) {
+    chatRooms.set('global', new Set());
+  }
+  chatRooms.get('global')!.add(server);
   
-  // Handle connection close
-  const handleClose = () => {
-    // Remove from all rooms
-    for (const [room, connections] of wsConnections.entries()) {
-      if (connections.has(server)) {
-        connections.delete(server);
-        if (connections.size === 0) {
-          wsConnections.delete(room);
-        } else {
-          wsConnections.set(room, connections);
-        }
-      }
-    }
-  };
-  
-  // Handle errors
-  const handleError = (error: any) => {
-    console.error('WebSocket error:', error);
-    handleClose();
-  };
-  
-  server.addEventListener('close', handleClose);
-  server.addEventListener('error', handleError);
-
-  server.addEventListener('message', async (event) => {
+  // Handle WebSocket events
+  server.addEventListener('message', (event) => {
     try {
-      const data = JSON.parse(event.data as string);
-
-      // Handle pong response
-      if (data.type === 'pong') {
-        return;
-      }
-
-      if (data.type === 'subscribe' && data.chatId) {
-        // The connection is already stored in activeConnections with the connectionId
-        // We can use this to associate the chatId with this connection if needed
-        
-        // Send current chat state if the chat exists
-        try {
-          const chat = await c.env.DB.prepare(
-            'SELECT * FROM chats WHERE id = ?'
-          ).bind(data.chatId).first();
-          
-          if (chat) {
-            const messages = await c.env.DB.prepare(
-              'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
-            ).bind(data.chatId).all();
-            
-            const chatWithMessages = {
-              ...chat,
-              messages: messages.results || []
-            };
-            
-            if (server.readyState === WebSocket.OPEN) {
-              server.send(JSON.stringify({
-                type: 'chat_selected',
-                chat: chatWithMessages
-              }));
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching chat for WebSocket:', error);
-        }
-      }
+      const message = JSON.parse(event.data.toString());
+      // Handle different message types if needed
     } catch (error) {
       console.error('Error processing WebSocket message:', error);
-      // Send error message to client
-      if (server.readyState === WebSocket.OPEN) {
-        server.send(JSON.stringify({
-          type: 'error',
-          message: 'Error processing message'
-        }));
-      }
     }
   });
-
-  // Handle WebSocket errors (already handled by the global error handler)
-  server.addEventListener('error', handleError);
-
-  // Handle WebSocket close
-  server.addEventListener('close', (event) => {
-    console.log(`WebSocket closed with code: ${event.code}, clean: ${event.wasClean}`);
-    handleClose();
+  
+  server.addEventListener('close', () => {
+    // Clean up when connection closes
+    chatRooms.forEach((room, roomId) => {
+      if (room.has(server)) {
+        room.delete(server);
+        if (room.size === 0) {
+          chatRooms.delete(roomId);
+        }
+      }
+    });
   });
   
-
   return new Response(null, {
     status: 101,
-    webSocket: client
+    webSocket: client,
   });
 });
 
@@ -1809,7 +1695,7 @@ export class Chat extends AIChatAgent<Env> {
     // ]);
 
     // Notificar a los clientes WebSocket
-    const chatConnections = wsConnections.get(this.currentChatId || '');
+    const chatConnections = chatRooms.get(this.currentChatId || '');
     if (chatConnections) {
       const update = {
         type: 'chat_updated',
@@ -2183,24 +2069,3 @@ export default {
     return app.fetch(request, env, ctx);
   },
 };
-
-
-
-//
-// Codigo que no se uso en estas funcionalidades.
-//
-// let geminiApiKey = '';
-// let geminiModel = 'gemini-2.0-flash';
-// Endpoint para configurar Gemini API
-// app.post('/api/gemini-config', async (c) => {
-//   const { apiKey, model } = await c.req.json();
-//   geminiApiKey = apiKey;
-//   ai = new GoogleGenAI({ apiKey: apiKey });
-//   if (model) geminiModel = model;
-//   return c.json({ success: true, model: geminiModel });
-// });
-
-// // Endpoint para obtener la configuración actual de Gemini
-// app.get('/api/gemini-config', async (c) => {
-//   return c.json({ model: geminiModel });
-// });

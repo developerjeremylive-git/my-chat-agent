@@ -104,9 +104,13 @@ function ChatComponent() {
   const [isLoadingChat, setIsLoadingChat] = useState(false);
 
   const { selectChat, currentChat, updateChat, chats } = useChat();
+  const [isCreatingNewChat, setIsCreatingNewChat] = useState(false);
 
   // Auto-select the first chat when chats are loaded
   useEffect(() => {
+    // No auto-select if we're in the middle of creating a new chat
+    if (isCreatingNewChat) return;
+
     const autoSelectChat = async () => {
       if (chats.length > 0 && !selectedChatId) {
         try {
@@ -290,6 +294,7 @@ function ChatComponent() {
   };
 
   const handleNewChat = () => {
+    setIsCreatingNewChat(true);
     // Clear the agent's message history
     clearHistory();
 
