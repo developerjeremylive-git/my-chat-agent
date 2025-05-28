@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useAnimation, type Variants } from "framer-motion";
-import { Gear, List, X, Sun, Moon, User, Bell, Question, Palette, Key, CaretRight as ChevronRight } from "@phosphor-icons/react";
+import { Gear, List, X, Sun, Moon, User, Bell, Question, Palette, Key, DotsThreeVertical, CaretRight as ChevronRight, PaintBrushBroad, PlusCircle, Trash, Minus, Plus, Robot, UserCirclePlus } from "@phosphor-icons/react";
 import { Button } from "../button/Button";
 import { useTheme } from "next-themes";
+import { AISettingsPanel } from "../settings/AISettingsPanel";
 
 const springTransition = {
   type: "spring",
@@ -68,6 +69,14 @@ interface SettingsDropdownProps {
   toggleSidebar: () => void;
   isSettingsOpen: boolean;
   toggleSettings: () => void;
+  onMenuToggle?: () => void;
+  onAISettingsClick?: () => void;
+  children?: React.ReactNode;
+  stepMax?: number;
+  setStepMax?: (value: number) => void;
+  setShowSettingsMenu?: (show: boolean) => void;
+  setShowOIAICreator?: (show: boolean) => void;
+  setShowClearDialog?: (show: boolean) => void;
 }
 
 export function SettingsDropdown({
@@ -75,14 +84,30 @@ export function SettingsDropdown({
   toggleSidebar,
   isSettingsOpen,
   toggleSettings,
+  onMenuToggle,
+  onAISettingsClick,
+  children,
+  stepMax = 5,
+  setStepMax = () => { },
+  setShowSettingsMenu = () => { },
+  setShowOIAICreator = () => { },
+  setShowClearDialog = () => { },
 }: SettingsDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activePanel, setActivePanel] = useState<'main' | 'settings' | 'profile'>('main');
-  const [direction, setDirection] = useState(0);
-  const [prevPanel, setPrevPanel] = useState<'main' | 'settings' | 'profile'>('main');
-  const { theme, setTheme } = useTheme();
   const controls = useAnimation();
+  const [activePanel, setActivePanel] = useState<'main' | 'settings' | 'profile'>('main');
+  const [prevPanel, setPrevPanel] = useState<'main' | 'settings' | 'profile'>('main');
+  const [direction, setDirection] = useState(0);
+  const [step, setStep] = useState(1);
+  const { theme, setTheme } = useTheme();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  const handleAISettingsClick = () => {
+    if (onAISettingsClick) {
+      onAISettingsClick();
+    }
+    setIsOpen(false);
+  };
 
   // Toggle theme
   const toggleTheme = () => {
@@ -90,7 +115,8 @@ export function SettingsDropdown({
   };
 
   // Handle menu item click
-  const handleMenuItemClick = (action: () => void) => {
+  const handleMenuItemClick = (action: () => void, customAction?: () => void) => {
+    if (customAction) customAction();
     action();
     controls.start('closed').then(() => {
       setTimeout(() => setIsOpen(false), 150);
@@ -136,28 +162,32 @@ export function SettingsDropdown({
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Mobile FAB */}
-      <motion.div 
-        className="fixed bottom-6 right-6 z-40 md:hidden"
+      {/* Mobile Button */}
+      <motion.div
+        className="fixed bottom-2 right-4 z-40 md:hidden"
         initial={{ scale: 0, opacity: 0 }}
-        animate={{ 
-          scale: 1, 
+        animate={{
+          scale: 1,
           opacity: 1,
-          transition: { delay: 0.2 }
+          transition: {
+            type: 'spring',
+            damping: 25,
+            stiffness: 300
+          }
         }}
       >
         <Button
           variant="ghost"
           size="lg"
-          className={`relative w-14 h-14 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 shadow-lg 
-                   hover:shadow-xl hover:shadow-[#F48120]/30 dark:hover:shadow-purple-500/30
-                   transition-all duration-300 ${isOpen ? 'rotate-45' : ''}`}
+          className={`relative w-8 h-8 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 shadow-lg 
+                   hover:shadow-xl hover:shadow-[#F48120]/30 dark:hover:shadow-purple-500/30 active:scale-95
+                   transition-all duration-200 ease-out ${isOpen ? 'rotate-180' : ''}`}
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Menú de configuración"
         >
-          <Gear 
-            size={24} 
-            className="text-white transition-transform duration-300"
+          <Gear
+            size={20}
+            className="text-white transition-transform duration-200 ml-1"
             weight="duotone"
           />
         </Button>
@@ -167,22 +197,18 @@ export function SettingsDropdown({
       <div className="hidden md:block">
         <Button
           variant="ghost"
-          size="sm"
-          className="relative w-10 h-10 rounded-full bg-gradient-to-r from-[#F48120] to-purple-500 p-[1.5px] group
-                   hover:shadow-lg hover:shadow-[#F48120]/25 dark:hover:shadow-purple-500/25
-                   transform hover:scale-110 active:scale-95 transition-all duration-300"
+          size="lg"
+          className={`relative w-8 h-8 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 shadow-lg 
+                   hover:shadow-xl hover:shadow-[#F48120]/30 dark:hover:shadow-purple-500/30 active:scale-95
+                   transition-all duration-200 ease-out ${isOpen ? 'rotate-180' : ''}`}
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Menú de configuración"
         >
-          <div className="absolute inset-[1px] rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center
-                      overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-[#F48120] before:to-purple-500 before:opacity-0
-                      before:transition-all before:duration-300 group-hover:before:opacity-100">
-            <Gear 
-              size={20} 
-              className={`relative z-10 text-[#F48120] group-hover:text-white transition-all duration-300 ${isOpen ? 'rotate-180' : ''}`} 
-              weight="duotone"
-            />
-          </div>
+          <Gear
+            size={20}
+            className="text-white transition-transform duration-200 ml-1"
+            weight="duotone"
+          />
         </Button>
       </div>
 
@@ -198,11 +224,11 @@ export function SettingsDropdown({
               transition={{ duration: 0.2 }}
               onClick={() => setIsOpen(false)}
             />
-            
+
             {/* Dropdown */}
             <div className="fixed inset-0 flex items-center justify-center z-50 px-4 py-4 pointer-events-none">
               <motion.div
-                className="w-full max-w-sm bg-white/80 dark:bg-neutral-800/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 dark:border-neutral-700/50 overflow-hidden pointer-events-auto max-h-[90vh] overflow-y-auto mx-auto my-auto"
+                className="w-full max-w-sm bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl border border-white/20 dark:border-neutral-700/50 overflow-hidden pointer-events-auto max-h-[90vh] overflow-y-auto mx-auto my-auto"
                 initial={{ opacity: 0, y: 20, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.98 }}
@@ -211,20 +237,19 @@ export function SettingsDropdown({
                 {/* Header */}
                 <div className="p-4 border-b border-white/10 dark:border-neutral-700/50 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10">
                   <div className="flex items-center">
-                    <button 
+                    <button
                       onClick={() => setActivePanel('main')}
-                      className={`mr-4 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                        activePanel === 'main' 
-                          ? 'bg-white dark:bg-neutral-700 text-[#F48120] shadow-sm' 
-                          : 'text-neutral-600 dark:text-neutral-300 hover:bg-white/50 dark:hover:bg-neutral-700/50'
-                      }`}
+                      className={`mr-4 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${activePanel === 'main'
+                        ? 'bg-white dark:bg-neutral-700 text-[#F48120] shadow-sm'
+                        : 'text-neutral-600 dark:text-neutral-300 hover:bg-white/50 dark:hover:bg-neutral-700/50'
+                        }`}
                     >
                       Menú
                     </button>
                     <h3 className="text-lg font-semibold text-neutral-800 dark:text-white">
                       {activePanel === 'main' ? 'Menú' : activePanel === 'settings' ? 'Configuración' : 'Perfil'}
                     </h3>
-                    <button 
+                    <button
                       onClick={() => setIsOpen(false)}
                       className="ml-auto p-1.5 rounded-full text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                       aria-label="Cerrar menú"
@@ -238,7 +263,7 @@ export function SettingsDropdown({
                 <div className="relative overflow-hidden">
                   <AnimatePresence mode="wait" custom={direction} initial={false}>
                     {activePanel === 'main' && (
-                      <motion.div 
+                      <motion.div
                         key="main"
                         className="p-2 w-full"
                         custom={direction}
@@ -249,68 +274,84 @@ export function SettingsDropdown({
                         style={{ willChange: 'transform, opacity' }}
                         transition={{ type: 'spring', stiffness: 400, damping: 40 }}
                       >
-                  <motion.button
-                    onClick={() => handleMenuItemClick(toggleSidebar)}
-                    className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${
-                      isSidebarOpen 
-                        ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium' 
-                        : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
-                    }`}
-                    variants={menuItemVariants}
-                    custom={0}
-                    initial="closed"
-                    animate="open"
-                  >
-                    <List size={18} weight="duotone" className="mr-3" />
-                    {isSidebarOpen ? 'Ocultar barra lateral' : 'Mostrar barra lateral'}
-                  </motion.button>
-                  
-                  <motion.button
-                    onClick={() => navigateToPanel('profile')}
-                    className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
-                    variants={menuItemVariants}
-                    custom={1}
-                    initial="closed"
-                    animate="open"
-                  >
-                    <User size={18} weight="duotone" className="mr-3 text-blue-500" />
-                    Perfil de usuario
-                  </motion.button>
+                        <motion.button
+                          onClick={() => handleMenuItemClick(toggleSidebar)}
+                          className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${isSidebarOpen
+                            ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium'
+                            : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
+                            }`}
+                          variants={menuItemVariants}
+                          custom={0}
+                          initial="closed"
+                          animate="open"
+                        >
+                          <UserCirclePlus size={18} weight="duotone" className="mr-3 text-[#F48120]" />
+                          {isSidebarOpen ? 'Personaliza tu Asistente IA' : 'Personaliza tu Asistente IA'}
+                        </motion.button>
 
-                  <motion.button
-                    onClick={() => navigateToPanel('settings')}
-                    className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
-                    variants={menuItemVariants}
-                    custom={2}
-                    initial="closed"
-                    animate="open"
-                  >
-                    <Gear size={18} weight="duotone" className="mr-3 text-purple-500" />
-                    Configuración
-                  </motion.button>
+                        <motion.button
+                          onClick={() => {
+                            handleAISettingsClick();
+                            controls.start('closed').then(() => {
+                              setTimeout(() => setIsOpen(false), 150);
+                            });
+                          }}
+                          className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${isSidebarOpen
+                            ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium'
+                            : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
+                            }`}
+                          variants={menuItemVariants}
+                          custom={1}
+                          initial="closed"
+                          animate="open"
+                        >
+                          <Robot size={18} weight="duotone" className="mr-3 text-purple-500" />
+                          Configuración Asistente IA
+                        </motion.button>
 
-                  <motion.button
-                    onClick={toggleTheme}
-                    className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
-                    variants={menuItemVariants}
-                    custom={3}
-                    initial="closed"
-                    animate="open"
-                  >
-                    {theme === 'dark' ? (
-                      <Sun size={18} weight="duotone" className="mr-3 text-yellow-500" />
-                    ) : (
-                      <Moon size={18} weight="duotone" className="mr-3 text-indigo-500" />
-                    )}
-                    {theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
-                  </motion.button>
+                        <motion.button
+                          onClick={() => navigateToPanel('profile')}
+                          className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
+                          variants={menuItemVariants}
+                          custom={2}
+                          initial="closed"
+                          animate="open"
+                        >
+                          <User size={18} weight="duotone" className="mr-3 text-blue-500" />
+                          Perfil de usuario
+                        </motion.button>
+
+                        <motion.button
+                          onClick={() => navigateToPanel('settings')}
+                          className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
+                          variants={menuItemVariants}
+                          custom={3}
+                          initial="closed"
+                          animate="open"
+                        >
+                          <PaintBrushBroad size={18} weight="duotone" className="mr-3 text-green-500" />
+                          Personalización
+                        </motion.button>
+                        {onMenuToggle && (
+                          <motion.button
+                            onClick={() => handleMenuItemClick(() => onMenuToggle())}
+                            className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
+                            variants={menuItemVariants}
+                            custom={5}
+                            initial="closed"
+                            animate="open"
+                          >
+                            <DotsThreeVertical size={18} weight="duotone" className="mr-3 text-[#F48120]" />
+                            Menú de opciones
+                          </motion.button>
+                        )}
 
                       </motion.div>
                     )}
                     {activePanel === 'settings' && (
-                      <motion.div 
-                        key="settings"
-                        className="p-4 absolute inset-0"
+                      <motion.div
+                        key="menu"
+                        className="p-4 absolute inset-0 overflow-y-auto"
                         custom={direction}
                         variants={panelVariants}
                         initial="enter"
@@ -318,62 +359,198 @@ export function SettingsDropdown({
                         exit="exit"
                         transition={{ type: 'spring', stiffness: 400, damping: 40 }}
                       >
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">APARIENCIA</h4>
-                    
-                    <button 
-                      onClick={toggleTheme}
-                      className="flex w-full items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-purple-500/50 transition-colors"
-                    >
-                      <div className="flex items-center">
-                        <Palette size={18} weight="duotone" className="mr-3 text-purple-500" />
-                        <span>Tema</span>
-                      </div>
-                      <div className="flex items-center text-sm text-neutral-500 dark:text-neutral-300">
-                        {theme === 'dark' ? 'Oscuro' : 'Claro'}
-                        <ChevronRight size={16} className="ml-2" />
-                      </div>
-                    </button>
+                        {/* Personalización Section */}
+                        <div>
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Personalización</div>
+                          <button
+                            onClick={() => {
+                              setShowSettingsMenu(true);
+                              setIsOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700/50 rounded-xl flex items-center space-x-2 mb-2"
+                          >
+                            <PaintBrushBroad size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
+                            <span className="truncate">Apariencia</span>
+                          </button>
+                        </div>
 
-                    <h4 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mt-6 mb-2">CUENTA</h4>
-                    
-                    <button className="flex w-full items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-purple-500/50 transition-colors">
-                      <div className="flex items-center">
-                        <Bell size={18} weight="duotone" className="mr-3 text-blue-500" />
-                        <span>Notificaciones</span>
-                      </div>
-                      <ChevronRight size={16} className="text-neutral-400" />
-                    </button>
+                        {/* Divider */}
+                        <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-3" />
 
-                    <button className="flex w-full items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-purple-500/50 transition-colors">
-                      <div className="flex items-center">
-                        <Key size={18} weight="duotone" className="mr-3 text-amber-500" />
-                        <span>Seguridad</span>
-                      </div>
-                      <ChevronRight size={16} className="text-neutral-400" />
-                    </button>
+                        {/* Nivel de Asistencia Section */}
+                        <div>
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Nivel de Asistencia</div>
+                          <div className="px-2 py-2 space-y-2">
+                            <div className="relative h-2 bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-full overflow-hidden shadow-inner">
+                              <div
+                                className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-lg"
+                                style={{ width: `${(stepMax / 10) * 100}%` }}
+                              />
+                            </div>
+                            <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1">
+                              <span className={stepMax <= 2 ? 'text-[#F48120] font-semibold' : ''}>Rápido</span>
+                              <span className={stepMax > 2 && stepMax <= 5 ? 'text-[#F48120] font-semibold' : ''}>Equilibrado</span>
+                              <span className={stepMax > 5 && stepMax <= 8 ? 'text-[#F48120] font-semibold' : ''}>Profundo</span>
+                              <span className={stepMax > 8 ? 'text-[#F48120] font-semibold' : ''}>Experto</span>
+                            </div>
+                            <div className="grid grid-cols-4 gap-1">
+                              <button
+                                onClick={() => setStepMax(1)}
+                                className={`p-1.5 text-xs rounded-md transition-all ${stepMax === 1 ? 'bg-[#F48120]/10 border border-[#F48120]/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
+                              >
+                                🎯 Básico
+                              </button>
+                              <button
+                                onClick={() => setStepMax(3)}
+                                className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 1 && stepMax <= 3 ? 'bg-blue-500/10 border border-blue-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
+                              >
+                                🧠 Equilibrado
+                              </button>
+                              <button
+                                onClick={() => setStepMax(7)}
+                                className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 3 && stepMax <= 7 ? 'bg-purple-500/10 border border-purple-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
+                              >
+                                🚀 Avanzado
+                              </button>
+                              <button
+                                onClick={() => setStepMax(10)}
+                                className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 7 ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
+                              >
+                                🤖 Experto
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-2 mt-3">
+                              <button
+                                onClick={() => stepMax > 1 && setStepMax(stepMax - 1)}
+                                disabled={stepMax <= 1}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 hover:border-red-300 dark:hover:border-red-600 disabled:opacity-40"
+                              >
+                                <Minus size={16} className="text-red-500" weight="bold" />
+                              </button>
+                              <div className="flex-1 text-center text-sm font-medium">
+                                Nivel {stepMax}
+                              </div>
+                              <button
+                                onClick={() => stepMax < 10 && setStepMax(stepMax + 1)}
+                                disabled={stepMax >= 10}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 hover:border-green-300 dark:hover:border-green-600 disabled:opacity-40"
+                              >
+                                <Plus size={16} className="text-green-500" weight="bold" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
 
-                    <button className="flex w-full items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-purple-500/50 transition-colors">
-                      <div className="flex items-center">
-                        <Question size={18} weight="duotone" className="mr-3 text-emerald-500" />
-                        <span>Ayuda y soporte</span>
-                      </div>
-                      <ChevronRight size={16} className="text-neutral-400" />
-                    </button>
+                        {/* Divider */}
+                        <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-3" />
 
-                    <div className="pt-4">
-                      <button 
-                        onClick={() => navigateToPanel('main')}
-                        className="w-full py-2.5 px-4 text-sm font-medium text-[#F48120] hover:bg-[#F48120]/10 dark:hover:bg-[#F48120]/20 rounded-lg transition-colors"
-                      >
-                        Volver al menú
-                      </button>
-                    </div>
-                  </div>
+                        {/* Acciones Section */}
+                        <div>
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Acciones</div>
+                          <button
+                            onClick={() => {
+                              setShowOIAICreator(true);
+                              setIsOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700/50 rounded-xl flex items-center space-x-2 mb-2"
+                          >
+                            <PlusCircle size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
+                            <span className="truncate">Crear Asistente IA</span>
+                          </button>
+                          {/* <button
+                            onClick={() => {
+                              setShowAISettings(true);
+                              setIsOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700/50 rounded-xl flex items-center space-x-2 mb-2"
+                          >
+                            <Robot size={16} className="text-blue-500 flex-shrink-0" weight="duotone" />
+                            <span className="truncate">Configuración de IA</span>
+                          </button> */}
+                          {/* <button
+                            onClick={() => {
+                              setShowClearDialog(true);
+                              setIsOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-neutral-700/50 rounded-xl flex items-center space-x-2"
+                          >
+                            <Trash size={16} className="text-red-500 flex-shrink-0" weight="duotone" />
+                            <span className="truncate">Limpiar Chat</span>
+                          </button> */}
+                        </div>
+
+                        {/* Divider */}
+                        {/* <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-3" /> */}
+
                       </motion.div>
                     )}
+                    {/* {activePanel === 'settings' && (
+                      <motion.div
+                        key="settings"
+                        className="p-4 absolute inset-0 overflow-y-auto"
+                        custom={direction}
+                        variants={panelVariants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+                      >
+                        <div className="space-y-3">
+                          <h4 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">APARIENCIA</h4>
+
+                          <button
+                            onClick={toggleTheme}
+                            className="flex w-full items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-purple-500/50 transition-colors"
+                          >
+                            <div className="flex items-center">
+                              <Palette size={18} weight="duotone" className="mr-3 text-purple-500" />
+                              <span>Tema</span>
+                            </div>
+                            <div className="flex items-center text-sm text-neutral-500 dark:text-neutral-300">
+                              {theme === 'dark' ? 'Oscuro' : 'Claro'}
+                              <ChevronRight size={16} className="ml-2" />
+                            </div>
+                          </button>
+
+                          <h4 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mt-6 mb-2">CUENTA</h4>
+
+                          <button className="flex w-full items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-purple-500/50 transition-colors">
+                            <div className="flex items-center">
+                              <Bell size={18} weight="duotone" className="mr-3 text-blue-500" />
+                              <span>Notificaciones</span>
+                            </div>
+                            <ChevronRight size={16} className="text-neutral-400" />
+                          </button>
+
+                          <button className="flex w-full items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-purple-500/50 transition-colors">
+                            <div className="flex items-center">
+                              <Key size={18} weight="duotone" className="mr-3 text-amber-500" />
+                              <span>Seguridad</span>
+                            </div>
+                            <ChevronRight size={16} className="text-neutral-400" />
+                          </button>
+
+                          <button className="flex w-full items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-purple-500/50 transition-colors">
+                            <div className="flex items-center">
+                              <Question size={18} weight="duotone" className="mr-3 text-emerald-500" />
+                              <span>Ayuda y soporte</span>
+                            </div>
+                            <ChevronRight size={16} className="text-neutral-400" />
+                          </button>
+
+                          <div className="pt-4">
+                            <button
+                              onClick={() => navigateToPanel('main')}
+                              className="w-full py-2.5 px-4 text-sm font-medium text-[#F48120] hover:bg-[#F48120]/10 dark:hover:bg-[#F48120]/20 rounded-lg transition-colors"
+                            >
+                              Volver al menú
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )} */}
                     {activePanel === 'profile' && (
-                      <motion.div 
+                      <motion.div
                         key="profile"
                         className="p-4 absolute inset-0"
                         custom={direction}
@@ -383,34 +560,34 @@ export function SettingsDropdown({
                         exit="exit"
                         transition={{ type: 'spring', stiffness: 400, damping: 40 }}
                       >
-                  <div className="flex flex-col items-center text-center mb-6">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 p-0.5 mb-3">
-                      <div className="w-full h-full rounded-full bg-white dark:bg-neutral-800 flex items-center justify-center text-2xl font-bold text-[#F48120]">
-                        U
-                      </div>
-                    </div>
-                    <h3 className="text-lg font-semibold text-neutral-800 dark:text-white">Usuario</h3>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">usuario@ejemplo.com</p>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <button className="w-full py-2.5 px-4 text-sm font-medium bg-[#F48120] hover:bg-[#e6731a] text-white rounded-lg transition-colors">
-                      Ver perfil completo
-                    </button>
-                    
-                    <button className="w-full py-2.5 px-4 text-sm font-medium border border-neutral-200 dark:border-neutral-600 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 rounded-lg transition-colors">
-                      Cerrar sesión
-                    </button>
+                        <div className="flex flex-col items-center text-center mb-6">
+                          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 p-0.5 mb-3">
+                            <div className="w-full h-full rounded-full bg-white dark:bg-neutral-800 flex items-center justify-center text-2xl font-bold text-[#F48120]">
+                              U
+                            </div>
+                          </div>
+                          <h3 className="text-lg font-semibold text-neutral-800 dark:text-white">Usuario</h3>
+                          <p className="text-sm text-neutral-500 dark:text-neutral-400">usuario@ejemplo.com</p>
+                        </div>
 
-                    <div className="pt-2">
-                      <button 
-                        onClick={() => navigateToPanel('main')}
-                        className="w-full py-2 text-sm font-medium text-[#F48120] hover:bg-[#F48120]/10 dark:hover:bg-[#F48120]/20 rounded-lg transition-colors"
-                      >
-                        ← Volver al menú
-                      </button>
-                    </div>
-                  </div>
+                        <div className="space-y-3">
+                          <button className="w-full py-2.5 px-4 text-sm font-medium bg-[#F48120] hover:bg-[#e6731a] text-white rounded-lg transition-colors">
+                            Ver perfil completo
+                          </button>
+
+                          <button className="w-full py-2.5 px-4 text-sm font-medium border border-neutral-200 dark:border-neutral-600 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 rounded-lg transition-colors">
+                            Cerrar sesión
+                          </button>
+
+                          <div className="pt-2">
+                            <button
+                              onClick={() => navigateToPanel('main')}
+                              className="w-full py-2 text-sm font-medium text-[#F48120] hover:bg-[#F48120]/10 dark:hover:bg-[#F48120]/20 rounded-lg transition-colors"
+                            >
+                              ← Volver al menú
+                            </button>
+                          </div>
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -420,6 +597,7 @@ export function SettingsDropdown({
           </>
         )}
       </AnimatePresence>
+
     </div>
   );
 }

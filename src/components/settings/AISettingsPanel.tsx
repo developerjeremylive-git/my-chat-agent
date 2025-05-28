@@ -117,11 +117,17 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
     <>
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-70 w-80 transform transition-transform duration-300 ease-in-out shadow-2xl',
-          'bg-gradient-to-b from-white to-gray-100 dark:from-neutral-900 dark:to-neutral-950 border-l border-neutral-200 dark:border-neutral-800 overflow-y-auto scrollbar-hide',
+          'fixed inset-y-0 right-0 w-80 transform transition-all duration-300 ease-in-out shadow-2xl',
+          'bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm border-l border-neutral-200/50 dark:border-neutral-700/50',
           'scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+          isOpen ? 'translate-x-0' : 'translate-x-full',
+          'z-[100]' // Aseguramos que esté por encima del menú desplegable
         )}
+        style={{
+          transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
+          opacity: isOpen ? 1 : 0,
+          transition: 'transform 0.3s ease-in-out, opacity 0.2s ease-in-out'
+        }}
       >
         <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 border-opacity-10 flex justify-between items-center sticky top-0 bg-white dark:bg-neutral-900 z-70">
           <div className="flex items-center space-x-2">

@@ -490,7 +490,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-3">
                 <Robot weight="duotone" className="text-[#F48120] h-7 w-7" />
-                <span className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Asistente IA</span>
+                <span className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Personaliza tu Asistente IA</span>
               </div>
               <Button
                 variant="ghost"
@@ -522,7 +522,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
               <div className="space-y-3">
                 {/* Sección de Asistente IA */}
                 <div className="flex items-center justify-between p-3 bg-neutral-100/50 dark:bg-neutral-800/50 rounded-xl">
-                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Asistente IA</span>
+                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Personaliza tu Asistente IA</span>
                 </div>
                 <div className="space-y-2 px-2">
                   <Button
