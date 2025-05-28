@@ -450,6 +450,16 @@ app.get('/api/chats/:id', async (c) => {
       });
     }
 
+    if (!Chat.instance) {
+      // Si no existe instancia, retornar error
+      return c.json({
+        error: 'Chat instance not initialized',
+        details: 'The Chat instance has not been properly initialized.'
+      }, 500);
+    }
+    
+    await Chat.instance.setCurrentChat(chatId);
+
     return c.json(chatWithMessages);
   } catch (error) {
     console.error('Error fetching chat:', error);
@@ -1457,11 +1467,11 @@ export class Chat extends AIChatAgent<Env> {
             execute: async (dataStream) => {
 
               // Asegurarnos de que tenemos un chat activo
-              if (!this.currentChatId) {
-                const defaultChat = await this.initializeDefaultChat();
-                this.currentChatId = defaultChat.id;
-                console.log('Chat ID establecido a:', this.currentChatId);
-              }
+              // if (!this.currentChatId) {
+              //   const defaultChat = await this.initializeDefaultChat();
+              //   this.currentChatId = defaultChat.id;
+              //   console.log('Chat ID establecido a:', this.currentChatId);
+              // }
 
               const messageResponse: ChatMessage = {
                 id: generateId(), // Generar un nuevo ID único para el mensaje
@@ -1741,11 +1751,11 @@ export class Chat extends AIChatAgent<Env> {
             };
 
             // Asegurarnos de que tenemos un chat activo
-            if (!this.currentChatId) {
-              const defaultChat = await this.initializeDefaultChat();
-              this.currentChatId = defaultChat.id;
-              console.log('Chat ID establecido a:', this.currentChatId);
-            }
+            // if (!this.currentChatId) {
+            //   const defaultChat = await this.initializeDefaultChat();
+            //   this.currentChatId = defaultChat.id;
+            //   console.log('Chat ID establecido a:', this.currentChatId);
+            // }
 
             // Actualizar los mensajes en memoria asegurando IDs únicos
             this._messages = [...this.messages, messageResponse].map(msg => ({
@@ -1914,11 +1924,11 @@ export class Chat extends AIChatAgent<Env> {
 
   async executeTask(description: string, task: Schedule<string>) {
     // Asegurarnos de que tenemos un chat activo antes de validar mensajes
-    if (!this.currentChatId) {
-      const defaultChat = await this.initializeDefaultChat();
-      this.currentChatId = defaultChat.id;
-      console.log('Chat ID establecido en executeTask:', this.currentChatId);
-    }
+    // if (!this.currentChatId) {
+    //   const defaultChat = await this.initializeDefaultChat();
+    //   this.currentChatId = defaultChat.id;
+    //   console.log('Chat ID establecido en executeTask:', this.currentChatId);
+    // }
     const message: ChatMessage = {
       id: generateId(),
       role: "user",
@@ -2028,11 +2038,12 @@ export default {
       }
 
       if (!chatId) {
-        const defaultChat = await chat.initializeDefaultChat();
+        // const defaultChat = await chat.initializeDefaultChat();
         return new Response(JSON.stringify({
           success: true,
           messages: [],
-          chatId: defaultChat.id
+          chatId: "",
+          // chatId: defaultChat.id
         }));
       }
 
