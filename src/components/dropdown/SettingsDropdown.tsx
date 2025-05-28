@@ -444,72 +444,75 @@ export function SettingsDropdown({
                           </button>
                         </div>
 
-                        {/* Divider */}
-                        <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-3" />
 
                         {/* Nivel de Asistencia Section */}
-                        <div>
-                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Nivel de Asistencia</div>
-                          <div className="px-2 py-2 space-y-2">
-                            <div className="relative h-2 bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-full overflow-hidden shadow-inner">
-                              <div
-                                className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-lg"
-                                style={{ width: `${(stepMax / 10) * 100}%` }}
-                              />
-                            </div>
-                            <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1">
-                              <span className={stepMax <= 2 ? 'text-[#F48120] font-semibold' : ''}>Rápido</span>
-                              <span className={stepMax > 2 && stepMax <= 5 ? 'text-[#F48120] font-semibold' : ''}>Equilibrado</span>
-                              <span className={stepMax > 5 && stepMax <= 8 ? 'text-[#F48120] font-semibold' : ''}>Profundo</span>
-                              <span className={stepMax > 8 ? 'text-[#F48120] font-semibold' : ''}>Experto</span>
-                            </div>
-                            <div className="grid grid-cols-4 gap-1">
-                              <button
-                                onClick={() => setStepMax(1)}
-                                className={`p-1.5 text-xs rounded-md transition-all ${stepMax === 1 ? 'bg-[#F48120]/10 border border-[#F48120]/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
-                              >
-                                🎯 Básico
-                              </button>
-                              <button
-                                onClick={() => setStepMax(3)}
-                                className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 1 && stepMax <= 3 ? 'bg-blue-500/10 border border-blue-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
-                              >
-                                🧠 Equilibrado
-                              </button>
-                              <button
-                                onClick={() => setStepMax(7)}
-                                className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 3 && stepMax <= 7 ? 'bg-purple-500/10 border border-purple-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
-                              >
-                                🚀 Avanzado
-                              </button>
-                              <button
-                                onClick={() => setStepMax(10)}
-                                className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 7 ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
-                              >
-                                🤖 Experto
-                              </button>
-                            </div>
-                            <div className="flex items-center gap-2 mt-3">
-                              <button
-                                onClick={() => stepMax > 1 && setStepMax(stepMax - 1)}
-                                disabled={stepMax <= 1}
-                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 hover:border-red-300 dark:hover:border-red-600 disabled:opacity-40"
-                              >
-                                <Minus size={16} className="text-red-500" weight="bold" />
-                              </button>
-                              <div className="flex-1 text-center text-sm font-medium">
-                                Nivel {stepMax}
+                        {selectedModel === 'gemini-2.0-flash' && (
+                          <div>
+
+                            <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-3" />
+
+                            <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Nivel de Asistencia</div>
+                            <div className="px-2 py-2 space-y-2">
+                              <div className="relative h-2 bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-full overflow-hidden shadow-inner">
+                                <div
+                                  className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-lg"
+                                  style={{ width: `${(stepMax / 10) * 100}%` }}
+                                />
                               </div>
-                              <button
-                                onClick={() => stepMax < 10 && setStepMax(stepMax + 1)}
-                                disabled={stepMax >= 10}
-                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 hover:border-green-300 dark:hover:border-green-600 disabled:opacity-40"
-                              >
-                                <Plus size={16} className="text-green-500" weight="bold" />
-                              </button>
+                              <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1">
+                                <span className={stepMax <= 2 ? 'text-[#F48120] font-semibold' : ''}>Rápido</span>
+                                <span className={stepMax > 2 && stepMax <= 5 ? 'text-[#F48120] font-semibold' : ''}>Equilibrado</span>
+                                <span className={stepMax > 5 && stepMax <= 8 ? 'text-[#F48120] font-semibold' : ''}>Profundo</span>
+                                <span className={stepMax > 8 ? 'text-[#F48120] font-semibold' : ''}>Experto</span>
+                              </div>
+                              <div className="grid grid-cols-4 gap-1">
+                                <button
+                                  onClick={() => setStepMax(1)}
+                                  className={`p-1.5 text-xs rounded-md transition-all ${stepMax === 1 ? 'bg-[#F48120]/10 border border-[#F48120]/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
+                                >
+                                  🎯 Básico
+                                </button>
+                                <button
+                                  onClick={() => setStepMax(3)}
+                                  className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 1 && stepMax <= 3 ? 'bg-blue-500/10 border border-blue-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
+                                >
+                                  🧠 Equilibrado
+                                </button>
+                                <button
+                                  onClick={() => setStepMax(7)}
+                                  className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 3 && stepMax <= 7 ? 'bg-purple-500/10 border border-purple-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
+                                >
+                                  🚀 Avanzado
+                                </button>
+                                <button
+                                  onClick={() => setStepMax(10)}
+                                  className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 7 ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
+                                >
+                                  🤖 Experto
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-2 mt-3">
+                                <button
+                                  onClick={() => stepMax > 1 && setStepMax(stepMax - 1)}
+                                  disabled={stepMax <= 1}
+                                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 hover:border-red-300 dark:hover:border-red-600 disabled:opacity-40"
+                                >
+                                  <Minus size={16} className="text-red-500" weight="bold" />
+                                </button>
+                                <div className="flex-1 text-center text-sm font-medium">
+                                  Nivel {stepMax}
+                                </div>
+                                <button
+                                  onClick={() => stepMax < 10 && setStepMax(stepMax + 1)}
+                                  disabled={stepMax >= 10}
+                                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 hover:border-green-300 dark:hover:border-green-600 disabled:opacity-40"
+                                >
+                                  <Plus size={16} className="text-green-500" weight="bold" />
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        )}
 
                         {/* Divider */}
                         <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-3" />
