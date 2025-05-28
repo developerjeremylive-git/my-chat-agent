@@ -1090,9 +1090,9 @@ function ChatComponent() {
                         <div className="flex items-center gap-2">
                           {/* Model Select */}
                           <div className="w-40">
-                            <ModelSelect />
+                            <ModelSelect mobile={true} />
                           </div>
-                          
+
                           {/* Send button */}
                           <Button
                             type="submit"
@@ -2002,31 +2002,37 @@ function ChatComponent() {
                                 </Button>
                               </Tooltip>
                             </div>
-
-                            {/* Send button */}
-                            <Button
-                              type="submit"
-                              size="sm"
-                              className="relative px-4 h-9 rounded-xl bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-orange-500 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group overflow-hidden flex items-center gap-2"
-                              disabled={pendingToolCallConfirmation || !agentInput.trim()}
-                              onClick={(e) => {
-                                try {
-                                  if (!user) {
-                                    e.preventDefault();
-                                    setIsLoginOpen(true);
-                                    return;
-                                  }
-                                } catch (error) {
-                                  console.error('Error al procesar la solicitud:', error);
-                                }
-                              }}
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                              <span className="relative z-10 text-sm font-semibold">Enviar</span>
-                              <div className="relative z-10 w-5 h-5 flex items-center justify-center rounded-full bg-white/20 group-hover:bg-white/30 transition-colors duration-300">
-                                <PaperPlaneRight size={12} className="transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" weight="bold" />
+                            <div className="flex items-center gap-2">
+                              {/* Model Select */}
+                              <div className="w-40">
+                                <ModelSelect />
                               </div>
-                            </Button>
+
+                              {/* Send button */}
+                              <Button
+                                type="submit"
+                                size="sm"
+                                className="relative px-4 h-9 rounded-xl bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-orange-500 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group overflow-hidden flex items-center gap-2"
+                                disabled={pendingToolCallConfirmation || !agentInput.trim()}
+                                onClick={(e) => {
+                                  try {
+                                    if (!user) {
+                                      e.preventDefault();
+                                      setIsLoginOpen(true);
+                                      return;
+                                    }
+                                  } catch (error) {
+                                    console.error('Error al procesar la solicitud:', error);
+                                  }
+                                }}
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                                <span className="relative z-10 text-sm font-semibold">Enviar</span>
+                                <div className="relative z-10 w-5 h-5 flex items-center justify-center rounded-full bg-white/20 group-hover:bg-white/30 transition-colors duration-300">
+                                  <PaperPlaneRight size={12} className="transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" weight="bold" />
+                                </div>
+                              </Button>
+                            </div>
                           </div>
                         </div>
 
