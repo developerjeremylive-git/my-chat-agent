@@ -103,6 +103,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   // Subscribe to new chat when current chat changes
   useEffect(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN && currentChat) {
+      // Only subscribe if we have a current chat (manually selected)
       wsRef.current.send(JSON.stringify({
         type: 'subscribe',
         chatId: currentChat.id
@@ -123,7 +124,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         if (response.ok) {
           const chatsData = await response.json();
           if (Array.isArray(chatsData) && chatsData.length > 0) {
-            const formattedChats = chatsData.map((chat: any) => ({
+            const formattedChats: Chat[] = chatsData.map((chat: any) => ({
               id: chat.id,
               title: chat.title || `Chat ${chat.id}`,
               messages: chat.messages || [],
@@ -132,29 +133,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             }));
             
             setChats(formattedChats);
-            
-            // Seleccionar el primer chat de la lista
-            if (formattedChats.length > 0 && !currentChat) {
-              const firstChat = formattedChats[0];
-              setCurrentChat(firstChat);
-              
-              // Cargar los mensajes del primer chat
-              // try {
-              //   const messagesResponse = await fetch(`/api/chats/${firstChat.id}`);
-              //   if (messagesResponse.ok) {
-              //     const chatData = await messagesResponse.json() as ChatResponse;
-              //     setCurrentChat(prev => ({
-              //       ...prev!,
-              //       messages: chatData.messages?.map(msg => ({
-              //         ...msg,
-              //         createdAt: new Date(msg.createdAt)
-              //       })) || []
-              //     }));
-              //   }
-              // } catch (error) {
-              //   console.error('Error loading chat messages:', error);
-              // }
-            }
             
             // Guardar en localStorage como respaldo
             localStorage.setItem('chats', JSON.stringify(formattedChats));
@@ -165,18 +143,22 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         // Si falla la API, cargar desde localStorage
         const savedChats = localStorage.getItem('chats');
         if (savedChats) {
-          const parsedChats = JSON.parse(savedChats).map((chat: any) => ({
-            ...chat,
-            createdAt: new Date(chat.createdAt),
-            lastMessageAt: new Date(chat.lastMessageAt),
-            messages: (chat.messages || []).map((msg: any) => ({
-              ...msg,
-              createdAt: new Date(msg.createdAt)
-            }))
-          }));
-          setChats(parsedChats);
-          if (parsedChats.length > 0 && !currentChat) {
-            setCurrentChat(parsedChats[0]);
+          try {
+            const parsedChats: Chat[] = JSON.parse(savedChats).map((chat: any) => ({
+              ...chat,
+              createdAt: new Date(chat.createdAt),
+              lastMessageAt: new Date(chat.lastMessageAt),
+              messages: (chat.messages || []).map((msg: any) => ({
+                ...msg,
+                createdAt: new Date(msg.createdAt)
+              }))
+            }));
+            setChats(parsedChats);
+            if (parsedChats.length > 0 && !currentChat) {
+              setCurrentChat(parsedChats[0]);
+            }
+          } catch (e) {
+            console.error('Error parsing saved chats:', e);
           }
         }
       } catch (error) {
@@ -185,7 +167,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         const savedChats = localStorage.getItem('chats');
         if (savedChats) {
           try {
-            const parsedChats = JSON.parse(savedChats).map((chat: any) => ({
+            const parsedChats: Chat[] = JSON.parse(savedChats).map((chat: any) => ({
               ...chat,
               createdAt: new Date(chat.createdAt),
               lastMessageAt: new Date(chat.lastMessageAt),
