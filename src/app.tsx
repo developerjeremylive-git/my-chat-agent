@@ -10,6 +10,7 @@ import { AIConfigProvider, useAIConfig } from "@/contexts/AIConfigContext";
 import { ModelProvider, useModel } from "@/contexts/ModelContext";
 import { ChatProvider } from "@/contexts/ChatContext";
 import "@/styles/markdown.css";
+import { ModelSelect } from "@/components/model/ModelSelect";
 import { MessageView } from "@/components/message/MessageView";
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { Button } from "@/components/button/Button";
@@ -76,7 +77,6 @@ import { AgentDashboard } from "./components/agent/AgentDashboard";
 import { Modal } from "./components/modal/Modal";
 import { Input } from "./components/input/Input";
 import { InputSystemPrompt } from "./components/input/InputSystemPrompt";
-import { ModelSelect } from "./components/model/ModelSelect";
 import { GeminiConfigModal } from "./components/modal/GeminiConfigModal";
 import { ListHeart } from "@phosphor-icons/react/dist/ssr";
 import type { ChatMessage, FormattedChatMessage, APIResponse } from "./types/api";
@@ -1049,18 +1049,20 @@ function ChatComponent() {
 
                       {/* Input field */}
                       <div className="relative z-10 p-3">
-                        <Input
-                          disabled={pendingToolCallConfirmation}
-                          placeholder={pendingToolCallConfirmation
-                            ? "Por favor responde a la confirmación de herramienta arriba..."
-                            : "✨ Escribe tu consulta aquí..."}
-                          className="w-full bg-transparent border-0 focus:ring-0 text-base lg:text-lg placeholder:text-neutral-400 dark:placeholder:text-neutral-500 font-medium px-2"
-                          value={agentInput}
-                          onChange={handleAgentInputChange}
-                          onValueChange={undefined}
-                          onClick={() => { setSystemPrompt(false); }}
-                        />
-                        <div className="absolute top-26 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div>
+                        <div className="relative">
+                          <Input
+                            disabled={pendingToolCallConfirmation}
+                            placeholder={pendingToolCallConfirmation
+                              ? "Por favor responde a la confirmación de herramienta arriba..."
+                              : "✨ Escribe tu consulta aquí..."}
+                            className="w-full bg-transparent border-0 focus:ring-0 text-base lg:text-lg placeholder:text-neutral-400 dark:placeholder:text-neutral-500 font-medium px-2"
+                            value={agentInput}
+                            onChange={handleAgentInputChange}
+                            onValueChange={undefined}
+                            onClick={() => { setSystemPrompt(false); }}
+                          />
+                          <div className="absolute top-26 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div>
+                        </div>
                       </div>
 
                       {/* Buttons row below input */}
@@ -1085,30 +1087,37 @@ function ChatComponent() {
                           </Tooltip>
                         </div>
 
-                        {/* Send button */}
-                        <Button
-                          type="submit"
-                          size="sm"
-                          className="relative px-4 h-9 rounded-xl bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-orange-500 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group overflow-hidden flex items-center gap-2"
-                          disabled={pendingToolCallConfirmation || !agentInput.trim()}
-                          onClick={(e) => {
-                            try {
-                              if (!user) {
-                                e.preventDefault();
-                                setIsLoginOpen(true);
-                                return;
-                              }
-                            } catch (error) {
-                              console.error('Error al procesar la solicitud:', error);
-                            }
-                          }}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                          <span className="relative z-10 text-sm font-semibold">Enviar</span>
-                          <div className="relative z-10 w-5 h-5 flex items-center justify-center rounded-full bg-white/20 group-hover:bg-white/30 transition-colors duration-300">
-                            <PaperPlaneRight size={12} className="transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" weight="bold" />
+                        <div className="flex items-center gap-2">
+                          {/* Model Select */}
+                          <div className="w-40">
+                            <ModelSelect />
                           </div>
-                        </Button>
+                          
+                          {/* Send button */}
+                          <Button
+                            type="submit"
+                            size="sm"
+                            className="relative px-4 h-9 rounded-xl bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-orange-500 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group overflow-hidden flex items-center gap-2"
+                            disabled={pendingToolCallConfirmation || !agentInput.trim()}
+                            onClick={(e) => {
+                              try {
+                                if (!user) {
+                                  e.preventDefault();
+                                  setIsLoginOpen(true);
+                                  return;
+                                }
+                              } catch (error) {
+                                console.error('Error al procesar la solicitud:', error);
+                              }
+                            }}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                            <span className="relative z-10 text-sm font-semibold">Enviar</span>
+                            <div className="relative z-10 w-5 h-5 flex items-center justify-center rounded-full bg-white/20 group-hover:bg-white/30 transition-colors duration-300">
+                              <PaperPlaneRight size={12} className="transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" weight="bold" />
+                            </div>
+                          </Button>
+                        </div>
                       </div>
                     </div>
 

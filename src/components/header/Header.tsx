@@ -79,9 +79,9 @@ export default function Header(props: HeaderProps) {
 
         {/* Center - Model Selector and Step Controls */}
         <div className="flex-1 flex items-center justify-center px-2 sm:px-4 max-w-2xl mx-auto">
-          <div className="flex-1 max-w-xl md:block hidden">
+          {/* <div className="flex-1 max-w-xl md:block hidden">
             <ModelSelect />
-          </div>
+          </div> */}
           
           {selectedModel === 'gemini-2.0-flash' && (
             <div className="sm:hidden flex items-center justify-center gap-0.5 mr-4">

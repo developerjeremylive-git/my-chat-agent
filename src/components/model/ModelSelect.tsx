@@ -268,7 +268,8 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
               'overscroll-contain touch-pan-y',
               'animate-in fade-in-80 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2',
               'data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1',
-              'data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1'
+              'data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1',
+              'h-88 md:h-110'
             )}
             style={{
               WebkitOverflowScrolling: 'touch',
