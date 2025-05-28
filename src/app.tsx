@@ -1114,7 +1114,7 @@ function ChatComponent() {
 
                     <div className="relative">
                       {/* Mobile toggle button */}
-                      <div className="w-full text-center mt-8 md:hidden absolute -top-19 z-20">
+                      <div className="w-full text-center mt-21 md:hidden absolute -top-19 z-20">
                         <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
                           <Button
                             variant="ghost"
@@ -1147,7 +1147,7 @@ function ChatComponent() {
                       </div>
 
                       {/* Desktop toggle button */}
-                      <div className="hidden md:flex justify-center w-full absolute mt-8 -top-19 z-20">
+                      <div className="hidden md:flex justify-center w-full absolute mt-21 -top-19 z-20">
                         <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
                           <Button
                             variant="ghost"
