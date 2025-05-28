@@ -25,12 +25,7 @@ interface WebSocketRequestResponsePair {
   response: string;
 }
 // Almacenamiento temporal de chats (en producción debería usar una base de datos)
-let chats: LocalChatData[] = [{
-  id: '3xytdwIhg9AimViz',
-  title: '¡Bienvenido a tu Asistente Virtual! 🤖',
-  messages: [],
-  lastMessageAt: new Date('2025-05-19T23:36:05.129Z')
-}];
+let chats: LocalChatData[] = [];
 
 // Configuración por defecto
 const DEFAULT_MAX_STEPS = 1;
@@ -451,14 +446,42 @@ app.get('/api/chats/:id', async (c) => {
     }
 
     if (!Chat.instance) {
-      // Si no existe instancia, retornar error
-      return c.json({
-        error: 'Chat instance not initialized',
-        details: 'The Chat instance has not been properly initialized.'
-      }, 500);
+      // Si no existe instancia, crear una nueva
+      const state = new SimpleDurableObjectState(
+        { toString: () => 'default-chat' } as any,
+        {
+          get: async () => null,
+          put: async () => {},
+          delete: async () => {},
+          list: async () => new Map(),
+          deleteAll: async () => {},
+          transaction: async () => {},
+          getAlarm: async () => null,
+          setAlarm: async () => {},
+          deleteAlarm: async () => {},
+          sync: async () => {},
+          database: () => c.env.DB,
+          sql: async () => {},
+          transactionSync: () => {},
+          getCurrentBookmark: () => '',
+          getBookmarkForTime: () => '',
+          onNextSessionRestoreBookmark: () => {}
+        } as any
+      );
+      
+      Chat.instance = new Chat(state, c.env);
+      // // Inicializar tablas si es necesario
+      // await Chat.instance.initializeTables();
     }
     
-    await Chat.instance.setCurrentChat(chatId);
+    // Establecer el chat actual
+    if (chatId) {
+      await Chat.instance.setCurrentChat(chatId);
+    } else {
+      // Si no hay chatId, crear o obtener uno por defecto
+      const defaultChat = await Chat.instance.initializeDefaultChat();
+      await Chat.instance.setCurrentChat(defaultChat.id);
+    }
 
     return c.json(chatWithMessages);
   } catch (error) {
@@ -728,7 +751,7 @@ app.post('/api/assistant', async (c) => {
 });
 
 // WebSocket endpoint
-app.get('/ws', async (c) => {
+app.get('/api/ws', async (c) => {
   const upgradeHeader = c.req.header('Upgrade');
   if (upgradeHeader !== 'websocket') {
     return c.text('Expected Upgrade: websocket', 426);
@@ -968,11 +991,12 @@ app.get('/agents/chat/default/get-messages', async (c) => {
 
     // If no chatId provided, create a new chat
     if (!chatId) {
-      const defaultChat = await chat.initializeDefaultChat();
+      // const defaultChat = await chat.initializeDefaultChat();
       return c.json({
         success: true,
         messages: [],
-        chatId: defaultChat.id
+        chatId: ''
+        // chatId: defaultChat.id
       });
     }
 
@@ -1135,9 +1159,10 @@ export class Chat extends AIChatAgent<Env> {
     if (!Chat.instance) {
       Chat.instance = this;
       this.initializeTables().then(() => {
-        this.initializeDefaultChat().catch(error => {
-          console.error('Error initializing default chat:', error);
-        });
+        console.log('Database tables initialized successfully');
+        // this.initializeDefaultChat().catch(error => {
+        //   console.error('Error initializing default chat:', error);
+        // });
       }).catch(error => {
         console.error('Error initializing database tables:', error);
       });
@@ -2021,62 +2046,62 @@ export default {
       new Response("Not found", { status: 404 })
     );
   },
-  async fetch_with_context(request: Request, env: Env, ctx: ExecutionContext) {
-    const url = new URL(request.url);
-    const pathname = url.pathname;
+  // async fetch_with_context(request: Request, env: Env, ctx: ExecutionContext) {
+  //   const url = new URL(request.url);
+  //   const pathname = url.pathname;
 
-    // Manejar rutas específicas
-    if (pathname.startsWith('/agents/chat/default/get-messages')) {
-      const chatId = url.searchParams.get('chatId');
-      let chat = Chat.instance;
+  //   // Manejar rutas específicas
+  //   if (pathname.startsWith('/agents/chat/default/get-messages')) {
+  //     const chatId = url.searchParams.get('chatId');
+  //     let chat = Chat.instance;
 
-      if (!chat) {
-        return new Response(JSON.stringify({
-          error: 'Chat instance not initialized',
-          details: 'The Chat instance has not been properly initialized.'
-        }), { status: 500 });
-      }
+  //     if (!chat) {
+  //       return new Response(JSON.stringify({
+  //         error: 'Chat instance not initialized',
+  //         details: 'The Chat instance has not been properly initialized.'
+  //       }), { status: 500 });
+  //     }
 
-      if (!chatId) {
-        // const defaultChat = await chat.initializeDefaultChat();
-        return new Response(JSON.stringify({
-          success: true,
-          messages: [],
-          chatId: "",
-          // chatId: defaultChat.id
-        }));
-      }
+  //     if (!chatId) {
+  //       // const defaultChat = await chat.initializeDefaultChat();
+  //       return new Response(JSON.stringify({
+  //         success: true,
+  //         messages: [],
+  //         chatId: "",
+  //         // chatId: defaultChat.id
+  //       }));
+  //     }
 
-      const savedChats = await chat.loadChatsFromStorage();
-      if (savedChats.length > 0) {
-        chats = savedChats;
-      }
+  //     const savedChats = await chat.loadChatsFromStorage();
+  //     if (savedChats.length > 0) {
+  //       chats = savedChats;
+  //     }
 
-      const specificChat = chats.find(c => c.id === chatId);
-      if (!specificChat) {
-        return new Response(JSON.stringify({
-          error: 'Chat not found',
-          details: `No chat found with ID: ${chatId}`
-        }), { status: 404 });
-      }
+  //     const specificChat = chats.find(c => c.id === chatId);
+  //     if (!specificChat) {
+  //       return new Response(JSON.stringify({
+  //         error: 'Chat not found',
+  //         details: `No chat found with ID: ${chatId}`
+  //       }), { status: 404 });
+  //     }
 
-      chat.setCurrentChat(chatId);
-      chat.messages = specificChat.messages;
+  //     chat.setCurrentChat(chatId);
+  //     chat.messages = specificChat.messages;
 
-      const messages = specificChat.messages.map(msg => ({
-        id: msg.id || generateId(),
-        role: msg.role || 'user',
-        content: msg.content || '',
-        createdAt: new Date(msg.createdAt)
-      }));
+  //     const messages = specificChat.messages.map(msg => ({
+  //       id: msg.id || generateId(),
+  //       role: msg.role || 'user',
+  //       content: msg.content || '',
+  //       createdAt: new Date(msg.createdAt)
+  //     }));
 
-      return new Response(JSON.stringify({
-        success: true,
-        messages: messages
-      }));
-    }
+  //     return new Response(JSON.stringify({
+  //       success: true,
+  //       messages: messages
+  //     }));
+  //   }
 
-    // Manejar otras rutas
-    return app.fetch(request, env, ctx);
-  },
+  //   // Manejar otras rutas
+  //   return app.fetch(request, env, ctx);
+  // },
 };

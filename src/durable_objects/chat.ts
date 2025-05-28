@@ -97,37 +97,78 @@ export class ChatDO implements DurableObject {
     }
 
     private async handleWebSocket(webSocket: WebSocket, chatId: string | null): Promise<void> {
-        webSocket.accept();
+        try {
+            webSocket.accept();
 
-        if (chatId) {
-            this.setCurrentChat(chatId);
-        } else {
-            const defaultChat = await this.initializeDefaultChat();
-            this.setCurrentChat(defaultChat.id);
-        }
-
-        webSocket.addEventListener('message', async (event) => {
-            try {
-                const data = JSON.parse(event.data as string) as WebSocketMessage;
-
-                if (data.type === 'message' && data.content) {
-                    const message: ChatMessage = {
-                        id: generateId(),
-                        role: 'user',
-                        content: data.content,
-                        createdAt: new Date()
-                    };
-
-                    await this.handleMessage(message, webSocket);
+            // Initialize chat session
+            let chatData: ChatData;
+            if (chatId) {
+                const existingChat = await this.getChat(chatId);
+                if (!existingChat) {
+                    throw new Error(`Chat with ID ${chatId} not found`);
                 }
-            } catch (error) {
-                console.error('Error handling WebSocket message:', error);
-                webSocket.send(JSON.stringify({
-                    type: 'error',
-                    error: 'Error processing message'
-                }));
+                chatData = existingChat;
+            } else {
+                chatData = await this.initializeDefaultChat();
             }
-        });
+            
+            this.setCurrentChat(chatData.id);
+            this.messages = chatData.messages || [];
+
+            // Send initial chat data to client
+            webSocket.send(JSON.stringify({
+                type: 'init',
+                chat: {
+                    id: chatData.id,
+                    title: chatData.title,
+                    messages: chatData.messages
+                }
+            }));
+
+            // Handle incoming messages
+            webSocket.addEventListener('message', async (event) => {
+                try {
+                    const data = JSON.parse(event.data as string) as WebSocketMessage;
+
+                    if (data.type === 'message' && data.content) {
+                        const message: ChatMessage = {
+                            id: generateId(),
+                            role: 'user',
+                            content: data.content,
+                            createdAt: new Date()
+                        };
+
+                        await this.handleMessage(message, webSocket);
+                    }
+                } catch (error) {
+                    console.error('Error handling WebSocket message:', error);
+                    webSocket.send(JSON.stringify({
+                        type: 'error',
+                        error: error instanceof Error ? error.message : 'Error processing message'
+                    }));
+                }
+            });
+
+            // Handle connection close
+            webSocket.addEventListener('close', () => {
+                console.log('WebSocket connection closed');
+                // Clean up resources if needed
+            });
+
+            // Handle errors
+            webSocket.addEventListener('error', (error) => {
+                console.error('WebSocket error:', error);
+                webSocket.close(1011, 'Internal error');
+            });
+
+        } catch (error) {
+            console.error('Error in WebSocket connection:', error);
+            webSocket.send(JSON.stringify({
+                type: 'error',
+                error: error instanceof Error ? error.message : 'Failed to initialize chat session'
+            }));
+            webSocket.close(1011, 'Internal error');
+        }
     }
 
     private async initializeTables(): Promise<void> {
@@ -339,6 +380,24 @@ export class ChatDO implements DurableObject {
             throw error;
         }
     }
+    
+    private async getChatMessages(chatId: string): Promise<ChatMessage[]> {
+        try {
+            const result = await this.db.prepare(
+                'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
+            ).bind(chatId).all<ChatMessage>();
+            
+            return result.results.map(msg => ({
+                id: msg.id,
+                role: msg.role as 'assistant' | 'system' | 'user' | 'data',
+                content: msg.content,
+                createdAt: new Date(msg.createdAt as unknown as string)
+            }));
+        } catch (error) {
+            console.error('Error fetching chat messages:', error);
+            return [];
+        }
+    }
 
     // private async handleMessage(message: ChatMessage, webSocket: WebSocket): Promise<void> {
     //   try {
@@ -420,7 +479,7 @@ export class ChatDO implements DurableObject {
             console.error('Error handling message:', error);
             webSocket.send(JSON.stringify({
                 type: 'error',
-                error: 'Error generating response'
+                error: error instanceof Error ? error.message : 'Error generating response'
             }));
         }
     }
