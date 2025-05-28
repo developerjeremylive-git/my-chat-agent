@@ -1094,10 +1094,8 @@ function ChatComponent() {
                           </div>
 
                           {/* Send button */}
-                          <Button
+                          <button
                             type="submit"
-                            size="sm"
-                            className="relative px-4 h-9 rounded-xl bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-orange-500 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group overflow-hidden flex items-center gap-2"
                             disabled={pendingToolCallConfirmation || !agentInput.trim()}
                             onClick={(e) => {
                               try {
@@ -1110,13 +1108,54 @@ function ChatComponent() {
                                 console.error('Error al procesar la solicitud:', error);
                               }
                             }}
+                            className={`relative w-12 h-12 rounded-full p-0 flex items-center justify-center 
+                              bg-gradient-to-br from-[#F48120] to-purple-500 
+                              hover:from-[#ff8f2d] hover:to-purple-600
+                              active:from-[#e6731a] active:to-purple-700
+                              shadow-lg hover:shadow-xl 
+                              transition-all duration-300 
+                              transform hover:scale-110 active:scale-95 
+                              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+                              group overflow-hidden
+                              ${pendingToolCallConfirmation ? 'animate-pulse' : ''}`}
                           >
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                            <span className="relative z-10 text-sm font-semibold">Enviar</span>
-                            <div className="relative z-10 w-5 h-5 flex items-center justify-center rounded-full bg-white/20 group-hover:bg-white/30 transition-colors duration-300">
-                              <PaperPlaneRight size={12} className="transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" weight="bold" />
+                            {/* Animated background gradient */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 rounded-full"></div>
+
+                            {/* Main icon container */}
+                            <div className={`relative z-10 w-6 h-6 flex items-center justify-center transition-all duration-300 transform 
+                              ${!pendingToolCallConfirmation ? 'group-hover:scale-110' : 'animate-spin'}`}>
+
+                              {/* Icon with animation */}
+                              {pendingToolCallConfirmation ? (
+                                <div className="relative w-6 h-6">
+                                  {/* Outer rotating circle */}
+                                  <div className="absolute inset-0 rounded-full border-2 border-t-transparent border-r-transparent border-l-white/80 border-b-white/80 animate-spin"></div>
+
+                                  {/* Pulsing dot */}
+                                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
+
+                                  {/* Inner gradient circle */}
+                                  <div className="absolute inset-1 rounded-full bg-gradient-to-br from-white/90 to-white/60 animate-pulse"></div>
+
+                                  {/* Center dot */}
+                                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-white/80 rounded-full"></div>
+                                </div>
+                              ) : (
+                                <PaperPlaneRight
+                                  size={20}
+                                  weight="fill"
+                                  className="text-white transition-all duration-300 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-1 group-active:-translate-y-1"
+                                />
+                              )}
                             </div>
-                          </Button>
+
+                            {/* Ripple effect on click */}
+                            <div className="absolute inset-0 rounded-full opacity-0 group-active:opacity-40 group-active:bg-white transition-opacity duration-500"></div>
+
+                            {/* Subtle pulse effect */}
+                            <div className="absolute inset-0 rounded-full border-2 border-white/10 group-hover:border-white/20 transition-all duration-500"></div>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -2009,10 +2048,8 @@ function ChatComponent() {
                               </div>
 
                               {/* Send button */}
-                              <Button
+                              <button
                                 type="submit"
-                                size="sm"
-                                className="relative px-4 h-9 rounded-xl bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-orange-500 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 group overflow-hidden flex items-center gap-2"
                                 disabled={pendingToolCallConfirmation || !agentInput.trim()}
                                 onClick={(e) => {
                                   try {
@@ -2025,13 +2062,54 @@ function ChatComponent() {
                                     console.error('Error al procesar la solicitud:', error);
                                   }
                                 }}
+                                className={`relative w-12 h-12 rounded-full p-0 flex items-center justify-center 
+                              bg-gradient-to-br from-[#F48120] to-purple-500 
+                              hover:from-[#ff8f2d] hover:to-purple-600
+                              active:from-[#e6731a] active:to-purple-700
+                              shadow-lg hover:shadow-xl 
+                              transition-all duration-300 
+                              transform hover:scale-110 active:scale-95 
+                              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+                              group overflow-hidden
+                              ${pendingToolCallConfirmation ? 'animate-pulse' : ''}`}
                               >
-                                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                                <span className="relative z-10 text-sm font-semibold">Enviar</span>
-                                <div className="relative z-10 w-5 h-5 flex items-center justify-center rounded-full bg-white/20 group-hover:bg-white/30 transition-colors duration-300">
-                                  <PaperPlaneRight size={12} className="transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" weight="bold" />
+                                {/* Animated background gradient */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 rounded-full"></div>
+
+                                {/* Main icon container */}
+                                <div className={`relative z-10 w-6 h-6 flex items-center justify-center transition-all duration-300 transform 
+                              ${!pendingToolCallConfirmation ? 'group-hover:scale-110' : 'animate-spin'}`}>
+
+                                  {/* Icon with animation */}
+                                  {pendingToolCallConfirmation ? (
+                                    <div className="relative w-6 h-6">
+                                      {/* Outer rotating circle */}
+                                      <div className="absolute inset-0 rounded-full border-2 border-t-transparent border-r-transparent border-l-white/80 border-b-white/80 animate-spin"></div>
+
+                                      {/* Pulsing dot */}
+                                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
+
+                                      {/* Inner gradient circle */}
+                                      <div className="absolute inset-1 rounded-full bg-gradient-to-br from-white/90 to-white/60 animate-pulse"></div>
+
+                                      {/* Center dot */}
+                                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-white/80 rounded-full"></div>
+                                    </div>
+                                  ) : (
+                                    <PaperPlaneRight
+                                      size={20}
+                                      weight="fill"
+                                      className="text-white transition-all duration-300 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-1 group-active:-translate-y-1"
+                                    />
+                                  )}
                                 </div>
-                              </Button>
+
+                                {/* Ripple effect on click */}
+                                <div className="absolute inset-0 rounded-full opacity-0 group-active:opacity-40 group-active:bg-white transition-opacity duration-500"></div>
+
+                                {/* Subtle pulse effect */}
+                                <div className="absolute inset-0 rounded-full border-2 border-white/10 group-hover:border-white/20 transition-all duration-500"></div>
+                              </button>
                             </div>
                           </div>
                         </div>
