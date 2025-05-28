@@ -263,7 +263,7 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
               'overflow-y-auto bg-white/95 dark:bg-neutral-900/95 rounded-t-xl shadow-2xl border border-neutral-200/70 dark:border-neutral-700/50 backdrop-blur-xl',
               'scrollbar-thin scrollbar-thumb-[#F48120]/50 scrollbar-track-transparent hover:scrollbar-thumb-[#F48120]/70',
               'transform transition-all duration-200 ease-out',
-              'z-[100]',
+              'z-50',
               mobile ? '' : 'mb-13',
               mobile ? 'w-[calc(100vw-2rem)] mx-auto' : 'w-[90vw] max-w-4xl',
               'overscroll-contain touch-pan-y',
