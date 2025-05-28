@@ -3,6 +3,7 @@ import { ModelSelect } from "@/components/model/ModelSelect";
 import { ChatText } from "@phosphor-icons/react";
 import type { Dispatch, SetStateAction } from "react";
 import { SettingsDropdown } from "../dropdown/SettingsDropdown";
+import { useModel } from "@/contexts/ModelContext";
 
 type SetState<T> = Dispatch<SetStateAction<T>>;
 
@@ -44,6 +45,8 @@ export default function Header(props: HeaderProps) {
     }
   };
 
+  const { selectedModel } = useModel();
+
   const handleAISettingsClick = () => {
     setIsSettingsOpen(true);
   };
@@ -79,36 +82,38 @@ export default function Header(props: HeaderProps) {
           <div className="hidden sm:block">
             <ModelSelect />
           </div>
-          <div className="sm:hidden flex items-center justify-center gap-0.5 mr-8">
-            <button 
-              onClick={() => setStepMax(1)}
-              className={`p-1.5 rounded-lg transition-all ${stepMax === 1 ? 'bg-[#F48120]/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
-              title="Básico"
-            >
-              <span className="text-sm">🎯</span>
-            </button>
-            <button 
-              onClick={() => setStepMax(3)}
-              className={`p-1.5 rounded-lg transition-all ${stepMax > 1 && stepMax <= 3 ? 'bg-blue-500/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
-              title="Equilibrado"
-            >
-              <span className="text-sm">🧠</span>
-            </button>
-            <button 
-              onClick={() => setStepMax(7)}
-              className={`p-1.5 rounded-lg transition-all ${stepMax > 3 && stepMax <= 7 ? 'bg-purple-500/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
-              title="Avanzado"
-            >
-              <span className="text-sm">🚀</span>
-            </button>
-            <button 
-              onClick={() => setStepMax(10)}
-              className={`p-1.5 rounded-lg transition-all ${stepMax > 7 ? 'bg-emerald-500/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
-              title="Experto"
-            >
-              <span className="text-sm">🤖</span>
-            </button>
-          </div>
+          {selectedModel === 'gemini-2.0-flash' && (
+            <div className="sm:hidden flex items-center justify-center gap-0.5 mr-8">
+              <button 
+                onClick={() => setStepMax(1)}
+                className={`p-1.5 rounded-lg transition-all ${stepMax === 1 ? 'bg-[#F48120]/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
+                title="Básico"
+              >
+                <span className="text-sm">🎯</span>
+              </button>
+              <button 
+                onClick={() => setStepMax(3)}
+                className={`p-1.5 rounded-lg transition-all ${stepMax > 1 && stepMax <= 3 ? 'bg-blue-500/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
+                title="Equilibrado"
+              >
+                <span className="text-sm">🧠</span>
+              </button>
+              <button 
+                onClick={() => setStepMax(7)}
+                className={`p-1.5 rounded-lg transition-all ${stepMax > 3 && stepMax <= 7 ? 'bg-purple-500/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
+                title="Avanzado"
+              >
+                <span className="text-sm">🚀</span>
+              </button>
+              <button 
+                onClick={() => setStepMax(10)}
+                className={`p-1.5 rounded-lg transition-all ${stepMax > 7 ? 'bg-emerald-500/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
+                title="Experto"
+              >
+                <span className="text-sm">🤖</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Right side - Settings Dropdown */}

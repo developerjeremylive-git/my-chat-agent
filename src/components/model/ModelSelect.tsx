@@ -22,6 +22,7 @@ interface ModelSelectPropsTemp {
 
 interface ModelSelectProps {
   className?: string;
+  mobile?: boolean;
 }
 
 // Modelos de Google Gemini
@@ -199,7 +200,7 @@ const distilledModels: Model[] = [
 const models: Model[] = [...geminiModels, ...reasoningModels, ...distilledModels];
 
 // export function ModelSelect({ className, onModelChange }: ModelSelectPropsTemp) {
-export function ModelSelect({ className }: ModelSelectProps) {
+export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
   const { selectedModel: contextModel, setSelectedModel: setContextModel } = useModel();
   const [selectedModel, setSelectedModel] = useState<Model>(
     models.find(model => model.name === contextModel) || models[0]
@@ -258,8 +259,22 @@ export function ModelSelect({ className }: ModelSelectProps) {
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
           <DropdownMenu.Content
-            className="min-w-[600px] max-h-[85vh] overflow-y-auto bg-white/95 dark:bg-neutral-900/95 rounded-xl p-2 shadow-xl border border-neutral-200 dark:border-neutral-700/50 z-50 backdrop-blur-xl ml-4 scrollbar-thin scrollbar-thumb-[#F48120] scrollbar-track-transparent hover:scrollbar-thumb-[#F48120]/80 md:min-w-[800px]"
-            sideOffset={5}
+            className={cn(
+              'overflow-y-auto bg-white/95 dark:bg-neutral-900/95 rounded-xl p-2 shadow-xl border border-neutral-200 dark:border-neutral-700/50 backdrop-blur-xl',
+              'scrollbar-thin scrollbar-thumb-[#F48120] scrollbar-track-transparent hover:scrollbar-thumb-[#F48120]/80',
+              mobile ? 'w-[calc(100vw-2rem)] max-h-[70vh]' : 'min-w-[600px] ml-4 max-h-[85vh]',
+              'md:min-w-[800px] z-[100]',
+              'overscroll-contain', // Better scrolling on mobile
+              'touch-pan-y' // Enable touch scrolling
+            )}
+            style={{
+              WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+              overscrollBehavior: 'contain', // Prevent scroll chaining
+              maxHeight: 'calc(100vh - 163px)' // Ensure it doesn't go off screen
+            }}
+            sideOffset={mobile ? 10 : 5}
+            side={mobile ? 'bottom' : 'right'}
+            align={mobile ? 'center' : 'start'}
           >
             {/* geminiModels   */}
             <div className="mt-4 mb-2 px-3 py-2">

@@ -4,6 +4,8 @@ import { Gear, List, X, Sun, Moon, User, Bell, Question, Palette, Key, DotsThree
 import { Button } from "../button/Button";
 import { useTheme } from "next-themes";
 import { AISettingsPanel } from "../settings/AISettingsPanel";
+import { ModelSelect } from "../model/ModelSelect";
+import { useModel } from "@/contexts/ModelContext";
 
 const springTransition = {
   type: "spring",
@@ -99,9 +101,27 @@ export function SettingsDropdown({
   const [prevPanel, setPrevPanel] = useState<'main' | 'settings' | 'profile'>('main');
   const [direction, setDirection] = useState(0);
   const [step, setStep] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
   const { theme, setTheme } = useTheme();
+  const { selectedModel } = useModel();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
+  // Check if mobile on mount and on window resize
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
+
+    // Initial check
+    checkIfMobile();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkIfMobile);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+
   const handleAISettingsClick = () => {
     if (onAISettingsClick) {
       onAISettingsClick();
@@ -247,7 +267,7 @@ export function SettingsDropdown({
                       Menú
                     </button>
                     <h3 className="text-lg font-semibold text-neutral-800 dark:text-white">
-                      {activePanel === 'main' ? 'Menú' : activePanel === 'settings' ? 'Configuración' : 'Perfil'}
+                      {activePanel === 'main' ? 'Menú' : activePanel === 'settings' ? 'Ajustes Personalizados' : 'Perfil'}
                     </h3>
                     <button
                       onClick={() => setIsOpen(false)}
@@ -274,19 +294,54 @@ export function SettingsDropdown({
                         style={{ willChange: 'transform, opacity' }}
                         transition={{ type: 'spring', stiffness: 400, damping: 40 }}
                       >
+                        {/* Model Selection - Mobile Only */}
+                        <div className="md:hidden px-4 py-2 mb-2">
+                          <ModelSelect mobile />
+                        </div>
+
+                        {/* Step Controls - Mobile Only for gemini-2.0-flash */}
+                        {isMobile && selectedModel === 'gemini-2.0-flash' && (
+                          <div className="flex items-center justify-center gap-1.5 px-4 py-2 mb-2 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl mx-2">
+                            <button
+                              onClick={() => setStepMax(1)}
+                              className={`p-1.5 rounded-lg transition-all ${stepMax === 1 ? 'bg-[#F48120]/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
+                              title="Básico"
+                            >
+                              <span className="text-sm">🎯</span>
+                            </button>
+                            <button
+                              onClick={() => setStepMax(3)}
+                              className={`p-1.5 rounded-lg transition-all ${stepMax > 1 && stepMax <= 3 ? 'bg-blue-500/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
+                              title="Equilibrado"
+                            >
+                              <span className="text-sm">🧠</span>
+                            </button>
+                            <button
+                              onClick={() => setStepMax(7)}
+                              className={`p-1.5 rounded-lg transition-all ${stepMax > 3 && stepMax <= 7 ? 'bg-purple-500/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
+                              title="Avanzado"
+                            >
+                              <span className="text-sm">🚀</span>
+                            </button>
+                            <button
+                              onClick={() => setStepMax(10)}
+                              className={`p-1.5 rounded-lg transition-all ${stepMax > 7 ? 'bg-emerald-500/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
+                              title="Experto"
+                            >
+                              <span className="text-sm">🤖</span>
+                            </button>
+                          </div>
+                        )}
                         <motion.button
-                          onClick={() => handleMenuItemClick(toggleSidebar)}
-                          className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${isSidebarOpen
-                            ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium'
-                            : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
-                            }`}
+                          onClick={() => navigateToPanel('settings')}
+                          className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
                           variants={menuItemVariants}
-                          custom={0}
+                          custom={3}
                           initial="closed"
                           animate="open"
                         >
-                          <UserCirclePlus size={18} weight="duotone" className="mr-3 text-[#F48120]" />
-                          {isSidebarOpen ? 'Personaliza tu Asistente IA' : 'Personaliza tu Asistente IA'}
+                          <PaintBrushBroad size={18} weight="duotone" className="mr-3 text-green-500" />
+                          Ajustes Personalizados
                         </motion.button>
 
                         <motion.button
@@ -310,6 +365,21 @@ export function SettingsDropdown({
                         </motion.button>
 
                         <motion.button
+                          onClick={() => handleMenuItemClick(toggleSidebar)}
+                          className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${isSidebarOpen
+                            ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium'
+                            : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
+                            }`}
+                          variants={menuItemVariants}
+                          custom={isMobile ? 1 : 0}
+                          initial="closed"
+                          animate="open"
+                        >
+                          <UserCirclePlus size={18} weight="duotone" className="mr-3 text-[#F48120]" />
+                          {isSidebarOpen ? 'Personaliza tu Asistente IA' : 'Personaliza tu Asistente IA'}
+                        </motion.button>
+
+                        {/* <motion.button
                           onClick={() => navigateToPanel('profile')}
                           className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
                           variants={menuItemVariants}
@@ -319,19 +389,8 @@ export function SettingsDropdown({
                         >
                           <User size={18} weight="duotone" className="mr-3 text-blue-500" />
                           Perfil de usuario
-                        </motion.button>
+                        </motion.button> */}
 
-                        <motion.button
-                          onClick={() => navigateToPanel('settings')}
-                          className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
-                          variants={menuItemVariants}
-                          custom={3}
-                          initial="closed"
-                          animate="open"
-                        >
-                          <PaintBrushBroad size={18} weight="duotone" className="mr-3 text-green-500" />
-                          Personalización
-                        </motion.button>
                         {onMenuToggle && (
                           <motion.button
                             onClick={() => handleMenuItemClick(() => onMenuToggle())}
