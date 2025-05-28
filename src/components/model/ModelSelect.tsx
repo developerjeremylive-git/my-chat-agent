@@ -260,21 +260,25 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
         <DropdownMenu.Portal>
           <DropdownMenu.Content
             className={cn(
-              'overflow-y-auto bg-white/95 dark:bg-neutral-900/95 rounded-xl p-2 shadow-xl border border-neutral-200 dark:border-neutral-700/50 backdrop-blur-xl',
-              'scrollbar-thin scrollbar-thumb-[#F48120] scrollbar-track-transparent hover:scrollbar-thumb-[#F48120]/80',
-              mobile ? 'w-[calc(100vw-2rem)] max-h-[70vh]' : 'min-w-[600px] ml-4 max-h-[85vh]',
-              'md:min-w-[800px] z-[100]',
-              'overscroll-contain', // Better scrolling on mobile
-              'touch-pan-y' // Enable touch scrolling
+              'overflow-y-auto bg-white/95 dark:bg-neutral-900/95 rounded-xl p-2 shadow-2xl border border-neutral-200/70 dark:border-neutral-700/50 backdrop-blur-xl',
+              'scrollbar-thin scrollbar-thumb-[#F48120]/50 scrollbar-track-transparent hover:scrollbar-thumb-[#F48120]/70',
+              'transform transition-all duration-200 ease-out',
+              'z-[100]',
+              mobile ? 'w-[calc(100vw-2rem)] max-h-[70vh]' : 'w-[90vw] max-w-4xl max-h-[80vh]',
+              'overscroll-contain touch-pan-y',
+              'animate-in fade-in-80 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2',
+              'data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1',
+              'data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1'
             )}
             style={{
-              WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
-              overscrollBehavior: 'contain', // Prevent scroll chaining
-              maxHeight: 'calc(100vh - 163px)' // Ensure it doesn't go off screen
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain',
+              maxHeight: 'calc(100vh - 163px)' 
             }}
-            sideOffset={mobile ? 10 : 5}
-            side={mobile ? 'bottom' : 'right'}
-            align={mobile ? 'center' : 'start'}
+            sideOffset={8}
+            side={mobile ? 'bottom' : 'bottom'}
+            align={mobile ? 'center' : 'center'}
+            collisionPadding={16}
           >
             {/* geminiModels   */}
             <div className="mt-4 mb-2 px-3 py-2">

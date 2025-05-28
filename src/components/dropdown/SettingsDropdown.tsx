@@ -208,7 +208,7 @@ export function SettingsDropdown({
         >
           <Gear
             size={20}
-            className="text-white transition-transform duration-200 ml-1"
+            className="text-white transition-transform duration-200 ml-1.5 mr-1.5"
             weight="duotone"
           />
         </Button>
@@ -227,7 +227,7 @@ export function SettingsDropdown({
         >
           <Gear
             size={20}
-            className="text-white transition-transform duration-200 ml-1"
+            className="text-white transition-transform duration-200 ml-1.5 mr-1.5"
             weight="duotone"
           />
         </Button>
@@ -311,7 +311,7 @@ export function SettingsDropdown({
                         </div>
 
                         {/* Step Controls - Mobile Only for gemini-2.0-flash */}
-                        {isMobile && selectedModel === 'gemini-2.0-flash' && (
+                        {selectedModel === 'gemini-2.0-flash' && (
                           <div className="flex items-center justify-center gap-1.5 px-4 py-2 mb-2 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl mx-2">
                             <button
                               onClick={() => setStepMax(1)}

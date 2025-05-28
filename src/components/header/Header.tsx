@@ -52,10 +52,10 @@ export default function Header(props: HeaderProps) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-lg border-b border-neutral-200/50 dark:border-neutral-700/50 px-4 py-2">
-      <div className="flex w-full max-w-5xl mx-auto justify-between items-center gap-2">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-lg border-b border-neutral-200/60 dark:border-neutral-700/60 px-0 py-2">
+      <div className="flex w-full max-w-6xl mx-auto justify-between items-center gap-2 px-4 sm:px-6">
         {/* Left side - Menu button and title */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Button
             variant="ghost"
             size="lg"
@@ -70,20 +70,21 @@ export default function Header(props: HeaderProps) {
           >
             <ChatText 
               size={20} 
-              className="text-white transition-transform duration-200 ml-1 md:ml-1.5" 
+              className="text-white transition-transform duration-200 ml-1.5 mr-1.5" 
               weight="duotone" 
             />
           </Button>
           <h1 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent hidden md:block">Asistente IA</h1>
         </div>
 
-        {/* Model Selector */}
-        <div className="flex-1 max-w-xs px-1 sm:px-2">
-          <div className="hidden sm:block">
+        {/* Center - Model Selector and Step Controls */}
+        <div className="flex-1 flex items-center justify-center px-2 sm:px-4 max-w-2xl mx-auto">
+          <div className="flex-1 max-w-xl md:block hidden">
             <ModelSelect />
           </div>
+          
           {selectedModel === 'gemini-2.0-flash' && (
-            <div className="sm:hidden flex items-center justify-center gap-0.5 mr-8">
+            <div className="sm:hidden flex items-center justify-center gap-0.5 mr-4">
               <button 
                 onClick={() => setStepMax(1)}
                 className={`p-1.5 rounded-lg transition-all ${stepMax === 1 ? 'bg-[#F48120]/10 scale-110' : 'bg-transparent hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'}`}
