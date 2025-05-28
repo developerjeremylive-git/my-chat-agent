@@ -43,64 +43,11 @@ interface Env {
   OPENAI_API_KEY?: string;
   GEMINI_API_KEY?: string;
   MODEL_CONFIG: KVNamespace; // Add KV namespace binding
+  Chat: DurableObjectNamespace; // Add Chat Durable Object binding
 }
 
 const app = new Hono<{ Bindings: Env }>();
 const workersai = createWorkersAI({ binding: env.AI });
-
-// WebSocket connections store (in-memory, request-specific)
-const chatRooms = new Map<string, Set<WebSocket>>();
-
-// Clean up dead WebSocket connections
-function cleanupConnections(roomId: string = 'global') {
-  if (!chatRooms.has(roomId)) return;
-  
-  const room = chatRooms.get(roomId)!;
-  const deadConnections: WebSocket[] = [];
-  
-  room.forEach(ws => {
-    if (ws.readyState !== WebSocket.OPEN) {
-      deadConnections.push(ws);
-    }
-  });
-  
-  deadConnections.forEach(ws => {
-    room.delete(ws);
-  });
-  
-  if (room.size === 0) {
-    chatRooms.delete(roomId);
-  }
-}
-
-// Helper function to broadcast to a room
-function broadcastToRoom(roomId: string, message: any) {
-  if (!chatRooms.has(roomId)) return;
-  
-  const room = chatRooms.get(roomId)!;
-  const deadConnections: WebSocket[] = [];
-  const messageStr = JSON.stringify(message);
-  
-  room.forEach(ws => {
-    try {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(messageStr);
-      } else {
-        deadConnections.push(ws);
-      }
-    } catch (error) {
-      console.error('Error sending WebSocket message:', error);
-      deadConnections.push(ws);
-    }
-  });
-  
-  // Clean up dead connections
-  deadConnections.forEach(ws => room.delete(ws));
-  
-  if (room.size === 0) {
-    chatRooms.delete(roomId);
-  }
-}
 
 // Default values
 const DEFAULT_MODEL = 'gemini-2.0-flash';
@@ -439,10 +386,10 @@ app.get('/api/chats/:id', async (c) => {
 
     // Notify all active WebSocket connections about the chat selection
     if (chatId) {
-      broadcastToRoom(chatId, {
-        type: 'chat_selected',
-        chat: chatWithMessages
-      });
+      // broadcastToRoom(chatId, {
+      //   type: 'chat_selected',
+      //   chat: chatWithMessages
+      // });
     }
 
     if (!Chat.instance) {
@@ -513,10 +460,10 @@ app.post('/api/chats', async (c) => {
     chats.push(newChat);
 
     // Notificar a los clientes WebSocket sobre el nuevo chat
-    broadcastToRoom('global', {
-      type: 'chat_created',
-      chat: newChat
-    });
+    // broadcastToRoom('global', {
+    //   type: 'chat_created',
+    //   chat: newChat
+    // });
 
     return c.json({
       success: true,
@@ -657,11 +604,11 @@ app.post('/api/chats/:id/messages', async (c) => {
       chats[chatIndex].lastMessageAt = newMessage.createdAt;
 
       // Notificar a los clientes WebSocket
-      broadcastToRoom(chatId, {
-        type: 'chat_updated',
-        chatId,
-        messages: formattedMessages
-      });
+      // broadcastToRoom(chatId, {
+      //   type: 'chat_updated',
+      //   chatId,
+      //   messages: formattedMessages
+      // });
     }
 
     return c.json({
@@ -750,55 +697,55 @@ app.post('/api/assistant', async (c) => {
   }
 });
 
-// WebSocket endpoint
+// WebSocket endpoint using Durable Objects
 app.get('/api/ws', async (c) => {
   const upgradeHeader = c.req.header('Upgrade');
-  if (upgradeHeader !== 'websocket') {
+  if (upgradeHeader?.toLowerCase() !== 'websocket') {
     return c.text('Expected Upgrade: websocket', 426);
   }
   
-  const webSocketPair = new WebSocketPair();
-  const [client, server] = Object.values(webSocketPair);
-  
-  server.accept();
-  
-  // Add to global room by default
-  if (!chatRooms.has('global')) {
-    chatRooms.set('global', new Set());
-  }
-  chatRooms.get('global')!.add(server);
-  
-  // Handle WebSocket events
-  server.addEventListener('message', (event) => {
-    try {
-      const message = JSON.parse(event.data.toString());
-      // Handle different message types if needed
-    } catch (error) {
-      console.error('Error processing WebSocket message:', error);
-    }
-  });
-  
-  server.addEventListener('close', () => {
-    // Clean up when connection closes
-    chatRooms.forEach((room, roomId) => {
-      if (room.has(server)) {
-        room.delete(server);
-        if (room.size === 0) {
-          chatRooms.delete(roomId);
-        }
-      }
+  try {
+    const chatId = c.req.query('chatId') || 'default';
+    
+    // Get or create a Durable Object for this chat room
+    const id = c.env.Chat.idFromName(chatId);
+    const stub = c.env.Chat.get(id);
+    
+    // Create a WebSocket pair
+    const webSocketPair = new WebSocketPair();
+    const [client, server] = Object.values(webSocketPair);
+    
+    // Accept the WebSocket connection immediately
+    server.accept();
+    
+    // Forward the WebSocket to the Durable Object
+    await stub.fetch(`http://chat/ws?chatId=${encodeURIComponent(chatId)}`, {
+      method: 'POST',
+      headers: {
+        'Upgrade': 'websocket',
+        'Connection': 'Upgrade',
+        'Sec-WebSocket-Key': c.req.header('Sec-WebSocket-Key') || '',
+        'Sec-WebSocket-Version': '13',
+        'Sec-WebSocket-Protocol': c.req.header('Sec-WebSocket-Protocol') || ''
+      },
+      // @ts-ignore - webSocket is a valid property in Cloudflare Workers
+      webSocket: server
     });
-  });
-  
-  return new Response(null, {
-    status: 101,
-    webSocket: client,
-  });
+    
+    return new Response(null, {
+      status: 101,
+      // @ts-ignore - webSocket is a valid property in Cloudflare Workers
+      webSocket: client
+    });
+  } catch (error) {
+    console.error('Error setting up WebSocket:', error);
+    return c.json({ 
+      error: 'Failed to establish WebSocket connection',
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    }, 500);
+  }
 });
 
-app.use('/*', cors());
-
-// Endpoint to check OpenAI key
 app.get('/check-open-ai-key', async (c) => {
   const openAIKey = env.OPENAI_API_KEY || import.meta.env.OPENAI_API_KEY || (import.meta as any).env.OPENAI_API_KEY;
   return c.json({
@@ -1729,20 +1676,7 @@ export class Chat extends AIChatAgent<Env> {
     //   },
     // ]);
 
-    // Notificar a los clientes WebSocket
-    const chatConnections = chatRooms.get(this.currentChatId || '');
-    if (chatConnections) {
-      const update = {
-        type: 'chat_updated',
-        chatId: this.currentChatId,
-        messages: this._messages
-      };
-      chatConnections.forEach(ws => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify(update));
-        }
-      });
-    }
+
 
     return createDataStreamResponse({
       execute: async (dataStream) => {
