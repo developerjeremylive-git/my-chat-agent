@@ -717,9 +717,19 @@ app.post('/api/chats/:id/messages', async (c) => {
 // });
 app.post('/api/assistant', async (c) => {
   try {
-    const { maxStepsTemp: newMaxSteps, prompt: newPrompt, modelTemp: newModel } = await c.req.json();
+    const { maxStepsTemp: newMaxSteps, prompt: newPrompt, modelTemp: newModel, selectedChatId: newChatId } = await c.req.json();
     await setSelectedModel(c.env, newModel);
     await setSystemPrompt(c.env, newPrompt);
+    let chat = Chat.instance as Chat | null;
+    if (!chat) {
+      // Si no existe instancia, retornar error
+      return c.json({
+        error: 'Chat instance not initialized',
+        details: 'The Chat instance has not been properly initialized.'
+      }, 500);
+    }
+    
+    await chat.setCurrentChat(newChatId);
     
     selectedModel = newModel;
     systemPrompt = newPrompt;
