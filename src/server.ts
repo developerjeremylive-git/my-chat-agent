@@ -1552,11 +1552,11 @@ export class Chat extends AIChatAgent<Env> {
       const currentModel = await getSelectedModel(this.env);
 
       // Verificar que existe un chat activo
-      if (!this.currentChatId) {
-        // Si no hay chat activo, usar el chat por defecto
-        const defaultChat = await this.initializeDefaultChat();
-        this.currentChatId = defaultChat.id;
-      }
+      // if (!this.currentChatId) {
+      //   // Si no hay chat activo, usar el chat por defecto
+      //   const defaultChat = await this.initializeDefaultChat();
+      //   this.currentChatId = defaultChat.id;
+      // }
 
       const allTools = { ...tools };
 
