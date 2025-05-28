@@ -110,24 +110,102 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   }, [currentChat?.id]);
 
-  // Cargar chats del almacenamiento local al iniciar
+  // Cargar chats desde la API al iniciar
+  const hasFetchedRef = useRef(false);
+
   useEffect(() => {
-    const savedChats = localStorage.getItem('chats');
-    if (savedChats) {
-      const parsedChats = JSON.parse(savedChats).map((chat: any) => ({
-        ...chat,
-        createdAt: new Date(chat.createdAt),
-        lastMessageAt: new Date(chat.lastMessageAt),
-        messages: chat.messages.map((msg: any) => ({
-          ...msg,
-          createdAt: new Date(msg.createdAt)
-        }))
-      }));
-      setChats(parsedChats);
-      if (parsedChats.length > 0 && !currentChat) {
-        setCurrentChat(parsedChats[0]);
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+    
+    const loadChats = async () => {
+      try {
+        const response = await fetch('/api/chats');
+        if (response.ok) {
+          const chatsData = await response.json();
+          if (Array.isArray(chatsData) && chatsData.length > 0) {
+            const formattedChats = chatsData.map((chat: any) => ({
+              id: chat.id,
+              title: chat.title || `Chat ${chat.id}`,
+              messages: chat.messages || [],
+              createdAt: new Date(chat.createdAt || Date.now()),
+              lastMessageAt: new Date(chat.lastMessageAt || Date.now())
+            }));
+            
+            setChats(formattedChats);
+            
+            // Seleccionar el primer chat de la lista
+            if (formattedChats.length > 0 && !currentChat) {
+              const firstChat = formattedChats[0];
+              setCurrentChat(firstChat);
+              
+              // Cargar los mensajes del primer chat
+              // try {
+              //   const messagesResponse = await fetch(`/api/chats/${firstChat.id}`);
+              //   if (messagesResponse.ok) {
+              //     const chatData = await messagesResponse.json() as ChatResponse;
+              //     setCurrentChat(prev => ({
+              //       ...prev!,
+              //       messages: chatData.messages?.map(msg => ({
+              //         ...msg,
+              //         createdAt: new Date(msg.createdAt)
+              //       })) || []
+              //     }));
+              //   }
+              // } catch (error) {
+              //   console.error('Error loading chat messages:', error);
+              // }
+            }
+            
+            // Guardar en localStorage como respaldo
+            localStorage.setItem('chats', JSON.stringify(formattedChats));
+            return;
+          }
+        }
+        
+        // Si falla la API, cargar desde localStorage
+        const savedChats = localStorage.getItem('chats');
+        if (savedChats) {
+          const parsedChats = JSON.parse(savedChats).map((chat: any) => ({
+            ...chat,
+            createdAt: new Date(chat.createdAt),
+            lastMessageAt: new Date(chat.lastMessageAt),
+            messages: (chat.messages || []).map((msg: any) => ({
+              ...msg,
+              createdAt: new Date(msg.createdAt)
+            }))
+          }));
+          setChats(parsedChats);
+          if (parsedChats.length > 0 && !currentChat) {
+            setCurrentChat(parsedChats[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading chats:', error);
+        // En caso de error, intentar cargar desde localStorage
+        const savedChats = localStorage.getItem('chats');
+        if (savedChats) {
+          try {
+            const parsedChats = JSON.parse(savedChats).map((chat: any) => ({
+              ...chat,
+              createdAt: new Date(chat.createdAt),
+              lastMessageAt: new Date(chat.lastMessageAt),
+              messages: (chat.messages || []).map((msg: any) => ({
+                ...msg,
+                createdAt: new Date(msg.createdAt)
+              }))
+            }));
+            setChats(parsedChats);
+            if (parsedChats.length > 0 && !currentChat) {
+              setCurrentChat(parsedChats[0]);
+            }
+          } catch (e) {
+            console.error('Error parsing saved chats:', e);
+          }
+        }
       }
-    }
+    };
+
+    loadChats();
   }, []);
 
   // Guardar chats en el almacenamiento local cuando cambien
@@ -160,8 +238,15 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     lastMessageAt: string;
   }
 
+  const lastProcessedChatId = useRef<string | null>(null);
+
   const selectChat = async (chatId: string) => {
+    // Skip if we're already processing this chat
+    if (lastProcessedChatId.current === chatId) return;
+    
+    lastProcessedChatId.current = chatId;
     setIsLoading(true);
+    
     try {
       const response = await fetch(`/api/chats/${chatId}`);
       if (response.ok) {

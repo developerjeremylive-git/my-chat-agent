@@ -98,19 +98,48 @@ function ChatComponent() {
 
   const { selectChat, currentChat, updateChat, chats } = useChat();
 
-  // Auto-select the most recent chat when chats are loaded
+  // Auto-select the first chat when chats are loaded
   useEffect(() => {
-    if (chats.length > 0 && !selectedChatId) {
-      // Find the most recent chat by lastMessageAt
-      const mostRecentChat = [...chats].sort(
-        (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
-      )[0];
-      
-      if (mostRecentChat) {
-        console.log('Auto-selecting most recent chat:', mostRecentChat.id);
-        handleChatSelect(mostRecentChat.id);
+    const autoSelectChat = async () => {
+      if (chats.length > 0 && !selectedChatId) {
+        try {
+          // Get the first chat from the list
+          const firstChat = chats[0];
+          
+          if (firstChat) {
+            console.log('Auto-selecting first chat:', firstChat.id);
+            
+            // Update selected chat state
+            setSelectedChatId(firstChat.id);
+            
+            // If chat already has messages, update state directly
+            if (firstChat.messages && firstChat.messages.length > 0) {
+              setCurrentMessages(firstChat.messages);
+              
+              // Update chat in context
+              if (updateChat) {
+                updateChat(firstChat.id, {
+                  ...firstChat,
+                  messages: firstChat.messages
+                });
+              }
+            } else {
+              // If no messages, try to load them
+              await handleChatSelect(firstChat.id);
+            }
+            
+            // Notify context that a chat has been selected
+            if (selectChat) {
+              selectChat(firstChat.id);
+            }
+          }
+        } catch (error) {
+          console.error('Error auto-selecting chat:', error);
+        }
       }
-    }
+    };
+
+    autoSelectChat();
   }, [chats, selectedChatId]);
 
   const handleChatSelect = async (chatId: string) => {
