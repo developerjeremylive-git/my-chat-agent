@@ -127,6 +127,7 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                     messages: []
                 }));
 
+                setChats(formattedChats);
                 // Cargar mensajes para cada chat
                 // const chatsWithMessages = await Promise.all(
                 //     data.map(async (chat) => {
@@ -152,7 +153,6 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                 //     })
                 // );
 
-                setChats(formattedChats);
                 // No seleccionamos ningún chat por defecto
             } catch (error) {
                 console.error('Error loading chats:', error);

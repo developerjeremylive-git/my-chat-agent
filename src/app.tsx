@@ -112,17 +112,17 @@ function ChatComponent() {
         try {
           // Get the first chat from the list
           const firstChat = chats[0];
-          
+
           if (firstChat) {
             console.log('Auto-selecting first chat:', firstChat.id);
-            
+
             // Update selected chat state
             setSelectedChatId(firstChat.id);
-            
+
             // If chat already has messages, update state directly
             if (firstChat.messages && firstChat.messages.length > 0) {
               setCurrentMessages(firstChat.messages);
-              
+
               // Update chat in context
               if (updateChat) {
                 updateChat(firstChat.id, {
@@ -134,7 +134,7 @@ function ChatComponent() {
               // If no messages, try to load them
               await handleChatSelect(firstChat.id);
             }
-            
+
             // Notify context that a chat has been selected
             if (selectChat) {
               selectChat(firstChat.id);
@@ -1173,7 +1173,7 @@ function ChatComponent() {
                                     const newChat = await response.json() as ChatResponse;
                                     selectChat(newChat.id);
                                     setSelectedChatId(newChat.id);
-                                    
+
                                     // Submit the form after creating the chat
                                     const form = e.currentTarget.closest('form');
                                     if (form) {
@@ -1999,7 +1999,7 @@ function ChatComponent() {
                               headers: {
                                 'Content-Type': 'application/json',
                               },
-                              body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText, modelTemp: selectedModel }),
+                              body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText, modelTemp: selectedModel, selectedChatId: selectedChatId }),
                             });
                             handleAgentSubmit(e);
                           } catch (error) {
