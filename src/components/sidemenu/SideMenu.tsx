@@ -330,8 +330,8 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
             
             // If the deleted chat was selected, clear the selection and create a new chat
             if (selectedChatId === chatId) {
-                // onNewChat();
-                createChat();
+                onNewChat();
+                // createChat();
             }
         } catch (error) {
             console.error('Error deleting chat:', error);
