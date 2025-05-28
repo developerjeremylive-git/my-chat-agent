@@ -121,7 +121,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
           'bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm border-l border-neutral-200/50 dark:border-neutral-700/50',
           'scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
           isOpen ? 'translate-x-0' : 'translate-x-full',
-          'z-[100]' // Aseguramos que esté por encima del menú desplegable
+          'z-70' // Aseguramos que esté por encima del menú desplegable
         )}
         style={{
           transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
@@ -197,7 +197,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                         </Tooltip.Trigger>
                         <Tooltip.Portal>
                           <Tooltip.Content
-                            className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-0"
+                            className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-80"
                             sideOffset={5}
                           >
                             {preset.name === 'Creativo' && 'Ideal para brainstorming, escritura creativa y generación de ideas innovadoras. Produce respuestas únicas y originales con mayor variabilidad.'}
