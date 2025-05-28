@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useAnimation, type Variants } from "framer-motion";
-import { Gear, List, X, Sun, Moon, User, Bell, Question, Palette, Key, DotsThreeVertical, CaretRight as ChevronRight, PaintBrushBroad, PlusCircle, Trash, Minus, Plus, Robot, UserCirclePlus } from "@phosphor-icons/react";
+import { Gear, List, X, Sun, Moon, User, Bell, Question, Palette, Key, DotsThreeVertical, CaretRight as ChevronRight, PaintBrushBroad, PlusCircle, Trash, Minus, Plus, Robot, UserCirclePlus, PaintBrushHousehold } from "@phosphor-icons/react";
+import { createPortal } from "react-dom";
 import { Button } from "../button/Button";
 import { useTheme } from "next-themes";
 import { AISettingsPanel } from "../settings/AISettingsPanel";
@@ -235,16 +236,26 @@ export function SettingsDropdown({
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Overlay */}
-            <motion.div
-              className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm z-40"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setIsOpen(false)}
-            />
-
+            {/* Overlay rendered via portal */}
+            {typeof window !== 'undefined' && createPortal(
+              <motion.div
+                className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setIsOpen(false)}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 50
+                }}
+              />,
+              document.body
+            )}
             {/* Dropdown */}
             <div className="fixed inset-0 flex items-center justify-center z-50 px-4 py-4 pointer-events-none">
               <motion.div
@@ -428,7 +439,7 @@ export function SettingsDropdown({
                             }}
                             className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-700/50 rounded-xl flex items-center space-x-2 mb-2"
                           >
-                            <PaintBrushBroad size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
+                            <PaintBrushHousehold size={16} className="text-[#F48120] flex-shrink-0" weight="duotone" />
                             <span className="truncate">Apariencia</span>
                           </button>
                         </div>
@@ -656,7 +667,6 @@ export function SettingsDropdown({
           </>
         )}
       </AnimatePresence>
-
     </div>
   );
 }
