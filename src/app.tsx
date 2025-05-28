@@ -96,7 +96,22 @@ function ChatComponent() {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
 
-  const { selectChat, currentChat, updateChat } = useChat();
+  const { selectChat, currentChat, updateChat, chats } = useChat();
+
+  // Auto-select the most recent chat when chats are loaded
+  useEffect(() => {
+    if (chats.length > 0 && !selectedChatId) {
+      // Find the most recent chat by lastMessageAt
+      const mostRecentChat = [...chats].sort(
+        (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+      )[0];
+      
+      if (mostRecentChat) {
+        console.log('Auto-selecting most recent chat:', mostRecentChat.id);
+        handleChatSelect(mostRecentChat.id);
+      }
+    }
+  }, [chats, selectedChatId]);
 
   const handleChatSelect = async (chatId: string) => {
     try {

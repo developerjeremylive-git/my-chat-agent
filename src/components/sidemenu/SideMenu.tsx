@@ -451,20 +451,28 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                                                     ${selectedChatId === chat.id ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 border border-[#F48120]/20' : 'border border-transparent'}`}
                                                 onClick={() => onChatSelect(chat.id)}
                                             >
-                                                <div className="flex items-center min-w-0 flex-1">
+                                                <div className="flex items-start min-w-0 flex-1">
                                                     <ChatText 
                                                         weight="duotone" 
-                                                        className="w-4 h-4 text-[#F48120] flex-shrink-0" 
+                                                        className="w-4 h-4 text-[#F48120] flex-shrink-0 mt-0.5" 
                                                     />
-                                                    <span 
-                                                        className="ml-3 text-sm font-medium truncate text-ellipsis overflow-hidden"
-                                                        title={chat.title}
-                                                    >
-                                                        {chat.title}
-                                                    </span>
+                                                    <div className="ml-3 min-w-0">
+                                                        <div 
+                                                            className="text-sm font-medium truncate text-ellipsis overflow-hidden"
+                                                            title={chat.title}
+                                                        >
+                                                            {chat.title}
+                                                        </div>
+                                                        <div className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+                                                            {formatDistanceToNow(new Date(chat.lastMessageAt), { 
+                                                                addSuffix: true, 
+                                                                locale: es 
+                                                            })}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 
-                                                <div className="relative">
+                                                <div className="relative flex-shrink-0 ml-2">
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
