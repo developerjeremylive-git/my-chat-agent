@@ -2129,13 +2129,41 @@ function ChatComponent() {
                               <button
                                 type="submit"
                                 disabled={pendingToolCallConfirmation || !agentInput.trim()}
-                                onClick={(e) => {
+                                onClick={async (e) => {
                                   try {
                                     if (!user) {
                                       e.preventDefault();
                                       setIsLoginOpen(true);
                                       return;
                                     }
+
+
+                                    // If there's no current chat, create a new one before submitting
+                                    if (!currentChat) {
+                                      e.preventDefault();
+                                      const response = await fetch('/api/chats', {
+                                        method: 'POST',
+                                        headers: {
+                                          'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                          title: agentInput.substring(0, 30) || 'Nuevo Chat',
+                                        }),
+                                      });
+
+                                      if (response.ok) {
+                                        const newChat = await response.json() as ChatResponse;
+                                        selectChat(newChat.id);
+                                        setSelectedChatId(newChat.id);
+
+                                        // Submit the form after creating the chat
+                                        const form = e.currentTarget.closest('form');
+                                        if (form) {
+                                          form.requestSubmit();
+                                        }
+                                      }
+                                    }
+
                                   } catch (error) {
                                     console.error('Error al procesar la solicitud:', error);
                                   }
