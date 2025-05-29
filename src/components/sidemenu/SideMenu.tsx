@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/button/Button';
-import { X, ChatText, Gear, Brain, Rocket, Trash, PencilSimple, Warning, DotsThreeVertical } from '@phosphor-icons/react';
+import { X, ChatText, Gear, Brain, Rocket, Trash, PencilSimple, Warning, DotsThreeVertical, PushPin, PushPinSlash } from '@phosphor-icons/react';
 import { useChat } from '@/contexts/ChatContext';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -19,6 +19,8 @@ interface EditTitleModalProps {
 
 interface SideMenuProps {
     isOpen: boolean;
+    isStatic: boolean;
+    onSetStatic: (isStatic: boolean) => void;
     onClose: () => void;
     onChatSelect: (chatId: string) => void;
     onNewChat: () => void;
@@ -89,7 +91,71 @@ function EditTitleModal({ isOpen, onClose, onSave, currentTitle }: EditTitleModa
     );
 }
 
-export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSettings, onOpenTools, onClearHistory, selectedChatId }: SideMenuProps) {
+export function SideMenu({ 
+    isOpen, 
+    isStatic, 
+    onSetStatic, 
+    onClose, 
+    onChatSelect, 
+    onNewChat, 
+    onOpenSettings, 
+    onOpenTools, 
+    onClearHistory, 
+    selectedChatId 
+}: SideMenuProps) {
+    // Toggle body class when menu is static
+    useEffect(() => {
+        if (isStatic) {
+            document.body.classList.add('menu-static');
+        } else {
+            document.body.classList.remove('menu-static');
+        }
+        
+        return () => {
+            document.body.classList.remove('menu-static');
+        };
+    }, [isStatic]);
+    
+    const toggleStatic = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+        const newStaticState = !isStatic;
+        onSetStatic(newStaticState);
+        
+        // If making static, ensure the menu is open
+        if (newStaticState) {
+            // Ensure the menu stays open
+            if (!isOpen) {
+                // If you have a way to open the menu, call it here
+                // Otherwise, we'll need to handle this case
+            }
+        }
+        
+        // Save to localStorage
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('menuStatic', String(newStaticState));
+        }
+    }, [isStatic, isOpen, onSetStatic]);
+    
+    // Handle click outside logic
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (!isOpen) return;
+            
+            const target = e.target as HTMLElement;
+            // Only close if menu is not static and click is outside the menu
+            if (!isStatic && !target.closest('.side-menu')) {
+                onClose();
+            }
+        };
+        
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen, isStatic, onClose]);
     const [chats, setChats] = useState<LocalChatData[]>([]);
     const [editingChat, setEditingChat] = useState<LocalChatData | null>(null);
     const [chatToDelete, setChatToDelete] = useState<LocalChatData | null>(null);
@@ -345,28 +411,33 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
         <AnimatePresence>
             {isOpen && (
                 <>
-                    {/* Full-screen overlay that covers everything */}
-                    <motion.div
-                        className="fixed inset-0 bg-black/50 z-70"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        style={{
-                            backdropFilter: 'blur(2px)',
-                            WebkitBackdropFilter: 'blur(2px)'
-                        }}
-                    />
+                    {/* Full-screen overlay that covers everything - only show when menu is not static */}
+                    {!isStatic && (
+                        <motion.div
+                            className="fixed inset-0 bg-black/50 z-60"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={onClose}
+                            style={{
+                                backdropFilter: 'blur(2px)',
+                                WebkitBackdropFilter: 'blur(2px)'
+                            }}
+                        />
+                    )}
 
                     {/* Side Panel */}
                     <motion.div
-                        className="fixed left-0 top-0 bottom-0 w-80 bg-white dark:bg-neutral-900 z-70
-                        border-r border-neutral-200 dark:border-neutral-700 shadow-2xl"
-                        initial={{ x: '-100%' }}
-                        animate={{ x: 0 }}
-                        exit={{ x: '-100%' }}
+                        className={`${isStatic ? 'static-menu' : 'fixed'} left-0 top-0 bottom-0 w-80 bg-white dark:bg-neutral-900 z-70
+                        border-r border-neutral-200 dark:border-neutral-700 shadow-2xl side-menu`}
+                        initial={{ x: isStatic ? 0 : '-100%' }}
+                        animate={{ 
+                            x: isStatic ? 0 : 0,
+                            position: isStatic ? 'relative' : 'fixed'
+                        }}
+                        exit={{ x: isStatic ? 0 : '-100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={isStatic ? undefined : (e) => e.stopPropagation()}
                     >
                         <div className="flex flex-col h-full">
                             {/* Cabecera */}
@@ -374,14 +445,28 @@ export function SideMenu({ isOpen, onClose, onChatSelect, onNewChat, onOpenSetti
                                 <h2 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
                                     Menú Principal
                                 </h2>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                                    onClick={onClose}
-                                >
-                                    <X weight="bold" className="w-5 h-5" />
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className={`hidden md:flex rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 ${isStatic ? 'text-[#F48120]' : ''}`}
+                                        onClick={toggleStatic}
+                                        title={isStatic ? "Hacer menú flotante" : "Fijar menú"}
+                                    >
+                                        {isStatic ? 
+                                            <PushPinSlash weight="fill" className="w-5 h-5" /> : 
+                                            <PushPin weight="fill" className="w-5 h-5" />
+                                        }
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                                        onClick={onClose}
+                                    >
+                                        <X weight="bold" className="w-5 h-5" />
+                                    </Button>
+                                </div>
                             </div>
 
                             {/* Contenido */}
