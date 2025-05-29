@@ -121,10 +121,12 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     const loadChats = async () => {
       try {
         const response = await fetch('/api/chats');
+        let formattedChats: Chat[] = [];
+        
         if (response.ok) {
           const chatsData = await response.json();
           if (Array.isArray(chatsData) && chatsData.length > 0) {
-            const formattedChats: Chat[] = chatsData.map((chat: any) => ({
+            formattedChats = chatsData.map((chat: any) => ({
               id: chat.id,
               title: chat.title || `Chat ${chat.id}`,
               messages: chat.messages || [],
@@ -136,30 +138,52 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             
             // Guardar en localStorage como respaldo
             localStorage.setItem('chats', JSON.stringify(formattedChats));
-            return;
           }
         }
         
-        // Si falla la API, cargar desde localStorage
-        const savedChats = localStorage.getItem('chats');
-        if (savedChats) {
-          try {
-            const parsedChats: Chat[] = JSON.parse(savedChats).map((chat: any) => ({
-              ...chat,
-              createdAt: new Date(chat.createdAt),
-              lastMessageAt: new Date(chat.lastMessageAt),
-              messages: (chat.messages || []).map((msg: any) => ({
-                ...msg,
-                createdAt: new Date(msg.createdAt)
-              }))
-            }));
-            setChats(parsedChats);
-            if (parsedChats.length > 0 && !currentChat) {
-              setCurrentChat(parsedChats[0]);
+        // Si no hay chats de la API, intentar cargar desde localStorage
+        if (formattedChats.length === 0) {
+          const savedChats = localStorage.getItem('chats');
+          if (savedChats) {
+            try {
+              formattedChats = JSON.parse(savedChats).map((chat: any) => ({
+                ...chat,
+                createdAt: new Date(chat.createdAt),
+                lastMessageAt: new Date(chat.lastMessageAt),
+                messages: (chat.messages || []).map((msg: any) => ({
+                  ...msg,
+                  createdAt: new Date(msg.createdAt)
+                }))
+              }));
+              setChats(formattedChats);
+            } catch (e) {
+              console.error('Error parsing saved chats:', e);
             }
-          } catch (e) {
-            console.error('Error parsing saved chats:', e);
           }
+        }
+        
+        // Asegurarse de que siempre haya un chat seleccionado
+        if (formattedChats.length > 0) {
+          // Intentar obtener el último chat usado
+          const lastChatId = localStorage.getItem('lastChatId');
+          const chatToSelect = lastChatId 
+            ? formattedChats.find(chat => chat.id === lastChatId) || formattedChats[0]
+            : formattedChats[0];
+          
+          if (!currentChat || currentChat.id !== chatToSelect.id) {
+            setCurrentChat(chatToSelect);
+          }
+        } else {
+          // Si no hay chats, crear uno nuevo
+          const newChat: Chat = {
+            id: Date.now().toString(),
+            title: 'Nuevo Chat',
+            messages: [],
+            createdAt: new Date(),
+            lastMessageAt: new Date()
+          };
+          setChats([newChat]);
+          setCurrentChat(newChat);
         }
       } catch (error) {
         console.error('Error loading chats:', error);
@@ -194,6 +218,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     localStorage.setItem('chats', JSON.stringify(chats));
   }, [chats]);
+  
+  // Guardar el chat actual en el almacenamiento local cuando cambie
+  useEffect(() => {
+    if (currentChat) {
+      localStorage.setItem('lastChatId', currentChat.id);
+    }
+  }, [currentChat?.id]);
 
   const createChat = () => {
     const newChat: Chat = {

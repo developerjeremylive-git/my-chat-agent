@@ -445,42 +445,20 @@ app.get('/api/chats/:id', async (c) => {
       });
     }
 
-    if (!Chat.instance) {
-      // Si no existe instancia, crear una nueva
-      const state = new SimpleDurableObjectState(
-        { toString: () => 'default-chat' } as any,
-        {
-          get: async () => null,
-          put: async () => {},
-          delete: async () => {},
-          list: async () => new Map(),
-          deleteAll: async () => {},
-          transaction: async () => {},
-          getAlarm: async () => null,
-          setAlarm: async () => {},
-          deleteAlarm: async () => {},
-          sync: async () => {},
-          database: () => c.env.DB,
-          sql: async () => {},
-          transactionSync: () => {},
-          getCurrentBookmark: () => '',
-          getBookmarkForTime: () => '',
-          onNextSessionRestoreBookmark: () => {}
-        } as any
-      );
-      
-      Chat.instance = new Chat(state, c.env);
-      // // Inicializar tablas si es necesario
-      // await Chat.instance.initializeTables();
-    }
-    
-    // Establecer el chat actual
+    // Obtener o establecer el chat actual usando KV
     if (chatId) {
-      await Chat.instance.setCurrentChat(chatId);
+      // Si se proporciona un chatId, guardarlo en KV
+      await c.env.MODEL_CONFIG.put('current_chat_id', chatId);
     } else {
-      // Si no hay chatId, crear o obtener uno por defecto
-      const defaultChat = await Chat.instance.initializeDefaultChat();
-      await Chat.instance.setCurrentChat(defaultChat.id);
+      // Si no hay chatId, intentar obtener el último usado o usar uno por defecto
+      const storedChatId = await c.env.MODEL_CONFIG.get('current_chat_id');
+      if (!storedChatId) {
+        // Si no hay chat guardado, crear uno nuevo
+        const newChatId = `chat_${Date.now()}`;
+        await c.env.MODEL_CONFIG.put('current_chat_id', newChatId);
+        // Aquí podrías inicializar el chat en la base de datos si es necesario
+      }
+      // Si hay un chat guardado, se usará automáticamente
     }
 
     return c.json(chatWithMessages);
@@ -1386,9 +1364,26 @@ export class Chat extends AIChatAgent<Env> {
       return;
     }
 
+    // Try to get the current chat ID from KV if not set
     if (!this.currentChatId) {
-      console.error('No chat selected');
-      return;
+      const storedChatId = await this.env.MODEL_CONFIG.get('current_chat_id');
+      if (storedChatId) {
+        this.currentChatId = storedChatId;
+      } else {
+        // If no chat ID in KV, try to get the most recent chat
+        const recentChat = await this.db.prepare(
+          'SELECT id FROM chats ORDER BY last_message_at DESC LIMIT 1'
+        ).first<{ id: string }>();
+        
+        if (recentChat) {
+          this.currentChatId = recentChat.id;
+          // Save to KV for future requests
+          await this.env.MODEL_CONFIG.put('current_chat_id', this.currentChatId);
+        } else {
+          console.error('No chat available. Please create a chat first.');
+          return;
+        }
+      }
     }
 
     try {

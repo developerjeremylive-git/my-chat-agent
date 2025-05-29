@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 
 interface Env {
     GEMINI_API_KEY: string;
+    MODEL_CONFIG: KVNamespace;
 }
 
 interface WebSocketMessage {
@@ -294,7 +295,26 @@ export class ChatDO implements DurableObject {
     }
 
     async saveMessages(messages: ChatMessage[]): Promise<void> {
-        if (!this.currentChatId) throw new Error('No chat selected');
+        // Try to get the current chat ID from KV if not set
+        if (!this.currentChatId) {
+            const storedChatId = await this.env.MODEL_CONFIG.get('current_chat_id');
+            if (storedChatId) {
+                this.currentChatId = storedChatId;
+            } else {
+                // If no chat ID in KV, try to get the most recent chat
+                const recentChat = await this.db.prepare(
+                    'SELECT id FROM chats ORDER BY last_message_at DESC LIMIT 1'
+                ).first<{ id: string }>();
+                
+                if (recentChat) {
+                    this.currentChatId = recentChat.id;
+                    // Save to KV for future requests
+                    await this.env.MODEL_CONFIG.put('current_chat_id', this.currentChatId);
+                } else {
+                    throw new Error('No chat available. Please create a chat first.');
+                }
+            }
+        }
 
         await this.storage.transaction(async (txn) => {
             // Obtener mensajes existentes para este chat
