@@ -480,9 +480,9 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
 
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-[70] w-64 transform transition-transform duration-300 ease-in-out shadow-2xl overflow-hidden',
+          'fixed inset-y-0 right-0 z-[90] w-64 transform transition-transform duration-300 ease-in-out shadow-2xl overflow-hidden',
           theme === 'dark' ? 'bg-gradient-to-b from-neutral-900 to-neutral-950' : 'bg-gradient-to-b from-white to-gray-100',
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+          isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
         <div className="flex flex-col h-full">
