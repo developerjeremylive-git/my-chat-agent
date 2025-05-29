@@ -246,18 +246,43 @@ export const InputSystemPrompt = ({
         <Modal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          className="w-full max-w-6xl mx-auto"
+          className="w-full max-w-6xl mx-auto flex flex-col"
           hideSubmitButton={true}
         >
-          <textarea
-            className="w-full h-[calc(90vh-13rem)] p-4 bg-transparent border-none focus:outline-none resize-none text-base md:text-lg"
-            value={value as string}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-              onChange?.(e as any);
-              onValueChange?.(e.target.value);
-            }}
-            {...props}
-          />
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Editor de Prompt</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Edita el contenido del prompt del sistema
+            </p>
+          </div>
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <div className="flex-1 overflow-auto p-1">
+              <textarea
+                className="w-full h-full min-h-[200px] p-4 text-base md:text-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 resize-none transition-colors"
+                value={value as string}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+                  onChange?.(e as any);
+                  onValueChange?.(e.target.value);
+                }}
+                placeholder="Escribe aquí el prompt del sistema..."
+                aria-label="Editor de prompt del sistema"
+                spellCheck="false"
+                autoCapitalize="off"
+                autoComplete="off"
+                autoCorrect="off"
+                {...props}
+              />
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-900"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
         </Modal>,
         document.body
       )}
@@ -269,27 +294,41 @@ export const InputSystemPrompt = ({
           className="w-full max-w-[min(95vw,500px)] mx-auto"
           hideSubmitButton={true}
         >
-          <div className="p-4 sm:p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Guardar Prompt del Sistema</h3>
-            <input
-              type="text"
-              placeholder="Nombre del prompt"
-              className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-neutral-200 dark:border-neutral-700 focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10"
-              value={promptName}
-              onChange={(e) => setPromptName(e.target.value)}
-            />
-            <div className="flex justify-end gap-2">
+          <div className="p-5 sm:p-6 space-y-5">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Guardar Prompt del Sistema</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Asigna un nombre descriptivo para tu prompt</p>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="prompt-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nombre del prompt
+                </label>
+                <input
+                  id="prompt-name"
+                  type="text"
+                  placeholder="Ej: Respuestas profesionales"
+                  className="w-full px-4 py-2.5 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 transition-colors"
+                  value={promptName}
+                  onChange={(e) => setPromptName(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
               <button
-                className="px-4 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                type="button"
+                className="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-900"
                 onClick={() => setIsPromptModalOpen(false)}
               >
                 Cancelar
               </button>
               <button
-                className="px-4 py-2 rounded-lg bg-[#F48120] text-white hover:bg-[#F48120]/90 transition-colors flex items-center gap-2"
+                type="button"
+                className="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors flex items-center gap-2"
                 onClick={savePrompt}
               >
-                <FloppyDisk size={20} />
+                <FloppyDisk size={18} weight="bold" />
                 Guardar
               </button>
             </div>
@@ -308,14 +347,22 @@ export const InputSystemPrompt = ({
           className="w-full max-w-[min(95vw,500px)] mx-auto"
           hideSubmitButton={true}
         >
-          <div className="p-4 sm:p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Confirmar Eliminación</h3>
-            <p className="text-neutral-700 dark:text-neutral-300">
-              ¿Estás seguro de que deseas eliminar el prompt "{promptToDelete?.name}"?
-            </p>
-            <div className="flex justify-end gap-2">
+          <div className="p-5 sm:p-6 space-y-5">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-3">
+                <Trash size={24} className="text-red-600 dark:text-red-400" weight="fill" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">¿Eliminar prompt?</h3>
+              <div className="mt-2">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  ¿Estás seguro de que deseas eliminar "{promptToDelete?.name}"? Esta acción no se puede deshacer.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
               <button
-                className="px-4 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                type="button"
+                className="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-900"
                 onClick={() => {
                   setIsDeleteModalOpen(false);
                   setPromptToDelete(null);
@@ -324,10 +371,11 @@ export const InputSystemPrompt = ({
                 Cancelar
               </button>
               <button
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors flex items-center gap-2"
+                type="button"
+                className="px-4 py-2.5 text-sm font-medium rounded-lg bg-red-600 hover:bg-red-700 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-900 transition-colors flex items-center gap-2"
                 onClick={confirmDelete}
               >
-                <Trash size={20} />
+                <Trash size={18} weight="bold" />
                 Eliminar
               </button>
             </div>
@@ -348,24 +396,43 @@ export const InputSystemPrompt = ({
           className="w-full max-w-[min(95vw,500px)] mx-auto"
           hideSubmitButton={true}
         >
-          <div className="p-4 sm:p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Editar Prompt del Sistema</h3>
-            <input
-              type="text"
-              placeholder="Nombre del prompt"
-              className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-neutral-200 dark:border-neutral-700 focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10"
-              value={editPromptName}
-              onChange={(e) => setEditPromptName(e.target.value)}
-            />
-            <textarea
-              placeholder="Contenido del prompt"
-              className="w-full h-40 px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-neutral-200 dark:border-neutral-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700/50 resize-none"
-              value={editPromptContent}
-              onChange={(e) => setEditPromptContent(e.target.value)}
-            />
-            <div className="flex justify-end gap-2">
+          <div className="p-5 sm:p-6 space-y-5">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Editar Prompt del Sistema</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Actualiza los detalles del prompt</p>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="edit-prompt-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nombre del prompt
+                </label>
+                <input
+                  id="edit-prompt-name"
+                  type="text"
+                  placeholder="Ej: Respuestas profesionales"
+                  className="w-full px-4 py-2.5 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 transition-colors"
+                  value={editPromptName}
+                  onChange={(e) => setEditPromptName(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-prompt-content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Contenido
+                </label>
+                <textarea
+                  id="edit-prompt-content"
+                  placeholder="Escribe el contenido del prompt..."
+                  className="w-full h-40 px-4 py-2.5 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 resize-none transition-colors"
+                  value={editPromptContent}
+                  onChange={(e) => setEditPromptContent(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
               <button
-                className="px-4 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                type="button"
+                className="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-900"
                 onClick={() => {
                   setIsEditModalOpen(false);
                   setPromptToEdit(null);
@@ -376,11 +443,12 @@ export const InputSystemPrompt = ({
                 Cancelar
               </button>
               <button
-                className="px-4 py-2 rounded-lg bg-[#F48120] text-white hover:bg-[#F48120]/90 transition-colors flex items-center gap-2"
+                type="button"
+                className="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors flex items-center gap-2"
                 onClick={confirmEdit}
               >
-                <FloppyDisk size={20} />
-                Guardar
+                <FloppyDisk size={18} weight="bold" />
+                Guardar Cambios
               </button>
             </div>
           </div>
