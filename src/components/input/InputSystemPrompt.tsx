@@ -5,7 +5,7 @@ import { ArrowsOut, Plus, FloppyDisk, CaretDown, Trash, PencilSimple } from "@ph
 import { Modal } from "../modal/Modal";
 
 export const inputClasses = cn(
-  "bg-ob-btn-secondary-bg text-ob-base-300 border-ob-border focus:border-ob-border-active placeholder:text-ob-base-100 add-disable border border-1 transition-colors focus:outline-none"
+  "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-400 transition-all duration-200"
 );
 
 export type InputProps = Omit<
@@ -140,23 +140,21 @@ export const InputSystemPrompt = ({
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
-      <div className="relative flex items-center w-full">
+      <div className="relative flex items-center w-full bg-white dark:bg-gray-800 rounded-md shadow-sm">
         <div className="relative flex-1 min-w-0">
           <input
             className={cn(
               inputClasses,
               {
-                "add-size-sm": size === "sm",
-                "add-size-md": size === "md",
-                "add-size-base": size === "base",
+                "text-sm py-1.5 px-2": size === "sm",
+                "text-base py-2 px-3": size === "md",
+                "text-base py-2.5 px-4": size === "base",
               },
-              "w-full pr-0 bg-transparent border-none focus:ring-0 truncate text-ellipsis overflow-hidden whitespace-nowrap",
+              "w-full truncate text-ellipsis overflow-hidden whitespace-nowrap",
               className
             )}
             style={{
               textOverflow: 'ellipsis',
-              paddingRight: '0.5rem',
-              paddingLeft: '0.5rem',
             }}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             onChange?.(e);
@@ -167,7 +165,7 @@ export const InputSystemPrompt = ({
             {...props}
           />
         </div>
-        <div className="flex-shrink-0 flex items-center space-x-0.5 sm:space-x-1 ml-1">
+        <div className="flex-shrink-0 flex items-center space-x-0.5 sm:space-x-1 ml-1 pr-1">
           <button
             type="button"
             className="p-1.5 sm:p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
@@ -208,39 +206,39 @@ export const InputSystemPrompt = ({
       </div>
 
       {isDropdownOpen && savedPrompts.length > 0 && (
-        <div className="w-[calc(100%+2rem)] sm:w-full max-w-[min(calc(100vw-2rem),600px)] absolute right-0 sm:right-auto bottom-full mb-1 bg-gradient-to-br from-white to-purple-50 dark:from-neutral-900 dark:to-purple-900/10 border border-orange-200 dark:border-purple-700/50 rounded-lg shadow-lg shadow-orange-500/5 dark:shadow-purple-500/5 z-20 max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-orange-200 hover:scrollbar-thumb-orange-300 dark:scrollbar-thumb-purple-700 dark:hover:scrollbar-thumb-purple-600 scrollbar-track-transparent backdrop-blur-sm">
-          {savedPrompts.map((prompt) => (
-            <div
-              key={prompt.id}
-              className="group flex items-center px-4 py-3 hover:bg-gradient-to-r hover:from-orange-50 hover:to-purple-50 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 transition-all duration-300 border-b border-orange-100/20 dark:border-purple-700/20 last:border-b-0"
-            >
-              <button
-                className="flex-grow text-left group-hover:scale-[1.01] transition-transform duration-300 min-w-0"
+        <div className="absolute z-50 mb-1 w-72 rounded-md shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 focus:outline-none transition-all duration-200 transform origin-bottom-right" style={{ bottom: '100%', right: 0 }}>
+          <div className="py-1 max-h-60 overflow-y-auto">
+            {savedPrompts.map((prompt) => (
+              <div
+                key={prompt.id}
+                className="group flex items-center justify-between px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 last:border-0"
                 onClick={() => selectPrompt(prompt)}
               >
-                <div className="font-medium text-neutral-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-300">{prompt.name}</div>
-                <div className="text-sm text-neutral-500 dark:text-neutral-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 truncate transition-colors duration-300 max-w-[400px]">
-                  {prompt.content}
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-gray-900 dark:text-gray-100 truncate">{prompt.name}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {prompt.content.length > 30 ? `${prompt.content.substring(0, 30)}...` : prompt.content}
+                  </div>
                 </div>
-              </button>
-              <div className="flex gap-2">
-                <button
-                  className="p-2 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 hover:scale-110 hover:rotate-2"
-                  onClick={(e) => handleEditClick(e, prompt)}
-                  title="Editar prompt"
-                >
-                  <PencilSimple size={20} />
-                </button>
-                <button
-                  className="p-2 text-neutral-400 hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-110 hover:rotate-2"
-                  onClick={(e) => handleDeleteClick(e, prompt)}
-                  title="Eliminar prompt"
-                >
-                  <Trash size={20} />
-                </button>
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={(e) => handleEditClick(e, prompt)}
+                    className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded hover:bg-gray-100 dark:hover:bg-gray-600"
+                    title="Editar prompt"
+                  >
+                    <PencilSimple size={14} />
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteClick(e, prompt)}
+                    className="p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded hover:bg-gray-100 dark:hover:bg-gray-600"
+                    title="Eliminar prompt"
+                  >
+                    <Trash size={14} />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 

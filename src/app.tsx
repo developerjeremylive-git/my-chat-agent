@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback, use } from "react";
 import { useAgent } from "agents/react";
 import { useAgentChat } from "agents/ai-react";
+import { cn } from '@/lib/utils';
 import type { Message } from "@ai-sdk/react";
 import { APPROVAL } from "./shared";
 import { transformAPIMessagesToAgentMessages } from "@/utils/messageUtils";
@@ -1969,7 +1970,21 @@ function ChatComponent() {
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder="Configura el comportamiento del asistente..."
-                        className="w-full px-4 py-2.5 text-sm rounded-xl bg-white/80 dark:bg-neutral-900/80 border border-neutral-200/80 dark:border-neutral-700/50 hover:border-neutral-300/80 dark:hover:border-neutral-600/50 focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 shadow-sm transition-all duration-200 placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90"
+                        className={cn(
+                          // Layout & Sizing
+                          "w-full px-4 py-2.5 text-sm rounded-xl shadow-sm",
+                          // Background
+                          "bg-white/80 dark:bg-neutral-900/80",
+                          // Border & Focus
+                          "border border-neutral-200/80 dark:border-neutral-700/50",
+                          "hover:border-neutral-300/80 dark:hover:border-neutral-600/50",
+                          "focus:border-[#F48120] dark:focus:border-[#F48120]",
+                          "focus:ring-2 focus:ring-[#F48120]/20",
+                          // Text & Placeholder
+                          "placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90",
+                          // Transitions
+                          "transition-all duration-200"
+                        )}
                       />
                       {/* <Tooltip content="Guardar consulta">
                           <Button
