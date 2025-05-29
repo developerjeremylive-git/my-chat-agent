@@ -443,7 +443,7 @@ export function SideMenu({
                             {/* Cabecera */}
                             <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-700">
                                 <h2 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
-                                    Menú Principal
+                                    {isStatic ? 'Historial' : 'Chats Historial'}
                                 </h2>
                                 <div className="flex items-center gap-2">
                                     <Button
@@ -451,7 +451,7 @@ export function SideMenu({
                                         size="sm"
                                         className={`hidden md:flex rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 ${isStatic ? 'text-[#F48120]' : ''}`}
                                         onClick={toggleStatic}
-                                        title={isStatic ? "Hacer menú flotante" : "Fijar menú"}
+                                        title={isStatic ? "Hacer flotante" : "Fijar"}
                                     >
                                         {isStatic ? 
                                             <PushPinSlash weight="fill" className="w-5 h-5" /> : 
