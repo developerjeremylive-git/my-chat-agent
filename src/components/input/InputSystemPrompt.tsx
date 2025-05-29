@@ -5,7 +5,7 @@ import { ArrowsOut, Plus, FloppyDisk, CaretDown, Trash, PencilSimple } from "@ph
 import { Modal } from "../modal/Modal";
 
 export const inputClasses = cn(
-  "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-400 transition-all duration-200"
+  "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-2 focus:ring-gray-400 focus:border-gray-400 dark:focus:ring-gray-500 dark:focus:border-gray-500 placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200"
 );
 
 export type InputProps = Omit<
@@ -168,7 +168,7 @@ export const InputSystemPrompt = ({
         <div className="flex-shrink-0 flex items-center space-x-0.5 sm:space-x-1 ml-1 pr-1">
           <button
             type="button"
-            className="p-1.5 sm:p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
+            className="p-1.5 sm:p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-md"
             onClick={(e) => {
               e.stopPropagation();
               setIsModalOpen(true);
@@ -180,7 +180,7 @@ export const InputSystemPrompt = ({
           <div className="h-4 w-px bg-neutral-300 dark:bg-neutral-600 mx-0.5"></div>
           <button
             type="button"
-            className="p-1.5 sm:p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
+            className="p-1.5 sm:p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-md"
             onClick={(e) => {
               e.stopPropagation();
               setIsPromptModalOpen(true);
@@ -193,7 +193,7 @@ export const InputSystemPrompt = ({
           <button
             ref={buttonRef}
             type="button"
-            className="p-1.5 sm:p-1.5 text-neutral-400 hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-200 hover:bg-orange-100/50 dark:hover:bg-orange-500/10 rounded-md"
+            className="p-1.5 sm:p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-md"
             onClick={(e) => {
               e.stopPropagation();
               setIsDropdownOpen(!isDropdownOpen);
@@ -223,7 +223,7 @@ export const InputSystemPrompt = ({
                 <div className="flex items-center space-x-1">
                   <button
                     onClick={(e) => handleEditClick(e, prompt)}
-                    className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded hover:bg-gray-100 dark:hover:bg-gray-600"
+                    className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded hover:bg-gray-100 dark:hover:bg-gray-600"
                     title="Editar prompt"
                   >
                     <PencilSimple size={14} />
@@ -324,7 +324,7 @@ export const InputSystemPrompt = ({
                 Cancelar
               </button>
               <button
-                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center gap-2"
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors flex items-center gap-2"
                 onClick={confirmDelete}
               >
                 <Trash size={20} />
@@ -359,7 +359,7 @@ export const InputSystemPrompt = ({
             />
             <textarea
               placeholder="Contenido del prompt"
-              className="w-full h-40 px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-neutral-200 dark:border-neutral-700 focus:border-[#F48120] dark:focus:border-[#F48120] focus:ring-2 focus:ring-[#F48120]/20 dark:focus:ring-[#F48120]/10 resize-none"
+              className="w-full h-40 px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg border border-neutral-200 dark:border-neutral-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700/50 resize-none"
               value={editPromptContent}
               onChange={(e) => setEditPromptContent(e.target.value)}
             />
