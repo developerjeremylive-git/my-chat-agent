@@ -682,16 +682,19 @@ app.post('/api/assistant', async (c) => {
     const { maxStepsTemp: newMaxSteps, prompt: newPrompt, modelTemp: newModel, selectedChatId: newChatId } = await c.req.json();
     await setSelectedModel(c.env, newModel);
     await setSystemPrompt(c.env, newPrompt);
-    let chat = Chat.instance as Chat | null;
-    if (!chat) {
-      // Si no existe instancia, retornar error
-      return c.json({
-        error: 'Chat instance not initialized',
-        details: 'The Chat instance has not been properly initialized.'
-      }, 500);
-    }
     
-    await chat.setCurrentChat(newChatId);
+    // Actualizar el chat actual en KV
+    if (newChatId) {
+      await c.env.MODEL_CONFIG.put('current_chat_id', newChatId);
+    } else {
+      // Si no se proporciona un chatId, verificar si ya existe uno
+      const storedChatId = await c.env.MODEL_CONFIG.get('current_chat_id');
+      if (!storedChatId) {
+        // Si no hay chat guardado, crear uno nuevo
+        const newChatId = `chat_${Date.now()}`;
+        await c.env.MODEL_CONFIG.put('current_chat_id', newChatId);
+      }
+    }
     
     selectedModel = newModel;
     systemPrompt = newPrompt;
