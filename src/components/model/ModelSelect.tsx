@@ -246,11 +246,13 @@ const ModelItem = React.memo(({
   return (
     <Tooltip.Root>
       <Tooltip.Trigger asChild>
-        <div className="flex items-center gap-2">
-          {getProviderIcon(model.provider)}
-          <div className="flex flex-col">
-            <span className="text-xs text-neutral-600 dark:text-neutral-400">{model.provider}</span>
-            <span className="text-sm font-medium dark:text-white">{model.name}</span>
+        <div className="flex items-center gap-2 w-full">
+          <div className="flex-shrink-0">
+            {getProviderIcon(model.provider)}
+          </div>
+          <div className="min-w-0 overflow-hidden">
+            <p className="text-xs font-medium text-neutral-600 dark:text-neutral-300 truncate">{model.name}</p>
+            <p className="text-[11px] text-neutral-500 dark:text-neutral-400 truncate">{model.provider}</p>
           </div>
         </div>
       </Tooltip.Trigger>
@@ -358,15 +360,32 @@ const ModelList = React.memo(({
   }, [models, selectedModel, onSelect, onCopy, copiedModel]);
 
   return (
-    <List
-      height={400}
-      itemCount={models.length}
-      itemSize={72}
-      width="100%"
-      className="scrollbar-thin scrollbar-thumb-[#F48120]/50 scrollbar-track-transparent"
-    >
-      {Row}
-    </List>
+    <div className="h-auto max-h-[280px] overflow-y-auto py-1">
+      <div className="space-y-0.5 px-1">
+        {models.map((model, index) => (
+          <div key={model.name}>
+            <DropdownMenu.Item
+              className={cn(
+                'flex flex-col gap-1 px-2 py-1.5 rounded-lg cursor-pointer outline-none',
+                'hover:bg-neutral-50 dark:hover:bg-neutral-800',
+                'focus:bg-neutral-50 dark:focus:bg-neutral-800',
+                'transition-all duration-200',
+                selectedModel?.name === model.name && 'bg-neutral-100/80 dark:bg-neutral-800 shadow-sm dark:shadow-neutral-950'
+              )}
+              onClick={() => onSelect(model)}
+            >
+              <ModelItem 
+                model={model} 
+                isSelected={selectedModel?.name === model.name} 
+                onSelect={onSelect}
+                onCopy={(e) => onCopy(e, model.name)}
+                isCopied={copiedModel === model.name}
+              />
+            </DropdownMenu.Item>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }, areEqual);
 
