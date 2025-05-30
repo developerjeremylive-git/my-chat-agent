@@ -184,19 +184,7 @@ export function SettingsDropdown({
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Mobile Button */}
-      <motion.div
-        className="fixed bottom-2 right-4 z-40 md:hidden"
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{
-          scale: 1,
-          opacity: 1,
-          transition: {
-            type: 'spring',
-            damping: 25,
-            stiffness: 300
-          }
-        }}
-      >
+      {/* <div className="md:hidden">
         <Button
           variant="ghost"
           size="lg"
@@ -212,10 +200,10 @@ export function SettingsDropdown({
             weight="duotone"
           />
         </Button>
-      </motion.div>
+      </div> */}
 
       {/* Desktop Button */}
-      <div className="hidden md:block">
+      <div>
         <Button
           variant="ghost"
           size="lg"

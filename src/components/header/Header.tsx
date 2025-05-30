@@ -53,37 +53,55 @@ export default function Header(props: HeaderProps) {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-lg border-b border-neutral-200/60 dark:border-neutral-700/60 px-0 py-2">
-      <div className="flex w-full max-w-6xl mx-auto justify-between items-center gap-2 px-4 sm:px-6">
-        {/* Left side - Menu button and title */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <Button
-            variant="ghost"
-            size="lg"
-            className="relative w-8 h-8 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 shadow-lg 
-                     hover:shadow-xl hover:shadow-[#F48120]/30 dark:hover:shadow-purple-500/30 active:scale-95
-                     transition-all duration-200 ease-out"
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenSideMenu();
-            }}
-            aria-label="Abrir menú de chat"
-          >
-            <ChatText 
-              size={20} 
-              className="text-white transition-transform duration-200 ml-1.5 mr-1.5" 
-              weight="duotone" 
+      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between w-full">
+          {/* Left side - Menu button and title */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="lg"
+              className="relative w-8 h-8 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 shadow-lg 
+                       hover:shadow-xl hover:shadow-[#F48120]/30 dark:hover:shadow-purple-500/30 active:scale-95
+                       transition-all duration-200 ease-out"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenSideMenu();
+              }}
+              aria-label="Abrir menú de chat"
+            >
+              <ChatText
+                size={20}
+                className="text-white transition-transform duration-200 ml-1.5 mr-1.5"
+                weight="duotone"
+              />
+            </Button>
+            <h1 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent hidden md:block">Asistente IA</h1>
+          </div>
+
+          {/* Right side - Settings Dropdown */}
+          <div className="flex items-center ml-auto">
+            <SettingsDropdown
+              isSidebarOpen={isSidebarOpen}
+              toggleSidebar={toggleSidebar}
+              isSettingsOpen={isSettingsOpen}
+              toggleSettings={toggleSettings}
+              onAISettingsClick={handleAISettingsClick}
+              stepMax={stepMax}
+              setStepMax={setStepMax}
+              setShowSettingsMenu={setShowSettingsMenu}
+              setShowOIAICreator={setShowOIAICreator}
+              setShowClearDialog={setShowClearDialog}
             />
-          </Button>
-          <h1 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent hidden md:block">Asistente IA</h1>
+          </div>
         </div>
 
         {/* Center - Model Selector and Step Controls */}
         {/* <div className="flex-1 flex items-center justify-center px-2 sm:px-4 max-w-2xl mx-auto"> */}
-          {/* <div className="flex-1 max-w-xl md:block hidden">
+        {/* <div className="flex-1 max-w-xl md:block hidden">
             <ModelSelect />
           </div> */}
-          
-          {/* {selectedModel === 'gemini-2.0-flash' && (
+
+        {/* {selectedModel === 'gemini-2.0-flash' && (
             <div className="sm:hidden flex items-center justify-center gap-0.5 mr-4">
               <button 
                 onClick={() => setStepMax(1)}
@@ -117,21 +135,7 @@ export default function Header(props: HeaderProps) {
           )} */}
         {/* </div> */}
 
-        {/* Right side - Settings Dropdown */}
-        <div className="relative sm:static absolute right-4 top-2 sm:top-auto z-50">
-          <SettingsDropdown
-            isSidebarOpen={isSidebarOpen}
-            toggleSidebar={toggleSidebar}
-            isSettingsOpen={isSettingsOpen}
-            toggleSettings={toggleSettings}
-            onAISettingsClick={handleAISettingsClick}
-            stepMax={stepMax}
-            setStepMax={setStepMax}
-            setShowSettingsMenu={setShowSettingsMenu}
-            setShowOIAICreator={setShowOIAICreator}
-            setShowClearDialog={setShowClearDialog}
-          />
-        </div>
+
       </div>
     </header>
   );
