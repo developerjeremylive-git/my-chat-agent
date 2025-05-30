@@ -264,7 +264,7 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
               'scrollbar-thin scrollbar-thumb-[#F48120]/50 scrollbar-track-transparent hover:scrollbar-thumb-[#F48120]/70',
               'transform transition-all duration-200 ease-out',
               'z-50',
-              mobile ? 'mb-20' : 'mb-13',
+              mobile ? 'mb-20' : 'mb-11',
               mobile ? 'w-[calc(100vw-2rem)] mx-auto' : 'w-[90vw] max-w-4xl',
               'overscroll-contain touch-pan-y',
               'animate-in fade-in-80 data-[side=bottom]:slide-in-from-top-2',
@@ -275,7 +275,7 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
             style={{
               WebkitOverflowScrolling: 'touch',
               overscrollBehavior: 'contain',
-              height: mobile ? 'calc(52vh - 60px)' : 'calc(100vh - 100px)', // Adjust the 100px to match your header height
+              height: mobile ? 'calc(52vh - 60px)' : 'calc(97vh - 100px)', // Adjust the 100px to match your header height
               maxHeight: 'calc(100vh - 100px)'
             }}
             side="bottom"
