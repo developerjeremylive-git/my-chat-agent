@@ -1139,7 +1139,7 @@ function ChatComponent() {
         >
           {agentMessages.length === 0 && (
 
-            <div className="flex flex-row items-stretch gap-3 p-3 w-full">
+            <div className="flex flex-row items-stretch gap-3 p-3 w-full max-w-[90vw] md:max-w-[calc(100vw-20rem)] lg:max-w-[calc(100vw-30rem)] xl:w-[calc(100vw-50rem)] xl:max-w-none mx-auto">
 
               {/* Input Form */}
               <form
