@@ -118,7 +118,7 @@ export default function Header(props: HeaderProps) {
         </div>
 
         {/* Right side - Settings Dropdown */}
-        <div className="relative">
+        <div className="relative sm:static absolute right-4 top-2 sm:top-auto z-50">
           <SettingsDropdown
             isSidebarOpen={isSidebarOpen}
             toggleSidebar={toggleSidebar}
