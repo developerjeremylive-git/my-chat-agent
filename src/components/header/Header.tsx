@@ -78,12 +78,12 @@ export default function Header(props: HeaderProps) {
         </div>
 
         {/* Center - Model Selector and Step Controls */}
-        <div className="flex-1 flex items-center justify-center px-2 sm:px-4 max-w-2xl mx-auto">
+        {/* <div className="flex-1 flex items-center justify-center px-2 sm:px-4 max-w-2xl mx-auto"> */}
           {/* <div className="flex-1 max-w-xl md:block hidden">
             <ModelSelect />
           </div> */}
           
-          {selectedModel === 'gemini-2.0-flash' && (
+          {/* {selectedModel === 'gemini-2.0-flash' && (
             <div className="sm:hidden flex items-center justify-center gap-0.5 mr-4">
               <button 
                 onClick={() => setStepMax(1)}
@@ -114,8 +114,8 @@ export default function Header(props: HeaderProps) {
                 <span className="text-sm">🤖</span>
               </button>
             </div>
-          )}
-        </div>
+          )} */}
+        {/* </div> */}
 
         {/* Right side - Settings Dropdown */}
         <div className="relative sm:static absolute right-4 top-2 sm:top-auto z-50">
