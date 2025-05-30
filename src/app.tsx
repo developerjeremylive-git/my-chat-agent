@@ -1957,7 +1957,7 @@ function ChatComponent() {
               </div> */}
           {/* </div>
             </div> */}
-          <div className="fixed bottom-0 left-0 right-0 z-60">
+          <div className="fixed bottom-0 left-0 right-0 z-50">
             {/* System prompt panel - slides from bottom */}
             <div className={`transform transition-all duration-400 ease-out ${systemPrompt ? 'translate-y-0' : 'translate-y-full'}`}>
               <div className="bg-gradient-to-b from-white/95 to-white/90 dark:from-neutral-900/95 dark:to-neutral-900/90 backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/30 shadow-lg">

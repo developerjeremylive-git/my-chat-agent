@@ -153,7 +153,12 @@ export function SettingsDropdown({
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      // Only close if clicking outside both the dropdown and its trigger button
+      const target = event.target as HTMLElement;
+      const isClickInside = dropdownRef.current?.contains(target) || 
+                          document.querySelector('button[aria-label="Menú de configuración"]')?.contains(target);
+      
+      if (!isClickInside) {
         controls.start('closed').then(() => {
           setTimeout(() => setIsOpen(false), 150);
         });
@@ -182,27 +187,7 @@ export function SettingsDropdown({
   }, [isOpen]);
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      {/* Mobile Button */}
-      {/* <div className="md:hidden">
-        <Button
-          variant="ghost"
-          size="lg"
-          className={`relative w-8 h-8 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 shadow-lg 
-                   hover:shadow-xl hover:shadow-[#F48120]/30 dark:hover:shadow-purple-500/30 active:scale-95
-                   transition-all duration-200 ease-out ${isOpen ? 'rotate-180' : ''}`}
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Menú de configuración"
-        >
-          <Gear
-            size={20}
-            className="text-white transition-transform duration-200 ml-1.5 mr-1.5"
-            weight="duotone"
-          />
-        </Button>
-      </div> */}
-
-      {/* Desktop Button */}
+    <div className="relative z-50" ref={dropdownRef}>
       <div>
         <Button
           variant="ghost"
@@ -224,37 +209,27 @@ export function SettingsDropdown({
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Overlay rendered via portal */}
-            {typeof window !== 'undefined' && createPortal(
+            {/* Overlay */}
+            <motion.div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setIsOpen(false)}
+            />
+            
+            {/* Dropdown Container */}
+            <div className="fixed inset-0 flex items-center justify-center z-[1001] px-4 py-4 pointer-events-none">
               <motion.div
-                className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => setIsOpen(false)}
-                style={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  zIndex: 50
-                }}
-              />,
-              document.body
-            )}
-            {/* Dropdown */}
-            <div className="fixed inset-0 flex items-center justify-center z-50 px-4 py-4 pointer-events-none">
-              <motion.div
-                className="w-full max-w-sm bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl border border-white/20 dark:border-neutral-700/50 overflow-hidden pointer-events-auto max-h-[90vh] overflow-y-auto mx-auto my-auto"
+                className="w-full max-w-md bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl border border-white/20 dark:border-neutral-700/50 overflow-hidden pointer-events-auto max-h-[90vh] overflow-y-auto mx-auto my-auto"
                 initial={{ opacity: 0, y: 20, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.98 }}
                 transition={springTransition}
               >
                 {/* Header */}
-                <div className="p-4 border-b border-white/10 dark:border-neutral-700/50 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10">
+                <div className="sticky top-0 z-10 p-4 border-b border-white/10 dark:border-neutral-700/50 bg-white/90 dark:bg-neutral-800/90 backdrop-blur-sm">
                   <div className="flex items-center">
                     <button
                       onClick={() => setActivePanel('main')}
