@@ -264,7 +264,7 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
               'scrollbar-thin scrollbar-thumb-[#F48120]/50 scrollbar-track-transparent hover:scrollbar-thumb-[#F48120]/70',
               'transform transition-all duration-200 ease-out',
               'z-50',
-              mobile ? 'mb-20' : 'mb-11',
+              mobile ? 'mb-11' : 'mb-11',
               mobile ? 'w-[calc(100vw-2rem)] mx-auto' : 'w-[90vw] max-w-4xl',
               'overscroll-contain touch-pan-y',
               'animate-in fade-in-80 data-[side=bottom]:slide-in-from-top-2',
