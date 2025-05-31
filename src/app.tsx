@@ -1959,34 +1959,35 @@ function ChatComponent() {
             </div> */}
           <div className="fixed bottom-0 left-0 right-0 z-50">
             {/* System prompt panel - slides from bottom */}
-            <div className={`transform transition-all duration-400 ease-out ${systemPrompt ? 'translate-y-0' : 'translate-y-full'}`}>
-              <div className="bg-gradient-to-b from-white/95 to-white/90 dark:from-neutral-900/95 dark:to-neutral-900/90 backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/30 shadow-lg">
-                <div className="max-w-2xl mx-auto px-4 py-3">
-                  <div className="relative group">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-30 group-focus-within:opacity-40 transition-opacity duration-300"></div>
-                    <div className="relative">
-                      <InputSystemPrompt
-                        type="text"
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        placeholder="Configura el comportamiento del asistente..."
-                        className={cn(
-                          // Layout & Sizing
-                          "w-full px-4 py-2.5 text-sm rounded-xl shadow-sm",
-                          // Background
-                          "bg-white/80 dark:bg-neutral-900/80",
-                          // Border & Focus
-                          "border border-neutral-200/80 dark:border-neutral-700/50",
-                          "hover:border-neutral-300/80 dark:hover:border-neutral-600/50",
-                          "focus:border-[#F48120] dark:focus:border-[#F48120]",
-                          "focus:ring-2 focus:ring-[#F48120]/20",
-                          // Text & Placeholder
-                          "placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90",
-                          // Transitions
-                          "transition-all duration-200"
-                        )}
-                      />
-                      {/* <Tooltip content="Guardar consulta">
+            {agentMessages.length === 0 && (
+              <div className={`transform transition-all duration-400 ease-out ${systemPrompt ? 'translate-y-0' : 'translate-y-full'}`}>
+                <div className="bg-gradient-to-b from-white/95 to-white/90 dark:from-neutral-900/95 dark:to-neutral-900/90 backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/30 shadow-lg">
+                  <div className="max-w-2xl mx-auto px-4 py-3">
+                    <div className="relative group">
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-30 group-focus-within:opacity-40 transition-opacity duration-300"></div>
+                      <div className="relative">
+                        <InputSystemPrompt
+                          type="text"
+                          value={inputText}
+                          onChange={(e) => setInputText(e.target.value)}
+                          placeholder="Configura el comportamiento del asistente..."
+                          className={cn(
+                            // Layout & Sizing
+                            "w-full px-4 py-2.5 text-sm rounded-xl shadow-sm",
+                            // Background
+                            "bg-white/80 dark:bg-neutral-900/80",
+                            // Border & Focus
+                            "border border-neutral-200/80 dark:border-neutral-700/50",
+                            "hover:border-neutral-300/80 dark:hover:border-neutral-600/50",
+                            "focus:border-[#F48120] dark:focus:border-[#F48120]",
+                            "focus:ring-2 focus:ring-[#F48120]/20",
+                            // Text & Placeholder
+                            "placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90",
+                            // Transitions
+                            "transition-all duration-200"
+                          )}
+                        />
+                        {/* <Tooltip content="Guardar consulta">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -2005,11 +2006,11 @@ function ChatComponent() {
                             <BookmarkSimple size={18} className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300" weight="duotone" />
                           </Button>
                         </Tooltip> */}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Saved Queries Section */}
-                  {/* <div>
+                    {/* Saved Queries Section */}
+                    {/* <div>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-1.5 text-sm font-medium text-neutral-600 dark:text-neutral-300">
                           <BookmarksSimple size={16} className="text-[#F48120]" weight="duotone" />
@@ -2057,10 +2058,10 @@ function ChatComponent() {
                         ))}
                       </div>
                     </div> */}
+                  </div>
                 </div>
               </div>
-            </div>
-
+            )}
             {/* Main input area - always visible */}
             {agentMessages.length !== 0 && (
               <div className={`relative bg-gradient-to-t from-white/95 via-white/90 to-transparent dark:from-neutral-900/95 dark:via-neutral-900/90 dark:to-transparent backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/50`}>
@@ -2093,9 +2094,9 @@ function ChatComponent() {
                     <div className="relative group max-w-4xl mx-auto w-full">
                       <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
 
-                      <div className="relative">
+                      {/* <div className="relative"> */}
                         {/* Mobile toggle button */}
-                        <div className="w-full text-center md:hidden z-20">
+                        {/* <div className="w-full text-center md:hidden z-20">
                           <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
                             <Button
                               variant="ghost"
@@ -2125,10 +2126,10 @@ function ChatComponent() {
                               </div>
                             </Button>
                           </Tooltip>
-                        </div>
+                        </div> */}
 
                         {/* Desktop toggle button */}
-                        <div className="hidden md:flex justify-center w-full z-20">
+                        {/* <div className="hidden md:flex justify-center w-full z-20">
                           <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
                             <Button
                               variant="ghost"
@@ -2159,7 +2160,7 @@ function ChatComponent() {
                             </Button>
                           </Tooltip>
                         </div>
-                      </div>
+                      </div> */}
                       <div className="relative bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
                         <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
 
@@ -2307,7 +2308,7 @@ function ChatComponent() {
           </div>
         </div>
       </div>
-      
+
       <AISettingsPanel
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
