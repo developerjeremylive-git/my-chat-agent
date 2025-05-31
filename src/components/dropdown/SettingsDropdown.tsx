@@ -271,6 +271,10 @@ export const SettingsDropdown = ({
                         style={{ willChange: 'transform, opacity' }}
                         transition={{ type: 'spring', stiffness: 400, damping: 40 }}
                       >
+                        {/* Configuración General Section */}
+                        {/* <div className="px-2 py-1 mb-2">
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Configuración General</div>
+                        </div> */}
                         {/* Model Selection - Mobile Only */}
                         {/* <div className="md:hidden px-4 py-2 mb-2">
                           <ModelSelect mobile />
@@ -336,6 +340,11 @@ export const SettingsDropdown = ({
                           Ajustes Personalizados
                         </motion.button>
 
+                        {/* Asistente IA Section */}
+                        {/* <div className="px-2 py-1 mt-4 mb-2">
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Asistente IA</div>
+                        </div> */}
+
                         <motion.button
                           onClick={() => {
                             handleAISettingsClick();
@@ -371,8 +380,13 @@ export const SettingsDropdown = ({
                           {isSidebarOpen ? 'Personaliza tu Asistente IA' : 'Personaliza tu Asistente IA'}
                         </motion.button>
 
+                        {/* Comportamiento Section */}
+                        {/* <div className="px-2 py-1 mt-4 mb-2">
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Comportamiento</div>
+                        </div> */}
+
                         {/* Nivel de Asistencia */}
-                        <div className="px-2 py-2 mb-2">
+                        <div className="px-2 py-2">
                           <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Nivel de Asistencia</div>
                           <div className="px-2 py-2 space-y-2">
                             <div className="relative h-2 bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-full overflow-hidden shadow-inner">
@@ -435,31 +449,34 @@ export const SettingsDropdown = ({
                           </div>
                         </div>
 
-                        {/* System Prompt Input */}
-                        <div className="px-2 py-2 mb-2">
-                          <InputSystemPrompt
-                            type="text"
-                            value={systemPrompt}
-                            onChange={(e) => setSystemPrompt(e.target.value)}
-                            placeholder="Configura el comportamiento del asistente..."
-                            className={cn(
-                              // Layout & Sizing
-                              "w-full px-4 py-2.5 text-sm rounded-xl shadow-sm",
-                              // Background
-                              "bg-white/80 dark:bg-neutral-900/80",
-                              // Border & Focus
-                              "border border-neutral-200/80 dark:border-neutral-700/50",
-                              "hover:border-neutral-300/80 dark:hover:border-neutral-600/50",
-                              "focus:border-[#F48120] dark:focus:border-[#F48120]",
-                              "focus:ring-2 focus:ring-[#F48120]/20",
-                              // Text & Placeholder
-                              "placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90",
-                              // Transitions
-                              "transition-all duration-200"
-                            )}
-                          />
-                        </div>
+                        {/* Prompt del Sistema Section */}
+                        <div className="px-2 py-2">
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Prompt del Sistema</div>
 
+                          <div className="px-2 py-2">
+                            <InputSystemPrompt
+                              type="text"
+                              value={systemPrompt}
+                              onChange={(e) => setSystemPrompt(e.target.value)}
+                              placeholder="Configura el comportamiento del asistente..."
+                              className={cn(
+                                // Layout & Sizing
+                                "w-full px-4 py-2.5 text-sm rounded-xl shadow-sm",
+                                // Background
+                                "bg-white/80 dark:bg-neutral-900/80",
+                                // Border & Focus
+                                "border border-neutral-200/80 dark:border-neutral-700/50",
+                                "hover:border-neutral-300/80 dark:hover:border-neutral-600/50",
+                                "focus:border-[#F48120] dark:focus:border-[#F48120]",
+                                "focus:ring-2 focus:ring-[#F48120]/20",
+                                // Text & Placeholder
+                                "placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90",
+                                // Transitions
+                                "transition-all duration-200"
+                              )}
+                            />
+                          </div>
+                        </div>
                         {/* <motion.button
                           onClick={() => navigateToPanel('profile')}
                           className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
@@ -471,6 +488,11 @@ export const SettingsDropdown = ({
                           <User size={18} weight="duotone" className="mr-3 text-blue-500" />
                           Perfil de usuario
                         </motion.button> */}
+
+                        {/* Opciones Avanzadas Section */}
+                        {/* <div className="px-2 py-1 mt-4 mb-2">
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Opciones Avanzadas</div>
+                        </div> */}
 
                         {onMenuToggle && (
                           <motion.button
