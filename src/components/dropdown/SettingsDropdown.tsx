@@ -82,6 +82,7 @@ interface SettingsDropdownProps {
   setShowSettingsMenu?: (show: boolean) => void;
   setShowOIAICreator?: (show: boolean) => void;
   setShowClearDialog?: (show: boolean) => void;
+  hasMessages?: boolean;
 }
 
 export const SettingsDropdown = ({
@@ -97,6 +98,7 @@ export const SettingsDropdown = ({
   setShowSettingsMenu = () => { },
   setShowOIAICreator = () => { },
   setShowClearDialog = () => { },
+  hasMessages = false,
 }: SettingsDropdownProps) => {
   const [systemPrompt, setSystemPrompt] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -451,33 +453,35 @@ export const SettingsDropdown = ({
                           </div>
                         )}
                         {/* Prompt del Sistema Section */}
-                        <div className="px-2 py-2">
-                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Prompt del Sistema</div>
-
+                        {hasMessages && (
                           <div className="px-2 py-2">
-                            <InputSystemPrompt
-                              type="text"
-                              value={systemPrompt}
-                              onChange={(e) => setSystemPrompt(e.target.value)}
-                              placeholder="Configura el comportamiento del asistente..."
-                              className={cn(
-                                // Layout & Sizing
-                                "w-full px-4 py-2.5 text-sm rounded-xl shadow-sm",
-                                // Background
-                                "bg-white/80 dark:bg-neutral-900/80",
-                                // Border & Focus
-                                "border border-neutral-200/80 dark:border-neutral-700/50",
-                                "hover:border-neutral-300/80 dark:hover:border-neutral-600/50",
-                                "focus:border-[#F48120] dark:focus:border-[#F48120]",
-                                "focus:ring-2 focus:ring-[#F48120]/20",
-                                // Text & Placeholder
-                                "placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90",
-                                // Transitions
-                                "transition-all duration-200"
-                              )}
-                            />
+                            <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Prompt del Sistema</div>
+
+                            <div className="px-2 py-2">
+                              <InputSystemPrompt
+                                type="text"
+                                value={systemPrompt}
+                                onChange={(e) => setSystemPrompt(e.target.value)}
+                                placeholder="Configura el comportamiento del asistente..."
+                                className={cn(
+                                  // Layout & Sizing
+                                  "w-full px-4 py-2.5 text-sm rounded-xl shadow-sm",
+                                  // Background
+                                  "bg-white/80 dark:bg-neutral-900/80",
+                                  // Border & Focus
+                                  "border border-neutral-200/80 dark:border-neutral-700/50",
+                                  "hover:border-neutral-300/80 dark:hover:border-neutral-600/50",
+                                  "focus:border-[#F48120] dark:focus:border-[#F48120]",
+                                  "focus:ring-2 focus:ring-[#F48120]/20",
+                                  // Text & Placeholder
+                                  "placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90",
+                                  // Transitions
+                                  "transition-all duration-200"
+                                )}
+                              />
+                            </div>
                           </div>
-                        </div>
+                        )}
                         {/* <motion.button
                           onClick={() => navigateToPanel('profile')}
                           className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"

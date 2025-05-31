@@ -18,6 +18,7 @@ interface HeaderProps {
   setShowClearDialog: (show: boolean) => void;
   setIsSettingsOpen: (open: boolean) => void;
   onOpenSideMenu: () => void;
+  hasMessages: boolean;
 }
 
 export default function Header(props: HeaderProps) {
@@ -31,7 +32,8 @@ export default function Header(props: HeaderProps) {
     setShowOIAICreator,
     setShowClearDialog,
     setIsSettingsOpen,
-    onOpenSideMenu
+    onOpenSideMenu,
+    hasMessages
   } = props;
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -91,6 +93,7 @@ export default function Header(props: HeaderProps) {
               setShowSettingsMenu={setShowSettingsMenu}
               setShowOIAICreator={setShowOIAICreator}
               setShowClearDialog={setShowClearDialog}
+              hasMessages={hasMessages}
             />
           </div>
         </div>

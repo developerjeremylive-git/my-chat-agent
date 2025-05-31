@@ -1095,6 +1095,7 @@ function ChatComponent() {
             setShowOIAICreator={setShowOIAICreator}
             setShowClearDialog={setShowClearDialog}
             setIsSettingsOpen={setIsSettingsOpen}
+            hasMessages={currentMessages.length > 0}
             onOpenSideMenu={() => {
               setIsSideMenuOpen(true);
               // If menu was static, make it non-static when opening from header
