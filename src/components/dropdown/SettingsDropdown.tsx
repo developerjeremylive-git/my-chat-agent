@@ -462,6 +462,7 @@ export const SettingsDropdown = ({
                                 type="text"
                                 value={systemPrompt}
                                 onChange={(e) => setSystemPrompt(e.target.value)}
+                                compact={true}
                                 placeholder="Configura el comportamiento del asistente..."
                                 className={cn(
                                   // Layout & Sizing

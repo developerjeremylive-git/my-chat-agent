@@ -15,6 +15,7 @@ export type InputProps = Omit<
   className?: string;
   size?: "sm" | "md" | "base";
   onValueChange?: (value: string) => void;
+  compact?: boolean;
 };
 
 interface SystemPrompt {
@@ -29,6 +30,7 @@ export const InputSystemPrompt = ({
   onChange,
   value,
   onValueChange,
+  compact = false,
   ...props
 }: InputProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -150,17 +152,11 @@ export const InputSystemPrompt = ({
       }
     };
 
-    if (isDropdownOpen) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
-    }
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isDropdownOpen]);
+  }, []);
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
@@ -230,39 +226,41 @@ export const InputSystemPrompt = ({
       </div>
 
       {isDropdownOpen && savedPrompts.length > 0 && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 dark:bg-opacity-70 flex flex-col items-center justify-end">
+        <div className={`fixed inset-0 z-50 bg-black bg-opacity-50 dark:bg-opacity-70 flex flex-col items-center ${compact ? 'justify-start' : 'justify-end'}`}>
           <div 
-            className="w-full max-h-[85vh] bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col"
+            className={`w-full ${compact ? 'max-h-[60vh] rounded-xl' : 'max-h-[85vh] rounded-t-2xl'} bg-white dark:bg-gray-900 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col`}
             style={{ boxShadow: '0 -10px 25px -5px rgba(0, 0, 0, 0.1), 0 -10px 10px -5px rgba(0, 0, 0, 0.04)' }}
           >
             {/* Header */}
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Mis Prompts</h3>
               <button
                 onClick={() => setIsDropdownOpen(false)}
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
                 aria-label="Cerrar"
               >
-                <X size={20} className="text-gray-500 dark:text-gray-400" />
+                <X size={20} />
               </button>
             </div>
             
             {/* Search Bar */}
-            <div className="p-3 border-b border-gray-100 dark:border-gray-800">
+            <div className="sticky top-[73px] z-10 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
               <div className="relative">
-                <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" weight="bold" />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <MagnifyingGlass className="h-4 w-4 text-gray-400" weight="bold" />
+                </div>
                 <input
                   ref={searchInputRef}
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Buscar prompts..."
-                  className="w-full pl-10 pr-10 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="block w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
                     aria-label="Limpiar búsqueda"
                   >
                     <X size={16} weight="bold" />
@@ -321,7 +319,7 @@ export const InputSystemPrompt = ({
             </div>
             
             {/* Add New Button */}
-            <div className="p-4 border-t border-gray-100 dark:border-gray-800">
+            <div className="sticky bottom-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);
@@ -334,9 +332,9 @@ export const InputSystemPrompt = ({
                   });
                   setIsEditModalOpen(true);
                 }}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center space-x-2 transition-colors"
+                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center space-x-2 transition-colors shadow-sm hover:shadow-md active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
               >
-                <Plus size={18} />
+                <Plus size={18} weight="bold" />
                 <span>Nuevo System Prompt</span>
               </button>
             </div>
