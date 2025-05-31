@@ -561,7 +561,6 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
                   placeholder="Buscar modelos..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  autoFocus
                   aria-label="Buscar modelos"
                 />
                 {searchQuery && (
