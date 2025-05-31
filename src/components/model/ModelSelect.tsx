@@ -537,7 +537,7 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
             style={{
               WebkitOverflowScrolling: 'touch',
               overscrollBehavior: 'contain',
-              maxHeight: mobile ? 'calc(53vh - 100px)' : '80vh',
+              maxHeight: mobile ? 'calc(54vh - 100px)' : '70vh',
               display: 'flex',
               flexDirection: 'column'
             }}
