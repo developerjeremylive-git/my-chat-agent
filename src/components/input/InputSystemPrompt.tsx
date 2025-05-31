@@ -325,11 +325,11 @@ export const InputSystemPrompt = ({
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);
-                  setEditPromptName('Nuevo Prompt');
+                  setEditPromptName('Nuevo System Prompt');
                   setEditPromptContent('');
                   setPromptToEdit({
                     id: '',
-                    name: 'Nuevo Prompt',
+                    name: 'Nuevo System Prompt',
                     content: ''
                   });
                   setIsEditModalOpen(true);
@@ -337,7 +337,7 @@ export const InputSystemPrompt = ({
                 className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center space-x-2 transition-colors"
               >
                 <Plus size={18} />
-                <span>Nuevo Prompt</span>
+                <span>Nuevo System Prompt</span>
               </button>
             </div>
           </div>
