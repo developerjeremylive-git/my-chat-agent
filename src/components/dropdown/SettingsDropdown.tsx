@@ -227,7 +227,7 @@ export const SettingsDropdown = ({
             {/* Dropdown Container */}
             <div className="fixed inset-0 flex items-center justify-center z-[1001] px-4 py-4 pointer-events-none">
               <motion.div
-                className="w-full max-w-md bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl border border-white/20 dark:border-neutral-700/50 overflow-hidden pointer-events-auto max-h-[90vh] overflow-y-auto mx-auto my-auto"
+                className="w-full max-w-md bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl border border-white/20 dark:border-neutral-700/50 overflow-hidden pointer-events-auto max-h-[90vh] flex flex-col mx-auto my-auto"
                 initial={{ opacity: 0, y: 20, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.98 }}
@@ -259,12 +259,12 @@ export const SettingsDropdown = ({
                 </div>
 
                 {/* Main Panel */}
-                <div className="relative overflow-hidden">
+                <div className="relative flex-1 overflow-y-auto">
                   <AnimatePresence mode="wait" custom={direction} initial={false}>
                     {activePanel === 'main' && (
                       <motion.div
                         key="main"
-                        className="p-2 w-full"
+                        className="p-2 w-full pb-4"
                         custom={direction}
                         variants={panelVariants}
                         initial="enter"
