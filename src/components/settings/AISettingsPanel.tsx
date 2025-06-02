@@ -230,13 +230,27 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
 
   return (
     <>
+      {/* Overlay with higher z-index */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-[60]"
+          onClick={onClose}
+          aria-hidden="true"
+          style={{
+            opacity: isOpen ? 1 : 0,
+            transition: 'opacity 0.2s ease-in-out',
+          }}
+        />
+      )}
+      
+      {/* Settings Panel with higher z-index than header */}
       <div
         className={cn(
           'fixed inset-y-0 right-0 w-full sm:w-96 transform transition-all duration-300 ease-in-out shadow-2xl',
           'bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm border-l border-neutral-200/50 dark:border-neutral-700/50',
           'flex flex-col h-full',
           isOpen ? 'translate-x-0' : 'translate-x-full',
-          'z-50 overflow-y-auto no-scrollbar',
+          'z-[70] overflow-y-auto no-scrollbar', // Increased z-index
           'overscroll-contain' // Prevents pull-to-refresh on mobile
         )}
         style={{
@@ -744,14 +758,6 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
         </div>
       </div>
 
-      {/* Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40"
-          onClick={onClose}
-          aria-hidden="true"
-        />
-      )}
     </>
   );
 }
