@@ -1,10 +1,10 @@
 import { Button } from '@/components/button/Button';
 import { Card } from '@/components/card/Card';
-import { X, PaintBrush, Target, MagnifyingGlass, Scales, Gear } from '@phosphor-icons/react';
+import { X, PaintBrush, Target, MagnifyingGlass, Scales, Gear, Info } from '@phosphor-icons/react';
 import { useAIConfig } from '@/contexts/AIConfigContext';
 import { cn } from '@/lib/utils';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { useState } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 
 interface AIModelConfig {
   temperature: number;
@@ -87,133 +87,270 @@ interface AISettingsPanelProps {
   onClose: () => void;
 }
 
+// Memoized slider component to prevent unnecessary re-renders
+const SliderControl = memo(({ 
+  label, 
+  value, 
+  min, 
+  max, 
+  step, 
+  onChange, 
+  tooltip,
+  formatValue = (v) => v,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  onChange: (value: number) => void;
+  tooltip: string;
+  formatValue?: (value: number) => string | number;
+}) => (
+  <div className="space-y-2">
+    <div className="flex items-center justify-between">
+      <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+        {label}
+      </label>
+      <div className="flex items-center space-x-2">
+        <span className="px-2.5 py-1 bg-neutral-100 dark:bg-neutral-800 rounded-md text-sm font-mono">
+          {formatValue(value)}
+        </span>
+        <Tooltip.Provider>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <button className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors">
+                <Info size={16} weight="fill" />
+              </button>
+            </Tooltip.Trigger>
+            <Tooltip.Portal>
+              <Tooltip.Content
+                className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-[100] shadow-lg"
+                sideOffset={5}
+              >
+                {tooltip}
+                <Tooltip.Arrow className="fill-neutral-800" />
+              </Tooltip.Content>
+            </Tooltip.Portal>
+          </Tooltip.Root>
+        </Tooltip.Provider>
+      </div>
+    </div>
+    <input
+      type="range"
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onChange={(e) => onChange(parseFloat(e.target.value))}
+      className="w-full h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#F48120] [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:transition-transform hover:[&::-webkit-slider-thumb]:scale-110 [&::-webkit-slider-thumb]:active:scale-105 focus-visible:[&::-webkit-slider-thumb]:ring-2 focus-visible:[&::-webkit-slider-thumb]:ring-[#F48120] focus-visible:[&::-webkit-slider-thumb]:ring-offset-2"
+      aria-label={label}
+    />
+  </div>
+));
+
+SliderControl.displayName = 'SliderControl';
+
 export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
   const { config, setConfig } = useAIConfig();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showPresets, setShowPresets] = useState(true);
   const [showBasic, setShowBasic] = useState(true);
-
-  const handlePresetSelect = (preset: PresetConfig) => {
-    setSelectedPreset(preset.name);
-    setConfig({ ...preset.config, stream: config.stream });
-  };
-
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
 
-  const handleSliderChange = <T extends number | boolean>(key: keyof AIModelConfig, value: T) => {
+  const handlePresetSelect = useCallback((preset: PresetConfig) => {
+    setSelectedPreset(preset.name);
+    setConfig({
+      ...config,
+      ...preset.config,
+      stream: config.stream
+    });
+  }, [config, setConfig]);
+
+  const handleSliderChange = useCallback(<T extends number | boolean>(
+    key: keyof AIModelConfig, 
+    value: T
+  ) => {
     setSelectedPreset(null);
-    setConfig({ ...config, [key]: value });
-  };
+    setConfig({
+      ...config,
+      [key]: value
+    });
+  }, [config, setConfig]);
 
-  const toggleAdvanced = () => {
-    setShowAdvanced(!showAdvanced);
-  };
+  const toggleAdvanced = useCallback(() => {
+    setShowAdvanced(prev => !prev);
+  }, []);
 
-  const togglePresets = () => {
-    setShowPresets(!showPresets);
-  };
+  const togglePresets = useCallback(() => {
+    setShowPresets(prev => !prev);
+  }, []);
+
+  const toggleBasic = useCallback(() => {
+    setShowBasic(prev => !prev);
+  }, []);
+
+  // Memoize preset cards to prevent re-renders
+  const presetCards = useMemo(() => (
+    presets.map((preset: PresetConfig) => (
+      <Card
+        key={preset.name}
+        className={cn(
+          'p-4 cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-800/50',
+          'border border-neutral-200/70 dark:border-neutral-700/50',
+          'hover:shadow-md dark:hover:shadow-neutral-800/30',
+          selectedPreset === preset.name 
+            ? 'ring-2 ring-[#F48120] ring-offset-2 dark:ring-offset-neutral-900' 
+            : 'hover:border-neutral-300 dark:hover:border-neutral-600'
+        )}
+        onClick={() => handlePresetSelect(preset)}
+      >
+        <div className="flex items-start gap-3">
+          <div className={cn(
+            'p-2 rounded-lg',
+            selectedPreset === preset.name 
+              ? 'bg-[#F48120]/10 text-[#F48120]' 
+              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
+          )}>
+            {preset.name === 'Creativo' && <PaintBrush size={20} weight="fill" />}
+            {preset.name === 'Preciso' && <Target size={20} weight="fill" />}
+            {preset.name === 'Investigador' && <MagnifyingGlass size={20} weight="fill" />}
+            {preset.name === 'Balanceado' && <Scales size={20} weight="fill" />}
+          </div>
+          <div>
+            <h4 className="font-medium text-neutral-900 dark:text-white">{preset.name}</h4>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+              {preset.description}
+            </p>
+          </div>
+        </div>
+      </Card>
+    ))
+  ), [handlePresetSelect, selectedPreset]);
 
   return (
     <>
       <div
         className={cn(
-          'fixed inset-y-0 right-0 w-80 transform transition-all duration-300 ease-in-out shadow-2xl',
+          'fixed inset-y-0 right-0 w-full sm:w-96 transform transition-all duration-300 ease-in-out shadow-2xl',
           'bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm border-l border-neutral-200/50 dark:border-neutral-700/50',
-          'scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
+          'flex flex-col h-full',
           isOpen ? 'translate-x-0' : 'translate-x-full',
-          'z-70' // Aseguramos que esté por encima del menú desplegable
+          'z-50 overflow-y-auto no-scrollbar',
+          'overscroll-contain' // Prevents pull-to-refresh on mobile
         )}
         style={{
-          transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
           opacity: isOpen ? 1 : 0,
-          transition: 'transform 0.3s ease-in-out, opacity 0.2s ease-in-out'
+          transition: 'transform 0.3s ease-in-out, opacity 0.2s ease-in-out',
+          WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
         }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Configuración del Asistente de IA"
       >
-        <div className="p-4 border-b border-neutral-200 dark:border-neutral-800 border-opacity-10 flex justify-between items-center sticky top-0 bg-white dark:bg-neutral-900 z-70">
-          <div className="flex items-center space-x-2">
-            <Gear weight="duotone" className="text-[#F48120] h-7 w-6" />
-            <span className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Configuración Asistente IA</span>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            shape="square"
-            className="rounded-full text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
-            onClick={onClose}
-          >
-            <X size={20} />
-          </Button>
+      {/* Header */}
+      <div className="sticky top-0 z-10 p-4 border-b border-neutral-200/50 dark:border-neutral-800/50 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <Gear weight="duotone" className="text-[#F48120] h-7 w-6 flex-shrink-0" />
+          <h2 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
+            Configuración Asistente IA
+          </h2>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          shape="square"
+          className="rounded-full text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
+          onClick={onClose}
+          aria-label="Cerrar configuración"
+        >
+          <X size={20} />
+        </Button>
+      </div>
 
-        <div className="p-4 space-y-6 border-t cn('border-opacity-10', theme === 'dark' ? 'border-neutral-800' : 'border-gray-200')">
-          <div className="space-y-4">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between cursor-pointer" onClick={togglePresets}>
-                <h3 className="text-sm font-medium">Configuraciones Predefinidas</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  shape="square"
-                  className="rounded-full"
-                >
-                  <svg
-                    className={`w-4 h-4 transition-transform duration-200 ${showPresets ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </Button>
-              </div>
+        {/* Main Content */}
+        <div className="flex-1 p-4 space-y-6 overflow-y-auto">
+          {/* Presets Section */}
+          <section className="space-y-4">
+            <button 
+              onClick={togglePresets}
+              className="w-full flex items-center justify-between text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F48120] focus-visible:ring-offset-2 rounded-lg p-2 -ml-2"
+              aria-expanded={showPresets}
+              aria-controls="presets-section"
+            >
+              <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+                Configuraciones Predefinidas
+              </h3>
+              <svg
+                className={`w-5 h-5 text-neutral-500 transition-transform duration-200 ${showPresets ? 'rotate-180' : ''}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            <div 
+              id="presets-section"
+              className={`space-y-3 transition-all duration-300 ${showPresets ? 'opacity-100 max-h-[1000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}
+              aria-hidden={!showPresets}
+            >
+              {presetCards}
             </div>
-            <div className={`grid gap-3 transition-all duration-300 ${showPresets ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-              {presets.map((preset) => (
-                <Card
-                  key={preset.name}
-                  className={`p-3 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 ${selectedPreset === preset.name ? 'border-[#F48120] border-2 shadow-lg dark:shadow-[#F48120]/20' : 'border border-neutral-200 dark:border-neutral-700'}`}
-                  onClick={() => handlePresetSelect(preset)}
-                >
-                  <div className="flex items-center gap-3">
-                    {preset.name === 'Creativo' && <PaintBrush size={20} />}
-                    {preset.name === 'Preciso' && <Target size={20} />}
-                    {preset.name === 'Investigador' && <MagnifyingGlass size={20} />}
-                    {preset.name === 'Balanceado' && <Scales size={20} />}
-                    <Tooltip.Provider>
-                      <Tooltip.Root>
-                        <Tooltip.Trigger asChild>
-                          <div>
-                            <h4 className="font-medium">{preset.name}</h4>
-                            <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                              {preset.description}
-                            </p>
-                          </div>
-                        </Tooltip.Trigger>
-                        <Tooltip.Portal>
-                          <Tooltip.Content
-                            className="bg-neutral-800 text-white px-3 py-2 rounded-lg text-sm max-w-xs z-80"
-                            sideOffset={5}
-                          >
-                            {preset.name === 'Creativo' && 'Ideal para brainstorming, escritura creativa y generación de ideas innovadoras. Produce respuestas únicas y originales con mayor variabilidad.'}
-                            {preset.name === 'Preciso' && 'Optimizado para tareas técnicas, programación y análisis que requieren exactitud. Minimiza la ambigüedad y mantiene alta coherencia.'}
-                            {preset.name === 'Investigador' && 'Especializado en análisis profundo y explicaciones extensas. Perfecto para investigación académica y documentación técnica detallada.'}
-                            {preset.name === 'Balanceado' && 'Configuración versátil que combina creatividad y precisión. Recomendado para conversaciones cotidianas y consultas generales.'}
-                            <Tooltip.Arrow className="fill-neutral-800" />
-                          </Tooltip.Content>
-                        </Tooltip.Portal>
-                      </Tooltip.Root>
-                    </Tooltip.Provider>
-                  </div>
-                </Card>
-              ))}
+          </section>
+          
+          {/* Divider */}
+          <div className="border-t border-neutral-200 dark:border-neutral-800 my-4" />
+          
+          {/* Basic Settings Section */}
+          <section className="space-y-4">
+            <button 
+              onClick={toggleBasic}
+              className="w-full flex items-center justify-between text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F48120] focus-visible:ring-offset-2 rounded-lg p-2 -ml-2"
+              aria-expanded={showBasic}
+              aria-controls="basic-settings"
+            >
+              <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+                Configuración Básica
+              </h3>
+              <svg
+                className={`w-5 h-5 text-neutral-500 transition-transform duration-200 ${showBasic ? 'rotate-180' : ''}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            <div 
+              id="basic-settings"
+              className={`space-y-5 transition-all duration-300 ${showBasic ? 'opacity-100 max-h-[1000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}
+              aria-hidden={!showBasic}
+            >
+              <SliderControl
+                label="Temperatura"
+                value={config.temperature}
+                min={0}
+                max={1}
+                step={0.1}
+                onChange={(value) => handleSliderChange('temperature', value)}
+                tooltip="Controla la aleatoriedad de las respuestas. Valores más altos (0.8-1.0) generan respuestas más creativas y diversas, mientras que valores más bajos (0.2-0.4) producen respuestas más consistentes y deterministas."
+              />
+              
+              <SliderControl
+                label="Tokens Máximos"
+                value={config.maxTokens}
+                min={256}
+                max={4096}
+                step={256}
+                formatValue={(v) => v.toLocaleString()}
+                onChange={(value) => handleSliderChange('maxTokens', value)}
+                tooltip="El número máximo de tokens que el modelo generará en una respuesta. Un valor más alto permite respuestas más largas pero consume más recursos."
+              />
             </div>
-          </div>
+          </section>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowBasic(!showBasic)}>
@@ -610,8 +747,9 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-60"
+          className="fixed inset-0 bg-black/50 z-40"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
     </>
