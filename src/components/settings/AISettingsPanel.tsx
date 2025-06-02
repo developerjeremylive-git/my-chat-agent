@@ -366,7 +366,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
             </div>
           </section>
 
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowBasic(!showBasic)}>
               <h3 className="text-sm font-medium">Configuración Básica</h3>
               <Button
@@ -458,7 +458,7 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
                 </Tooltip.Provider>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <div className="space-y-4">
             <div className="flex items-center justify-between cursor-pointer" onClick={toggleAdvanced}>
