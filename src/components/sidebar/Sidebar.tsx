@@ -480,7 +480,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
 
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-[90] w-64 transform transition-transform duration-300 ease-in-out shadow-2xl overflow-hidden',
+          'fixed inset-y-0 right-0 z-[90] w-full sm:w-80 transform transition-transform duration-300 ease-in-out shadow-2xl overflow-hidden',
           theme === 'dark' ? 'bg-gradient-to-b from-neutral-900 to-neutral-950' : 'bg-gradient-to-b from-white to-gray-100',
           isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
@@ -488,34 +488,34 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
         <div className="flex flex-col h-full">
           <div className="p-4 border-b cn('border-opacity-10', theme === 'dark' ? 'border-neutral-800' : 'border-gray-200')">
             <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-3">
-                <Robot weight="duotone" className="text-[#F48120] h-7 w-7" />
-                <span className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Personaliza tu Asistente IA</span>
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <Robot weight="duotone" className="text-[#F48120] h-6 w-6 sm:h-7 sm:w-7 flex-shrink-0" />
+                <span className="text-base sm:text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Personaliza tu Asistente IA</span>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 shape="square"
-                className="rounded-xl hover:bg-white/10 text-neutral-400 hover:text-white transition-all duration-300 transform hover:rotate-90"
+                className="rounded-xl hover:bg-white/10 text-neutral-400 hover:text-white transition-all duration-300 transform hover:rotate-90 p-2"
                 onClick={onClose}
               >
-                <X weight="bold" size={20} />
+                <X weight="bold" size={20} className="w-5 h-5" />
               </Button>
             </div>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex flex-col h-full space-y-6">
+          <nav className="flex-1 p-3 sm:p-4 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex flex-col h-full space-y-4 sm:space-y-6">
 
               {/* Sección de Prompts del Sistema */}
-              <div className="px-2 py-2">
+              <div className="px-1 py-1 sm:px-2 sm:py-2">
                 <button
-                  className="flex items-center gap-2 w-full px-3 py-2 text-left text-neutral-700 dark:text-neutral-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-gradient-to-r hover:from-orange-50 hover:to-purple-50 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg transition-all duration-300"
+                  className="flex items-center gap-2 w-full px-3 py-3 sm:py-2 text-left text-sm sm:text-base text-neutral-700 dark:text-neutral-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-gradient-to-r hover:from-orange-50 hover:to-purple-50 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg transition-all duration-300"
                   onClick={() => {setShowSystemPromptDashboard(true); onClose(); }}
                 >
-                  <ChatText size={20} />
-                  <span>Prompts del Sistema</span>
+                  <ChatText size={20} className="flex-shrink-0 w-5 h-5" />
+                  <span className="truncate">Prompts del Sistema</span>
                 </button>
               </div>
 
@@ -530,16 +530,16 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                     className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20"
                     onClick={() => { setShowOiaiGuide(true); onClose(); }}
                   >
-                    <Question weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
-                    Guía Asistente IA
+                    <Question weight="duotone" className="mr-2 sm:mr-3 h-5 w-5 text-[#F48120] flex-shrink-0" />
+                    <span className="text-sm sm:text-base truncate">Guía Asistente IA</span>
                   </Button>
                   <Button
                     variant="ghost"
                     className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20"
                     onClick={() => { setShowOIAICreator(true); onClose(); }}
                   >
-                    <PlusCircle weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
-                    Crear Asistente IA
+                    <PlusCircle weight="duotone" className="mr-2 sm:mr-3 h-5 w-5 text-[#F48120] flex-shrink-0" />
+                    <span className="text-sm sm:text-base truncate">Crear Asistente IA</span>
                   </Button>
                 </div>
 
