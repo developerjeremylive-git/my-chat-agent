@@ -54,20 +54,20 @@ const chatRooms = new Map<string, Set<WebSocket>>();
 // Clean up dead WebSocket connections
 function cleanupConnections(roomId: string = 'global') {
   if (!chatRooms.has(roomId)) return;
-  
+
   const room = chatRooms.get(roomId)!;
   const deadConnections: WebSocket[] = [];
-  
+
   room.forEach(ws => {
     if (ws.readyState !== WebSocket.OPEN) {
       deadConnections.push(ws);
     }
   });
-  
+
   deadConnections.forEach(ws => {
     room.delete(ws);
   });
-  
+
   if (room.size === 0) {
     chatRooms.delete(roomId);
   }
@@ -76,11 +76,11 @@ function cleanupConnections(roomId: string = 'global') {
 // Helper function to broadcast to a room
 function broadcastToRoom(roomId: string, message: any) {
   if (!chatRooms.has(roomId)) return;
-  
+
   const room = chatRooms.get(roomId)!;
   const deadConnections: WebSocket[] = [];
   const messageStr = JSON.stringify(message);
-  
+
   room.forEach(ws => {
     try {
       if (ws.readyState === WebSocket.OPEN) {
@@ -93,10 +93,10 @@ function broadcastToRoom(roomId: string, message: any) {
       deadConnections.push(ws);
     }
   });
-  
+
   // Clean up dead connections
   deadConnections.forEach(ws => room.delete(ws));
-  
+
   if (room.size === 0) {
     chatRooms.delete(roomId);
   }
@@ -219,9 +219,9 @@ app.get('/api/config', async (c) => {
 app.get('/api/system-prompt', async (c) => {
   try {
     const prompt = await getSystemPrompt(c.env);
-    return c.json({ 
-      success: true, 
-      prompt 
+    return c.json({
+      success: true,
+      prompt
     });
   } catch (error) {
     console.error('Error getting system prompt:', error);
@@ -243,13 +243,13 @@ app.post('/api/system-prompt', async (c) => {
         error: 'Prompt is required and must be a string'
       }, 400);
     }
-    
+
     await setSystemPrompt(c.env, prompt);
     systemPrompt = prompt;
-    
-    return c.json({ 
-      success: true, 
-      prompt: systemPrompt 
+
+    return c.json({
+      success: true,
+      prompt: systemPrompt
     });
   } catch (error) {
     console.error('Error updating system prompt:', error);
@@ -265,9 +265,9 @@ app.post('/api/system-prompt', async (c) => {
 app.get('/api/max-steps', async (c) => {
   try {
     const steps = await getMaxSteps(c.env);
-    return c.json({ 
-      success: true, 
-      maxSteps: steps 
+    return c.json({
+      success: true,
+      maxSteps: steps
     });
   } catch (error) {
     console.error('Error getting max steps:', error);
@@ -283,20 +283,20 @@ app.get('/api/max-steps', async (c) => {
 app.post('/api/max-steps', async (c) => {
   try {
     const { maxSteps: newMaxSteps } = await c.req.json();
-    
+
     if (typeof newMaxSteps !== 'number' || newMaxSteps <= 0) {
       return c.json({
         success: false,
         error: 'maxSteps must be a positive number'
       }, 400);
     }
-    
+
     await setMaxSteps(c.env, newMaxSteps);
     maxSteps = newMaxSteps;
-    
-    return c.json({ 
-      success: true, 
-      maxSteps 
+
+    return c.json({
+      success: true,
+      maxSteps
     });
   } catch (error) {
     console.error('Error updating max steps:', error);
@@ -518,8 +518,8 @@ app.put('/api/chats/:id/title', async (c) => {
     const result = await c.env.DB.prepare(
       'UPDATE chats SET title = ? WHERE id = ? RETURNING *'
     )
-    .bind(title, chatId)
-    .first();
+      .bind(title, chatId)
+      .first();
 
     if (!result) {
       return c.json({ error: 'Chat no encontrado' }, 404);
@@ -531,18 +531,18 @@ app.put('/api/chats/:id/title', async (c) => {
       chats[chatIndex].title = title;
     }
 
-    return c.json({ 
-      success: true, 
+    return c.json({
+      success: true,
       chat: {
         id: result.id,
         title: result.title,
         lastMessageAt: result.last_message_at,
         messages: []
-      } 
+      }
     });
   } catch (error) {
     console.error('Error updating chat title:', error);
-    return c.json({ 
+    return c.json({
       error: 'Error al actualizar el título del chat',
       details: error instanceof Error ? error.message : 'Error desconocido'
     }, 500);
@@ -551,7 +551,7 @@ app.put('/api/chats/:id/title', async (c) => {
 
 app.delete('/api/chats/:id', async (c) => {
   const chatId = c.req.param('id');
-  
+
   try {
     // Delete messages first due to foreign key constraint
     await c.env.DB.prepare(
@@ -682,7 +682,7 @@ app.post('/api/assistant', async (c) => {
     const { maxStepsTemp: newMaxSteps, prompt: newPrompt, modelTemp: newModel, selectedChatId: newChatId } = await c.req.json();
     await setSelectedModel(c.env, newModel);
     await setSystemPrompt(c.env, newPrompt);
-    
+
     // Actualizar el chat actual en KV
     if (newChatId) {
       await c.env.MODEL_CONFIG.put('current_chat_id', newChatId);
@@ -695,7 +695,7 @@ app.post('/api/assistant', async (c) => {
         await c.env.MODEL_CONFIG.put('current_chat_id', newChatId);
       }
     }
-    
+
     selectedModel = newModel;
     systemPrompt = newPrompt;
     // Validate maxSteps
@@ -737,18 +737,18 @@ app.get('/api/ws', async (c) => {
   if (upgradeHeader !== 'websocket') {
     return c.text('Expected Upgrade: websocket', 426);
   }
-  
+
   const webSocketPair = new WebSocketPair();
   const [client, server] = Object.values(webSocketPair);
-  
+
   server.accept();
-  
+
   // Add to global room by default
   if (!chatRooms.has('global')) {
     chatRooms.set('global', new Set());
   }
   chatRooms.get('global')!.add(server);
-  
+
   // Handle WebSocket events
   server.addEventListener('message', (event) => {
     try {
@@ -758,7 +758,7 @@ app.get('/api/ws', async (c) => {
       console.error('Error processing WebSocket message:', error);
     }
   });
-  
+
   server.addEventListener('close', () => {
     // Clean up when connection closes
     chatRooms.forEach((room, roomId) => {
@@ -770,7 +770,7 @@ app.get('/api/ws', async (c) => {
       }
     });
   });
-  
+
   return new Response(null, {
     status: 101,
     webSocket: client,
@@ -1026,6 +1026,7 @@ app.get('/agents/chat/default/get-messages', async (c) => {
 
 // Stream the AI response using GPT-4
 import { config } from './contexts/config';
+import { any } from "zod";
 // error
 // const model = workersai("@cf/meta/llama-4-scout-17b-16e-instruct");
 // const model = workersai("@cf/mistralai/mistral-small-3.1-24b-instruct");
@@ -1377,7 +1378,7 @@ export class Chat extends AIChatAgent<Env> {
         const recentChat = await this.db.prepare(
           'SELECT id FROM chats ORDER BY last_message_at DESC LIMIT 1'
         ).first<{ id: string }>();
-        
+
         if (recentChat) {
           this.currentChatId = recentChat.id;
           // Save to KV for future requests
@@ -1742,6 +1743,37 @@ export class Chat extends AIChatAgent<Env> {
       });
     }
 
+    // Helper function for retryable API calls with exponential backoff
+    const callWithRetry = async (fn: () => Promise<any>, maxRetries = 3, baseDelay = 1000) => {
+      let lastError;
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          return await fn();
+        } catch (error: any) {
+          lastError = error;
+
+          // If it's a 503 or rate limit error, we'll retry
+          const isRetryable = error?.code === 503 ||
+            error?.status === 'UNAVAILABLE' ||
+            error?.code === 429;
+
+          if (!isRetryable || attempt === maxRetries - 1) {
+            console.error(`API call failed after ${attempt + 1} attempts:`, error);
+            throw error;
+          }
+
+          // Exponential backoff with jitter
+          const delay = Math.min(baseDelay * Math.pow(2, attempt), 30000);
+          const jitter = Math.random() * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay + jitter));
+          console.log(`Retrying API call (attempt ${attempt + 2}/${maxRetries})...`);
+        }
+      }
+
+      throw lastError || new Error('Unknown error in API call');
+    };
+
     return createDataStreamResponse({
       execute: async (dataStream) => {
         let lastError = null;
@@ -1749,16 +1781,19 @@ export class Chat extends AIChatAgent<Env> {
 
         while (currentStep < maxSteps) {
           try {
-            const response = await ai.models.generateContent({
-              model: geminiModel,
-              contents: [
-                {
-                  parts: [
-                    { text: systemPrompt },
-                    ...this.messages.map(msg => ({ text: msg.content }))
-                  ]
-                }
-              ],
+            const response = await callWithRetry(async () => {
+              return await ai.models.generateContent({
+                model: geminiModel,
+                contents: [
+                  {
+                    role: 'assistant',
+                    parts: [
+                      { text: systemPrompt },
+                      ...this.messages.map(msg => ({ text: msg.content }))
+                    ]
+                  }
+                ],
+              });
             });
 
             if (!response || !response.text) {
@@ -1803,25 +1838,36 @@ export class Chat extends AIChatAgent<Env> {
             // Enviar la respuesta al stream para actualizar la UI
             dataStream.write(formatDataStreamPart('text', `### Respuesta ${currentStep + 1} de ${maxSteps}
 
-> ${response.text}
-`));
+            > ${response.text}
+            `));
 
             currentStep++;
-          } catch (error) {
-            console.error(`Error en el paso ${currentStep + 1}:`, error);
+          } catch (error: any) {
+            console.error('Error en el paso ' + (currentStep + 1) + ':', error);
             lastError = error;
-            break;
+
+            // Provide more user-friendly error messages
+            const errorMessage = error?.code === 503 || error?.status === 'UNAVAILABLE'
+              ? 'El servicio de IA está temporalmente sobrecargado. Por favor, inténtalo de nuevo en unos momentos.'
+              : error?.code === 429
+                ? 'Has excedido el límite de solicitudes. Por favor, espera un momento antes de intentar de nuevo.'
+                : 'Ocurrió un error al procesar tu solicitud. Por favor, inténtalo de nuevo.';
+
+            // Send error message to the client
+            dataStream.write(formatDataStreamPart('error', errorMessage));
+
+            // Exit the loop on non-retryable errors or after all retries
+            const isRetryable = error?.code === 503 ||
+              error?.status === 'UNAVAILABLE' ||
+              error?.code === 429;
+            if (!isRetryable) {
+              break;
+            }
+
+            // For retryable errors, we'll let the retry logic handle it
+            throw error;
           }
         }
-
-        if (lastError) {
-          throw lastError;
-        }
-        // // dataStream.write(formatDataStreamPart('text', response.text ?? ''));
-        // if (lastError) {
-        //   console.log('Request succeeded after retry');
-        // }
-        console.log('Transmisión de Gemini finalizada');
       }
     });
   }
