@@ -327,6 +327,11 @@ export const SettingsDropdown = ({
                           Ajustes Personalizados
                         </motion.button> */}
 
+                        {/* Categoría: Ajustes de Interfaz */}
+                        <div className="px-2 py-1 mt-4 mb-2">
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Ajustes de Interfaz</div>
+                        </div>
+
                         <motion.button
                           onClick={() => {
                             setShowSettingsMenu(true);
@@ -339,13 +344,13 @@ export const SettingsDropdown = ({
                           animate="open"
                         >
                           <PaintBrushBroad size={18} weight="duotone" className="mr-3 text-green-500" />
-                          Ajustes Personalizados
+                          Personalizar Apariencia
                         </motion.button>
 
-                        {/* Asistente IA Section */}
-                        {/* <div className="px-2 py-1 mt-4 mb-2">
-                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Asistente IA</div>
-                        </div> */}
+                        {/* Categoría: Configuración de IA */}
+                        <div className="px-2 py-1 mt-4 mb-2">
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Configuración de IA</div>
+                        </div>
 
                         <motion.button
                           onClick={() => {
@@ -363,23 +368,8 @@ export const SettingsDropdown = ({
                           initial="closed"
                           animate="open"
                         >
-                          <Robot size={18} weight="duotone" className="mr-3 text-purple-500" />
-                          Configuración Asistente IA
-                        </motion.button>
-
-                        <motion.button
-                          onClick={() => handleMenuItemClick(toggleSidebar)}
-                          className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${isSidebarOpen
-                            ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium'
-                            : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
-                            }`}
-                          variants={menuItemVariants}
-                          custom={isMobile ? 1 : 0}
-                          initial="closed"
-                          animate="open"
-                        >
-                          <UserCirclePlus size={18} weight="duotone" className="mr-3 text-[#F48120]" />
-                          {isSidebarOpen ? 'Personaliza tu Asistente IA' : 'Personaliza tu Asistente IA'}
+                          <Gear size={18} weight="duotone" className="mr-3 text-purple-500" />
+                          Ajustes del Asistente
                         </motion.button>
 
                         {/* Comportamiento Section */}
@@ -453,36 +443,52 @@ export const SettingsDropdown = ({
                           </div>
                         )}
                         {/* Prompt del Sistema Section */}
-                        {hasMessages && (
-                          <div className="px-2 py-2">
-                            <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Prompt del Sistema</div>
+                        {/* {hasMessages && ( */}
+                        <div className="px-2 py-2">
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Prompt del Sistema</div>
 
-                            <div className="px-2 py-2">
-                              <InputSystemPrompt
-                                type="text"
-                                value={systemPrompt}
-                                onChange={(e) => setSystemPrompt(e.target.value)}
-                                compact={true}
-                                placeholder="Configura el comportamiento del asistente..."
-                                className={cn(
-                                  // Layout & Sizing
-                                  "w-full px-4 py-2.5 text-sm rounded-xl shadow-sm",
-                                  // Background
-                                  "bg-white/80 dark:bg-neutral-900/80",
-                                  // Border & Focus
-                                  "border border-neutral-200/80 dark:border-neutral-700/50",
-                                  "hover:border-neutral-300/80 dark:hover:border-neutral-600/50",
-                                  "focus:border-[#F48120] dark:focus:border-[#F48120]",
-                                  "focus:ring-2 focus:ring-[#F48120]/20",
-                                  // Text & Placeholder
-                                  "placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90",
-                                  // Transitions
-                                  "transition-all duration-200"
-                                )}
-                              />
-                            </div>
+                          <motion.button
+                            onClick={() => handleMenuItemClick(toggleSidebar)}
+                            className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${isSidebarOpen
+                              ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium'
+                              : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
+                              }`}
+                            variants={menuItemVariants}
+                            custom={isMobile ? 1 : 0}
+                            initial="closed"
+                            animate="open"
+                          >
+                            <UserCirclePlus size={18} weight="duotone" className="mr-3 text-[#F48120]" />
+                            {/* {isSidebarOpen ? 'Personaliza tu Asistente IA' : 'Personaliza tu Asistente IA'} */}
+                            Personaliza tus prompts
+                          </motion.button>
+
+                          <div className="px-2 py-2">
+                            <InputSystemPrompt
+                              type="text"
+                              value={systemPrompt}
+                              onChange={(e) => setSystemPrompt(e.target.value)}
+                              compact={true}
+                              placeholder="Configura el comportamiento del asistente..."
+                              className={cn(
+                                // Layout & Sizing
+                                "w-full px-4 py-2.5 text-sm rounded-xl shadow-sm",
+                                // Background
+                                "bg-white/80 dark:bg-neutral-900/80",
+                                // Border & Focus
+                                "border border-neutral-200/80 dark:border-neutral-700/50",
+                                "hover:border-neutral-300/80 dark:hover:border-neutral-600/50",
+                                "focus:border-[#F48120] dark:focus:border-[#F48120]",
+                                "focus:ring-2 focus:ring-[#F48120]/20",
+                                // Text & Placeholder
+                                "placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90",
+                                // Transitions
+                                "transition-all duration-200"
+                              )}
+                            />
                           </div>
-                        )}
+                        </div>
+                        {/* )} */}
                         {/* <motion.button
                           onClick={() => navigateToPanel('profile')}
                           className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"

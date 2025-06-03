@@ -265,7 +265,15 @@ export function AISettingsPanel({ isOpen, onClose }: AISettingsPanelProps) {
       {/* Header */}
       <div className="sticky top-0 z-10 p-4 border-b border-neutral-200/50 dark:border-neutral-800/50 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <Gear weight="duotone" className="text-[#F48120] h-7 w-6 flex-shrink-0" />
+        <div className={cn(
+                  'p-1.5 rounded-lg',
+                  'bg-gradient-to-br from-[#F48120] to-purple-500',
+                  'shadow-lg shadow-[#F48120]/20',
+                  'transform transition-transform hover:scale-105 active:scale-95'
+                )}>
+                  <Gear weight="duotone" className="text-white h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
+                </div>
+          {/* <Gear weight="duotone" className="text-[#F48120] h-7 w-6 flex-shrink-0" /> */}
           <h2 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
             Configuración Asistente IA
           </h2>

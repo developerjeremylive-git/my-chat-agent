@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/button/Button';
 import { Card } from '@/components/card/Card';
 import { cn } from '@/lib/utils';
-import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun, GraduationCap, Pencil, Palette, Leaf, Camera, MusicNotes, ChartBar, Globe, ShieldCheck, Rocket, Wrench, Users, Question, PlusCircle, ChatText } from '@phosphor-icons/react';
+import { List, X, Brain, Code, Lightbulb, Robot, ChartLine, Moon, Sun, GraduationCap, Pencil, Palette, Leaf, Camera, MusicNotes, ChartBar, Globe, ShieldCheck, Rocket, Wrench, Users, Question, PlusCircle, ChatText, UserCirclePlus } from '@phosphor-icons/react';
 import AuthPopup from '../AuthPopup';
 import AuthButton from '../AuthButton';
 import { OIAICreator } from '../modal/OIAICreator';
@@ -480,23 +480,48 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
 
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-[90] w-full sm:w-80 transform transition-transform duration-300 ease-in-out shadow-2xl overflow-hidden',
-          theme === 'dark' ? 'bg-gradient-to-b from-neutral-900 to-neutral-950' : 'bg-gradient-to-b from-white to-gray-100',
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+          'fixed inset-y-0 right-0 z-[90] w-full sm:w-80 transform transition-all duration-300 ease-in-out overflow-hidden',
+          theme === 'dark' 
+            ? 'bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-950' 
+            : 'bg-gradient-to-br from-white via-gray-50 to-gray-100',
+          isOpen ? 'translate-x-0 shadow-2xl' : 'translate-x-full',
+          'border-l border-opacity-10',
+          theme === 'dark' ? 'border-neutral-800' : 'border-gray-200'
         )}
       >
         <div className="flex flex-col h-full">
-          <div className="p-4 border-b cn('border-opacity-10', theme === 'dark' ? 'border-neutral-800' : 'border-gray-200')">
-            <div className="flex items-center justify-between mb-2">
+          {/* Header */}
+          <div className={cn(
+            'p-4 border-b backdrop-blur-sm',
+            'transition-colors duration-200',
+            theme === 'dark' 
+              ? 'border-neutral-800 bg-neutral-900/80' 
+              : 'border-gray-200 bg-white/80'
+          )}>
+            <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 sm:space-x-3">
-                <Robot weight="duotone" className="text-[#F48120] h-6 w-6 sm:h-7 sm:w-7 flex-shrink-0" />
-                <span className="text-base sm:text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">Personaliza tu Asistente IA</span>
+                <div className={cn(
+                  'p-1.5 rounded-lg',
+                  'bg-gradient-to-br from-[#F48120] to-purple-500',
+                  'shadow-lg shadow-[#F48120]/20',
+                  'transform transition-transform hover:scale-105 active:scale-95'
+                )}>
+                  <UserCirclePlus weight="duotone" className="text-white h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
+                </div>
+                <span className="text-base sm:text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
+                  Personaliza tus prompts
+                </span>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 shape="square"
-                className="rounded-xl hover:bg-white/10 text-neutral-400 hover:text-white transition-all duration-300 transform hover:rotate-90 p-2"
+                className={cn(
+                  'rounded-xl transition-all duration-300 p-2',
+                  'hover:bg-[#F48120]/10 hover:text-[#F48120]',
+                  'dark:hover:bg-white/10 dark:hover:text-white',
+                  'transform hover:rotate-90 active:scale-95'
+                )}
                 onClick={onClose}
               >
                 <X weight="bold" size={20} className="w-5 h-5" />
@@ -505,42 +530,112 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-3 sm:p-4 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex flex-col h-full space-y-4 sm:space-y-6">
-
+          <nav className={cn(
+            'flex-1 p-3 sm:p-4 overflow-y-auto',
+            'scrollbar-thin scrollbar-thumb-rounded-full',
+            theme === 'dark' 
+              ? 'scrollbar-thumb-neutral-700 scrollbar-track-neutral-900/50' 
+              : 'scrollbar-thumb-gray-300 scrollbar-track-gray-100/50',
+            '[-ms-overflow-style:none] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full'
+          )}>
+            <div className="flex flex-col h-full space-y-3 sm:space-y-4">
               {/* Sección de Prompts del Sistema */}
-              <div className="px-1 py-1 sm:px-2 sm:py-2">
+              <div className="px-1 py-0.5">
                 <button
-                  className="flex items-center gap-2 w-full px-3 py-3 sm:py-2 text-left text-sm sm:text-base text-neutral-700 dark:text-neutral-300 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-gradient-to-r hover:from-orange-50 hover:to-purple-50 dark:hover:from-orange-500/10 dark:hover:to-purple-500/10 rounded-lg transition-all duration-300"
                   onClick={() => {setShowSystemPromptDashboard(true); onClose(); }}
+                  className={cn(
+                    'group w-full flex items-center gap-3 px-3 py-2.5 sm:py-2.5 rounded-xl',
+                    'text-sm sm:text-[0.9375rem] font-medium transition-all duration-200',
+                    'text-neutral-700 hover:text-[#F48120] dark:text-neutral-300 dark:hover:text-orange-400',
+                    'hover:bg-gradient-to-r hover:from-[#F48120]/5 hover:to-purple-500/5',
+                    'active:scale-[0.98] transform transition-transform',
+                    'focus:outline-none focus:ring-2 focus:ring-[#F48120]/30',
+                    'dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10'
+                  )}
                 >
-                  <ChatText size={20} className="flex-shrink-0 w-5 h-5" />
+                  <div className={cn(
+                    'p-1.5 rounded-lg',
+                    'bg-gradient-to-br from-[#F48120] to-purple-500',
+                    'group-hover:shadow-md group-hover:shadow-[#F48120]/20',
+                    'transform transition-transform group-hover:scale-110',
+                    'flex-shrink-0'
+                  )}>
+                    <ChatText weight="duotone" className="text-white h-4 w-4" />
+                  </div>
                   <span className="truncate">Prompts del Sistema</span>
                 </button>
               </div>
 
               <div className="space-y-3">
                 {/* Sección de Asistente IA */}
-                <div className="flex items-center justify-between p-3 bg-neutral-100/50 dark:bg-neutral-800/50 rounded-xl">
-                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Personaliza tu Asistente IA</span>
-                </div>
-                <div className="space-y-2 px-2">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20"
-                    onClick={() => { setShowOiaiGuide(true); onClose(); }}
-                  >
-                    <Question weight="duotone" className="mr-2 sm:mr-3 h-5 w-5 text-[#F48120] flex-shrink-0" />
-                    <span className="text-sm sm:text-base truncate">Guía Asistente IA</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] hover:bg-[#F48120]/10 hover:text-[#F48120] dark:hover:bg-[#F48120]/20"
-                    onClick={() => { setShowOIAICreator(true); onClose(); }}
-                  >
-                    <PlusCircle weight="duotone" className="mr-2 sm:mr-3 h-5 w-5 text-[#F48120] flex-shrink-0" />
-                    <span className="text-sm sm:text-base truncate">Crear Asistente IA</span>
-                  </Button>
+                {/* Sección de Personalización */}
+                <div className="space-y-2">
+                  <div className={cn(
+                    'px-3 py-2.5 rounded-xl',
+                    'bg-gradient-to-r from-[#F48120]/5 to-purple-500/5',
+                    'border border-[#F48120]/10 dark:border-[#F48120]/5',
+                    'shadow-sm',
+                    'dark:from-[#F48120]/5 dark:to-purple-500/5'
+                  )}>
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-[#F48120] mb-1">Personalización</h3>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400">Personaliza tu experiencia de IA</p>
+                  </div>
+                  
+                  <div className="space-y-1.5 px-1">
+                    <button
+                      onClick={() => { setShowOiaiGuide(true); onClose(); }}
+                      className={cn(
+                        'group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg',
+                        'text-sm font-medium transition-all duration-200',
+                        'text-neutral-700 hover:text-[#F48120] dark:text-neutral-300 dark:hover:text-orange-400',
+                        'hover:bg-gradient-to-r hover:from-[#F48120]/5 hover:to-purple-500/5',
+                        'active:scale-[0.98] transform transition-transform',
+                        'focus:outline-none focus:ring-2 focus:ring-[#F48120]/30',
+                        'dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10'
+                      )}
+                    >
+                      <div className={cn(
+                        'p-1.5 rounded-lg',
+                        'bg-gradient-to-br from-[#F48120] to-purple-500',
+                        'group-hover:shadow-md group-hover:shadow-[#F48120]/20',
+                        'transform transition-transform group-hover:scale-110',
+                        'flex-shrink-0'
+                      )}>
+                        <Question weight="duotone" className="text-white h-4 w-4" />
+                      </div>
+                      <span className="truncate">Guía de uso</span>
+                      <span className="ml-auto px-2 py-0.5 text-xs rounded-full bg-[#F48120]/10 text-[#F48120] dark:bg-[#F48120]/20">
+                        Guía
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => { setShowOIAICreator(true); onClose(); }}
+                      className={cn(
+                        'group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg',
+                        'text-sm font-medium transition-all duration-200',
+                        'text-neutral-700 hover:text-[#F48120] dark:text-neutral-300 dark:hover:text-orange-400',
+                        'hover:bg-gradient-to-r hover:from-[#F48120]/5 hover:to-purple-500/5',
+                        'active:scale-[0.98] transform transition-transform',
+                        'focus:outline-none focus:ring-2 focus:ring-[#F48120]/30',
+                        'dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10'
+                      )}
+                    >
+                      <div className={cn(
+                        'p-1.5 rounded-lg',
+                        'bg-gradient-to-br from-[#F48120] to-purple-500',
+                        'group-hover:shadow-md group-hover:shadow-[#F48120]/20',
+                        'transform transition-transform group-hover:scale-110',
+                        'flex-shrink-0'
+                      )}>
+                        <PlusCircle weight="duotone" className="text-white h-4 w-4" />
+                      </div>
+                      <span className="truncate">Crear Prompt del Sistema</span>
+                      <span className="ml-auto px-2 py-0.5 text-xs rounded-full bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400">
+                        Nuevo
+                      </span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Sección de Agentes */}
@@ -551,34 +646,37 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                     transform hover:scale-[0.99] active:scale-[0.97]
                     cursor-pointer transition-all duration-200 group"
                 >
-                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Agentes Inteligentes</span>
+                  <div className="flex items-center space-x-2">
+                    <Robot weight="duotone" className="w-5 h-5 text-[#F48120] flex-shrink-0" />
+                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Agentes Inteligentes</span>
+                  </div>
                   <div className="p-1 rounded-lg bg-neutral-200/50 dark:bg-neutral-700/50 group-hover:bg-neutral-300/50 dark:group-hover:bg-neutral-600/50 transition-colors">
                     <List weight="bold" className={cn("w-4 h-4 transition-transform duration-200 text-neutral-600 dark:text-neutral-400 group-hover:text-neutral-800 dark:group-hover:text-white", isAgentsExpanded ? "rotate-180" : "")} />
                   </div>
                 </div>
-                <div className={cn("space-y-3 transition-all duration-200", isAgentsExpanded ? "opacity-100" : "opacity-0 h-0 overflow-hidden")}>
+                <div className={cn("space-y-2 sm:space-y-3 transition-all duration-200 pl-2 sm:pl-3 ml-2 sm:ml-3 border-l-2 border-neutral-200/50 dark:border-neutral-700/50", isAgentsExpanded ? "opacity-100 mt-2 mb-3" : "opacity-0 h-0 overflow-hidden")}>
                   <Button
                     variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    className="w-full justify-start rounded-xl py-2.5 sm:py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] text-sm sm:text-base"
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowAgentDashboard(true);
                       onClose();
                     }}
                   >
-                    <Users weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
-                    Ver Agentes Inteligentes
+                    <Users weight="duotone" className="mr-2 sm:mr-3 h-5 w-5 text-[#F48120] flex-shrink-0" />
+                    <span className="truncate">Ver Agentes</span>
                   </Button>
                   <Button
                     variant="ghost"
-                    className="w-full justify-start rounded-xl py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] cn('hover:bg-opacity-10', theme === 'dark' ? 'text-neutral-300 hover:text-white hover:bg-white' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-900')"
+                    className="w-full justify-start rounded-xl py-2.5 sm:py-3 transition-all duration-300 transform hover:translate-x-1 hover:scale-[1.02] text-sm sm:text-base"
                     onClick={() => {
                       window.dispatchEvent(new CustomEvent('openToolsInterface'));
                       onClose();
                     }}
                   >
-                    <Robot weight="duotone" className="mr-3 h-5 w-5 text-[#F48120]" />
-                    Crear Agente Inteligente
+                    <PlusCircle weight="duotone" className="mr-2 sm:mr-3 h-5 w-5 text-[#F48120] flex-shrink-0" />
+                    <span className="truncate">Crear Agente</span>
                   </Button>
                 </div>
 
@@ -588,14 +686,17 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
                   className="flex items-center justify-between p-3 bg-neutral-100/50 dark:bg-neutral-800/50 rounded-xl
                     hover:bg-neutral-200/70 dark:hover:bg-neutral-700/70
                     transform hover:scale-[0.99] active:scale-[0.97]
-                    cursor-pointer transition-all duration-200 group"
+                    cursor-pointer transition-all duration-200 group mt-2"
                 >
-                  <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Plantillas de Mensajes IA</span>
+                  <div className="flex items-center space-x-2">
+                    <ChatText weight="duotone" className="w-5 h-5 text-[#F48120] flex-shrink-0" />
+                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">Plantillas de Mensajes IA</span>
+                  </div>
                   <div className="p-1 rounded-lg bg-neutral-200/50 dark:bg-neutral-700/50 group-hover:bg-neutral-300/50 dark:group-hover:bg-neutral-600/50 transition-colors">
                     <List weight="bold" className={cn("w-4 h-4 transition-transform duration-200 text-neutral-600 dark:text-neutral-400 group-hover:text-neutral-800 dark:group-hover:text-white", isTemplatesExpanded ? "rotate-180" : "")} />
                   </div>
                 </div>
-                <div className={cn("space-y-3 transition-all duration-200", isTemplatesExpanded ? "opacity-100" : "opacity-0 h-0 overflow-hidden")}>
+                <div className={cn("space-y-2 sm:space-y-3 transition-all duration-200 pl-2 sm:pl-3 ml-2 sm:ml-3 border-l-2 border-neutral-200/50 dark:border-neutral-700/50", isTemplatesExpanded ? "opacity-100 mt-2 mb-3" : "opacity-0 h-0 overflow-hidden")}>
                   <div>
                     <Button
                       variant="ghost"
