@@ -1190,7 +1190,7 @@ function ChatComponent() {
                     <div className="relative z-10 flex items-center justify-between px-3 pb-3 pt-1">
                       <div className="flex items-center gap-2">
                         {/* Attachment button */}
-                        <Tooltip content="Adjuntar archivo">
+                        {/* <Tooltip content="Adjuntar archivo">
                           <Button
                             type="button"
                             variant="ghost"
@@ -1205,15 +1205,14 @@ function ChatComponent() {
                           >
                             <Paperclip size={16} className="relative z-10 text-neutral-500 group-hover:text-[#F48120] dark:group-hover:text-[#F48120] transition-colors duration-300" weight="bold" />
                           </Button>
-                        </Tooltip>
-                      </div>
-
-                      <div className="flex items-center gap-2">
+                        </Tooltip> */}
                         {/* Model Select */}
                         <div className="w-40">
                           <ModelSelect mobile={true} />
                         </div>
+                      </div>
 
+                      <div className="flex items-center gap-2">
                         {/* Send button */}
                         <button
                           type="submit"
@@ -1251,58 +1250,51 @@ function ChatComponent() {
                                   }
                                 }
                               }
-
                             } catch (error) {
                               console.error('Error al procesar la solicitud:', error);
                             }
                           }}
-                          className={`relative w-12 h-12 rounded-full p-0 flex items-center justify-center 
+                          className={`relative w-10 h-10 rounded-full p-0 flex items-center justify-center 
                               bg-gradient-to-br from-[#F48120] to-purple-500 
                               hover:from-[#ff8f2d] hover:to-purple-600
                               active:from-[#e6731a] active:to-purple-700
-                              shadow-lg hover:shadow-xl 
-                              transition-all duration-300 
-                              transform hover:scale-110 active:scale-95 
+                              shadow-md hover:shadow-lg 
+                              transition-all duration-200 
+                              transform hover:scale-105 active:scale-95 
                               disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
                               group overflow-hidden
                               ${pendingToolCallConfirmation ? 'animate-pulse' : ''}`}
                         >
                           {/* Animated background gradient */}
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 rounded-full"></div>
+                          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 rounded-full"></div>
 
                           {/* Main icon container */}
-                          <div className={`relative z-10 w-6 h-6 flex items-center justify-center transition-all duration-300 transform 
+                          <div className={`relative z-10 w-5 h-5 flex items-center justify-center transition-all duration-200 transform 
                               ${!pendingToolCallConfirmation ? 'group-hover:scale-110' : 'animate-spin'}`}>
-
                             {/* Icon with animation */}
                             {pendingToolCallConfirmation ? (
-                              <div className="relative w-6 h-6">
+                              <div className="relative w-5 h-5">
                                 {/* Outer rotating circle */}
                                 <div className="absolute inset-0 rounded-full border-2 border-t-transparent border-r-transparent border-l-white/80 border-b-white/80 animate-spin"></div>
-
                                 {/* Pulsing dot */}
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
-
                                 {/* Inner gradient circle */}
-                                <div className="absolute inset-1 rounded-full bg-gradient-to-br from-white/90 to-white/60 animate-pulse"></div>
-
-                                {/* Center dot */}
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-white/80 rounded-full"></div>
+                                <div className="absolute inset-0.5 rounded-full bg-gradient-to-br from-white/90 to-white/60 animate-pulse"></div>
                               </div>
                             ) : (
                               <PaperPlaneRight
-                                size={20}
+                                size={16}
                                 weight="fill"
-                                className="text-white transition-all duration-300 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-1 group-active:-translate-y-1"
+                                className="text-white transition-all duration-200 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-0.5 group-active:-translate-y-0.5"
                               />
                             )}
                           </div>
 
                           {/* Ripple effect on click */}
-                          <div className="absolute inset-0 rounded-full opacity-0 group-active:opacity-40 group-active:bg-white transition-opacity duration-500"></div>
+                          <div className="absolute inset-0 rounded-full opacity-0 group-active:opacity-40 group-active:bg-white transition-opacity duration-300"></div>
 
                           {/* Subtle pulse effect */}
-                          <div className="absolute inset-0 rounded-full border-2 border-white/10 group-hover:border-white/20 transition-all duration-500"></div>
+                          <div className="absolute inset-0 rounded-full border border-white/10 group-hover:border-white/20 transition-all duration-300"></div>
                         </button>
                       </div>
                     </div>
@@ -2113,7 +2105,7 @@ function ChatComponent() {
                         <div className="relative z-10 flex items-center justify-between px-3 pb-3 pt-1">
                           <div className="flex items-center gap-2">
                             {/* Attachment button */}
-                            <Tooltip content="Adjuntar archivo">
+                            {/* <Tooltip content="Adjuntar archivo">
                               <Button
                                 type="button"
                                 variant="ghost"
@@ -2128,14 +2120,13 @@ function ChatComponent() {
                               >
                                 <Paperclip size={16} className="relative z-10 text-neutral-500 group-hover:text-[#F48120] dark:group-hover:text-[#F48120] transition-colors duration-300" weight="bold" />
                               </Button>
-                            </Tooltip>
-                          </div>
-                          <div className="flex items-center gap-2">
+                            </Tooltip> */}
                             {/* Model Select */}
                             <div className="w-40">
                               <ModelSelect />
                             </div>
-
+                          </div>
+                          <div className="flex items-center gap-2">
                             {/* Send button */}
                             <button
                               type="submit"
@@ -2178,53 +2169,47 @@ function ChatComponent() {
                                   console.error('Error al procesar la solicitud:', error);
                                 }
                               }}
-                              className={`relative w-12 h-12 rounded-full p-0 flex items-center justify-center 
-                              bg-gradient-to-br from-[#F48120] to-purple-500 
-                              hover:from-[#ff8f2d] hover:to-purple-600
-                              active:from-[#e6731a] active:to-purple-700
-                              shadow-lg hover:shadow-xl 
-                              transition-all duration-300 
-                              transform hover:scale-110 active:scale-95 
-                              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
-                              group overflow-hidden
-                              ${pendingToolCallConfirmation ? 'animate-pulse' : ''}`}
+                              className={`relative w-10 h-10 rounded-full p-0 flex items-center justify-center 
+                                bg-gradient-to-br from-[#F48120] to-purple-500 
+                                hover:from-[#ff8f2d] hover:to-purple-600
+                                active:from-[#e6731a] active:to-purple-700
+                                shadow-md hover:shadow-lg 
+                                transition-all duration-200 
+                                transform hover:scale-105 active:scale-95 
+                                disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+                                group overflow-hidden
+                                ${pendingToolCallConfirmation ? 'animate-pulse' : ''}`}
                             >
                               {/* Animated background gradient */}
-                              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-300 rounded-full"></div>
+                              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 rounded-full"></div>
 
                               {/* Main icon container */}
-                              <div className={`relative z-10 w-6 h-6 flex items-center justify-center transition-all duration-300 transform 
-                              ${!pendingToolCallConfirmation ? 'group-hover:scale-110' : 'animate-spin'}`}>
-
+                              <div className={`relative z-10 w-5 h-5 flex items-center justify-center transition-all duration-200 transform 
+                                ${!pendingToolCallConfirmation ? 'group-hover:scale-110' : 'animate-spin'}`}>
                                 {/* Icon with animation */}
                                 {pendingToolCallConfirmation ? (
-                                  <div className="relative w-6 h-6">
+                                  <div className="relative w-5 h-5">
                                     {/* Outer rotating circle */}
                                     <div className="absolute inset-0 rounded-full border-2 border-t-transparent border-r-transparent border-l-white/80 border-b-white/80 animate-spin"></div>
-
                                     {/* Pulsing dot */}
                                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
-
                                     {/* Inner gradient circle */}
-                                    <div className="absolute inset-1 rounded-full bg-gradient-to-br from-white/90 to-white/60 animate-pulse"></div>
-
-                                    {/* Center dot */}
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-1 bg-white/80 rounded-full"></div>
+                                    <div className="absolute inset-0.5 rounded-full bg-gradient-to-br from-white/90 to-white/60 animate-pulse"></div>
                                   </div>
                                 ) : (
                                   <PaperPlaneRight
-                                    size={20}
+                                    size={16}
                                     weight="fill"
-                                    className="text-white transition-all duration-300 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-1 group-active:-translate-y-1"
+                                    className="text-white transition-all duration-200 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-0.5 group-active:-translate-y-0.5"
                                   />
                                 )}
                               </div>
 
                               {/* Ripple effect on click */}
-                              <div className="absolute inset-0 rounded-full opacity-0 group-active:opacity-40 group-active:bg-white transition-opacity duration-500"></div>
+                              <div className="absolute inset-0 rounded-full opacity-0 group-active:opacity-40 group-active:bg-white transition-opacity duration-300"></div>
 
                               {/* Subtle pulse effect */}
-                              <div className="absolute inset-0 rounded-full border-2 border-white/10 group-hover:border-white/20 transition-all duration-500"></div>
+                              <div className="absolute inset-0 rounded-full border border-white/10 group-hover:border-white/20 transition-all duration-300"></div>
                             </button>
                           </div>
                         </div>
