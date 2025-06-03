@@ -44,15 +44,15 @@ function EditTitleModal({ isOpen, onClose, onSave, currentTitle }: EditTitleModa
     return (
         <div 
             className="fixed inset-0 bg-black/50 flex items-center justify-center z-70"
-            onClick={(e) => {
-                // Prevent closing when clicking inside the modal
-                e.stopPropagation();
-                e.preventDefault();
-            }}
+            onClick={onClose}
         >
-            <div className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-96 relative">
+            <div 
+                className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-96 relative"
+                onClick={(e) => e.stopPropagation()}
+            >
                 {/* Close button */}
                 <button
+                    type="button"
                     onClick={onClose}
                     className="absolute top-4 right-4 p-1 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-700"
                     aria-label="Cerrar"
@@ -578,6 +578,7 @@ export function SideMenu({
                                                                 onClick={() => {
                                                                     setEditingChat(chat);
                                                                     setShowEditModal(true);
+                                                                    onClose();
                                                                 }}
                                                                 className="w-full text-left px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 flex items-center"
                                                             >
