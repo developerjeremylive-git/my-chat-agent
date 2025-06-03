@@ -10,6 +10,7 @@ import { AISettingsPanel } from "../settings/AISettingsPanel";
 import { ModelSelect } from "../model/ModelSelect";
 import { useModel } from "@/contexts/ModelContext";
 import { Modal } from "../modal/Modal";
+import { Notebook } from "lucide-react";
 
 const springTransition = {
   type: "spring",
@@ -410,41 +411,72 @@ export const SettingsDropdown = ({
                                       setIsDropdownOpen(!isDropdownOpen);
                                       if (!isDropdownOpen) setSearchTerm('');
                                     }}
-                                    className="w-full px-4 py-3 text-sm text-left rounded-xl bg-white/80 dark:bg-neutral-900/80 border border-neutral-200/80 dark:border-neutral-700/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 transition-colors truncate flex justify-between items-center"
+                                    className="w-full px-4 py-3 text-sm text-left rounded-xl bg-white/90 dark:bg-neutral-900/90 border-2 border-neutral-200/90 dark:border-neutral-700/90 hover:border-[#F48120] dark:hover:border-[#F48120] transition-all duration-200 flex justify-between items-center group"
                                     aria-label={savedPrompts.length > 0 ? 'Seleccionar prompt guardado' : 'No hay prompts guardados'}
                                   >
-                                    <span className="truncate text-left">
-                                      {savedPrompts.length > 0 ? 'Seleccionar prompt guardado...' : 'No hay prompts guardados'}
-                                    </span>
-                                    <CaretDown size={18} weight="bold" className={`flex-shrink-0 ml-2 transition-transform duration-200 ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
+                                    <div className="flex items-center min-w-0">
+                                      <Notebook size={16} className="text-[#F48120] mr-2 flex-shrink-0"/>
+                                      <span className="truncate">
+                                        {savedPrompts.length > 0 ? 'Seleccionar prompt guardado...' : 'No hay prompts guardados'}
+                                      </span>
+                                    </div>
+                                    <CaretDown 
+                                      size={18} 
+                                      weight="bold" 
+                                      className={`flex-shrink-0 ml-2 transition-transform duration-200 text-gray-500 group-hover:text-[#F48120] ${isDropdownOpen ? 'transform rotate-180' : ''}`} 
+                                    />
                                   </button>
 
                                   {isDropdownOpen && (
                                     <div className="absolute z-10 mt-1 w-full bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-gray-200 dark:border-neutral-700 overflow-hidden">
-                                      <div className="p-2 border-b border-gray-100 dark:border-neutral-700">
-                                        <div className="relative">
-                                          <input
-                                            type="text"
-                                            placeholder="Buscar prompt..."
-                                            className="w-full pl-8 pr-3 py-2 text-sm bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-[#F48120]/50 focus:border-[#F48120] dark:focus:ring-[#F48120]/30 dark:focus:border-[#F48120] transition-colors"
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            autoFocus
-                                          />
-                                          <MagnifyingGlass size={16} className="absolute left-3 top-2.5 text-gray-400" />
-                                        </div>
+                                      <div className="sticky top-0 bg-white dark:bg-neutral-800 z-10 p-3 border-b border-gray-100 dark:border-neutral-700 shadow-sm">
+                                      <div className="relative">
+                                        <input
+                                          type="text"
+                                          placeholder="Buscar prompt..."
+                                          className="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-neutral-900 border-2 border-gray-200 dark:border-neutral-600 rounded-xl focus:ring-0 focus:border-[#F48120] dark:focus:border-[#F48120] transition-colors placeholder-gray-400 dark:placeholder-gray-500"
+                                          value={searchTerm}
+                                          onChange={(e) => setSearchTerm(e.target.value)}                                          
+                                        />
+                                        <MagnifyingGlass 
+                                          size={18} 
+                                          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
+                                          weight="duotone"
+                                        />
+                                        {searchTerm && (
+                                          <button
+                                            onClick={() => setSearchTerm('')}
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                                            aria-label="Limpiar búsqueda"
+                                          >
+                                            <X size={16} weight="bold" />
+                                          </button>
+                                        )}
                                       </div>
+                                    </div>
                                       <div className="max-h-60 overflow-y-auto">
                                         {filteredPrompts.length > 0 ? (
                                           filteredPrompts.map((prompt) => (
                                             <div
                                               key={prompt.id}
-                                              className="group px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-neutral-700/50 cursor-pointer border-b border-gray-100 dark:border-neutral-700 last:border-0"
+                                              className="group px-4 py-3 hover:bg-gray-50 dark:hover:bg-neutral-700/50 cursor-pointer border-b border-gray-100 dark:border-neutral-700 last:border-0 transition-colors duration-150"
                                               onClick={() => selectPrompt(prompt)}
                                             >
-                                              <div className="flex justify-between items-center">
-                                                <span className="font-medium text-gray-900 dark:text-white">{prompt.name}</span>
-                                                <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                              <div className="flex items-start justify-between gap-3">
+                                                <div className="flex-1 min-w-0">
+                                                  <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                                                    <span className="truncate">{prompt.name}</span>
+                                                    {systemPrompt === prompt.content && (
+                                                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#F48120]/10 text-[#F48120] border border-[#F48120]/20">
+                                                        En uso
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 break-words">
+                                                    {prompt.content}
+                                                  </p>
+                                                </div>
+                                                <div className="flex space-x-1 flex-shrink-0 pt-1">
                                                   <button
                                                     onClick={(e) => {
                                                       e.stopPropagation();
@@ -454,10 +486,11 @@ export const SettingsDropdown = ({
                                                       setIsEditModalOpen(true);
                                                       setIsDropdownOpen(false);
                                                     }}
-                                                    className="p-1.5 text-gray-500 hover:text-[#F48120] rounded-full hover:bg-gray-100 dark:hover:bg-neutral-600"
+                                                    className="p-1.5 text-gray-500 hover:text-[#F48120] rounded-full hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors"
                                                     title="Editar prompt"
+                                                    aria-label={`Editar ${prompt.name}`}
                                                   >
-                                                    <PencilSimple size={14} weight="bold" />
+                                                    <PencilSimple size={16} weight="bold" />
                                                   </button>
                                                   <button
                                                     onClick={(e) => {
@@ -466,16 +499,17 @@ export const SettingsDropdown = ({
                                                       setIsDeleteModalOpen(true);
                                                       setIsDropdownOpen(false);
                                                     }}
-                                                    className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-600"
+                                                    className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors"
                                                     title="Eliminar prompt"
+                                                    aria-label={`Eliminar ${prompt.name}`}
                                                   >
-                                                    <Trash size={14} weight="bold" />
+                                                    <Trash size={16} weight="bold" />
                                                   </button>
                                                 </div>
                                               </div>
-                                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                                              {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                                                 {prompt.content}
-                                              </p>
+                                              </p> */}
                                             </div>
                                           ))
                                         ) : (
@@ -489,14 +523,6 @@ export const SettingsDropdown = ({
                                 </div>
                                 <div className="flex sm:flex-col gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                                   <button
-                                    onClick={() => setIsModalOpen(true)}
-                                    className="flex-1 sm:flex-none flex items-center justify-center p-3 sm:p-2.5 rounded-lg bg-white/80 dark:bg-neutral-800 border border-neutral-200/80 dark:border-neutral-700/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 hover:bg-[#F48120]/10 transition-colors"
-                                    aria-label="Editar prompt actual"
-                                  >
-                                    <NotePencil size={20} weight="duotone" className="text-[#F48120] sm:block" />
-                                    <span className="ml-2 sm:hidden text-sm">Editar</span>
-                                  </button>
-                                  <button
                                     onClick={() => setIsPromptModalOpen(true)}
                                     className="flex-1 sm:flex-none flex items-center justify-center p-3 sm:p-2.5 rounded-lg bg-[#F48120]/10 hover:bg-[#F48120]/20 text-[#F48120] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     aria-label="Guardar prompt"
@@ -509,17 +535,29 @@ export const SettingsDropdown = ({
                               </div>
 
                               {/* Vista previa del prompt actual */}
-                              <div
-                                className="text-sm p-4 bg-white/50 dark:bg-neutral-800/50 rounded-lg border border-dashed border-gray-200 dark:border-neutral-700 cursor-pointer transition-colors hover:bg-white/70 dark:hover:bg-neutral-800/70 active:bg-white/90 dark:active:bg-neutral-800/90"
-                                onClick={() => setIsModalOpen(true)}
-                                role="button"
-                                tabIndex={0}
-                                onKeyDown={(e) => e.key === 'Enter' && setIsModalOpen(true)}
-                                aria-label="Editar prompt del sistema"
-                              >
-                                <p className={`${!systemPrompt ? 'text-gray-400 dark:text-gray-500 italic' : 'text-gray-700 dark:text-gray-300'} line-clamp-3 break-words`}>
-                                  {systemPrompt || 'Haz clic para editar el prompt del sistema...'}
-                                </p>
+                              <div className="relative">
+                                <div
+                                  className="text-sm p-4 pr-12 bg-white/50 dark:bg-neutral-800/50 rounded-lg border border-dashed border-gray-200 dark:border-neutral-700 cursor-pointer transition-colors hover:bg-white/70 dark:hover:bg-neutral-800/70 active:bg-white/90 dark:active:bg-neutral-800/90 min-h-[80px]"
+                                  onClick={() => setIsModalOpen(true)}
+                                  role="button"
+                                  tabIndex={0}
+                                  onKeyDown={(e) => e.key === 'Enter' && setIsModalOpen(true)}
+                                  aria-label="Editar prompt del sistema"
+                                >
+                                  <p className={`${!systemPrompt ? 'text-gray-400 dark:text-gray-500 italic' : 'text-gray-700 dark:text-gray-300'} break-words`}>
+                                    {systemPrompt || 'Haz clic para editar el prompt del sistema...'}
+                                  </p>
+                                </div>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsModalOpen(true);
+                                  }}
+                                  className="absolute right-2 bottom-2 p-2 rounded-lg bg-white/80 dark:bg-neutral-800/80 border border-neutral-200/80 dark:border-neutral-700/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 hover:bg-[#F48120]/10 transition-colors"
+                                  aria-label="Editar prompt"
+                                >
+                                  <NotePencil size={18} weight="duotone" className="text-[#F48120]" />
+                                </button>
                               </div>
                             </div>
 
