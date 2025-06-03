@@ -1308,8 +1308,7 @@ function ChatComponent() {
                     </div>
                   </div>
 
-                  <div className="relative">
-                    {/* Mobile toggle button */}
+                  {/* <div className="relative">
                     <div className="w-full text-center mt-21 md:hidden absolute -top-19 z-20">
                       <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
                         <Button
@@ -1342,7 +1341,6 @@ function ChatComponent() {
                       </Tooltip>
                     </div>
 
-                    {/* Desktop toggle button */}
                     <div className="hidden md:flex justify-center w-full absolute mt-21 -top-19 z-20">
                       <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
                         <Button
@@ -1374,7 +1372,7 @@ function ChatComponent() {
                         </Button>
                       </Tooltip>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </form>
             </div>
@@ -1960,7 +1958,7 @@ function ChatComponent() {
             </div> */}
           <div className="fixed bottom-0 left-0 right-0 z-50">
             {/* System prompt panel - slides from bottom */}
-            {agentMessages.length === 0 && (
+            {/* {agentMessages.length === 0 && (
               <div className={`transform transition-all duration-400 ease-out ${systemPrompt ? 'translate-y-0' : 'translate-y-full'}`}>
                 <div className="bg-gradient-to-b from-white/95 to-white/90 dark:from-neutral-900/95 dark:to-neutral-900/90 backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/30 shadow-lg">
                   <div className="max-w-2xl mx-auto px-4 py-3">
@@ -1988,81 +1986,12 @@ function ChatComponent() {
                             "transition-all duration-200"
                           )}
                         />
-                        {/* <Tooltip content="Guardar consulta">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            shape="square"
-                            className="relative w-9 h-9 rounded-lg bg-gradient-to-br from-white via-neutral-50 to-white dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 border border-[#F48120]/20 dark:border-[#F48120]/20 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-105 active:scale-95 group overflow-hidden"
-                            onClick={() => {
-                              if (inputText.trim() && !savedQueries.includes(inputText)) {
-                                const newQueries = [...savedQueries, inputText];
-                                setSavedQueries(newQueries);
-                                localStorage.setItem('systemQueries', JSON.stringify(newQueries));
-                              }
-                            }}
-                            disabled={!inputText.trim()}
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-br from-[#F48120]/10 via-purple-500/10 to-[#F48120]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <BookmarkSimple size={18} className="relative z-10 text-[#F48120] group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-300" weight="duotone" />
-                          </Button>
-                        </Tooltip> */}
                       </div>
                     </div>
-
-                    {/* Saved Queries Section */}
-                    {/* <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-1.5 text-sm font-medium text-neutral-600 dark:text-neutral-300">
-                          <BookmarksSimple size={16} className="text-[#F48120]" weight="duotone" />
-                          Consultas guardadas
-                        </div>
-                        <button
-                          onClick={() => setShowSavedQueries(!showSavedQueries)}
-                          className="text-sm text-[#F48120] hover:text-orange-500 dark:hover:text-orange-400 transition-colors duration-300 flex items-center gap-1.5"
-                        >
-                          {showSavedQueries ? (
-                            <>
-                              <CaretCircleDown size={16} weight="duotone" />
-                              Ocultar
-                            </>
-                          ) : (
-                            <>
-                              <CaretCircleDoubleUp size={16} weight="duotone" />
-                              Ver todas
-                            </>
-                          )}
-                        </button>
-                      </div>
-                      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 transition-all duration-500 ${showSavedQueries ? 'max-h-[300px]' : 'max-h-[68px]'} overflow-y-auto pr-2`}>
-                        {savedQueries.map((query, index) => (
-                          <div key={index} className="group relative">
-                            <button
-                              onClick={() => setInputText(query)}
-                              className="w-full px-3 py-2 text-sm rounded-lg bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 border border-[#F48120]/20 dark:border-[#F48120]/20 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 shadow-sm hover:shadow-md dark:shadow-[#F48120]/5 dark:hover:shadow-[#F48120]/10 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] text-neutral-700 dark:text-neutral-300 hover:text-[#F48120] dark:hover:text-[#F48120] group flex items-center gap-2"
-                            >
-                              <span className="relative z-50 flex-1 text-left truncate">{query}</span>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const newQueries = savedQueries.filter((_, i) => i !== index);
-                                  setSavedQueries(newQueries);
-                                  localStorage.setItem('systemQueries', JSON.stringify(newQueries));
-                                }}
-                                className="relative z-50 opacity-0 group-hover:opacity-100 hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 p-1"
-                              >
-                                <X size={14} weight="bold" />
-                              </button>
-                            </button>
-                            <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-purple-500/5 to-[#F48120]/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          </div>
-                        ))}
-                      </div>
-                    </div> */}
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
             {/* Main input area - always visible */}
             {agentMessages.length !== 0 && (
               <div className={`relative bg-gradient-to-t from-white/95 via-white/90 to-transparent dark:from-neutral-900/95 dark:via-neutral-900/90 dark:to-transparent backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/50`}>
@@ -2096,8 +2025,8 @@ function ChatComponent() {
                       <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
 
                       {/* <div className="relative"> */}
-                        {/* Mobile toggle button */}
-                        {/* <div className="w-full text-center md:hidden z-20">
+                      {/* Mobile toggle button */}
+                      {/* <div className="w-full text-center md:hidden z-20">
                           <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
                             <Button
                               variant="ghost"
@@ -2129,8 +2058,8 @@ function ChatComponent() {
                           </Tooltip>
                         </div> */}
 
-                        {/* Desktop toggle button */}
-                        {/* <div className="hidden md:flex justify-center w-full z-20">
+                      {/* Desktop toggle button */}
+                      {/* <div className="hidden md:flex justify-center w-full z-20">
                           <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
                             <Button
                               variant="ghost"

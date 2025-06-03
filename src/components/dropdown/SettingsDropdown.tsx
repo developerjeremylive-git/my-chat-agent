@@ -328,11 +328,11 @@ export const SettingsDropdown = ({
                         </motion.button> */}
 
                         {/* Categoría: Ajustes de Interfaz */}
-                        <div className="px-2 py-1 mt-4 mb-2">
+                        {/* <div className="px-2 py-1 mt-4 mb-2">
                           <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Ajustes de Interfaz</div>
-                        </div>
+                        </div> */}
 
-                        <motion.button
+                        {/* <motion.button
                           onClick={() => {
                             setShowSettingsMenu(true);
                             setIsOpen(false);
@@ -345,12 +345,24 @@ export const SettingsDropdown = ({
                         >
                           <PaintBrushBroad size={18} weight="duotone" className="mr-3 text-green-500" />
                           Personalizar Apariencia
+                        </motion.button> */}
+
+                        <motion.button
+                          onClick={() => navigateToPanel('settings')}
+                          className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
+                          variants={menuItemVariants}
+                          custom={3}
+                          initial="closed"
+                          animate="open"
+                        >
+                          <PaintBrushBroad size={18} weight="duotone" className="mr-3 text-green-500" />
+                          Ajustes Personalizados
                         </motion.button>
 
                         {/* Categoría: Configuración de IA */}
-                        <div className="px-2 py-1 mt-4 mb-2">
+                        {/* <div className="px-2 py-1 mt-4 mb-2">
                           <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Configuración de IA</div>
-                        </div>
+                        </div> */}
 
                         <motion.button
                           onClick={() => {
@@ -369,13 +381,61 @@ export const SettingsDropdown = ({
                           animate="open"
                         >
                           <Gear size={18} weight="duotone" className="mr-3 text-purple-500" />
-                          Ajustes del Asistente
+                          Configuración Asistente IA
                         </motion.button>
 
                         {/* Comportamiento Section */}
                         {/* <div className="px-2 py-1 mt-4 mb-2">
                           <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Comportamiento</div>
                         </div> */}
+
+
+                        {/* Prompt del Sistema Section */}
+                        {/* {hasMessages && ( */}
+                        <div className="px-2 py-2">
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Prompt del Sistema</div>
+
+                          <motion.button
+                            onClick={() => handleMenuItemClick(toggleSidebar)}
+                            className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${isSidebarOpen
+                              ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium'
+                              : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
+                              }`}
+                            variants={menuItemVariants}
+                            custom={isMobile ? 1 : 0}
+                            initial="closed"
+                            animate="open"
+                          >
+                            <UserCirclePlus size={18} weight="duotone" className="mr-3 text-[#F48120]" />
+                            {/* {isSidebarOpen ? 'Personaliza tu Asistente IA' : 'Personaliza tu Asistente IA'} */}
+                            Personaliza tus prompts
+                          </motion.button>
+
+                          <div className="px-2 py-2">
+                            <InputSystemPrompt
+                              type="text"
+                              value={systemPrompt}
+                              onChange={(e) => setSystemPrompt(e.target.value)}
+                              compact={true}
+                              placeholder="Configura el comportamiento del asistente..."
+                              className={cn(
+                                // Layout & Sizing
+                                "w-full px-4 py-2.5 text-sm rounded-xl shadow-sm",
+                                // Background
+                                "bg-white/80 dark:bg-neutral-900/80",
+                                // Border & Focus
+                                "border border-neutral-200/80 dark:border-neutral-700/50",
+                                "hover:border-neutral-300/80 dark:hover:border-neutral-600/50",
+                                "focus:border-[#F48120] dark:focus:border-[#F48120]",
+                                "focus:ring-2 focus:ring-[#F48120]/20",
+                                // Text & Placeholder
+                                "placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90",
+                                // Transitions
+                                "transition-all duration-200"
+                              )}
+                            />
+                          </div>
+                        </div>
 
                         {/* Nivel de Asistencia */}
                         {selectedModel === 'gemini-2.0-flash' && (
@@ -442,52 +502,7 @@ export const SettingsDropdown = ({
                             </div>
                           </div>
                         )}
-                        {/* Prompt del Sistema Section */}
-                        {/* {hasMessages && ( */}
-                        <div className="px-2 py-2">
-                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Prompt del Sistema</div>
 
-                          <motion.button
-                            onClick={() => handleMenuItemClick(toggleSidebar)}
-                            className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${isSidebarOpen
-                              ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium'
-                              : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
-                              }`}
-                            variants={menuItemVariants}
-                            custom={isMobile ? 1 : 0}
-                            initial="closed"
-                            animate="open"
-                          >
-                            <UserCirclePlus size={18} weight="duotone" className="mr-3 text-[#F48120]" />
-                            {/* {isSidebarOpen ? 'Personaliza tu Asistente IA' : 'Personaliza tu Asistente IA'} */}
-                            Personaliza tus prompts
-                          </motion.button>
-
-                          <div className="px-2 py-2">
-                            <InputSystemPrompt
-                              type="text"
-                              value={systemPrompt}
-                              onChange={(e) => setSystemPrompt(e.target.value)}
-                              compact={true}
-                              placeholder="Configura el comportamiento del asistente..."
-                              className={cn(
-                                // Layout & Sizing
-                                "w-full px-4 py-2.5 text-sm rounded-xl shadow-sm",
-                                // Background
-                                "bg-white/80 dark:bg-neutral-900/80",
-                                // Border & Focus
-                                "border border-neutral-200/80 dark:border-neutral-700/50",
-                                "hover:border-neutral-300/80 dark:hover:border-neutral-600/50",
-                                "focus:border-[#F48120] dark:focus:border-[#F48120]",
-                                "focus:ring-2 focus:ring-[#F48120]/20",
-                                // Text & Placeholder
-                                "placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90",
-                                // Transitions
-                                "transition-all duration-200"
-                              )}
-                            />
-                          </div>
-                        </div>
                         {/* )} */}
                         {/* <motion.button
                           onClick={() => navigateToPanel('profile')}
@@ -548,76 +563,6 @@ export const SettingsDropdown = ({
                           </button>
                         </div>
 
-
-                        {/* Nivel de Asistencia Section */}
-                        {/* {selectedModel === 'gemini-2.0-flash' && (
-                          <div>
-
-                            <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-3" />
-
-                            <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Nivel de Asistencia</div>
-                            <div className="px-2 py-2 space-y-2">
-                              <div className="relative h-2 bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-full overflow-hidden shadow-inner">
-                                <div
-                                  className="h-full bg-gradient-to-r from-[#F48120] via-orange-400 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-lg"
-                                  style={{ width: `${(stepMax / 10) * 100}%` }}
-                                />
-                              </div>
-                              <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1">
-                                <span className={stepMax <= 2 ? 'text-[#F48120] font-semibold' : ''}>Rápido</span>
-                                <span className={stepMax > 2 && stepMax <= 5 ? 'text-[#F48120] font-semibold' : ''}>Equilibrado</span>
-                                <span className={stepMax > 5 && stepMax <= 8 ? 'text-[#F48120] font-semibold' : ''}>Profundo</span>
-                                <span className={stepMax > 8 ? 'text-[#F48120] font-semibold' : ''}>Experto</span>
-                              </div>
-                              <div className="grid grid-cols-4 gap-1">
-                                <button
-                                  onClick={() => setStepMax(1)}
-                                  className={`p-1.5 text-xs rounded-md transition-all ${stepMax === 1 ? 'bg-[#F48120]/10 border border-[#F48120]/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
-                                >
-                                  🎯 Básico
-                                </button>
-                                <button
-                                  onClick={() => setStepMax(3)}
-                                  className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 1 && stepMax <= 3 ? 'bg-blue-500/10 border border-blue-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
-                                >
-                                  🧠 Equilibrado
-                                </button>
-                                <button
-                                  onClick={() => setStepMax(7)}
-                                  className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 3 && stepMax <= 7 ? 'bg-purple-500/10 border border-purple-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
-                                >
-                                  🚀 Avanzado
-                                </button>
-                                <button
-                                  onClick={() => setStepMax(10)}
-                                  className={`p-1.5 text-xs rounded-md transition-all ${stepMax > 7 ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-neutral-100/50 dark:bg-neutral-700/50 hover:bg-neutral-200/50 dark:hover:bg-neutral-600/50'}`}
-                                >
-                                  🤖 Experto
-                                </button>
-                              </div>
-                              <div className="flex items-center gap-2 mt-3">
-                                <button
-                                  onClick={() => stepMax > 1 && setStepMax(stepMax - 1)}
-                                  disabled={stepMax <= 1}
-                                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 hover:border-red-300 dark:hover:border-red-600 disabled:opacity-40"
-                                >
-                                  <Minus size={16} className="text-red-500" weight="bold" />
-                                </button>
-                                <div className="flex-1 text-center text-sm font-medium">
-                                  Nivel {stepMax}
-                                </div>
-                                <button
-                                  onClick={() => stepMax < 10 && setStepMax(stepMax + 1)}
-                                  disabled={stepMax >= 10}
-                                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-600 hover:border-green-300 dark:hover:border-green-600 disabled:opacity-40"
-                                >
-                                  <Plus size={16} className="text-green-500" weight="bold" />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        )} */}
-
                         {/* Divider */}
                         <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-3" />
 
@@ -658,7 +603,14 @@ export const SettingsDropdown = ({
 
                         {/* Divider */}
                         {/* <div className="border-t border-[#F48120]/10 dark:border-[#F48120]/20 my-3" /> */}
-
+                        <div className="pt-4">
+                          <button
+                            onClick={() => navigateToPanel('main')}
+                            className="w-full py-2.5 px-4 text-sm font-medium text-[#F48120] hover:bg-[#F48120]/10 dark:hover:bg-[#F48120]/20 rounded-lg transition-colors"
+                          >
+                            Volver al menú
+                          </button>
+                        </div>
                       </motion.div>
                     )}
                     {/* {activePanel === 'settings' && (
