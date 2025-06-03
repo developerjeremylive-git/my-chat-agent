@@ -155,6 +155,20 @@ export const SettingsDropdown = ({
     if (loadedPrompts) {
       setSavedPrompts(JSON.parse(loadedPrompts));
     }
+
+    // Listen for system prompt updates from OIAI creator
+    const handleSystemPromptUpdate = (event: CustomEvent) => {
+      const { content } = event.detail;
+      setSystemPrompt(content);
+    };
+
+    // @ts-ignore - CustomEvent type needs to be handled
+    window.addEventListener('openSystemPrompt', handleSystemPromptUpdate);
+    
+    return () => {
+      // @ts-ignore - CustomEvent type needs to be handled
+      window.removeEventListener('openSystemPrompt', handleSystemPromptUpdate);
+    };
   }, []);
 
   // Guardar prompts en localStorage cuando cambien
@@ -525,7 +539,18 @@ export const SettingsDropdown = ({
                                   onKeyDown={(e) => e.key === 'Enter' && setIsModalOpen(true)}
                                   aria-label="Editar prompt del sistema"
                                 >
-                                  <p className={`${!systemPrompt ? 'text-gray-400 dark:text-gray-500 italic' : 'text-gray-700 dark:text-gray-300'} break-words`}>
+                                  <p 
+                                    className={`${!systemPrompt ? 'text-gray-400 dark:text-gray-500 italic' : 'text-gray-700 dark:text-gray-300'} 
+                                    break-words overflow-hidden text-ellipsis line-clamp-3`}
+                                    style={{
+                                      display: '-webkit-box',
+                                      WebkitLineClamp: 3,
+                                      WebkitBoxOrient: 'vertical',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      maxHeight: '4.5em' /* 3 lines * 1.5 line-height */
+                                    }}
+                                  >
                                     {systemPrompt || 'Haz clic para editar el prompt del sistema...'}
                                   </p>
                                 </div>

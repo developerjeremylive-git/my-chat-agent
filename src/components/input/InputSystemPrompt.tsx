@@ -55,7 +55,76 @@ export const InputSystemPrompt = ({
     if (loadedPrompts) {
       setSavedPrompts(JSON.parse(loadedPrompts));
     }
-  }, []);
+
+    const handleOpenSystemPrompt = (event: CustomEvent) => {
+      const { content, source, triggerSave } = event.detail;
+      
+      // Update the input value through the proper React way
+      if (onChange) {
+        const syntheticEvent = {
+          target: { 
+            value: content,
+            name: props.name || 'systemPrompt'
+          }
+        } as React.ChangeEvent<HTMLInputElement>;
+        onChange(syntheticEvent);
+      }
+      
+      // Update through onValueChange if provided
+      onValueChange?.(content);
+      
+      // Store the content in state for the save prompt modal
+      setEditPromptContent(content);
+      
+      // If this is coming from OIAI creator or triggerSave is true, open the save prompt modal
+      if (source === 'oiai-creator' || triggerSave) {
+        // Use a small timeout to ensure the state updates have taken effect
+        setTimeout(() => {
+          setIsPromptModalOpen(true);
+          
+          // Focus the prompt name input after the modal is open
+          setTimeout(() => {
+            const nameInput = document.getElementById('prompt-name') as HTMLInputElement;
+            if (nameInput) {
+              nameInput.focus();
+              // Select all text in the input for easier renaming
+              nameInput.select();
+            }
+          }, 100);
+        }, 50);
+      }
+      
+      // Update the input element's value directly
+      const inputElements = document.querySelectorAll(`[name="${props.name || 'systemPrompt'}"]`);
+      inputElements.forEach((el: Element) => {
+        const input = el as HTMLInputElement;
+        if (input && input.value !== content) {
+          input.value = content;
+          // Trigger React's onChange handler
+          const event = new Event('input', { bubbles: true });
+          input.dispatchEvent(event);
+        }
+      });
+      
+      // Also update any textarea that might be used for the system prompt
+      const textareas = document.querySelectorAll('textarea');
+      textareas.forEach(textarea => {
+        if (textarea.name === (props.name || 'systemPrompt') && textarea.value !== content) {
+          textarea.value = content;
+          const event = new Event('input', { bubbles: true });
+          textarea.dispatchEvent(event);
+        }
+      });
+    };
+
+    // @ts-ignore - CustomEvent type needs to be handled
+    window.addEventListener('openSystemPrompt', handleOpenSystemPrompt);
+    
+    return () => {
+      // @ts-ignore - CustomEvent type needs to be handled
+      window.removeEventListener('openSystemPrompt', handleOpenSystemPrompt);
+    };
+  }, [onChange, onValueChange]);
 
   const savePrompt = () => {
     if (!promptName.trim() || !value) return;

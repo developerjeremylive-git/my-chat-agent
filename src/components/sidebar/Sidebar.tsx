@@ -34,6 +34,7 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
   const [showOIAICreator, setShowOIAICreator] = useState(false);
   const [showSystemPromptDashboard, setShowSystemPromptDashboard] = useState(false);
   const [activeTab, setActiveTab] = useState<'chats' | 'templates'>('chats');
+  const [oiaiContent, setOiaiContent] = useState('');
 
   const promptTemplates = {
     "exploracion-ideas": [
@@ -470,7 +471,38 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
           <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[85vh] overflow-hidden relative transform transition-all duration-300 scale-100 opacity-100">
             <OIAICreator
               onCopyContent={(content) => {
-
+                setOiaiContent(content);
+                
+                // Dispatch the event with the content
+                const event = new CustomEvent('openSystemPrompt', { 
+                  detail: { 
+                    content,
+                    source: 'oiai-creator',
+                    triggerSave: true // Add flag to trigger save
+                  } 
+                });
+                window.dispatchEvent(event);
+                
+                // Programmatically click the save prompt button after a small delay
+                setTimeout(() => {
+                  const saveButton = document.querySelector<HTMLButtonElement>('[aria-label="Guardar prompt"]');
+                  if (saveButton && !saveButton.disabled) {
+                    saveButton.click();
+                  }
+                }, 100);
+                
+                // Close the OIAI creator
+                setShowOIAICreator(false);
+                
+                // Show a success message
+                const successEvent = new CustomEvent('showToast', { 
+                  detail: { 
+                    message: 'Contenido generado con éxito',
+                    type: 'success',
+                    duration: 3000
+                  } 
+                });
+                window.dispatchEvent(successEvent);
               }}
               onClose={() => setShowOIAICreator(false)}
             />
