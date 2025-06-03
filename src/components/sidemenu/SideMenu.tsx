@@ -42,11 +42,11 @@ function EditTitleModal({ isOpen, onClose, onSave, currentTitle }: EditTitleModa
     if (!isOpen) return null;
 
     return (
-        <div 
+        <div
             className="fixed inset-0 bg-black/50 flex items-center justify-center z-70"
             onClick={onClose}
         >
-            <div 
+            <div
                 className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-96 relative"
                 onClick={(e) => e.stopPropagation()}
             >
@@ -59,7 +59,7 @@ function EditTitleModal({ isOpen, onClose, onSave, currentTitle }: EditTitleModa
                 >
                     <X size={20} weight="bold" className="text-neutral-500" />
                 </button>
-                
+
                 <h3 className="text-lg font-semibold mb-4 pr-6">Editar título del chat</h3>
                 <form onSubmit={handleSubmit}>
                     <input
@@ -91,17 +91,17 @@ function EditTitleModal({ isOpen, onClose, onSave, currentTitle }: EditTitleModa
     );
 }
 
-export function SideMenu({ 
-    isOpen, 
-    isStatic, 
-    onSetStatic, 
-    onClose, 
-    onChatSelect, 
-    onNewChat, 
-    onOpenSettings, 
-    onOpenTools, 
-    onClearHistory, 
-    selectedChatId 
+export function SideMenu({
+    isOpen,
+    isStatic,
+    onSetStatic,
+    onClose,
+    onChatSelect,
+    onNewChat,
+    onOpenSettings,
+    onOpenTools,
+    onClearHistory,
+    selectedChatId
 }: SideMenuProps) {
     // Toggle body class when menu is static
     useEffect(() => {
@@ -110,17 +110,17 @@ export function SideMenu({
         } else {
             document.body.classList.remove('menu-static');
         }
-        
+
         return () => {
             document.body.classList.remove('menu-static');
         };
     }, [isStatic]);
-    
+
     const toggleStatic = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         const newStaticState = !isStatic;
         onSetStatic(newStaticState);
-        
+
         // If making static, ensure the menu is open
         if (newStaticState) {
             // Ensure the menu stays open
@@ -129,29 +129,29 @@ export function SideMenu({
                 // Otherwise, we'll need to handle this case
             }
         }
-        
+
         // Save to localStorage
         if (typeof window !== 'undefined') {
             localStorage.setItem('menuStatic', String(newStaticState));
         }
     }, [isStatic, isOpen, onSetStatic]);
-    
+
     // Handle click outside logic
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (!isOpen) return;
-            
+
             const target = e.target as HTMLElement;
             // Only close if menu is not static and click is outside the menu
             if (!isStatic && !target.closest('.side-menu')) {
                 onClose();
             }
         };
-        
+
         if (isOpen) {
             document.addEventListener('mousedown', handleClickOutside);
         }
-        
+
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
@@ -162,7 +162,7 @@ export function SideMenu({
     const [showNewChatModal, setShowNewChatModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [newChatTitle, setNewChatTitle] = useState('Nuevo Chat');
-    
+
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = () => {
@@ -170,7 +170,7 @@ export function SideMenu({
                 setEditingChat(null);
             }
         };
-        
+
         document.addEventListener('click', handleClickOutside);
         return () => document.removeEventListener('click', handleClickOutside);
     }, [editingChat]);
@@ -185,7 +185,7 @@ export function SideMenu({
                     throw new Error('Failed to fetch chats');
                 }
                 const data = await response.json() as ChatData[];
-                
+
                 // Formatear los chats
                 const formattedChats = data.map((chat) => ({
                     ...chat,
@@ -253,13 +253,13 @@ export function SideMenu({
                     title: title || 'Nuevo Chat'
                 })
             });
-            
+
             if (!response.ok) {
                 throw new Error('Error al crear el chat');
             }
 
             const data = await response.json() as { success: boolean; chat: ChatData };
-            
+
             if (data.success && data.chat) {
                 const newChat: LocalChatData = {
                     id: data.chat.id,
@@ -267,7 +267,7 @@ export function SideMenu({
                     lastMessageAt: new Date(data.chat.lastMessageAt),
                     messages: []
                 };
-                
+
                 setChats(prevChats => [...prevChats, newChat]);
                 await fetchChats(); // Actualizar la lista completa de chats
                 onNewChat(); // Cerrar el menú lateral
@@ -286,6 +286,7 @@ export function SideMenu({
 
     const createChat = () => {
         setShowNewChatModal(true);
+        onClose();
     };
 
     const updateChatTitle = async (chatId: string, newTitle: string) => {
@@ -297,13 +298,13 @@ export function SideMenu({
                 },
                 body: JSON.stringify({ title: newTitle })
             });
-            
+
             if (!response.ok) {
                 throw new Error('Error al actualizar el título del chat');
             }
 
             const data = await response.json() as { success: boolean; chat: ChatData };
-            
+
             if (data.success) {
                 setChats(prevChats => prevChats.map(chat =>
                     chat.id === chatId ? { ...chat, title: newTitle } : chat
@@ -323,7 +324,7 @@ export function SideMenu({
             // Obtener detalles del chat
             const chatResponse = await fetch(`/api/chats/${chatId}`);
             const chatData = await chatResponse.json() as ChatData | { error: string };
-            
+
             if ('error' in chatData) {
                 console.error('Error en la respuesta de la API:', chatData.error);
                 return;
@@ -363,9 +364,9 @@ export function SideMenu({
             );
 
             // Emitir evento para actualizar la interfaz principal
-            window.dispatchEvent(new CustomEvent('chatSelected', { 
-                detail: { 
-                    chatId, 
+            window.dispatchEvent(new CustomEvent('chatSelected', {
+                detail: {
+                    chatId,
                     messages: formattedMessages,
                     isInitialLoad: false
                 }
@@ -385,15 +386,15 @@ export function SideMenu({
             const response = await fetch(`/api/chats/${chatId}`, {
                 method: 'DELETE',
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to delete chat');
             }
-            
+
             // Update local state
             const updatedChats = chats.filter(chat => chat.id !== chatId);
             setChats(updatedChats);
-            
+
             // If the deleted chat was selected, clear the selection and create a new chat
             if (selectedChatId === chatId) {
                 onNewChat();
@@ -431,7 +432,7 @@ export function SideMenu({
                         className={`${isStatic ? 'static-menu' : 'fixed'} left-0 top-0 bottom-0 w-80 bg-white dark:bg-neutral-900 z-70
                         border-r border-neutral-200 dark:border-neutral-700 shadow-2xl side-menu`}
                         initial={{ x: isStatic ? 0 : '-100%' }}
-                        animate={{ 
+                        animate={{
                             x: isStatic ? 0 : 0,
                             position: isStatic ? 'relative' : 'fixed'
                         }}
@@ -453,8 +454,8 @@ export function SideMenu({
                                         onClick={toggleStatic}
                                         title={isStatic ? "Hacer flotante" : "Fijar"}
                                     >
-                                        {isStatic ? 
-                                            <PushPinSlash weight="fill" className="w-5 h-5" /> : 
+                                        {isStatic ?
+                                            <PushPinSlash weight="fill" className="w-5 h-5" /> :
                                             <PushPin weight="fill" className="w-5 h-5" />
                                         }
                                     </Button>
@@ -474,7 +475,7 @@ export function SideMenu({
                                 {/* Acciones principales */}
                                 <div className="space-y-2">
                                     <button
-                                            onClick={() => createChat()}
+                                        onClick={() => createChat()}
                                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
                                         text-neutral-700 dark:text-neutral-300
                                         hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
@@ -537,26 +538,26 @@ export function SideMenu({
                                                 onClick={() => onChatSelect(chat.id)}
                                             >
                                                 <div className="flex items-start min-w-0 flex-1">
-                                                    <ChatText 
-                                                        weight="duotone" 
-                                                        className="w-4 h-4 text-[#F48120] flex-shrink-0 mt-0.5" 
+                                                    <ChatText
+                                                        weight="duotone"
+                                                        className="w-4 h-4 text-[#F48120] flex-shrink-0 mt-0.5"
                                                     />
                                                     <div className="ml-3 min-w-0">
-                                                        <div 
+                                                        <div
                                                             className="text-sm font-medium truncate text-ellipsis overflow-hidden"
                                                             title={chat.title}
                                                         >
                                                             {chat.title}
                                                         </div>
                                                         <div className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
-                                                            {formatDistanceToNow(new Date(chat.lastMessageAt), { 
-                                                                addSuffix: true, 
-                                                                locale: es 
+                                                            {formatDistanceToNow(new Date(chat.lastMessageAt), {
+                                                                addSuffix: true,
+                                                                locale: es
                                                             })}
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div className="relative flex-shrink-0 ml-2">
                                                     <button
                                                         onClick={(e) => {
@@ -567,10 +568,10 @@ export function SideMenu({
                                                     >
                                                         <DotsThreeVertical weight="bold" className="w-4 h-4 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200" />
                                                     </button>
-                                                    
+
                                                     {/* Dropdown Menu */}
                                                     {editingChat?.id === chat.id && (
-                                                        <div 
+                                                        <div
                                                             className="absolute right-0 mt-1 w-40 bg-white dark:bg-neutral-800 rounded-md shadow-lg py-1 z-10 border border-neutral-200 dark:border-neutral-700"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
@@ -586,7 +587,7 @@ export function SideMenu({
                                                                 Editar título
                                                             </button>
                                                             <button
-                                                                onClick={() => setChatToDelete(chat)}
+                                                                onClick={() =>{ setChatToDelete(chat); onClose();}}
                                                                 className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 flex items-center"
                                                             >
                                                                 <Trash weight="duotone" className="w-4 h-4 mr-2" />
@@ -619,7 +620,7 @@ export function SideMenu({
                     currentTitle={editingChat.title}
                 />
             )}
-            
+
             {/* Delete Confirmation Modal */}
             {chatToDelete && (
                 <div key={`delete-modal-${chatToDelete.id}`} className="fixed inset-0 bg-black/50 flex items-center justify-center z-70 p-4">
@@ -652,7 +653,7 @@ export function SideMenu({
                     </div>
                 </div>
             )}
-            
+
             {/* New Chat Modal */}
             {showNewChatModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-70">
