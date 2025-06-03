@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useAnimation, type Variants } from "framer-motion";
-import { Gear, List, X, Sun, Moon, User, Bell, Question, Palette, Key, DotsThreeVertical, CaretRight as ChevronRight, PaintBrushBroad, PlusCircle, Trash, Minus, Plus, Robot, UserCirclePlus, PaintBrushHousehold } from "@phosphor-icons/react";
+import { Gear, List, X, Sun, Moon, User, Bell, Question, Palette, Key, DotsThreeVertical, CaretRight as ChevronRight, PaintBrushBroad, PlusCircle, Trash, Minus, Plus, Robot, UserCirclePlus, PaintBrushHousehold, FloppyDisk, MagnifyingGlass, PencilSimple, NotePencil, CaretDown } from "@phosphor-icons/react";
 import { createPortal } from "react-dom";
 import { Button } from "../button/Button";
 import { InputSystemPrompt } from "../input/InputSystemPrompt";
@@ -9,6 +9,7 @@ import { useTheme } from "next-themes";
 import { AISettingsPanel } from "../settings/AISettingsPanel";
 import { ModelSelect } from "../model/ModelSelect";
 import { useModel } from "@/contexts/ModelContext";
+import { Modal } from "../modal/Modal";
 
 const springTransition = {
   type: "spring",
@@ -102,6 +103,18 @@ export const SettingsDropdown = ({
 }: SettingsDropdownProps) => {
   const [systemPrompt, setSystemPrompt] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [promptName, setPromptName] = useState('');
+  const [savedPrompts, setSavedPrompts] = useState<Array<{id: string, name: string, content: string}>>([]);
+  const [promptToDelete, setPromptToDelete] = useState<{id: string, name: string} | null>(null);
+  const [promptToEdit, setPromptToEdit] = useState<{id: string, name: string, content: string} | null>(null);
+  const [editPromptName, setEditPromptName] = useState('');
+  const [editPromptContent, setEditPromptContent] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const controls = useAnimation();
   const [activePanel, setActivePanel] = useState<'main' | 'settings' | 'profile'>('main');
   const [prevPanel, setPrevPanel] = useState<'main' | 'settings' | 'profile'>('main');
@@ -134,6 +147,89 @@ export const SettingsDropdown = ({
     }
     setIsOpen(false);
   };
+
+  // Cargar prompts guardados al montar el componente
+  useEffect(() => {
+    const loadedPrompts = localStorage.getItem("systemPrompts");
+    if (loadedPrompts) {
+      setSavedPrompts(JSON.parse(loadedPrompts));
+    }
+  }, []);
+
+  // Guardar prompts en localStorage cuando cambien
+  useEffect(() => {
+    if (savedPrompts.length > 0) {
+      localStorage.setItem("systemPrompts", JSON.stringify(savedPrompts));
+    }
+  }, [savedPrompts]);
+
+  // Cerrar el dropdown al hacer clic fuera
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Guardar un nuevo prompt
+  const savePrompt = () => {
+    if (!promptName.trim() || !systemPrompt) return;
+
+    const newPrompt = {
+      id: Date.now().toString(),
+      name: promptName,
+      content: systemPrompt,
+    };
+
+    const updatedPrompts = [...savedPrompts, newPrompt];
+    setSavedPrompts(updatedPrompts);
+    setIsPromptModalOpen(false);
+    setPromptName('');
+  };
+
+  // Seleccionar un prompt guardado
+  const selectPrompt = (prompt: {id: string, name: string, content: string}) => {
+    setSystemPrompt(prompt.content);
+    setIsDropdownOpen(false);
+  };
+
+  // Confirmar eliminación de un prompt
+  const confirmDelete = () => {
+    if (!promptToDelete) return;
+    
+    const updatedPrompts = savedPrompts.filter(p => p.id !== promptToDelete.id);
+    setSavedPrompts(updatedPrompts);
+    setIsDeleteModalOpen(false);
+    setPromptToDelete(null);
+  };
+
+  // Confirmar edición de un prompt
+  const confirmEdit = () => {
+    if (!promptToEdit || !editPromptName.trim() || !editPromptContent.trim()) return;
+    
+    const updatedPrompts = savedPrompts.map(p => 
+      p.id === promptToEdit.id 
+        ? { ...p, name: editPromptName, content: editPromptContent }
+        : p
+    );
+    
+    setSavedPrompts(updatedPrompts);
+    setIsEditModalOpen(false);
+    setPromptToEdit(null);
+    setEditPromptName('');
+    setEditPromptContent('');
+  };
+
+  // Filtrar prompts por término de búsqueda
+  const filteredPrompts = savedPrompts.filter(prompt =>
+    prompt.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    prompt.content.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Toggle theme
   const toggleTheme = () => {
@@ -411,29 +507,337 @@ export const SettingsDropdown = ({
                             Personaliza tus prompts
                           </motion.button>
 
-                          <div className="px-2 py-2">
-                            <InputSystemPrompt
-                              type="text"
-                              value={systemPrompt}
-                              onChange={(e) => setSystemPrompt(e.target.value)}
-                              compact={true}
-                              placeholder="Configura el comportamiento del asistente..."
-                              className={cn(
-                                // Layout & Sizing
-                                "w-full px-4 py-2.5 text-sm rounded-xl shadow-sm",
-                                // Background
-                                "bg-white/80 dark:bg-neutral-900/80",
-                                // Border & Focus
-                                "border border-neutral-200/80 dark:border-neutral-700/50",
-                                "hover:border-neutral-300/80 dark:hover:border-neutral-600/50",
-                                "focus:border-[#F48120] dark:focus:border-[#F48120]",
-                                "focus:ring-2 focus:ring-[#F48120]/20",
-                                // Text & Placeholder
-                                "placeholder:text-neutral-400/90 dark:placeholder:text-neutral-500/90",
-                                // Transitions
-                                "transition-all duration-200"
-                              )}
-                            />
+                          <div className="px-2 py-2 space-y-2">
+                            <div className="space-y-2">
+                              <div className="flex gap-2">
+                                <div className="relative flex-1" ref={dropdownRef}>
+                                  <button
+                                    onClick={() => {
+                                      setIsDropdownOpen(!isDropdownOpen);
+                                      if (!isDropdownOpen) setSearchTerm('');
+                                    }}
+                                    className="w-full px-4 py-2.5 text-sm text-left rounded-xl bg-white/80 dark:bg-neutral-900/80 border border-neutral-200/80 dark:border-neutral-700/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 transition-colors truncate flex justify-between items-center"
+                                  >
+                                    <span className="truncate">
+                                      {savedPrompts.length > 0 ? 'Seleccionar prompt guardado...' : 'No hay prompts guardados'}
+                                    </span>
+                                    <CaretDown size={16} weight="bold" className={`transition-transform duration-200 ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
+                                  </button>
+                                  
+                                  {isDropdownOpen && (
+                                    <div className="absolute z-10 mt-1 w-full bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-gray-200 dark:border-neutral-700 overflow-hidden">
+                                      <div className="p-2 border-b border-gray-100 dark:border-neutral-700">
+                                        <div className="relative">
+                                          <input
+                                            type="text"
+                                            placeholder="Buscar prompt..."
+                                            className="w-full pl-8 pr-3 py-2 text-sm bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-[#F48120]/50 focus:border-[#F48120] dark:focus:ring-[#F48120]/30 dark:focus:border-[#F48120] transition-colors"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            autoFocus
+                                          />
+                                          <MagnifyingGlass size={16} className="absolute left-3 top-2.5 text-gray-400" />
+                                        </div>
+                                      </div>
+                                      <div className="max-h-60 overflow-y-auto">
+                                        {filteredPrompts.length > 0 ? (
+                                          filteredPrompts.map((prompt) => (
+                                            <div 
+                                              key={prompt.id}
+                                              className="group px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-neutral-700/50 cursor-pointer border-b border-gray-100 dark:border-neutral-700 last:border-0"
+                                              onClick={() => selectPrompt(prompt)}
+                                            >
+                                              <div className="flex justify-between items-center">
+                                                <span className="font-medium text-gray-900 dark:text-white">{prompt.name}</span>
+                                                <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                  <button
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      setPromptToEdit(prompt);
+                                                      setEditPromptName(prompt.name);
+                                                      setEditPromptContent(prompt.content);
+                                                      setIsEditModalOpen(true);
+                                                      setIsDropdownOpen(false);
+                                                    }}
+                                                    className="p-1.5 text-gray-500 hover:text-[#F48120] rounded-full hover:bg-gray-100 dark:hover:bg-neutral-600"
+                                                    title="Editar prompt"
+                                                  >
+                                                    <PencilSimple size={14} weight="bold" />
+                                                  </button>
+                                                  <button
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      setPromptToDelete(prompt);
+                                                      setIsDeleteModalOpen(true);
+                                                      setIsDropdownOpen(false);
+                                                    }}
+                                                    className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-600"
+                                                    title="Eliminar prompt"
+                                                  >
+                                                    <Trash size={14} weight="bold" />
+                                                  </button>
+                                                </div>
+                                              </div>
+                                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                                                {prompt.content}
+                                              </p>
+                                            </div>
+                                          ))
+                                        ) : (
+                                          <div className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            {searchTerm ? 'No se encontraron resultados' : 'No hay prompts guardados'}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex space-x-1">
+                                  <button
+                                    onClick={() => setIsModalOpen(true)}
+                                    className="p-2.5 rounded-lg bg-white/80 dark:bg-neutral-800 border border-neutral-200/80 dark:border-neutral-700/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 hover:bg-[#F48120]/10 transition-colors"
+                                    title="Editar prompt actual"
+                                  >
+                                    <NotePencil size={18} weight="duotone" className="text-[#F48120]" />
+                                  </button>
+                                  <button
+                                    onClick={() => setIsPromptModalOpen(true)}
+                                    className="p-2.5 rounded-lg bg-[#F48120]/10 hover:bg-[#F48120]/20 text-[#F48120] transition-colors"
+                                    title="Guardar prompt"
+                                    disabled={!systemPrompt.trim()}
+                                  >
+                                    <FloppyDisk size={18} weight="duotone" />
+                                  </button>
+                                </div>
+                              </div>
+                              
+                              {/* Vista previa del prompt actual */}
+                              <div 
+                                className="text-sm p-3 bg-white/50 dark:bg-neutral-800/50 rounded-lg border border-dashed border-gray-200 dark:border-neutral-700 cursor-pointer"
+                                onClick={() => setIsModalOpen(true)}
+                              >
+                                <p className={`${!systemPrompt ? 'text-gray-400 dark:text-gray-500 italic' : 'text-gray-700 dark:text-gray-300'} line-clamp-3`}>
+                                  {systemPrompt || 'Haz clic para editar el prompt del sistema...'}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {/* Modals */}
+                            {createPortal(
+                              <Modal
+                                isOpen={isModalOpen}
+                                onClose={() => setIsModalOpen(false)}
+                                className="w-full max-w-6xl mx-auto flex flex-col"
+                                hideSubmitButton={true}
+                              >
+                                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Editor de Prompt</h3>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                    Edita el contenido del prompt del sistema
+                                  </p>
+                                </div>
+                                <div className="flex-1 overflow-hidden flex flex-col">
+                                  <div className="flex-1 overflow-auto p-1">
+                                    <textarea
+                                      className="w-full h-full min-h-[200px] p-4 text-base md:text-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 resize-none transition-colors"
+                                      value={systemPrompt}
+                                      onChange={(e) => setSystemPrompt(e.target.value)}
+                                      placeholder="Escribe aquí el prompt del sistema..."
+                                      aria-label="Editor de prompt del sistema"
+                                      spellCheck="false"
+                                      autoCapitalize="off"
+                                      autoComplete="off"
+                                      autoCorrect="off"
+                                    />
+                                  </div>
+                                  <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                                    <button
+                                      type="button"
+                                      onClick={() => setIsModalOpen(false)}
+                                      className="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-900"
+                                    >
+                                      Cerrar
+                                    </button>
+                                  </div>
+                                </div>
+                              </Modal>,
+                              document.body
+                            )}
+
+                            {createPortal(
+                              <Modal
+                                isOpen={isPromptModalOpen}
+                                onClose={() => setIsPromptModalOpen(false)}
+                                className="w-full max-w-[min(95vw,500px)] mx-auto"
+                                hideSubmitButton={true}
+                              >
+                                <div className="p-5 sm:p-6 space-y-5">
+                                  <div>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Guardar Prompt del Sistema</h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Asigna un nombre descriptivo para tu prompt</p>
+                                  </div>
+                                  <div className="space-y-3">
+                                    <div>
+                                      <label htmlFor="prompt-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Nombre del prompt
+                                      </label>
+                                      <input
+                                        id="prompt-name"
+                                        type="text"
+                                        placeholder="Ej: Respuestas profesionales"
+                                        className="w-full px-4 py-2.5 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 transition-colors"
+                                        value={promptName}
+                                        onChange={(e) => setPromptName(e.target.value)}
+                                        autoFocus
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-end gap-3 pt-2">
+                                    <button
+                                      type="button"
+                                      className="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-900"
+                                      onClick={() => setIsPromptModalOpen(false)}
+                                    >
+                                      Cancelar
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors flex items-center gap-2"
+                                      onClick={() => {
+                                        savePrompt();
+                                      }}
+                                    >
+                                      <FloppyDisk size={18} weight="bold" />
+                                      Guardar
+                                    </button>
+                                  </div>
+                                </div>
+                              </Modal>,
+                              document.body
+                            )}
+
+                            {createPortal(
+                              <Modal
+                                isOpen={isDeleteModalOpen}
+                                onClose={() => {
+                                  setIsDeleteModalOpen(false);
+                                  setPromptToDelete(null);
+                                }}
+                                className="w-full max-w-[min(95vw,500px)] mx-auto"
+                                hideSubmitButton={true}
+                              >
+                                <div className="p-5 sm:p-6 space-y-5">
+                                  <div className="text-center">
+                                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-3">
+                                      <Trash size={24} className="text-red-600 dark:text-red-400" weight="fill" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">¿Eliminar prompt?</h3>
+                                    <div className="mt-2">
+                                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        ¿Estás seguro de que deseas eliminar "{promptToDelete?.name}"? Esta acción no se puede deshacer.
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-end gap-3 pt-2">
+                                    <button
+                                      type="button"
+                                      className="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-900"
+                                      onClick={() => {
+                                        setIsDeleteModalOpen(false);
+                                        setPromptToDelete(null);
+                                      }}
+                                    >
+                                      Cancelar
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="px-4 py-2.5 text-sm font-medium rounded-lg bg-red-600 hover:bg-red-700 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-900 transition-colors flex items-center gap-2"
+                                      onClick={() => {
+                                        confirmDelete();
+                                      }}
+                                    >
+                                      <Trash size={18} weight="bold" />
+                                      Eliminar
+                                    </button>
+                                  </div>
+                                </div>
+                              </Modal>,
+                              document.body
+                            )}
+
+                            {createPortal(
+                              <Modal
+                                isOpen={isEditModalOpen}
+                                onClose={() => {
+                                  setIsEditModalOpen(false);
+                                  setPromptToEdit(null);
+                                  setEditPromptName('');
+                                  setEditPromptContent('');
+                                }}
+                                className="w-full max-w-[min(95vw,500px)] mx-auto"
+                                hideSubmitButton={true}
+                              >
+                                <div className="p-5 sm:p-6 space-y-5">
+                                  <div>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Editar Prompt del Sistema</h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Actualiza los detalles del prompt</p>
+                                  </div>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <label htmlFor="edit-prompt-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Nombre del prompt
+                                      </label>
+                                      <input
+                                        id="edit-prompt-name"
+                                        type="text"
+                                        placeholder="Ej: Respuestas profesionales"
+                                        className="w-full px-4 py-2.5 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 transition-colors"
+                                        value={editPromptName}
+                                        onChange={(e) => setEditPromptName(e.target.value)}
+                                        autoFocus
+                                      />
+                                    </div>
+                                    <div>
+                                      <label htmlFor="edit-prompt-content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Contenido
+                                      </label>
+                                      <textarea
+                                        id="edit-prompt-content"
+                                        placeholder="Escribe el contenido del prompt..."
+                                        className="w-full h-40 px-4 py-2.5 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-gray-400 dark:focus:border-gray-500 resize-none transition-colors"
+                                        value={editPromptContent}
+                                        onChange={(e) => setEditPromptContent(e.target.value)}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="flex justify-end gap-3 pt-2">
+                                    <button
+                                      type="button"
+                                      className="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-900"
+                                      onClick={() => {
+                                        setIsEditModalOpen(false);
+                                        setPromptToEdit(null);
+                                        setEditPromptName('');
+                                        setEditPromptContent('');
+                                      }}
+                                    >
+                                      Cancelar
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-900 transition-colors flex items-center gap-2"
+                                      onClick={() => {
+                                        confirmEdit();
+                                      }}
+                                    >
+                                      <FloppyDisk size={18} weight="bold" />
+                                      Guardar Cambios
+                                    </button>
+                                  </div>
+                                </div>
+                              </Modal>,
+                              document.body
+                            )}
                           </div>
                         </div>
 
