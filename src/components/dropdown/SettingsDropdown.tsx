@@ -108,9 +108,9 @@ export const SettingsDropdown = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [promptName, setPromptName] = useState('');
-  const [savedPrompts, setSavedPrompts] = useState<Array<{id: string, name: string, content: string}>>([]);
-  const [promptToDelete, setPromptToDelete] = useState<{id: string, name: string} | null>(null);
-  const [promptToEdit, setPromptToEdit] = useState<{id: string, name: string, content: string} | null>(null);
+  const [savedPrompts, setSavedPrompts] = useState<Array<{ id: string, name: string, content: string }>>([]);
+  const [promptToDelete, setPromptToDelete] = useState<{ id: string, name: string } | null>(null);
+  const [promptToEdit, setPromptToEdit] = useState<{ id: string, name: string, content: string } | null>(null);
   const [editPromptName, setEditPromptName] = useState('');
   const [editPromptContent, setEditPromptContent] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -163,18 +163,12 @@ export const SettingsDropdown = ({
     }
   }, [savedPrompts]);
 
-  // Cerrar el dropdown al hacer clic fuera
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
+  // Handle click on overlay to close dropdown
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setIsOpen(false);
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  };
 
   // Guardar un nuevo prompt
   const savePrompt = () => {
@@ -193,7 +187,7 @@ export const SettingsDropdown = ({
   };
 
   // Seleccionar un prompt guardado
-  const selectPrompt = (prompt: {id: string, name: string, content: string}) => {
+  const selectPrompt = (prompt: { id: string, name: string, content: string }) => {
     setSystemPrompt(prompt.content);
     setIsDropdownOpen(false);
   };
@@ -201,7 +195,7 @@ export const SettingsDropdown = ({
   // Confirmar eliminación de un prompt
   const confirmDelete = () => {
     if (!promptToDelete) return;
-    
+
     const updatedPrompts = savedPrompts.filter(p => p.id !== promptToDelete.id);
     setSavedPrompts(updatedPrompts);
     setIsDeleteModalOpen(false);
@@ -211,13 +205,13 @@ export const SettingsDropdown = ({
   // Confirmar edición de un prompt
   const confirmEdit = () => {
     if (!promptToEdit || !editPromptName.trim() || !editPromptContent.trim()) return;
-    
-    const updatedPrompts = savedPrompts.map(p => 
-      p.id === promptToEdit.id 
+
+    const updatedPrompts = savedPrompts.map(p =>
+      p.id === promptToEdit.id
         ? { ...p, name: editPromptName, content: editPromptContent }
         : p
     );
-    
+
     setSavedPrompts(updatedPrompts);
     setIsEditModalOpen(false);
     setPromptToEdit(null);
@@ -251,79 +245,29 @@ export const SettingsDropdown = ({
     setActivePanel(panel);
   };
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      // Only close if clicking outside both the dropdown and its trigger button
-      const target = event.target as HTMLElement;
-      const isClickInside = dropdownRef.current?.contains(target) ||
-        document.querySelector('button[aria-label="Menú de configuración"]')?.contains(target);
-
-      if (!isClickInside) {
-        controls.start('closed').then(() => {
-          setTimeout(() => setIsOpen(false), 150);
-        });
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = '';
-    };
-  }, [isOpen, controls]);
-
-  // Reset panel when closing
-  useEffect(() => {
-    if (!isOpen) {
-      const timer = setTimeout(() => setActivePanel('main'), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
-
   return (
-    <div className="relative z-50" ref={dropdownRef}>
-      <div>
-        <Button
-          variant="ghost"
-          size="lg"
-          className={`relative w-8 h-8 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-[#F48120] to-purple-500 shadow-lg 
-                   hover:shadow-xl hover:shadow-[#F48120]/30 dark:hover:shadow-purple-500/30 active:scale-95
-                   transition-all duration-200 ease-out ${isOpen ? 'rotate-180' : ''}`}
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Menú de configuración"
-        >
-          <Gear
-            size={20}
-            className="text-white transition-transform duration-200 ml-1.5 mr-1.5"
-            weight="duotone"
-          />
-        </Button>
-      </div>
+    <div className="relative">
+      {/* Toggle Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/50"
+        aria-label="Abrir menú de configuración"
+        aria-expanded={isOpen}
+      >
+        <Gear size={20} weight="bold" className="text-white" />
+      </button>
 
+      {/* Dropdown Panel */}
       <AnimatePresence>
         {isOpen && (
-          <>
-            {/* Overlay */}
-            <motion.div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setIsOpen(false)}
-            />
-
-            {/* Dropdown Container */}
-            <div className="fixed inset-0 flex items-center justify-center z-[1001] px-4 py-4 pointer-events-none">
+          <div
+            className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-[1000] flex items-center justify-center p-4"
+            onClick={handleOverlayClick}
+          >
+            <div className="fixed inset-0 flex items-center justify-center z-[1001] px-4 py-4">
               <motion.div
-                className="w-full max-w-md bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl border border-white/20 dark:border-neutral-700/50 overflow-hidden pointer-events-auto max-h-[90vh] flex flex-col mx-auto my-auto"
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-md bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl border border-white/20 dark:border-neutral-700/50 overflow-hidden max-h-[90vh] flex flex-col mx-auto my-auto"
                 initial={{ opacity: 0, y: 20, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.98 }}
@@ -369,10 +313,7 @@ export const SettingsDropdown = ({
                         style={{ willChange: 'transform, opacity' }}
                         transition={{ type: 'spring', stiffness: 400, damping: 40 }}
                       >
-                        {/* Configuración General Section */}
-                        {/* <div className="px-2 py-1 mb-2">
-                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Configuración General</div>
-                        </div> */}
+
                         {/* Model Selection - Mobile Only */}
                         {/* <div className="md:hidden px-4 py-2 mb-2">
                           <ModelSelect mobile />
@@ -423,10 +364,6 @@ export const SettingsDropdown = ({
                           Ajustes Personalizados
                         </motion.button> */}
 
-                        {/* Categoría: Ajustes de Interfaz */}
-                        {/* <div className="px-2 py-1 mt-4 mb-2">
-                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Ajustes de Interfaz</div>
-                        </div> */}
 
                         {/* <motion.button
                           onClick={() => {
@@ -442,49 +379,6 @@ export const SettingsDropdown = ({
                           <PaintBrushBroad size={18} weight="duotone" className="mr-3 text-green-500" />
                           Personalizar Apariencia
                         </motion.button> */}
-
-                        <motion.button
-                          onClick={() => navigateToPanel('settings')}
-                          className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
-                          variants={menuItemVariants}
-                          custom={3}
-                          initial="closed"
-                          animate="open"
-                        >
-                          <PaintBrushBroad size={18} weight="duotone" className="mr-3 text-green-500" />
-                          Ajustes Personalizados
-                        </motion.button>
-
-                        {/* Categoría: Configuración de IA */}
-                        {/* <div className="px-2 py-1 mt-4 mb-2">
-                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Configuración de IA</div>
-                        </div> */}
-
-                        <motion.button
-                          onClick={() => {
-                            handleAISettingsClick();
-                            controls.start('closed').then(() => {
-                              setTimeout(() => setIsOpen(false), 150);
-                            });
-                          }}
-                          className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${isSidebarOpen
-                            ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium'
-                            : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
-                            }`}
-                          variants={menuItemVariants}
-                          custom={1}
-                          initial="closed"
-                          animate="open"
-                        >
-                          <Gear size={18} weight="duotone" className="mr-3 text-purple-500" />
-                          Configuración Asistente IA
-                        </motion.button>
-
-                        {/* Comportamiento Section */}
-                        {/* <div className="px-2 py-1 mt-4 mb-2">
-                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Comportamiento</div>
-                        </div> */}
-
 
                         {/* Prompt del Sistema Section */}
                         {/* {hasMessages && ( */}
@@ -523,7 +417,7 @@ export const SettingsDropdown = ({
                                     </span>
                                     <CaretDown size={16} weight="bold" className={`transition-transform duration-200 ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
                                   </button>
-                                  
+
                                   {isDropdownOpen && (
                                     <div className="absolute z-10 mt-1 w-full bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-gray-200 dark:border-neutral-700 overflow-hidden">
                                       <div className="p-2 border-b border-gray-100 dark:border-neutral-700">
@@ -542,7 +436,7 @@ export const SettingsDropdown = ({
                                       <div className="max-h-60 overflow-y-auto">
                                         {filteredPrompts.length > 0 ? (
                                           filteredPrompts.map((prompt) => (
-                                            <div 
+                                            <div
                                               key={prompt.id}
                                               className="group px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-neutral-700/50 cursor-pointer border-b border-gray-100 dark:border-neutral-700 last:border-0"
                                               onClick={() => selectPrompt(prompt)}
@@ -610,9 +504,9 @@ export const SettingsDropdown = ({
                                   </button>
                                 </div>
                               </div>
-                              
+
                               {/* Vista previa del prompt actual */}
-                              <div 
+                              <div
                                 className="text-sm p-3 bg-white/50 dark:bg-neutral-800/50 rounded-lg border border-dashed border-gray-200 dark:border-neutral-700 cursor-pointer"
                                 onClick={() => setIsModalOpen(true)}
                               >
@@ -621,7 +515,7 @@ export const SettingsDropdown = ({
                                 </p>
                               </div>
                             </div>
-                            
+
                             {/* Modals */}
                             {createPortal(
                               <Modal
@@ -841,6 +735,11 @@ export const SettingsDropdown = ({
                           </div>
                         </div>
 
+                        {/* Comportamiento Section */}
+                        {/* <div className="px-2 py-1 mt-4 mb-2">
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Comportamiento</div>
+                        </div> */}
+
                         {/* Nivel de Asistencia */}
                         {selectedModel === 'gemini-2.0-flash' && (
                           <div className="px-2 py-2">
@@ -907,7 +806,48 @@ export const SettingsDropdown = ({
                           </div>
                         )}
 
-                        {/* )} */}
+                             {/* Categoría: Configuración de IA */}
+                             <div className="px-2 py-1 mt-1">
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-1">Configuración de IA</div>
+                        </div>
+
+                        <motion.button
+                          onClick={() => {
+                            handleAISettingsClick();
+                            controls.start('closed').then(() => {
+                              setTimeout(() => setIsOpen(false), 150);
+                            });
+                          }}
+                          className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${isSidebarOpen
+                            ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium'
+                            : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
+                            }`}
+                          variants={menuItemVariants}
+                          custom={1}
+                          initial="closed"
+                          animate="open"
+                        >
+                          <Gear size={18} weight="duotone" className="mr-3 text-purple-500" />
+                          Configuración Asistente IA
+                        </motion.button>
+
+                        {/* Categoría: Ajustes de Interfaz */}
+                        <div className="px-2 py-1 mt-1">
+                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-1">Ajustes de Interfaz</div>
+                        </div>
+                        
+                        <motion.button
+                          onClick={() => navigateToPanel('settings')}
+                          className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
+                          variants={menuItemVariants}
+                          custom={3}
+                          initial="closed"
+                          animate="open"
+                        >
+                          <PaintBrushBroad size={18} weight="duotone" className="mr-3 text-green-500" />
+                          Ajustes Personalizados
+                        </motion.button>
+                   
                         {/* <motion.button
                           onClick={() => navigateToPanel('profile')}
                           className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
@@ -1127,7 +1067,7 @@ export const SettingsDropdown = ({
                 </div>
               </motion.div>
             </div>
-          </>
+          </div>
         )}
       </AnimatePresence>
     </div>
