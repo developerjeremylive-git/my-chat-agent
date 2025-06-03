@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from 'react-dom';
-import { ArrowsOut, Plus, FloppyDisk, CaretDown, Trash, PencilSimple, MagnifyingGlass, X } from "@phosphor-icons/react";
+import { ArrowsOut, Plus, FloppyDisk, CaretDown, Trash, PencilSimple, MagnifyingGlass, X, NotePencil } from "@phosphor-icons/react";
 import { Modal } from "../modal/Modal";
 
 export const inputClasses = cn(
@@ -225,101 +225,120 @@ export const InputSystemPrompt = ({
         </div>
       </div>
 
-      {isDropdownOpen && savedPrompts.length > 0 && (
-        <div className={`fixed inset-0 z-50 bg-black bg-opacity-50 dark:bg-opacity-70 flex flex-col items-center ${compact ? 'justify-start' : 'justify-end'}`}>
-          <div 
-            className={`w-full ${compact ? 'max-h-[60vh] rounded-xl' : 'max-h-[85vh] rounded-t-2xl'} bg-white dark:bg-gray-900 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col`}
-            style={{ boxShadow: '0 -10px 25px -5px rgba(0, 0, 0, 0.1), 0 -10px 10px -5px rgba(0, 0, 0, 0.04)' }}
-          >
-            {/* Header */}
-            <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Mis Prompts</h3>
-              <button
-                onClick={() => setIsDropdownOpen(false)}
-                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
-                aria-label="Cerrar"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            
-            {/* Search Bar */}
-            <div className="sticky top-[73px] z-10 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MagnifyingGlass className="h-4 w-4 text-gray-400" weight="bold" />
+      {isDropdownOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/50 dark:bg-black/70 flex flex-col items-center justify-end"
+          onClick={(e) => {
+            // Only close if clicking on the backdrop, not on the modal content
+            if (e.target === e.currentTarget) {
+              setIsDropdownOpen(false);
+            }
+          }}
+        >
+          <div className="w-full max-w-2xl max-h-[90vh] bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl flex flex-col mx-auto overflow-hidden">
+            {/* Fixed Header Section */}
+            <div className="flex flex-col flex-none sticky top-0 z-10 bg-white dark:bg-gray-900">
+              {/* Header */}
+              <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-800">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Mis Prompt del Sistema</h3>
+                <button
+                  onClick={() => setIsDropdownOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                  aria-label="Cerrar"
+                >
+                  <X size={20} weight="bold" />
+                </button>
+              </div>
+              
+              {/* Search Bar */}
+              <div className="px-4 pb-3 border-b border-gray-100 dark:border-gray-800">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <MagnifyingGlass className="h-4 w-4 text-gray-400" weight="bold" />
+                  </div>
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar prompts del sistema..."
+                    className="block w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 backdrop-blur-sm"
+                    autoComplete="off"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                      aria-label="Limpiar búsqueda"
+                    >
+                      <X size={16} weight="bold" />
+                    </button>
+                  )}
                 </div>
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Buscar prompts..."
-                  className="block w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                />
-                {searchTerm && (
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                    aria-label="Limpiar búsqueda"
-                  >
-                    <X size={16} weight="bold" />
-                  </button>
-                )}
               </div>
             </div>
             
             {/* Prompts List */}
             <div className="flex-1 overflow-y-auto">
-              {savedPrompts
-                .filter(prompt => 
-                  searchTerm === '' || 
-                  prompt.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  prompt.content.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-                .map((prompt) => (
-                <div
-                  key={prompt.id}
-                  className="group flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 dark:active:bg-gray-700 transition-colors duration-150 border-b border-gray-100 dark:border-gray-800 last:border-0"
-                  onClick={() => {
-                    selectPrompt(prompt);
-                    setIsDropdownOpen(false);
-                  }}
-                >
-                  <div className="flex-1 min-w-0 pr-3">
-                    <div className="font-medium text-gray-900 dark:text-white truncate">{prompt.name}</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                      {prompt.content}
+              {savedPrompts.length > 0 ? (
+                savedPrompts
+                  .filter(prompt => 
+                    searchTerm === '' || 
+                    prompt.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    prompt.content.toLowerCase().includes(searchTerm.toLowerCase())
+                  )
+                  .map((prompt) => (
+                    <div
+                      key={prompt.id}
+                      className="group flex items-center justify-between p-4 hover:bg-gray-50/80 dark:hover:bg-gray-800/80 active:bg-gray-100 dark:active:bg-gray-700/80 transition-colors duration-150 border-b border-gray-100 dark:border-gray-800 last:border-0"
+                      onClick={() => {
+                        selectPrompt(prompt);
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      <div className="flex-1 min-w-0 pr-3">
+                        <div className="font-medium text-gray-900 dark:text-white truncate">{prompt.name}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                          {prompt.content}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditClick(e, prompt);
+                          }}
+                          className="p-2 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50/80 dark:hover:bg-blue-900/30 transition-colors"
+                          title="Editar prompt"
+                        >
+                          <PencilSimple size={16} weight="fill" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(e, prompt);
+                          }}
+                          className="p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-red-50/80 dark:hover:bg-red-900/30 transition-colors"
+                          title="Eliminar prompt"
+                        >
+                          <Trash size={16} weight="fill" />
+                        </button>
+                      </div>
                     </div>
+                  ))
+              ) : (
+                <div className="flex flex-col items-center justify-center p-8 text-center">
+                  <div className="p-3 mb-4 rounded-full bg-gray-100 dark:bg-gray-800">
+                    <NotePencil size={24} className="text-gray-400" />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditClick(e, prompt);
-                      }}
-                      className="p-2 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/30"
-                      title="Editar prompt"
-                    >
-                      <PencilSimple size={16} />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteClick(e, prompt);
-                      }}
-                      className="p-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30"
-                      title="Eliminar prompt"
-                    >
-                      <Trash size={16} />
-                    </button>
-                  </div>
+                  <h4 className="text-gray-900 dark:text-white font-medium">No hay prompts guardados</h4>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Crea tu primer prompt para comenzar</p>
                 </div>
-              ))}
+              )}
             </div>
             
             {/* Add New Button */}
-            <div className="sticky bottom-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+            <div className="sticky bottom-0 p-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800">
               <button
                 onClick={() => {
                   setIsDropdownOpen(false);
@@ -332,7 +351,7 @@ export const InputSystemPrompt = ({
                   });
                   setIsEditModalOpen(true);
                 }}
-                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center space-x-2 transition-colors shadow-sm hover:shadow-md active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center space-x-2 transition-colors shadow hover:shadow-md active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
               >
                 <Plus size={18} weight="bold" />
                 <span>Nuevo System Prompt</span>
