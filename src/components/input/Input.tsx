@@ -67,6 +67,7 @@ export const Input = ({
             onValueChange?.(e.target.value);
           }}
           {...props}
+          autoFocus
         />
       </Modal>
     </div>

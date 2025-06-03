@@ -1955,7 +1955,7 @@ function ChatComponent() {
                 <div className="bg-gradient-to-b from-white/95 to-white/90 dark:from-neutral-900/95 dark:to-neutral-900/90 backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/30 shadow-lg">
                   <div className="max-w-2xl mx-auto px-4 py-3">
                     <div className="relative group">
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-30 group-focus-within:opacity-40 transition-opacity duration-300"></div>
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-[#F48120]/2 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-30 group-focus-within:opacity-40 transition-opacity duration-300"></div>
                       <div className="relative">
                         <InputSystemPrompt
                           type="text"
