@@ -428,7 +428,13 @@ export const SettingsDropdown = ({
                                   </button>
 
                                   {isDropdownOpen && (
-                                    <div className="absolute z-10 mt-1 w-full bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-gray-200 dark:border-neutral-700 overflow-hidden">
+                                    <>
+                                      <div 
+                                        className="fixed inset-0 bg-black/30 dark:bg-black/50 z-[999]"
+                                        onClick={() => setIsDropdownOpen(false)}
+                                        aria-hidden="true"
+                                      />
+                                      <div className="absolute z-[1000] mt-1 w-full bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-gray-200 dark:border-neutral-700 overflow-hidden">
                                       <div className="sticky top-0 bg-white dark:bg-neutral-800 z-10 p-3 border-b border-gray-100 dark:border-neutral-700 shadow-sm">
                                       <div className="relative">
                                         <input
@@ -519,6 +525,7 @@ export const SettingsDropdown = ({
                                         )}
                                       </div>
                                     </div>
+                                  </>
                                   )}
                                 </div>
                                 <div className="flex sm:flex-col gap-2 w-full sm:w-auto mt-2 sm:mt-0">
