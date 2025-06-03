@@ -146,7 +146,7 @@ export const SettingsDropdown = ({
     if (onAISettingsClick) {
       onAISettingsClick();
     }
-    setIsOpen(false);
+    // setIsOpen(false);
   };
 
   // Cargar prompts guardados al montar el componente
@@ -235,9 +235,9 @@ export const SettingsDropdown = ({
   const handleMenuItemClick = (action: () => void, customAction?: () => void) => {
     if (customAction) customAction();
     action();
-    controls.start('closed').then(() => {
-      setTimeout(() => setIsOpen(false), 150);
-    });
+    // controls.start('closed').then(() => {
+    //   setTimeout(() => setIsOpen(false), 150);
+    // });
   };
 
   const navigateToPanel = (panel: 'main' | 'settings' | 'profile') => {
@@ -353,17 +353,6 @@ export const SettingsDropdown = ({
                             </button>
                           </div>
                         )} */}
-                        {/* <motion.button
-                          onClick={() => navigateToPanel('settings')}
-                          className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
-                          variants={menuItemVariants}
-                          custom={3}
-                          initial="closed"
-                          animate="open"
-                        >
-                          <PaintBrushBroad size={18} weight="duotone" className="mr-3 text-green-500" />
-                          Ajustes Personalizados
-                        </motion.button> */}
 
 
                         {/* <motion.button
@@ -384,23 +373,8 @@ export const SettingsDropdown = ({
                         {/* Prompt del Sistema Section */}
                         {/* {hasMessages && ( */}
                         <div className="px-2 py-2">
-                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Prompt del Sistema</div>
 
-                          <motion.button
-                            onClick={() => handleMenuItemClick(toggleSidebar)}
-                            className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${isSidebarOpen
-                              ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium'
-                              : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
-                              }`}
-                            variants={menuItemVariants}
-                            custom={isMobile ? 1 : 0}
-                            initial="closed"
-                            animate="open"
-                          >
-                            <UserCirclePlus size={18} weight="duotone" className="mr-3 text-[#F48120]" />
-                            {/* {isSidebarOpen ? 'Personaliza tu Asistente IA' : 'Personaliza tu Asistente IA'} */}
-                            Personaliza tus prompts
-                          </motion.button>
+                          <h4 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">Prompt del Sistema</h4>
 
                           <div className="px-2 py-2 space-y-2">
                             <div className="space-y-2">
@@ -415,117 +389,117 @@ export const SettingsDropdown = ({
                                     aria-label={savedPrompts.length > 0 ? 'Seleccionar prompt guardado' : 'No hay prompts guardados'}
                                   >
                                     <div className="flex items-center min-w-0">
-                                      <Notebook size={16} className="text-[#F48120] mr-2 flex-shrink-0"/>
+                                      <Notebook size={16} className="text-[#F48120] mr-2 flex-shrink-0" />
                                       <span className="truncate">
                                         {savedPrompts.length > 0 ? 'Seleccionar prompt guardado...' : 'No hay prompts guardados'}
                                       </span>
                                     </div>
-                                    <CaretDown 
-                                      size={18} 
-                                      weight="bold" 
-                                      className={`flex-shrink-0 ml-2 transition-transform duration-200 text-gray-500 group-hover:text-[#F48120] ${isDropdownOpen ? 'transform rotate-180' : ''}`} 
+                                    <CaretDown
+                                      size={18}
+                                      weight="bold"
+                                      className={`flex-shrink-0 ml-2 transition-transform duration-200 text-gray-500 group-hover:text-[#F48120] ${isDropdownOpen ? 'transform rotate-180' : ''}`}
                                     />
                                   </button>
 
                                   {isDropdownOpen && (
                                     <>
-                                      <div 
+                                      <div
                                         className="fixed inset-0 bg-black/30 dark:bg-black/50 z-[999]"
                                         onClick={() => setIsDropdownOpen(false)}
                                         aria-hidden="true"
                                       />
                                       <div className="absolute z-[1000] mt-1 w-full bg-white dark:bg-neutral-800 rounded-xl shadow-lg border border-gray-200 dark:border-neutral-700 overflow-hidden">
-                                      <div className="sticky top-0 bg-white dark:bg-neutral-800 z-10 p-3 border-b border-gray-100 dark:border-neutral-700 shadow-sm">
-                                      <div className="relative">
-                                        <input
-                                          type="text"
-                                          placeholder="Buscar prompt..."
-                                          className="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-neutral-900 border-2 border-gray-200 dark:border-neutral-600 rounded-xl focus:ring-0 focus:border-[#F48120] dark:focus:border-[#F48120] transition-colors placeholder-gray-400 dark:placeholder-gray-500"
-                                          value={searchTerm}
-                                          onChange={(e) => setSearchTerm(e.target.value)}                                          
-                                        />
-                                        <MagnifyingGlass 
-                                          size={18} 
-                                          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
-                                          weight="duotone"
-                                        />
-                                        {searchTerm && (
-                                          <button
-                                            onClick={() => setSearchTerm('')}
-                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                                            aria-label="Limpiar búsqueda"
-                                          >
-                                            <X size={16} weight="bold" />
-                                          </button>
-                                        )}
-                                      </div>
-                                    </div>
-                                      <div className="max-h-60 overflow-y-auto">
-                                        {filteredPrompts.length > 0 ? (
-                                          filteredPrompts.map((prompt) => (
-                                            <div
-                                              key={prompt.id}
-                                              className="group px-4 py-3 hover:bg-gray-50 dark:hover:bg-neutral-700/50 cursor-pointer border-b border-gray-100 dark:border-neutral-700 last:border-0 transition-colors duration-150"
-                                              onClick={() => selectPrompt(prompt)}
-                                            >
-                                              <div className="flex items-start justify-between gap-3">
-                                                <div className="flex-1 min-w-0">
-                                                  <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                                                    <span className="truncate">{prompt.name}</span>
-                                                    {systemPrompt === prompt.content && (
-                                                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#F48120]/10 text-[#F48120] border border-[#F48120]/20">
-                                                        En uso
-                                                      </span>
-                                                    )}
+                                        <div className="sticky top-0 bg-white dark:bg-neutral-800 z-10 p-3 border-b border-gray-100 dark:border-neutral-700 shadow-sm">
+                                          <div className="relative">
+                                            <input
+                                              type="text"
+                                              placeholder="Buscar prompt..."
+                                              className="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-neutral-900 border-2 border-gray-200 dark:border-neutral-600 rounded-xl focus:ring-0 focus:border-[#F48120] dark:focus:border-[#F48120] transition-colors placeholder-gray-400 dark:placeholder-gray-500"
+                                              value={searchTerm}
+                                              onChange={(e) => setSearchTerm(e.target.value)}
+                                            />
+                                            <MagnifyingGlass
+                                              size={18}
+                                              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                                              weight="duotone"
+                                            />
+                                            {searchTerm && (
+                                              <button
+                                                onClick={() => setSearchTerm('')}
+                                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                                                aria-label="Limpiar búsqueda"
+                                              >
+                                                <X size={16} weight="bold" />
+                                              </button>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <div className="max-h-60 overflow-y-auto">
+                                          {filteredPrompts.length > 0 ? (
+                                            filteredPrompts.map((prompt) => (
+                                              <div
+                                                key={prompt.id}
+                                                className="group px-4 py-3 hover:bg-gray-50 dark:hover:bg-neutral-700/50 cursor-pointer border-b border-gray-100 dark:border-neutral-700 last:border-0 transition-colors duration-150"
+                                                onClick={() => selectPrompt(prompt)}
+                                              >
+                                                <div className="flex items-start justify-between gap-3">
+                                                  <div className="flex-1 min-w-0">
+                                                    <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                                                      <span className="truncate">{prompt.name}</span>
+                                                      {systemPrompt === prompt.content && (
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#F48120]/10 text-[#F48120] border border-[#F48120]/20">
+                                                          En uso
+                                                        </span>
+                                                      )}
+                                                    </div>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 break-words">
+                                                      {prompt.content}
+                                                    </p>
                                                   </div>
-                                                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 break-words">
-                                                    {prompt.content}
-                                                  </p>
+                                                  <div className="flex space-x-1 flex-shrink-0 pt-1">
+                                                    <button
+                                                      onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setPromptToEdit(prompt);
+                                                        setEditPromptName(prompt.name);
+                                                        setEditPromptContent(prompt.content);
+                                                        setIsEditModalOpen(true);
+                                                        setIsDropdownOpen(false);
+                                                      }}
+                                                      className="p-1.5 text-gray-500 hover:text-[#F48120] rounded-full hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors"
+                                                      title="Editar prompt"
+                                                      aria-label={`Editar ${prompt.name}`}
+                                                    >
+                                                      <PencilSimple size={16} weight="bold" />
+                                                    </button>
+                                                    <button
+                                                      onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setPromptToDelete(prompt);
+                                                        setIsDeleteModalOpen(true);
+                                                        setIsDropdownOpen(false);
+                                                      }}
+                                                      className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors"
+                                                      title="Eliminar prompt"
+                                                      aria-label={`Eliminar ${prompt.name}`}
+                                                    >
+                                                      <Trash size={16} weight="bold" />
+                                                    </button>
+                                                  </div>
                                                 </div>
-                                                <div className="flex space-x-1 flex-shrink-0 pt-1">
-                                                  <button
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      setPromptToEdit(prompt);
-                                                      setEditPromptName(prompt.name);
-                                                      setEditPromptContent(prompt.content);
-                                                      setIsEditModalOpen(true);
-                                                      setIsDropdownOpen(false);
-                                                    }}
-                                                    className="p-1.5 text-gray-500 hover:text-[#F48120] rounded-full hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors"
-                                                    title="Editar prompt"
-                                                    aria-label={`Editar ${prompt.name}`}
-                                                  >
-                                                    <PencilSimple size={16} weight="bold" />
-                                                  </button>
-                                                  <button
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      setPromptToDelete(prompt);
-                                                      setIsDeleteModalOpen(true);
-                                                      setIsDropdownOpen(false);
-                                                    }}
-                                                    className="p-1.5 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors"
-                                                    title="Eliminar prompt"
-                                                    aria-label={`Eliminar ${prompt.name}`}
-                                                  >
-                                                    <Trash size={16} weight="bold" />
-                                                  </button>
-                                                </div>
-                                              </div>
-                                              {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                                                {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                                                 {prompt.content}
                                               </p> */}
+                                              </div>
+                                            ))
+                                          ) : (
+                                            <div className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                                              {searchTerm ? 'No se encontraron resultados' : 'No hay prompts guardados'}
                                             </div>
-                                          ))
-                                        ) : (
-                                          <div className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
-                                            {searchTerm ? 'No se encontraron resultados' : 'No hay prompts guardados'}
-                                          </div>
-                                        )}
+                                          )}
+                                        </div>
                                       </div>
-                                    </div>
-                                  </>
+                                    </>
                                   )}
                                 </div>
                                 <div className="flex sm:flex-col gap-2 w-full sm:w-auto mt-2 sm:mt-0">
@@ -785,6 +759,19 @@ export const SettingsDropdown = ({
                               document.body
                             )}
                           </div>
+
+                          <motion.button
+                            onClick={() => handleMenuItemClick(toggleSidebar)}
+                            className="flex w-full items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-purple-500/50 transition-colors"
+                            variants={menuItemVariants}
+                            custom={isMobile ? 1 : 0}
+                            initial="closed"
+                            animate="open"
+                          >
+                            <UserCirclePlus size={18} weight="duotone" className="mr-3 text-[#F48120]" />
+                            {/* {isSidebarOpen ? 'Personaliza tu Asistente IA' : 'Personaliza tu Asistente IA'} */}
+                            Personaliza tus prompts
+                          </motion.button>
                         </div>
 
                         {/* Comportamiento Section */}
@@ -792,10 +779,49 @@ export const SettingsDropdown = ({
                           <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Comportamiento</div>
                         </div> */}
 
+                        {/* Categoría: Configuración de IA */}
+                        <div className="px-2 py-2">
+                          <h4 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2 mt-2">Configuración de IA</h4>
+
+                          <motion.button
+                            onClick={() => {
+                              handleAISettingsClick();
+                              // controls.start('closed').then(() => {
+                              //   setTimeout(() => setIsOpen(false), 150);
+                              // });
+                            }}
+                            className="flex w-full items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-purple-500/50 transition-colors"
+                            variants={menuItemVariants}
+                            custom={1}
+                            initial="closed"
+                            animate="open"
+                          >
+                            <Gear size={18} weight="duotone" className="mr-3 text-purple-500" />
+                            Configuración Asistente IA
+                          </motion.button>
+                        </div>
+                        <div className="px-2 py-2">
+                          {/* Categoría: Ajustes de Interfaz */}
+                          <h4 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2 mt-2">Ajustes de Interfaz</h4>
+
+                          <motion.button
+                            // onClick={() => navigateToPanel('settings')}
+                            onClick={() => setShowSettingsMenu(true)}
+                            className="flex w-full items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-purple-500/50 transition-colors"
+                            variants={menuItemVariants}
+                            custom={3}
+                            initial="closed"
+                            animate="open"
+                          >
+                            <PaintBrushBroad size={18} weight="duotone" className="mr-3 text-green-500" />
+                            Ajustes Personalizados
+                          </motion.button>
+
+                        </div>
                         {/* Nivel de Asistencia */}
                         {selectedModel === 'gemini-2.0-flash' && (
                           <div className="px-2 py-2">
-                            <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-2">Nivel de Asistencia</div>
+                            <h4 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2 mt-2">Nivel de Asistencia</h4>
                             <div className="px-2 py-2 space-y-2">
                               <div className="relative h-2 bg-gradient-to-r from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-700 rounded-full overflow-hidden shadow-inner">
                                 <div
@@ -858,48 +884,6 @@ export const SettingsDropdown = ({
                           </div>
                         )}
 
-                             {/* Categoría: Configuración de IA */}
-                             <div className="px-2 py-1 mt-1">
-                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-1">Configuración de IA</div>
-                        </div>
-
-                        <motion.button
-                          onClick={() => {
-                            handleAISettingsClick();
-                            controls.start('closed').then(() => {
-                              setTimeout(() => setIsOpen(false), 150);
-                            });
-                          }}
-                          className={`flex w-full items-center px-4 py-3 text-sm rounded-xl transition-all duration-200 mb-1 ${isSidebarOpen
-                            ? 'bg-gradient-to-r from-[#F48120]/10 to-purple-500/10 text-[#F48120] font-medium'
-                            : 'text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50'
-                            }`}
-                          variants={menuItemVariants}
-                          custom={1}
-                          initial="closed"
-                          animate="open"
-                        >
-                          <Gear size={18} weight="duotone" className="mr-3 text-purple-500" />
-                          Configuración Asistente IA
-                        </motion.button>
-
-                        {/* Categoría: Ajustes de Interfaz */}
-                        <div className="px-2 py-1 mt-1">
-                          <div className="text-xs font-bold text-[#F48120] tracking-wide uppercase opacity-80 mb-1">Ajustes de Interfaz</div>
-                        </div>
-                        
-                        <motion.button
-                          onClick={() => navigateToPanel('settings')}
-                          className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
-                          variants={menuItemVariants}
-                          custom={3}
-                          initial="closed"
-                          animate="open"
-                        >
-                          <PaintBrushBroad size={18} weight="duotone" className="mr-3 text-green-500" />
-                          Ajustes Personalizados
-                        </motion.button>
-                   
                         {/* <motion.button
                           onClick={() => navigateToPanel('profile')}
                           className="flex w-full items-center px-4 py-3 text-sm rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100/50 dark:hover:bg-neutral-700/50 transition-colors mb-1"
