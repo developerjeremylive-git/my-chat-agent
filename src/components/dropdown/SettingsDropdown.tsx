@@ -403,19 +403,20 @@ export const SettingsDropdown = ({
 
                           <div className="px-2 py-2 space-y-2">
                             <div className="space-y-2">
-                              <div className="flex gap-2">
-                                <div className="relative flex-1" ref={dropdownRef}>
+                              <div className="flex flex-col sm:flex-row gap-2 w-full">
+                                <div className="relative w-full" ref={dropdownRef}>
                                   <button
                                     onClick={() => {
                                       setIsDropdownOpen(!isDropdownOpen);
                                       if (!isDropdownOpen) setSearchTerm('');
                                     }}
-                                    className="w-full px-4 py-2.5 text-sm text-left rounded-xl bg-white/80 dark:bg-neutral-900/80 border border-neutral-200/80 dark:border-neutral-700/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 transition-colors truncate flex justify-between items-center"
+                                    className="w-full px-4 py-3 text-sm text-left rounded-xl bg-white/80 dark:bg-neutral-900/80 border border-neutral-200/80 dark:border-neutral-700/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 transition-colors truncate flex justify-between items-center"
+                                    aria-label={savedPrompts.length > 0 ? 'Seleccionar prompt guardado' : 'No hay prompts guardados'}
                                   >
-                                    <span className="truncate">
+                                    <span className="truncate text-left">
                                       {savedPrompts.length > 0 ? 'Seleccionar prompt guardado...' : 'No hay prompts guardados'}
                                     </span>
-                                    <CaretDown size={16} weight="bold" className={`transition-transform duration-200 ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
+                                    <CaretDown size={18} weight="bold" className={`flex-shrink-0 ml-2 transition-transform duration-200 ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
                                   </button>
 
                                   {isDropdownOpen && (
@@ -486,31 +487,37 @@ export const SettingsDropdown = ({
                                     </div>
                                   )}
                                 </div>
-                                <div className="flex space-x-1">
+                                <div className="flex sm:flex-col gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                                   <button
                                     onClick={() => setIsModalOpen(true)}
-                                    className="p-2.5 rounded-lg bg-white/80 dark:bg-neutral-800 border border-neutral-200/80 dark:border-neutral-700/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 hover:bg-[#F48120]/10 transition-colors"
-                                    title="Editar prompt actual"
+                                    className="flex-1 sm:flex-none flex items-center justify-center p-3 sm:p-2.5 rounded-lg bg-white/80 dark:bg-neutral-800 border border-neutral-200/80 dark:border-neutral-700/50 hover:border-[#F48120]/50 dark:hover:border-[#F48120]/50 hover:bg-[#F48120]/10 transition-colors"
+                                    aria-label="Editar prompt actual"
                                   >
-                                    <NotePencil size={18} weight="duotone" className="text-[#F48120]" />
+                                    <NotePencil size={20} weight="duotone" className="text-[#F48120] sm:block" />
+                                    <span className="ml-2 sm:hidden text-sm">Editar</span>
                                   </button>
                                   <button
                                     onClick={() => setIsPromptModalOpen(true)}
-                                    className="p-2.5 rounded-lg bg-[#F48120]/10 hover:bg-[#F48120]/20 text-[#F48120] transition-colors"
-                                    title="Guardar prompt"
+                                    className="flex-1 sm:flex-none flex items-center justify-center p-3 sm:p-2.5 rounded-lg bg-[#F48120]/10 hover:bg-[#F48120]/20 text-[#F48120] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    aria-label="Guardar prompt"
                                     disabled={!systemPrompt.trim()}
                                   >
-                                    <FloppyDisk size={18} weight="duotone" />
+                                    <FloppyDisk size={20} weight="duotone" className="sm:block" />
+                                    <span className="ml-2 sm:hidden text-sm">Guardar</span>
                                   </button>
                                 </div>
                               </div>
 
                               {/* Vista previa del prompt actual */}
                               <div
-                                className="text-sm p-3 bg-white/50 dark:bg-neutral-800/50 rounded-lg border border-dashed border-gray-200 dark:border-neutral-700 cursor-pointer"
+                                className="text-sm p-4 bg-white/50 dark:bg-neutral-800/50 rounded-lg border border-dashed border-gray-200 dark:border-neutral-700 cursor-pointer transition-colors hover:bg-white/70 dark:hover:bg-neutral-800/70 active:bg-white/90 dark:active:bg-neutral-800/90"
                                 onClick={() => setIsModalOpen(true)}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => e.key === 'Enter' && setIsModalOpen(true)}
+                                aria-label="Editar prompt del sistema"
                               >
-                                <p className={`${!systemPrompt ? 'text-gray-400 dark:text-gray-500 italic' : 'text-gray-700 dark:text-gray-300'} line-clamp-3`}>
+                                <p className={`${!systemPrompt ? 'text-gray-400 dark:text-gray-500 italic' : 'text-gray-700 dark:text-gray-300'} line-clamp-3 break-words`}>
                                   {systemPrompt || 'Haz clic para editar el prompt del sistema...'}
                                 </p>
                               </div>
