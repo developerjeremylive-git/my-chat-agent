@@ -1166,7 +1166,7 @@ function ChatComponent() {
               >
                 <div className="relative group max-w-4xl mx-auto w-full">
                   <div className="relative bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    {/* <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div> */}
 
                     {/* Input field */}
                     <div className="relative z-10 p-3">
@@ -1182,7 +1182,7 @@ function ChatComponent() {
                           onValueChange={undefined}
                           onClick={() => { setSystemPrompt(false); }}
                         />
-                        <div className="absolute top-26 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div>
+                        {/* <div className="absolute top-26 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div> */}
                       </div>
                     </div>
 
@@ -1996,7 +1996,7 @@ function ChatComponent() {
             {agentMessages.length !== 0 && (
               <div className={`relative bg-gradient-to-t from-white/95 via-white/90 to-transparent dark:from-neutral-900/95 dark:via-neutral-900/90 dark:to-transparent backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/50`}>
                 {/* Decorative top border */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div>
+                {/* <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div> */}
 
                 <div className="flex flex-row items-stretch gap-3 p-3 w-full">
                   {/* Input Form */}
@@ -2092,7 +2092,7 @@ function ChatComponent() {
                         </div>
                       </div> */}
                       <div className="relative bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                        {/* <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div> */}
 
                         {/* Input field */}
                         <div className="relative z-10 p-3">
