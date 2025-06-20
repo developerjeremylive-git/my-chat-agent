@@ -1081,7 +1081,7 @@ function ChatComponent() {
         </div>,
         document.body
       )}
-      <div className={`flex h-[calc(100vh-2rem)] ${isMenuStatic ? 'flex-1' : getMainWidth()} ${isMenuStatic ? 'ml-0' : 'mx-auto'} flex-col shadow-xl rounded-md overflow-hidden relative border border-neutral-300 dark:border-neutral-800 transition-all duration-300`}>
+      <div className={`flex h-[calc(100vh-2rem)] ${isMenuStatic ? 'flex-1' : getMainWidth()} ${isMenuStatic ? 'ml-0' : 'mx-auto'} flex-col shadow-xl rounded-md overflow-hidden relative transition-all duration-300`}>
         {isMenuStatic && <div className="w-0 flex-shrink-0"></div>}
         {/* Header Component */}
         <div className="sticky top-0 z-60 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800">
@@ -1136,10 +1136,10 @@ function ChatComponent() {
 
         <div
           ref={messagesContainerRef}
-          className={`flex-1 overflow-y-auto p-4 space-y-4 pb-24 max-h-[calc(100vh-5rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden mt-0`}
+          className={`flex-1 overflow-y-auto p-4 pb-24 max-h-[calc(100vh-5rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden mt-0 space-y-4'}`}
         >
           {/* Messages container */}
-          <div className="space-y-4">
+          <div className={`${agentMessages.length === 0 ? 'text-center p-8 text-muted-foreground' : 'space-y-4'}`}>
             {agentMessages.map((m: Message, index) => {
               const isUser = m.role === "user";
               const showAvatar =
@@ -1177,9 +1177,9 @@ function ChatComponent() {
                                   <Card
                                     className={`p-4 rounded-2xl ${isUser
                                       ? 'bg-[#F48120]/10 dark:bg-[#F48120]/10 rounded-br-none ml-8'
-                                      : 'bg-neutral-100 dark:bg-neutral-900/80 backdrop-blur-sm rounded-bl-none mr-8 border border-neutral-200 dark:border-neutral-700'
+                                      : 'bg-neutral-100 dark:bg-neutral-900/80 backdrop-blur-sm rounded-bl-none mr-8'
                                       } ${part.text.startsWith("scheduled message")
-                                        ? "border-accent/50"
+                                        ? ""
                                         : ""
                                       } relative ${textSize === 'small' ? 'text-sm' : textSize === 'large' ? 'text-lg' : 'text-base'} shadow-sm break-words transition-all duration-200`}
                                   >
