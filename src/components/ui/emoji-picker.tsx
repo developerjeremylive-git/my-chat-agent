@@ -57,18 +57,8 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close picker when clicking outside or pressing Escape
+  // Handle Escape key press
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      const isColorPicker = colorPickerRef.current?.contains(target);
-      const isPicker = pickerRef.current?.contains(target);
-      
-      if (!isPicker && !isColorPicker) {
-        onClose();
-      }
-    };
-
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         if (showColorPicker) {
@@ -81,25 +71,46 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscape);
-    
-      // No focus management needed without search
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose, activeCategory, showColorPicker]);
+  
+  // Handle click outside to close the picker
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const isColorPicker = colorPickerRef.current?.contains(target);
+      const isPicker = pickerRef.current?.contains(target);
+      
+      // Only close if clicking outside both the picker and color picker
+      if (!isPicker && !isColorPicker) {
+        onClose();
+      }
     };
-  }, [onClose, activeCategory]);
+    
+    // Use a small timeout to prevent immediate click handling
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 0);
+    
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
 
   const handleEmojiClick = (emoji: string, event: React.MouseEvent) => {
+    // Only close for regular emoji selection, not for category navigation
     event.stopPropagation();
+    event.preventDefault();
     onSelect(emoji);
     onClose();
   };
 
   const handleCategoryClick = (category: EmojiCategory, event: React.MouseEvent) => {
     event.stopPropagation();
+    event.preventDefault();
+    // Don't close the picker, just update the category
     setActiveCategory(category);
   };
 
@@ -111,9 +122,23 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
   const positionClasses = 'fixed inset-0 flex items-center justify-center bg-black/50 z-50';
   const pickerClasses = 'relative bg-white dark:bg-[#1F1F1F] rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden w-[420px] max-h-[500px] flex flex-col';
 
+  // Handle click on the overlay (outside the picker)
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    // Only close if clicking directly on the overlay, not on any children
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+  
+  // Stop propagation for all internal clicks
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
   return (
     <AnimatePresence>
-      <div className={positionClasses} onClick={onClose}>
+      <div className={positionClasses} onClick={handleOverlayClick}>
         <motion.div
           ref={pickerRef}
           initial={{ opacity: 0, scale: 0.95 }}
@@ -121,7 +146,8 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
           className={pickerClasses}
-          onClick={(e) => e.stopPropagation()}
+          onClick={stopPropagation}
+          onMouseDown={stopPropagation}
         >
         <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 flex-shrink-0">
           <div className="relative mb-3">
