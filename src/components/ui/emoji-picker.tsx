@@ -157,9 +157,18 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
               <div className="flex items-center gap-2">
                 <div className="relative" ref={colorPickerRef}>
                   <button 
-                    onClick={() => setShowColorPicker(!showColorPicker)}
-                    className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-[#2F2F2F] text-neutral-500 dark:text-neutral-400"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setShowColorPicker(!showColorPicker);
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }}
+                    className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-[#2F2F2F] text-neutral-500 dark:text-neutral-400 focus:outline-none"
                     aria-label="Cambiar color"
+                    type="button"
                   >
                     <div className={`w-5 h-5 rounded-full ${selectedColor === 'default' ? 'bg-gradient-to-br from-yellow-400 to-orange-400' : colorOptions.find(c => c.id === selectedColor)?.bg}`} />
                   </button>
@@ -182,12 +191,20 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                               whileTap={{ scale: 0.95 }}
                               onClick={(e) => {
                                 e.stopPropagation();
+                                e.preventDefault();
                                 setSelectedColor(color.id);
                                 setShowColorPicker(false);
                               }}
-                              className={`w-6 h-6 rounded-full ${color.bg} flex items-center justify-center transition-all ${selectedColor === color.id ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-[#2A2A2A] ring-white' : ''}`}
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                              }}
+                              className={`w-6 h-6 rounded-full ${color.bg} flex items-center justify-center transition-all focus:outline-none ${
+                                selectedColor === color.id ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-[#2A2A2A] ring-white' : ''
+                              }`}
                               aria-label={`Color ${color.id}`}
                               title={color.id.charAt(0).toUpperCase() + color.id.slice(1)}
+                              type="button"
                             >
                               {selectedColor === color.id && <Check size={12} weight="bold" className="text-white" />}
                             </motion.button>
