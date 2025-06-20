@@ -3,21 +3,22 @@ import { emojis, emojiCategories, type EmojiCategory } from '@/lib/emojis';
 import { Smiley, MagnifyingGlass, X, ArrowLeft, Check } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type EmojiColor = 'default' | 'yellow' | 'blue' | 'purple' | 'green' | 'red' | 'orange';
+type EmojiColor = 'default' | 'yellow' | 'cyan' | 'purple' | 'green' | 'red' | 'orange';
 
+// Color mapping for emoji filters
 const colorMap: Record<EmojiColor, string> = {
   default: 'filter-none',
-  yellow: 'filter-hue-rotate-0 brightness-100 contrast-100',
-  blue: 'filter-hue-rotate-[-200deg] brightness-100 contrast-100',
-  purple: 'filter-hue-rotate-[-120deg] brightness-100 contrast-100',
-  green: 'filter-hue-rotate-[-80deg] brightness-100 contrast-100',
-  red: 'filter-hue-rotate-[-50deg] brightness-100 contrast-100',
-  orange: 'filter-hue-rotate-[-30deg] brightness-100 contrast-100',
+  yellow: 'hue-rotate(0deg) saturate(1.5) brightness(1.1)',
+  cyan: 'hue-rotate(180deg) saturate(1.5) brightness(1.1)',
+  purple: 'hue-rotate(270deg) saturate(1.5) brightness(1.1)',
+  green: 'hue-rotate(100deg) saturate(1.5) brightness(1.1)',
+  red: 'hue-rotate(0deg) saturate(2) brightness(1.1) hue-rotate(-30deg)',
+  orange: 'hue-rotate(20deg) saturate(1.5) brightness(1.1)',
 };
 
 const colorOptions: { id: EmojiColor; bg: string; selectedBg: string }[] = [
   { id: 'yellow', bg: 'bg-yellow-400', selectedBg: 'ring-2 ring-offset-2 ring-yellow-400' },
-  { id: 'blue', bg: 'bg-blue-400', selectedBg: 'ring-2 ring-offset-2 ring-blue-400' },
+  { id: 'cyan', bg: 'bg-cyan-400', selectedBg: 'ring-2 ring-offset-2 ring-cyan-400' },
   { id: 'purple', bg: 'bg-purple-400', selectedBg: 'ring-2 ring-offset-2 ring-purple-400' },
   { id: 'green', bg: 'bg-green-400', selectedBg: 'ring-2 ring-offset-2 ring-green-400' },
   { id: 'red', bg: 'bg-red-400', selectedBg: 'ring-2 ring-offset-2 ring-red-400' },
@@ -224,14 +225,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                   }`}
                   style={{
                     transformOrigin: 'center',
-                    filter: selectedColor !== 'default' ? `hue-rotate(${
-                      selectedColor === 'yellow' ? '0' :
-                      selectedColor === 'blue' ? '-200deg' :
-                      selectedColor === 'purple' ? '-120deg' :
-                      selectedColor === 'green' ? '-80deg' :
-                      selectedColor === 'red' ? '-50deg' :
-                      selectedColor === 'orange' ? '-30deg' : '0'
-                    }) brightness(100%) contrast(100%)` : 'none'
+                    filter: selectedColor !== 'default' ? colorMap[selectedColor] : 'none'
                   }}
                   aria-label={`Emoji ${emoji}`}
                 >
@@ -282,14 +276,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                       }`}
                       style={{
                         transformOrigin: 'center',
-                        filter: selectedColor !== 'default' ? `hue-rotate(${
-                          selectedColor === 'yellow' ? '0' :
-                          selectedColor === 'blue' ? '-200deg' :
-                          selectedColor === 'purple' ? '-120deg' :
-                          selectedColor === 'green' ? '-80deg' :
-                          selectedColor === 'red' ? '-50deg' :
-                          selectedColor === 'orange' ? '-30deg' : '0'
-                        }) brightness(100%) contrast(100%)` : 'none'
+                        filter: selectedColor !== 'default' ? colorMap[selectedColor] : 'none'
                       }}
                       aria-label={`Emoji ${emoji}`}
                     >
