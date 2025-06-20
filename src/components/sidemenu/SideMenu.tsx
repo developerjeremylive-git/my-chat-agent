@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/button/Button';
-import { X, ChatText, Gear, Brain, Rocket, Trash, PencilSimple, Warning, DotsThreeVertical, PushPin, PushPinSlash } from '@phosphor-icons/react';
+import { X, ChatText, Gear, Brain, Rocket, Trash, PencilSimple, Warning, DotsThreeVertical, PushPin, PushPinSlash, Plus, FolderSimple } from '@phosphor-icons/react';
 import { useChat } from '@/contexts/ChatContext';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { WorkspaceModal } from '@/components/workspace/WorkspaceModal';
 
 import type { ChatData, LocalMessage, LocalChatData, ChatMessage } from '@/types/chat';
+import type { Workspace } from '@/lib/types/workspace';
 
 interface EditTitleModalProps {
     isOpen: boolean;
@@ -16,6 +18,7 @@ interface EditTitleModalProps {
 }
 
 // Using LocalChatData from types/chat.ts
+// Workspace type is imported from ../../types/workspace.ts
 
 interface SideMenuProps {
     isOpen: boolean;
@@ -162,6 +165,80 @@ export function SideMenu({
     const [showNewChatModal, setShowNewChatModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [newChatTitle, setNewChatTitle] = useState('Nuevo Chat');
+    
+    // Workspace state
+    const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+    const [expandedWorkspace, setExpandedWorkspace] = useState<string | null>(null);
+    const [workspaceToEdit, setWorkspaceToEdit] = useState<Workspace | null>(null);
+    const [showWorkspaceModal, setShowWorkspaceModal] = useState<boolean>(false);
+
+    // Load workspaces from localStorage on mount
+    useEffect(() => {
+        const savedWorkspaces = localStorage.getItem('workspaces');
+        if (savedWorkspaces) {
+            try {
+                const parsedWorkspaces = JSON.parse(savedWorkspaces);
+                const workspacesWithDates = parsedWorkspaces.map((w: any) => ({
+                    ...w,
+                    createdAt: new Date(w.createdAt),
+                    updatedAt: new Date(w.updatedAt)
+                }));
+                setWorkspaces(workspacesWithDates);
+            } catch (error) {
+                console.error('Error parsing workspaces:', error);
+            }
+        }
+    }, []);
+
+    // Save workspaces to localStorage when they change
+    useEffect(() => {
+        if (workspaces.length > 0) {
+            localStorage.setItem('workspaces', JSON.stringify(workspaces));
+        }
+    }, [workspaces]);
+
+    const handleCreateWorkspace = (data: {
+        title: string;
+        emoji: string;
+        description: string;
+        instructions: string;
+    }) => {
+        const newWorkspace: Workspace = {
+            id: `workspace-${Date.now()}`,
+            ...data,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+        setWorkspaces(prev => [...prev, newWorkspace]);
+        setShowWorkspaceModal(false);
+    };
+
+    const handleUpdateWorkspace = (data: {
+        title: string;
+        emoji: string;
+        description: string;
+        instructions: string;
+    }) => {
+        if (!workspaceToEdit) return;
+        
+        setWorkspaces(prev => 
+            prev.map(w => 
+                w.id === workspaceToEdit.id 
+                    ? { ...w, ...data, updatedAt: new Date() } 
+                    : w
+            )
+        );
+        setWorkspaceToEdit(null);
+        setShowWorkspaceModal(false);
+    };
+
+    const handleDeleteWorkspace = (workspaceId: string) => {
+        setWorkspaces(prev => prev.filter(w => w.id !== workspaceId));
+    };
+
+    const toggleWorkspace = (workspaceId: string) => {
+        setExpandedWorkspace(prev => prev === workspaceId ? null : workspaceId);
+    };
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -470,7 +547,122 @@ export function SideMenu({
                                 </div>
                             </div>
 
-                            {/* Contenido */}
+                            {/* Workspace Modal */}
+                            <WorkspaceModal
+                                isOpen={showWorkspaceModal}
+                                onClose={() => {
+                                    setShowWorkspaceModal(false);
+                                    setWorkspaceToEdit(null);
+                                }}
+                                onSubmit={workspaceToEdit ? handleUpdateWorkspace : handleCreateWorkspace}
+                                initialData={workspaceToEdit}
+                            />
+
+                            {/* Chats Section */}
+                            <div className="border-b border-neutral-200 dark:border-neutral-700 p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                                        Espacios de trabajo
+                                    </h3>
+                                    <button
+                                        onClick={() => {
+                                            setWorkspaceToEdit(null);
+                                            setShowWorkspaceModal(true);
+                                        }}
+                                        className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+                                        title="Nuevo espacio"
+                                    >
+                                        <Plus size={18} weight="bold" />
+                                    </button>
+                                </div>
+
+                                {workspaces.length > 0 ? (
+                                    <div className="space-y-1">
+                                        {workspaces.map(workspace => (
+                                            <div key={workspace.id} className="rounded-lg overflow-hidden">
+                                                <button
+                                                    onClick={() => toggleWorkspace(workspace.id)}
+                                                    className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium ${
+                                                        expandedWorkspace === workspace.id 
+                                                            ? 'bg-neutral-100 dark:bg-neutral-800' 
+                                                            : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
+                                                    } transition-colors`}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-lg">{workspace.emoji}</span>
+                                                        <span className="truncate">{workspace.title}</span>
+                                                    </div>
+                                                    <svg
+                                                        className={`w-4 h-4 text-neutral-500 transition-transform ${
+                                                            expandedWorkspace === workspace.id ? 'rotate-180' : ''
+                                                        }`}
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </button>
+                                                
+                                                {expandedWorkspace === workspace.id && (
+                                                    <div className="pl-11 pr-2 py-1 bg-neutral-50 dark:bg-neutral-800/30">
+                                                        {workspace.description && (
+                                                            <div className="text-xs text-neutral-500 dark:text-neutral-400 mb-2 line-clamp-2">
+                                                                {workspace.description}
+                                                            </div>
+                                                        )}
+                                                        <div className="flex justify-between items-center text-xs text-neutral-500 dark:text-neutral-400">
+                                                            <span>
+                                                                Actualizado {formatDistanceToNow(workspace.updatedAt, { addSuffix: true, locale: es })}
+                                                            </span>
+                                                            <div className="flex gap-1">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setWorkspaceToEdit(workspace);
+                                                                        setShowWorkspaceModal(true);
+                                                                    }}
+                                                                    className="p-1 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded"
+                                                                    title="Editar espacio"
+                                                                >
+                                                                    <PencilSimple size={14} weight="bold" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        if (window.confirm(`¿Estás seguro de que quieres eliminar el espacio "${workspace.title}"?`)) {
+                                                                            handleDeleteWorkspace(workspace.id);
+                                                                        }
+                                                                    }}
+                                                                    className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                                                                    title="Eliminar espacio"
+                                                                >
+                                                                    <Trash size={14} weight="bold" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-4">
+                                        <FolderSimple size={32} weight="duotone" className="mx-auto text-neutral-400 mb-2" />
+                                        <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-3">
+                                            Crea tu primer espacio para organizar tus chats
+                                        </p>
+                                        <button
+                                            onClick={() => setShowWorkspaceModal(true)}
+                                            className="text-sm font-medium text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 flex items-center justify-center gap-1 mx-auto"
+                                        >
+                                            <Plus size={16} weight="bold" />
+                                            <span>Nuevo espacio</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
                             <div className="flex-1 overflow-y-auto space-y-6 p-4">
                                 {/* Acciones principales */}
                                 <div className="space-y-2">
