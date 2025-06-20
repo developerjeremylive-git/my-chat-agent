@@ -210,14 +210,14 @@ const MODEL_LISTS = {
 type ModelCategory = keyof typeof MODEL_LISTS;
 
 // Model item component with memoization
-const ModelItem = React.memo(({ 
-  model, 
-  isSelected, 
-  onSelect, 
+const ModelItem = React.memo(({
+  model,
+  isSelected,
+  onSelect,
   onCopy,
-  isCopied 
-}: { 
-  model: Model; 
+  isCopied
+}: {
+  model: Model;
   isSelected: boolean;
   onSelect: (model: Model) => void;
   onCopy: (e: React.MouseEvent, modelName: string) => void;
@@ -318,15 +318,15 @@ const ModelItem = React.memo(({
 }, areEqual);
 
 // Virtualized list for better performance with many items
-const ModelList = React.memo(({ 
-  models, 
-  selectedModel, 
-  onSelect, 
+const ModelList = React.memo(({
+  models,
+  selectedModel,
+  onSelect,
   onCopy,
   copiedModel
-}: { 
-  models: Model[]; 
-  selectedModel: Model | null; 
+}: {
+  models: Model[];
+  selectedModel: Model | null;
   onSelect: (model: Model) => void;
   onCopy: (e: React.MouseEvent, modelName: string) => void;
   copiedModel: string | null;
@@ -334,7 +334,7 @@ const ModelList = React.memo(({
   const Row = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
     const model = models[index];
     if (!model) return null;
-    
+
     return (
       <div style={style}>
         <DropdownMenu.Item
@@ -347,9 +347,9 @@ const ModelList = React.memo(({
           )}
           onClick={() => onSelect(model)}
         >
-          <ModelItem 
-            model={model} 
-            isSelected={selectedModel?.name === model.name} 
+          <ModelItem
+            model={model}
+            isSelected={selectedModel?.name === model.name}
             onSelect={onSelect}
             onCopy={(e) => onCopy(e, model.name)}
             isCopied={copiedModel === model.name}
@@ -374,9 +374,9 @@ const ModelList = React.memo(({
               )}
               onClick={() => onSelect(model)}
             >
-              <ModelItem 
-                model={model} 
-                isSelected={selectedModel?.name === model.name} 
+              <ModelItem
+                model={model}
+                isSelected={selectedModel?.name === model.name}
                 onSelect={onSelect}
                 onCopy={(e) => onCopy(e, model.name)}
                 isCopied={copiedModel === model.name}
@@ -409,7 +409,7 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
   // Filter models based on search query (using debounced search for better performance)
   const filteredModels = React.useMemo(() => {
     if (!debouncedSearchQuery.trim()) return modelCategories;
-    
+
     const query = debouncedSearchQuery.toLowerCase();
     return Object.entries(modelCategories).reduce((acc, [category, models]) => {
       const filtered = models.filter(model =>
@@ -428,10 +428,10 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
   // Filter models based on real-time search query (for instant feedback)
   const filteredModelsRealTime = React.useMemo(() => {
     if (!searchQuery.trim()) return modelCategories;
-    
+
     const searchLower = searchQuery.toLowerCase();
     return Object.entries(modelCategories).reduce((acc, [category, models]) => {
-      const filtered = models.filter(model => 
+      const filtered = models.filter(model =>
         model.name.toLowerCase().includes(searchLower) ||
         model.provider.toLowerCase().includes(searchLower) ||
         model.description.toLowerCase().includes(searchLower) ||
@@ -449,6 +449,38 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
   const hasRealTimeSearchResults = Object.values(filteredModelsRealTime).some(models => models.length > 0);
 
   // Handle model selection
+  const handleSelectModel = useCallback((model: Model) => {
+    setSelectedModel(model);
+    setContextModel(model.name);
+  }, [setContextModel]);
+
+  // const handleSelectModel = useCallback(async (model: Model) => {
+  //   try {
+  //     // Update local state immediately for better UX
+  //     setSelectedModel(model);
+  //     setContextModel(model.name);
+
+  //     // Update the model on the server
+  //     const response = await fetch('/api/model', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ modelTemp: model.name })
+  //     });
+
+  //     if (!response.ok) {
+  //       const error = await response.json();
+  //       console.error('Failed to update model:', error);
+  //       // Optionally show an error message to the user here
+  //     }
+  //   } catch (error) {
+  //     console.error('Error updating model:', error);
+  //     // Optionally show an error message to the user here
+  //   }
+  // }, [setContextModel]);
+
+  // Handle copy model name
   const handleCopy = useCallback(async (e: React.MouseEvent, modelName: string) => {
     e?.stopPropagation?.(); // Safely call stopPropagation if event exists
     try {
@@ -456,17 +488,12 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
       setCopiedModel(modelName);
       // Reset the copied state after 2 seconds
       setTimeout(() => setCopiedModel(null), 2000);
-    } catch (err) {
-      console.error('Failed to copy model name:', err);
+    } catch (error) {
+      console.error('Error copying model name:', error);
     }
   }, []);
 
-  const handleSelectModel = useCallback((model: Model) => {
-    setSelectedModel(model);
-    setContextModel(model.name);
-  }, [setContextModel]);
-
-  // Get provider icon for the selected model
+  // Get provider icon
   const getProviderIcon = useCallback((provider: string) => {
     switch (provider) {
       case 'DeepSeek / Meta':
@@ -491,7 +518,7 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
     <Tooltip.Provider>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
-          <div 
+          <div
             className={cn(
               'group flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer w-full',
               'bg-white dark:bg-neutral-900/50',
@@ -517,7 +544,7 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
             </div>
           </div>
         </DropdownMenu.Trigger>
-        
+
         <DropdownMenu.Portal>
           <DropdownMenu.Content
             className={cn(
@@ -587,7 +614,7 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
                 )}
               </div>
             </div>
-            
+
             {/* Model Lists */}
             <div className="flex-1 overflow-y-auto p-2">
               {!hasSearchResults ? (
@@ -602,7 +629,7 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
                 <>
                   {Object.entries(filteredModels).map(([category, models]) => {
                     if (models.length === 0) return null;
-                    
+
                     const categoryInfo = {
                       gemini: {
                         title: 'Modelos Gemini',
@@ -620,7 +647,7 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
                         color: 'text-purple-500 dark:text-purple-400'
                       }
                     }[category as ModelCategory];
-                    
+
                     return (
                       <div key={category} className="mb-6 last:mb-0">
                         <div className="sticky top-0 z-10 px-3 py-2 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md">
@@ -632,9 +659,9 @@ export function ModelSelect({ className, mobile = false }: ModelSelectProps) {
                           </p>
                         </div>
                         <div className="mt-1">
-                          <ModelList 
-                            models={models} 
-                            selectedModel={selectedModel} 
+                          <ModelList
+                            models={models}
+                            selectedModel={selectedModel}
                             onSelect={handleSelectModel}
                             onCopy={(e, modelName) => handleCopy(e, modelName)}
                             copiedModel={copiedModel}

@@ -699,6 +699,7 @@ app.post('/api/assistant', async (c) => {
     selectedModel = newModel;
     systemPrompt = newPrompt;
     // Validate maxSteps
+    model = workersai(newModel);
     if (typeof newMaxSteps === 'number' && newMaxSteps > 0 && newMaxSteps < 11) {
       await setMaxSteps(c.env, newMaxSteps);
       maxSteps = newMaxSteps;
