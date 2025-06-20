@@ -1136,7 +1136,7 @@ function ChatComponent() {
 
         <div
           ref={messagesContainerRef}
-          className={`flex-1 overflow-y-auto p-4 space-y-4 ${agentMessages.length === 0 ? 'flex flex-col justify-center items-center min-h-[calc(100vh-15rem)]' : 'pb-24'} max-h-[calc(100vh-5rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden mt-0`}
+          className={`flex-1 overflow-y-auto p-4 space-y-4 pb-24 max-h-[calc(100vh-5rem)] scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden mt-0`}
         >
           {/* Messages container */}
           <div className="space-y-4">
@@ -1199,7 +1199,7 @@ function ChatComponent() {
                                         />
                                       </div>
                                     </div>
-                                    {/* <div
+                                    <div
                                       id={`message-${m.id}-${i}`}
                                       className="markdown-content"
                                     >
@@ -1245,7 +1245,7 @@ function ChatComponent() {
                                           </p>
                                         )}
                                       </div>
-                                    </div> */}
+                                    </div>
                                   </Card>
                                   <p
                                     className={`text-xs text-muted-foreground mt-1 ${isUser ? "text-right" : "text-left"
