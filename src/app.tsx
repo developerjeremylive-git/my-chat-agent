@@ -1186,11 +1186,8 @@ function ChatComponent() {
                       </div>
                     </div>
 
-                    {/* Buttons row below input */}
-                    <div className="relative z-10 flex items-center justify-between px-3 pb-3 pt-1">
-                      <div className="flex items-center gap-2">
-                        {/* Attachment button */}
-                        {/* <Tooltip content="Adjuntar archivo">
+                    {/* Attachment button */}
+                    {/* <Tooltip content="Adjuntar archivo">
                           <Button
                             type="button"
                             variant="ghost"
@@ -1206,13 +1203,18 @@ function ChatComponent() {
                             <Paperclip size={16} className="relative z-10 text-neutral-500 group-hover:text-[#F48120] dark:group-hover:text-[#F48120] transition-colors duration-300" weight="bold" />
                           </Button>
                         </Tooltip> */}
+
+                    {/* Buttons row below input */}
+                    <div className="relative z-10 flex items-center justify-between px-3 pb-3 pt-1">
+                      <div className="flex-1">
+                        {/* Left side buttons can be added here in the future */}
+                      </div>
+                      <div className="flex items-center gap-2 mr-2">
                         {/* Model Select */}
                         <div className="w-40">
-                          <ModelSelect mobile={true} />
+                          <ModelSelect />
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-2">
                         {/* Send button */}
                         <button
                           type="submit"
@@ -1296,7 +1298,6 @@ function ChatComponent() {
                           {/* Subtle pulse effect */}
                           <div className="absolute inset-0 rounded-full border border-white/10 group-hover:border-white/20 transition-all duration-300"></div>
                         </button>
-                      </div>
                     </div>
                   </div>
 
@@ -2100,12 +2101,8 @@ function ChatComponent() {
                             onClick={() => { setSystemPrompt(false); }}
                           />
                         </div>
-
-                        {/* Buttons row below input */}
-                        <div className="relative z-10 flex items-center justify-between px-3 pb-3 pt-1">
-                          <div className="flex items-center gap-2">
-                            {/* Attachment button */}
-                            {/* <Tooltip content="Adjuntar archivo">
+                        {/* Attachment button */}
+                        {/* <Tooltip content="Adjuntar archivo">
                               <Button
                                 type="button"
                                 variant="ghost"
@@ -2121,12 +2118,16 @@ function ChatComponent() {
                                 <Paperclip size={16} className="relative z-10 text-neutral-500 group-hover:text-[#F48120] dark:group-hover:text-[#F48120] transition-colors duration-300" weight="bold" />
                               </Button>
                             </Tooltip> */}
+                        {/* Buttons row below input */}
+                        <div className="relative z-10 flex items-center justify-between px-3 pb-3 pt-1">
+                          <div className="flex items-center gap-2">
+                            {/* Left side buttons can be added here in the future */}
+                          </div>
+                          <div className="flex items-center gap-2">
                             {/* Model Select */}
                             <div className="w-40">
                               <ModelSelect />
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2">
                             {/* Send button */}
                             <button
                               type="submit"
