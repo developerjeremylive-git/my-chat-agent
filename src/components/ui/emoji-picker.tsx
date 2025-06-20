@@ -62,7 +62,11 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
   // Close picker when clicking outside or pressing Escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+      const target = event.target as HTMLElement;
+      const isColorPicker = colorPickerRef.current?.contains(target);
+      const isPicker = pickerRef.current?.contains(target);
+      
+      if (!isPicker && !isColorPicker) {
         onClose();
       }
     };
@@ -128,7 +132,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
   };
 
   const positionClasses = 'fixed inset-0 flex items-center justify-center bg-black/50 z-50';
-  const pickerClasses = 'relative bg-white dark:bg-neutral-800 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden w-80 max-h-[32rem] flex flex-col';
+  const pickerClasses = 'relative bg-white dark:bg-[#1F1F1F] rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden w-[420px] max-h-[500px] flex flex-col';
 
   return (
     <AnimatePresence>
@@ -158,26 +162,36 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                     <div className={`w-5 h-5 rounded-full ${selectedColor === 'default' ? 'bg-gradient-to-br from-yellow-400 to-orange-400' : colorOptions.find(c => c.id === selectedColor)?.bg}`} />
                   </button>
                   
-                  {showColorPicker && (
-                    <div className="absolute right-0 mt-2 w-48 p-2 bg-white dark:bg-[#2F2F2F] rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 z-10">
-                      <div className="grid grid-cols-7 gap-2">
-                        {colorOptions.map((color) => (
-                          <button
-                            key={color.id}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedColor(color.id);
-                              setShowColorPicker(false);
-                            }}
-                            className={`w-6 h-6 rounded-full ${color.bg} flex items-center justify-center ${selectedColor === color.id ? color.selectedBg : ''}`}
-                            aria-label={`Color ${color.id}`}
-                          >
-                            {selectedColor === color.id && <Check size={14} weight="bold" className="text-white" />}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <AnimatePresence>
+                    {showColorPicker && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 5 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 mt-2 w-48 p-3 bg-white dark:bg-[#2A2A2A] rounded-xl shadow-xl border border-neutral-100 dark:border-neutral-700 z-10"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="grid grid-cols-7 gap-2">
+                          {colorOptions.map((color) => (
+                            <motion.button
+                              key={color.id}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedColor(color.id);
+                              }}
+                              className={`w-6 h-6 rounded-full ${color.bg} flex items-center justify-center transition-all ${selectedColor === color.id ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-[#2A2A2A] ring-white' : ''}`}
+                              aria-label={`Color ${color.id}`}
+                            >
+                              {selectedColor === color.id && <Check size={12} weight="bold" className="text-white" />}
+                            </motion.button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
                 <button 
                   onClick={onClose}
@@ -214,7 +228,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
           </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto p-4">
           {activeCategory ? (
             <div className="grid grid-cols-8 gap-1 justify-items-center">
               {emojis[activeCategory].map((emoji) => (
@@ -286,7 +300,8 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                 </h3>
                 <div className="grid grid-cols-8 gap-1 justify-items-center">
                   {['😊', '👍', '❤️', '🔥', '🎉', '👋', '🤔', '😍'].map((emoji) => (
-                    <motion.button                      key={emoji}
+                    <motion.button
+                      key={emoji}
                       whileHover={{ scale: 1.2, rotate: 5 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={(e) => handleEmojiClick(emoji, e)}
