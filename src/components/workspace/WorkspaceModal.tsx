@@ -3,16 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, FolderPlus, Check, Sparkle } from '@phosphor-icons/react';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 
+interface WorkspaceFormData {
+  title: string;
+  emoji: string;
+  emojiColor?: string;
+  description: string;
+  instructions: string;
+}
+
 interface WorkspaceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { title: string; emoji: string; description: string; instructions: string }) => void;
-  initialData?: {
-    title: string;
-    emoji: string;
-    description: string;
-    instructions: string;
-  } | null;
+  onSubmit: (data: WorkspaceFormData) => void;
+  initialData?: Partial<WorkspaceFormData> | null;
 }
 
 export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
@@ -24,6 +27,7 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     emoji: initialData?.emoji || '📁',
+    emojiColor: initialData?.emojiColor || '',
     description: initialData?.description || '',
     instructions: initialData?.instructions || '',
   });
@@ -38,6 +42,7 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
       setFormData({
         title: initialData?.title || '',
         emoji: initialData?.emoji || '📁',
+        emojiColor: initialData?.emojiColor || '',
         description: initialData?.description || '',
         instructions: initialData?.instructions || '',
       });
@@ -73,10 +78,11 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
     }));
   };
 
-  const handleEmojiSelect = (emoji: string) => {
+  const handleEmojiSelect = (emoji: string, color?: string) => {
     setFormData(prev => ({
       ...prev,
-      emoji
+      emoji,
+      emojiColor: color || ''
     }));
     setShowEmojiPicker(false);
   };
@@ -90,6 +96,7 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
       await onSubmit({
         title: formData.title.trim(),
         emoji: formData.emoji,
+        emojiColor: formData.emojiColor,
         description: formData.description.trim(),
         instructions: formData.instructions.trim(),
       });
@@ -163,9 +170,8 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                     className="flex-shrink-0 w-12 h-12 flex items-center justify-center text-2xl rounded-xl bg-neutral-100 dark:bg-neutral-700/50 hover:bg-neutral-200 dark:hover:bg-neutral-600 transition-colors"
                     aria-label="Seleccionar emoji"
-                  >
-                    {formData.emoji}
-                  </button>
+                    dangerouslySetInnerHTML={{ __html: formData.emoji }}
+                  />
                   
                   {/* Emoji Picker */}
                   {showEmojiPicker && (

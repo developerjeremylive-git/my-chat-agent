@@ -589,7 +589,10 @@ export function SideMenu({
                                                     } transition-colors`}
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-lg">{workspace.emoji}</span>
+                                                        <span 
+                                                            className="text-lg" 
+                                                            dangerouslySetInnerHTML={{ __html: workspace.emoji }}
+                                                        />
                                                         <span className="truncate">{workspace.title}</span>
                                                     </div>
                                                     <svg

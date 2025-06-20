@@ -26,7 +26,7 @@ const colorOptions: { id: EmojiColor; bg: string; selectedBg: string }[] = [
 ];
 
 interface EmojiPickerProps {
-  onSelect: (emoji: string) => void;
+  onSelect: (emoji: string, color?: string) => void;
   onClose: () => void;
   selectedEmoji?: string;
   position?: 'top' | 'bottom';
@@ -102,7 +102,10 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
     // Only close for regular emoji selection, not for category navigation
     event.stopPropagation();
     event.preventDefault();
-    onSelect(emoji);
+    // Apply the selected color filter to the emoji
+    const coloredEmoji = selectedColor !== 'default' ? 
+      `<span style="filter: ${colorMap[selectedColor]}">${emoji}</span>` : emoji;
+    onSelect(coloredEmoji, selectedColor !== 'default' ? selectedColor : undefined);
     onClose();
   };
 
