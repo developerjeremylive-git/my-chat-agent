@@ -39,12 +39,10 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
   selectedEmoji,
   position = 'bottom'
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<EmojiCategory | null>(null);
   const [selectedColor, setSelectedColor] = useState<EmojiColor>('default');
   const [showColorPicker, setShowColorPicker] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
 
   // Close color picker when clicking outside
@@ -73,10 +71,10 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        if (activeCategory) {
+        if (showColorPicker) {
+          setShowColorPicker(false);
+        } else if (activeCategory) {
           setActiveCategory(null);
-        } else if (searchQuery) {
-          setSearchQuery('');
         } else {
           onClose();
         }
@@ -86,34 +84,13 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscape);
     
-    // Focus search input when picker opens
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+      // No focus management needed without search
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [onClose, activeCategory, searchQuery]);
-
-  const filteredEmojis = useMemo(() => {
-    if (!searchQuery) return emojis;
-    
-    const query = searchQuery.toLowerCase();
-    const result: Record<string, string[]> = {};
-    
-    emojiCategories.forEach(category => {
-      const filtered = emojis[category].filter(emoji => 
-        emoji.toLowerCase().includes(query)
-      );
-      if (filtered.length > 0) {
-        result[category] = filtered;
-      }
-    });
-    
-    return result;
-  }, [searchQuery]);
+  }, [onClose, activeCategory]);
 
   const handleEmojiClick = (emoji: string, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -204,33 +181,12 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
             </div>
           </div>
           
-          <div className="relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">
-              <MagnifyingGlass size={16} weight="bold" />
-            </div>
-            <input
-              ref={inputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar emojis..."
-              className="w-full pl-9 pr-3 py-2 bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-600 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
-                aria-label="Limpiar búsqueda"
-              >
-                <X size={16} weight="bold" />
-              </button>
-            )}
-          </div>
+
         </div>
         
         <div className="flex-1 overflow-y-auto p-4">
           {activeCategory ? (
-            <div className="grid grid-cols-8 gap-1 justify-items-center">
+            <div className="grid grid-cols-9 gap-2 justify-items-center">
               {emojis[activeCategory].map((emoji) => (
                 <motion.button
                   key={emoji}
@@ -247,51 +203,31 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                 </motion.button>
               ))}
             </div>
-          ) : searchQuery ? (
-            Object.entries(filteredEmojis).map(([category, categoryEmojis]) => (
-              <div key={category} className="mb-6">
-                <h3 className="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-3 px-1">
-                  {category}
+          ) : (
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-neutral-600 dark:text-neutral-300 px-1">
+                  Categorías
                 </h3>
-                <div className="grid grid-cols-8 gap-1 justify-items-center">
-                  {categoryEmojis.map((emoji) => (
+                <div className="grid grid-cols-8 gap-2 justify-items-center">
+                  {emojiCategories.map((category) => (
                     <motion.button
-                      key={emoji}
-                      whileHover={{ scale: 1.2, rotate: 5 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={(e) => handleEmojiClick(emoji, e)}
-                      className={`text-2xl w-9 h-9 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-[#2F2F2F] transition-transform will-change-transform ${
-                        selectedEmoji === emoji ? 'bg-neutral-100 dark:bg-[#2F2F2F]' : ''
-                      } ${selectedColor !== 'default' ? colorMap[selectedColor] : ''}`}
-                      style={{ transformOrigin: 'center' }}
-                      aria-label={`Emoji ${emoji}`}
+                      key={category}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={(e) => handleCategoryClick(category, e)}
+                      className="w-11 h-11 flex flex-col items-center justify-center rounded-xl hover:bg-neutral-100 dark:hover:bg-[#2A2A2A] transition-colors"
+                      title={category}
                     >
-                      {emoji}
+                      <span className="text-2xl">
+                        {emojis[category][0]}
+                      </span>
+                      <span className="text-[10px] text-neutral-500 dark:text-neutral-400 mt-1">
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                      </span>
                     </motion.button>
                   ))}
                 </div>
-              </div>
-            ))
-          ) : (
-            <div className="space-y-4">
-              <div className="grid grid-cols-8 gap-1 justify-items-center">
-                {emojiCategories.slice(0, 8).map((category) => (
-                  <motion.button
-                    key={category}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) => handleCategoryClick(category, e)}
-                    className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-[#2F2F2F] transition-colors"
-                    title={category}
-                  >
-                    <span className="text-xl">
-                      {emojis[category][0]}
-                    </span>
-                    <span className="sr-only">
-                      {category}
-                    </span>
-                  </motion.button>
-                ))}
               </div>
               
               <div className="pt-4">
