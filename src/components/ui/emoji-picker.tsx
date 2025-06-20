@@ -3,27 +3,25 @@ import { emojis, emojiCategories, type EmojiCategory } from '@/lib/emojis';
 import { Smiley, MagnifyingGlass, X, ArrowLeft, Check } from '@phosphor-icons/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type EmojiColor = 'default' | 'yellow' | 'orange' | 'red' | 'purple' | 'blue' | 'teal' | 'green';
+type EmojiColor = 'default' | 'yellow' | 'blue' | 'purple' | 'green' | 'red' | 'orange';
 
 const colorMap: Record<EmojiColor, string> = {
   default: 'filter-none',
   yellow: 'filter-hue-rotate-0 brightness-100 contrast-100',
-  orange: 'filter-hue-rotate-[-30deg] brightness-100 contrast-100',
-  red: 'filter-hue-rotate-[-50deg] brightness-100 contrast-100',
-  purple: 'filter-hue-rotate-[-120deg] brightness-100 contrast-100',
   blue: 'filter-hue-rotate-[-200deg] brightness-100 contrast-100',
-  teal: 'filter-hue-rotate-[-160deg] brightness-100 contrast-100',
+  purple: 'filter-hue-rotate-[-120deg] brightness-100 contrast-100',
   green: 'filter-hue-rotate-[-80deg] brightness-100 contrast-100',
+  red: 'filter-hue-rotate-[-50deg] brightness-100 contrast-100',
+  orange: 'filter-hue-rotate-[-30deg] brightness-100 contrast-100',
 };
 
 const colorOptions: { id: EmojiColor; bg: string; selectedBg: string }[] = [
   { id: 'yellow', bg: 'bg-yellow-400', selectedBg: 'ring-2 ring-offset-2 ring-yellow-400' },
-  { id: 'orange', bg: 'bg-orange-400', selectedBg: 'ring-2 ring-offset-2 ring-orange-400' },
-  { id: 'red', bg: 'bg-red-400', selectedBg: 'ring-2 ring-offset-2 ring-red-400' },
-  { id: 'purple', bg: 'bg-purple-400', selectedBg: 'ring-2 ring-offset-2 ring-purple-400' },
   { id: 'blue', bg: 'bg-blue-400', selectedBg: 'ring-2 ring-offset-2 ring-blue-400' },
-  { id: 'teal', bg: 'bg-teal-400', selectedBg: 'ring-2 ring-offset-2 ring-teal-400' },
+  { id: 'purple', bg: 'bg-purple-400', selectedBg: 'ring-2 ring-offset-2 ring-purple-400' },
   { id: 'green', bg: 'bg-green-400', selectedBg: 'ring-2 ring-offset-2 ring-green-400' },
+  { id: 'red', bg: 'bg-red-400', selectedBg: 'ring-2 ring-offset-2 ring-red-400' },
+  { id: 'orange', bg: 'bg-orange-400', selectedBg: 'ring-2 ring-offset-2 ring-orange-400' }
 ];
 
 interface EmojiPickerProps {
@@ -175,7 +173,7 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                         className="absolute right-0 mt-2 w-48 p-3 bg-white dark:bg-[#2A2A2A] rounded-xl shadow-xl border border-neutral-100 dark:border-neutral-700 z-10"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="grid grid-cols-7 gap-2">
+                        <div className="grid grid-cols-6 gap-2">
                           {colorOptions.map((color) => (
                             <motion.button
                               key={color.id}
@@ -184,9 +182,11 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedColor(color.id);
+                                setShowColorPicker(false);
                               }}
                               className={`w-6 h-6 rounded-full ${color.bg} flex items-center justify-center transition-all ${selectedColor === color.id ? 'ring-2 ring-offset-1 ring-offset-white dark:ring-offset-[#2A2A2A] ring-white' : ''}`}
                               aria-label={`Color ${color.id}`}
+                              title={color.id.charAt(0).toUpperCase() + color.id.slice(1)}
                             >
                               {selectedColor === color.id && <Check size={12} weight="bold" className="text-white" />}
                             </motion.button>
@@ -221,8 +221,18 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                   onClick={(e) => handleEmojiClick(emoji, e)}
                   className={`text-2xl w-9 h-9 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-[#2F2F2F] transition-transform will-change-transform ${
                     selectedEmoji === emoji ? 'bg-neutral-100 dark:bg-[#2F2F2F]' : ''
-                  } ${selectedColor !== 'default' ? colorMap[selectedColor] : ''}`}
-                  style={{ transformOrigin: 'center' }}
+                  }`}
+                  style={{
+                    transformOrigin: 'center',
+                    filter: selectedColor !== 'default' ? `hue-rotate(${
+                      selectedColor === 'yellow' ? '0' :
+                      selectedColor === 'blue' ? '-200deg' :
+                      selectedColor === 'purple' ? '-120deg' :
+                      selectedColor === 'green' ? '-80deg' :
+                      selectedColor === 'red' ? '-50deg' :
+                      selectedColor === 'orange' ? '-30deg' : '0'
+                    }) brightness(100%) contrast(100%)` : 'none'
+                  }}
                   aria-label={`Emoji ${emoji}`}
                 >
                   {emoji}
@@ -268,9 +278,19 @@ export const EmojiPicker: React.FC<EmojiPickerProps> = ({
                       whileTap={{ scale: 0.9 }}
                       onClick={(e) => handleEmojiClick(emoji, e)}
                       className={`text-2xl w-9 h-9 flex items-center justify-center rounded-lg hover:bg-neutral-100 dark:hover:bg-[#2F2F2F] transition-transform will-change-transform ${
-                        selectedColor !== 'default' ? colorMap[selectedColor] : ''
+                        selectedEmoji === emoji ? 'bg-neutral-100 dark:bg-[#2F2F2F]' : ''
                       }`}
-                      style={{ transformOrigin: 'center' }}
+                      style={{
+                        transformOrigin: 'center',
+                        filter: selectedColor !== 'default' ? `hue-rotate(${
+                          selectedColor === 'yellow' ? '0' :
+                          selectedColor === 'blue' ? '-200deg' :
+                          selectedColor === 'purple' ? '-120deg' :
+                          selectedColor === 'green' ? '-80deg' :
+                          selectedColor === 'red' ? '-50deg' :
+                          selectedColor === 'orange' ? '-30deg' : '0'
+                        }) brightness(100%) contrast(100%)` : 'none'
+                      }}
                       aria-label={`Emoji ${emoji}`}
                     >
                       {emoji}
