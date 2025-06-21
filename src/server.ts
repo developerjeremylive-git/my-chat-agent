@@ -1695,36 +1695,97 @@ export class Chat extends AIChatAgent<Env> {
               //   console.log('Chat ID establecido a:', this.currentChatId);
               // }
 
+              // Get the assistant's response content from the last message
+              const assistantContent = this.messages[this.messages.length - 1]?.content || '';
+              
+              // Create the assistant's message with a new ID
               const messageResponse: ChatMessage = {
-                id: generateId(), // Generar un nuevo ID único para el mensaje
+                id: generateId(),
                 role: "assistant",
-                content: this.messages[this.messages.length - 1].content ?? '',
+                content: assistantContent,
                 createdAt: new Date(),
               };
 
-              // Actualizar los mensajes en memoria asegurando IDs únicos
-              this._messages = [...this.messages, messageResponse].map(msg => ({
+              // Update messages in memory ensuring unique IDs and valid dates
+              const updatedMessages = [...this.messages, messageResponse].map(msg => ({
                 ...msg,
-                id: msg.id || generateId(), // Asegurar que cada mensaje tenga un ID único
+                id: msg.id || generateId(),
                 role: msg.role || 'assistant',
                 content: msg.content || '',
-                createdAt: msg.createdAt || new Date(),
+                createdAt: msg.createdAt instanceof Date ? msg.createdAt : new Date(msg.createdAt || Date.now())
               })) as ChatMessage[];
+              
+              this._messages = updatedMessages;
 
-              // Guardar en la base de datos usando transacción
+              // Save to database using transaction
               try {
                 await this.storage.transaction(async (txn) => {
-                  await this.saveMessagesD1(this._messages);
+                  // Save all messages including the assistant's response
+                  // Ensure all messages have valid dates before saving
+                  const messagesToSave = updatedMessages.map(msg => ({
+                    ...msg,
+                    createdAt: msg.createdAt instanceof Date ? msg.createdAt : new Date()
+                  }));
+                  
+                  await this.saveMessagesD1(messagesToSave);
+                  
+                  // Update the chat's last message timestamp
+                  if (this.currentChatId) {
+                    await this.db.prepare(
+                      'UPDATE chats SET last_message_at = ? WHERE id = ?'
+                    ).bind(new Date().toISOString(), this.currentChatId).run();
+                  }
                 });
               } catch (error) {
                 console.error('Error al guardar mensajes:', error);
                 throw new Error('Error al persistir los mensajes');
               }
 
+              // Create a placeholder for the assistant's response
+              const assistantMessageId = generateId();
+              const assistantMessage: ChatMessage = {
+                id: assistantMessageId,
+                role: 'assistant',
+                content: '',
+                createdAt: new Date(),
+              };
+              
+              // Ensure all existing messages have valid dates and required fields
+              const currentMessages = this.messages.map(msg => {
+                const baseMessage: ChatMessage = {
+                  id: msg.id || generateId(),
+                  role: msg.role === 'user' || msg.role === 'assistant' || msg.role === 'system' 
+                    ? msg.role 
+                    : 'assistant',
+                  content: msg.content || '',
+                  createdAt: msg.createdAt instanceof Date ? msg.createdAt : new Date()
+                };
+                
+                // Copy any additional properties that might be present
+                return {
+                  ...baseMessage,
+                  ...msg,
+                  // Ensure these core properties are not overridden by spread
+                  id: baseMessage.id,
+                  role: baseMessage.role,
+                  content: baseMessage.content,
+                  createdAt: baseMessage.createdAt
+                } as ChatMessage;
+              });
+              
+              // Add the assistant's message to the messages array
+              this._messages = [
+                ...currentMessages,
+                assistantMessage
+              ];
+              
+              // Save the initial state with empty assistant message
+              await this.saveMessagesD1(this._messages);
+              
               // Process any pending tool calls from previous messages
               // This handles human-in-the-loop confirmations for tools
               const processedMessages = await processToolCalls({
-                messages: this.messages,
+                messages: this._messages,
                 dataStream,
                 tools: allTools,
                 executions,
@@ -1736,7 +1797,12 @@ export class Chat extends AIChatAgent<Env> {
                 try {
                   await streamText({
                     model,
-                    messages: [{ role: 'user', content: 'agree' }],
+                    messages: [{
+                      role: 'user',
+                      content: 'agree',
+                      id: generateId(),
+                      createdAt: new Date()
+                    } as ChatMessage],
                   });
                 } catch (error) {
                   console.warn('License agreement error:', error);
@@ -1765,6 +1831,42 @@ export class Chat extends AIChatAgent<Env> {
                 messages: processedMessages,
                 tools: allTools,
                 onFinish: async (args) => {
+                  // Update the assistant's message with the final content
+                  const finalContent = args.text || '';
+                  
+                  // Update the message in memory
+                  const updatedMessages = this._messages.map(msg => {
+                    if (msg.id === assistantMessageId) {
+                      return {
+                        ...msg,
+                        content: finalContent,
+                        createdAt: msg.createdAt instanceof Date ? msg.createdAt : new Date()
+                      } as ChatMessage;
+                    }
+                    return {
+                      ...msg,
+                      createdAt: msg.createdAt instanceof Date ? msg.createdAt : new Date()
+                    } as ChatMessage;
+                  });
+                  
+                  this._messages = updatedMessages;
+                  
+                  // Save the updated messages to the database
+                  try {
+                    await this.storage.transaction(async (txn) => {
+                      await this.saveMessagesD1(updatedMessages);
+                      
+                      // Update the chat's last message timestamp
+                      if (this.currentChatId) {
+                        await this.db.prepare(
+                          'UPDATE chats SET last_message_at = ? WHERE id = ?'
+                        ).bind(new Date().toISOString(), this.currentChatId).run();
+                      }
+                    });
+                  } catch (error) {
+                    console.error('Error al actualizar el mensaje del asistente:', error);
+                  }
+                  
                   onFinish(
                     args as Parameters<StreamTextOnFinishCallback<ToolSet>>[0]
                   );
