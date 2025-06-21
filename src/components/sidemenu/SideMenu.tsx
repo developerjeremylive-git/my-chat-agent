@@ -389,6 +389,11 @@ export function SideMenu({
 
     const handleCreateChat = async (title: string) => {
         try {
+            // Si no hay workspace seleccionado, se envía null explícitamente
+            const workspaceId = selectedWorkspace || null;
+            
+            console.log('Creating chat with:', { title, workspaceId });
+            
             const response = await fetch('/api/chats', {
                 method: 'POST',
                 headers: {
@@ -396,32 +401,58 @@ export function SideMenu({
                 },
                 body: JSON.stringify({
                     title: title || 'Nuevo Chat',
-                    workspaceId: selectedWorkspace || undefined
+                    workspaceId: workspaceId // Puede ser string o null
                 })
             });
 
+            const responseText = await response.text();
+            let result;
+            
+            try {
+                result = responseText ? JSON.parse(responseText) : null;
+                console.log('API Response:', result);
+            } catch (e) {
+                console.error('Error parsing JSON response:', e);
+                throw new Error(`Error al analizar la respuesta del servidor: ${responseText}`);
+            }
+
             if (!response.ok) {
-                throw new Error('Error al crear el chat');
+                const errorMessage = result?.error || 
+                                  result?.message || 
+                                  `Error ${response.status}: ${response.statusText}`;
+                throw new Error(errorMessage);
             }
 
-            const result = await response.json() as ApiResponse<ChatData>;
-
-            if (result.success && result.data) {
-                const newChat: LocalChatData = {
-                    id: result.data.id,
-                    title: result.data.title,
-                    lastMessageAt: new Date(result.data.lastMessageAt || Date.now()),
-                    messages: [],
-                    workspaceId: result.data.workspaceId
-                };
-
-                setChats(prevChats => [...prevChats, newChat]);
-                await fetchChats(); // Actualizar la lista completa de chats
-                onNewChat(); // Cerrar el menú lateral
-                selectChat(newChat.id); // Seleccionar el nuevo chat
-            } else {
-                throw new Error('Formato de respuesta inválido');
+            if (!result || typeof result !== 'object') {
+                throw new Error('La respuesta del servidor no es un objeto válido');
             }
+
+            // Verificar si la respuesta tiene el formato esperado
+            if (!result.success) {
+                throw new Error(result.error || 'Error al crear el chat');
+            }
+
+            const chatData = result.data || result.chat || result;
+            
+            if (!chatData || !chatData.id) {
+                console.error('Datos de chat inválidos en la respuesta:', chatData);
+                throw new Error('Datos de chat inválidos en la respuesta del servidor');
+            }
+
+            const newChat: LocalChatData = {
+                id: chatData.id,
+                title: chatData.title || 'Nuevo Chat',
+                lastMessageAt: new Date(chatData.lastMessageAt || Date.now()),
+                messages: [],
+                workspaceId: chatData.workspaceId || undefined
+            };
+
+            console.log('New chat created:', newChat);
+            
+            setChats(prevChats => [...prevChats, newChat]);
+            await fetchChats(workspaceId); // Actualizar la lista de chats con el workspaceId actual
+            onNewChat(); // Cerrar el menú lateral
+            selectChat(newChat.id); // Seleccionar el nuevo chat
         } catch (error) {
             console.error('Error al crear el chat:', error);
             alert(error instanceof Error ? error.message : 'Error al crear el chat');
