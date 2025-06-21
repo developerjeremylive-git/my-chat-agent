@@ -1,14 +1,66 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
+import { CheckCircle, Warning, Info, X, Trash } from '@phosphor-icons/react';
+
+export type NotificationType = 'success' | 'error' | 'info' | 'warning' | 'deletion';
 
 interface NotificationProps {
   message: string;
   duration?: number;
   onClose: () => void;
+  type?: NotificationType;
 }
 
-export const Notification = ({ message, duration = 5000, onClose }: NotificationProps) => {
+const notificationStyles = {
+  success: {
+    bg: 'bg-green-100 dark:bg-green-800',
+    border: 'border-green-200 dark:border-green-700',
+    text: 'text-green-900 dark:text-white',
+    icon: CheckCircle,
+    iconColor: 'text-green-600 dark:text-green-300',
+    progressBg: 'bg-green-200 dark:bg-green-700',
+    progressBar: 'bg-green-600 dark:bg-green-300',
+  },
+  error: {
+    bg: 'bg-red-100 dark:bg-red-800',
+    border: 'border-red-200 dark:border-red-700',
+    text: 'text-red-900 dark:text-white',
+    icon: Warning,
+    iconColor: 'text-red-600 dark:text-red-300',
+    progressBg: 'bg-red-200 dark:bg-red-700',
+    progressBar: 'bg-red-600 dark:bg-red-300',
+  },
+  info: {
+    bg: 'bg-blue-100 dark:bg-blue-800',
+    border: 'border-blue-200 dark:border-blue-700',
+    text: 'text-blue-900 dark:text-white',
+    icon: Info,
+    iconColor: 'text-blue-600 dark:text-blue-300',
+    progressBg: 'bg-blue-200 dark:bg-blue-700',
+    progressBar: 'bg-blue-600 dark:bg-blue-300',
+  },
+  warning: {
+    bg: 'bg-yellow-100 dark:bg-yellow-800',
+    border: 'border-yellow-200 dark:border-yellow-700',
+    text: 'text-yellow-900 dark:text-white',
+    icon: Warning,
+    iconColor: 'text-yellow-600 dark:text-yellow-300',
+    progressBg: 'bg-yellow-200 dark:bg-yellow-700',
+    progressBar: 'bg-yellow-600 dark:bg-yellow-300',
+  },
+  deletion: {
+    bg: 'bg-orange-100 dark:bg-orange-800',
+    border: 'border-orange-200 dark:border-orange-700',
+    text: 'text-orange-900 dark:text-white',
+    icon: Trash,
+    iconColor: 'text-orange-600 dark:text-orange-300',
+    progressBg: 'bg-orange-200 dark:bg-orange-700',
+    progressBar: 'bg-orange-600 dark:bg-orange-300',
+  },
+} as const;
+
+export const Notification = ({ message, duration = 5000, onClose, type = 'info' }: NotificationProps) => {
   const [progress, setProgress] = useState(100);
   const [isVisible, setIsVisible] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
@@ -19,10 +71,14 @@ export const Notification = ({ message, duration = 5000, onClose }: Notification
   useEffect(() => {
     if (isHovered) return;
 
-    // Start progress bar animation
+    // Start progress bar animation with faster updates
+    const totalSteps = 100; // Number of steps for the animation
+    const stepDuration = 20; // Time between steps in ms (smaller = faster)
+    const progressDecrement = 100 / (duration / stepDuration);
+    
     const interval = setInterval(() => {
       setProgress((prev) => {
-        const newProgress = prev - (100 / (duration / 30)); // Faster update (30ms instead of 50ms)
+        const newProgress = prev - progressDecrement;
         if (newProgress <= 0) {
           clearInterval(interval);
           setShouldClose(true);
@@ -30,7 +86,7 @@ export const Notification = ({ message, duration = 5000, onClose }: Notification
         }
         return newProgress;
       });
-    }, 30); // Faster updates
+    }, stepDuration);
 
     return () => clearInterval(interval);
   }, [duration, isHovered]);
@@ -62,23 +118,18 @@ export const Notification = ({ message, duration = 5000, onClose }: Notification
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden border border-blue-200 dark:border-blue-800"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => {
-              setIsHovered(false);
-              // Reset the progress when mouse leaves
-              setProgress(100);
-            }}
+            className={`${notificationStyles[type].bg} ${notificationStyles[type].border} rounded-lg shadow-lg overflow-hidden`}
           >
             <div className="p-4">
               <div className="flex items-start">
-                <div className="flex-shrink-0 pt-0.5">
-                  <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                <div className={`flex-shrink-0 pt-0.5 ${notificationStyles[type].iconColor}`}>
+                  {(() => {
+                    const Icon = notificationStyles[type].icon;
+                    return <Icon weight="fill" size={20} />;
+                  })()}
                 </div>
                 <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <p className={`text-sm font-medium ${notificationStyles[type].text}`}>
                     {message}
                   </p>
                 </div>
@@ -96,12 +147,15 @@ export const Notification = ({ message, duration = 5000, onClose }: Notification
                 </button>
               </div>
             </div>
-            <div className="bg-blue-100 dark:bg-blue-900 h-1 w-full">
+            <div className={`${notificationStyles[type].progressBg} h-1 w-full overflow-hidden`}>
               <motion.div
                 initial={{ width: '100%' }}
                 animate={{ width: `${progress}%` }}
-                transition={{ duration: animationDuration, ease: 'linear' }}
-                className="h-full bg-blue-500 dark:bg-blue-400"
+                transition={{ 
+                  duration: 0.02, // Much faster animation
+                  ease: 'linear'
+                }}
+                className={`h-full ${notificationStyles[type].progressBar} transition-[width] duration-75 ease-linear`}
               />
             </div>
           </motion.div>

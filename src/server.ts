@@ -437,7 +437,7 @@ app.put('/api/workspaces/:id', async (c) => {
     ).bind(workspaceId).first();
 
     if (!existingWorkspace) {
-      return c.json({ success: false, error: 'Workspace not found' }, 404);
+      return c.json({ success: false, error: 'Workspace not found in DB' }, 404);
     }
 
     const now = new Date().toISOString();
@@ -490,7 +490,7 @@ app.delete('/api/workspaces/:id', async (c) => {
     ).bind(workspaceId).first();
 
     if (!existingWorkspace) {
-      return c.json({ success: false, error: 'Workspace not found' }, 404);
+      return c.json({ success: false, error: 'Workspace not found in DB' }, 404);
     }
 
     // Start a transaction to ensure data consistency

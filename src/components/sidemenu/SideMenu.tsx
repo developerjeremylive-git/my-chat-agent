@@ -275,11 +275,11 @@ export function SideMenu({
             setShowWorkspaceModal(false);
             
             // Show success notification
-            showNotification('Espacio de trabajo creado exitosamente', 3000);
+            showSuccess('Espacio de trabajo creado exitosamente', 3000);
             
         } catch (error) {
             console.error('Error creating workspace:', error);
-            showNotification(
+            showError(
                 `Error al crear el espacio de trabajo: ${error instanceof Error ? error.message : 'Error desconocido'}`,
                 5000
             );
@@ -305,7 +305,7 @@ export function SideMenu({
         setShowWorkspaceModal(false);
     };
 
-    const { showNotification } = useNotification();
+    const { showSuccess, showError, showDeletion } = useNotification();
 
     const handleDeleteWorkspace = async (workspace: Workspace) => {
         setWorkspaceToDelete(workspace);
@@ -338,8 +338,8 @@ export function SideMenu({
             // Update local state
             setWorkspaces(prev => prev.filter(w => w.id !== workspaceToDelete.id));
 
-            // Show success notification
-            showNotification('Los chats se han movido a TODOS los chats', 5000);
+            // Show deletion notification with the new deletion type
+            showDeletion('Los chats se han movido al listado de "Chats Recientes"', 2000);
 
             // If the deleted workspace was selected, clear the selection
             if (selectedWorkspace === workspaceToDelete.id) {
@@ -348,7 +348,7 @@ export function SideMenu({
             }
         } catch (error) {
             console.error('Error deleting workspace:', error);
-            showNotification(
+            showError(
                 `Error al eliminar el espacio de trabajo: ${error instanceof Error ? error.message : 'Error desconocido'}`,
                 5000
             );
