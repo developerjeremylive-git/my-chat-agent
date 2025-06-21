@@ -215,20 +215,75 @@ export function SideMenu({
         }
     }, [workspaces]);
 
-    const handleCreateWorkspace = (data: {
+    const handleCreateWorkspace = async (data: {
         title: string;
         emoji: string;
+        emojiColor?: string;
         description: string;
         instructions: string;
     }) => {
-        const newWorkspace: Workspace = {
-            id: `workspace-${Date.now()}`,
-            ...data,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        };
-        setWorkspaces(prev => [...prev, newWorkspace]);
-        setShowWorkspaceModal(false);
+        try {
+            const response = await fetch('/api/workspaces', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: data.title,
+                    emoji: data.emoji,
+                    emoji_color: data.emojiColor,
+                    description: data.description,
+                    instructions: data.instructions
+                }),
+            });
+
+            // Define the API response type
+            interface CreateWorkspaceResponse {
+                success: boolean;
+                data: {
+                    id: string;
+                    title: string;
+                    emoji: string;
+                    description?: string;
+                    instructions?: string;
+                    created_at: string;
+                    updated_at: string;
+                    emoji_color?: string;
+                };
+                error?: string;
+            }
+
+            const result: CreateWorkspaceResponse = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to create workspace');
+            }
+
+            // Convert the API response to match our Workspace type
+            const newWorkspace: Workspace = {
+                id: result.data.id,
+                title: result.data.title,
+                emoji: result.data.emoji,
+                description: result.data.description || '',
+                instructions: result.data.instructions || '',
+                createdAt: new Date(result.data.created_at),
+                updatedAt: new Date(result.data.updated_at)
+            };
+
+            // Update local state
+            setWorkspaces(prev => [...prev, newWorkspace]);
+            setShowWorkspaceModal(false);
+            
+            // Show success notification
+            showNotification('Espacio de trabajo creado exitosamente', 3000);
+            
+        } catch (error) {
+            console.error('Error creating workspace:', error);
+            showNotification(
+                `Error al crear el espacio de trabajo: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+                5000
+            );
+        }
     };
 
     const handleUpdateWorkspace = (data: {
