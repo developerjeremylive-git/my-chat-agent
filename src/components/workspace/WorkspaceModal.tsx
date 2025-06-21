@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, FolderPlus, Check, Sparkle } from '@phosphor-icons/react';
+import { X, FolderPlus, Check, Sparkle, MagicWand } from '@phosphor-icons/react';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 
 interface WorkspaceFormData {
@@ -35,6 +35,25 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const emojiButtonRef = useRef<HTMLButtonElement>(null);
+
+  const instructionExamples = [
+    'Responde siempre en un tono profesional y técnico. Sé conciso pero completo en tus explicaciones. Si no estás seguro de algo, admítelo en lugar de especular.',
+    'Actúa como un asistente de programación experto. Proporciona ejemplos de código cuando sea relevante y explica los conceptos de manera clara. Si el código tiene posibles problemas, menciónalos.',
+    'Eres un asistente creativo. Responde con ideas innovadoras y pensamiento lateral. Fomenta la creatividad y la exploración de conceptos inusuales.',
+    'Como asistente educativo, adapta tus respuestas para explicar conceptos complejos de manera sencilla. Usa analogías y ejemplos prácticos para facilitar la comprensión.',
+    'Responde siempre en español neutro. Mantén un tono amable y profesional. Si la pregunta es ambigua, pide aclaraciones antes de responder.',
+    'Eres un experto en productividad. Proporciona consejos prácticos, técnicas y estrategias para mejorar la gestión del tiempo y la eficiencia en el trabajo.',
+    'Como asistente de escritura, ayuda a mejorar la claridad, coherencia y estilo del texto. Sugiere sinónimos, reestructura oraciones y ofrece alternativas para mejorar la fluidez.',
+    'Actúa como un mentor de negocios. Proporciona análisis estratégicos, identifica oportunidades y ofrece recomendaciones basadas en las mejores prácticas de la industria.'
+  ];
+
+  const handleAIClick = () => {
+    const randomIndex = Math.floor(Math.random() * instructionExamples.length);
+    setFormData(prev => ({
+      ...prev,
+      instructions: instructionExamples[randomIndex]
+    }));
+  };
 
   // Reset form when opening/closing
   useEffect(() => {
@@ -226,10 +245,15 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
                   <label htmlFor="instructions" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Instrucciones personalizadas (opcional)
                   </label>
-                  <span className="inline-flex items-center gap-1 text-xs text-blue-500 dark:text-blue-400">
+                  <button
+                    type="button"
+                    onClick={handleAIClick}
+                    className="inline-flex items-center gap-1 text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
+                    title="Generar instrucciones de ejemplo"
+                  >
                     <Sparkle size={14} weight="fill" />
                     IA
-                  </span>
+                  </button>
                 </div>
                 <textarea
                   id="instructions"
