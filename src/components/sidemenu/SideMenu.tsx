@@ -521,21 +521,26 @@ export function SideMenu({
                             {/* Cabecera */}
                             <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-700">
                                 <h2 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
-                                    {isStatic ? 'Historial' : 'Chats Historial'}
+                                    {isStatic ? 'Espacios de trabajo' : 'Espacios de trabajo'}
                                 </h2>
-                                <div className="flex items-center gap-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className={`hidden md:flex rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 ${isStatic ? 'text-[#F48120]' : ''}`}
-                                        onClick={toggleStatic}
-                                        title={isStatic ? "Hacer flotante" : "Fijar"}
-                                    >
-                                        {isStatic ?
-                                            <PushPinSlash weight="fill" className="w-5 h-5" /> :
-                                            <PushPin weight="fill" className="w-5 h-5" />
-                                        }
-                                    </Button>
+                                <div className="flex items-center gap-2 mr-2">
+                                    <div className="relative group">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className={`hidden md:flex rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 ${isStatic ? 'text-[#F48120]' : ''}`}
+                                            onClick={toggleStatic}
+                                        >
+                                            {isStatic ?
+                                                <PushPinSlash weight="fill" className="w-5 h-5" /> :
+                                                <PushPin weight="fill" className="w-5 h-5" />
+                                            }
+                                        </Button>
+                                        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 px-2 py-1 text-xs font-medium text-white bg-neutral-800 dark:bg-neutral-700 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                            {isStatic ? "Flotante" : "Fijar"}
+                                            <div className="absolute left-1/2 -translate-x-1/2 -top-1 w-2 h-2 bg-neutral-800 dark:bg-neutral-700 rotate-45"></div>
+                                        </div>
+                                    </div>
                                     <Button
                                         variant="ghost"
                                         size="sm"
@@ -561,18 +566,19 @@ export function SideMenu({
                             {/* Chats Section */}
                             <div className="border-b border-neutral-200 dark:border-neutral-700 p-4">
                                 <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                                        Espacios de trabajo
-                                    </h3>
+                                    {/* <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                                    Espacios de trabajo disponibles
+                                    </h3> */}
                                     <button
                                         onClick={() => {
                                             setWorkspaceToEdit(null);
                                             setShowWorkspaceModal(true);
                                         }}
-                                        className="p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
-                                        title="Nuevo espacio"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#F48120] to-purple-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"
+                                        title="Crear nuevo espacio"
                                     >
-                                        <Plus size={18} weight="bold" />
+                                        <Plus size={16} weight="bold" />
+                                        <span>Crear Nuevo Espacio</span>
                                     </button>
                                 </div>
 
