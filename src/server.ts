@@ -349,27 +349,45 @@ app.get('/api/model', async (c) => {
 
 // Middleware CORS
 // Endpoints para la gestión de chats
+// Get all chats or filter by workspace_id if provided
 app.get('/api/chats', async (c) => {
   try {
-    const chats = await c.env.DB.prepare(
-      'SELECT * FROM chats ORDER BY last_message_at DESC'
-    ).all();
+    const workspaceId = c.req.query('workspaceId');
+    let query = 'SELECT * FROM chats';
+    let params: any[] = [];
+
+    if (workspaceId) {
+      query += ' WHERE workspace_id = ?';
+      params.push(workspaceId);
+    }
+    
+    query += ' ORDER BY last_message_at DESC';
+    
+    const result = await c.env.DB.prepare(query)
+      .bind(...params)
+      .all();
+
+    if (!result || !result.results) {
+      return c.json({ success: true, data: [] });
+    }
 
     // Format the chats with proper date handling
-    const formattedChats = chats.results.map(chat => {
-      const lastMessageAt = typeof chat.last_message_at === 'string' ?
-        new Date(chat.last_message_at) : new Date();
-      return {
-        ...chat,
-        lastMessageAt: lastMessageAt.toISOString(),
-        messages: [] // Initialize empty messages array
-      };
-    });
+    const formattedChats = result.results.map((chat: any) => ({
+      id: chat.id,
+      title: chat.title,
+      workspaceId: chat.workspace_id || null,
+      lastMessageAt: chat.last_message_at ? new Date(chat.last_message_at).toISOString() : new Date().toISOString(),
+      messages: []
+    }));
 
-    return c.json(formattedChats);
+    return c.json({ success: true, data: formattedChats });
   } catch (error) {
     console.error('Error fetching chats:', error);
-    return c.json({ error: 'Failed to fetch chats' }, 500);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to fetch chats',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
   }
 });
 
@@ -470,21 +488,23 @@ app.get('/api/chats/:id', async (c) => {
 
 app.post('/api/chats', async (c) => {
   try {
-    const { title } = await c.req.json();
+    const { title, workspaceId } = await c.req.json();
     const newChat: ChatData = {
       id: generateId(),
       title: title || 'Nuevo Chat',
       messages: [],
-      lastMessageAt: new Date()
+      lastMessageAt: new Date(),
+      workspaceId: workspaceId || null
     };
 
     // Insertar el nuevo chat en la base de datos D1
     await c.env.DB.prepare(
-      'INSERT INTO chats (id, title, last_message_at) VALUES (?, ?, ?)'
+      'INSERT INTO chats (id, title, last_message_at, workspace_id) VALUES (?, ?, ?, ?)'
     ).bind(
       newChat.id,
       newChat.title,
-      newChat.lastMessageAt.toISOString()
+      newChat.lastMessageAt.toISOString(),
+      newChat.workspaceId || null
     ).run();
 
     // Actualizar el estado en memoria
@@ -1115,6 +1135,7 @@ export class Chat extends AIChatAgent<Env> {
     CREATE TABLE IF NOT EXISTS chats (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
+      workspace_id TEXT,
       last_message_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `;

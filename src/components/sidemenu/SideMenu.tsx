@@ -3,6 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/button/Button';
 import { X, ChatText, Gear, Brain, Rocket, Trash, PencilSimple, Warning, DotsThreeVertical, PushPin, PushPinSlash, Plus, FolderSimple } from '@phosphor-icons/react';
 import { useChat } from '@/contexts/ChatContext';
+
+interface ApiResponse<T> {
+    success: boolean;
+    data?: T;
+    error?: string;
+}
+
+interface ChatApiData {
+    id: string;
+    title: string;
+    lastMessageAt: string;
+    workspaceId?: string | null;
+}
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { WorkspaceModal } from '@/components/workspace/WorkspaceModal';
@@ -168,6 +181,7 @@ export function SideMenu({
     
     // Workspace state
     const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+    const [selectedWorkspace, setSelectedWorkspace] = useState<string | null>(null);
     const [expandedWorkspace, setExpandedWorkspace] = useState<string | null>(null);
     const [workspaceToEdit, setWorkspaceToEdit] = useState<Workspace | null>(null);
     const [showWorkspaceModal, setShowWorkspaceModal] = useState<boolean>(false);
@@ -237,6 +251,15 @@ export function SideMenu({
     };
 
     const toggleWorkspace = (workspaceId: string) => {
+        if (selectedWorkspace === workspaceId) {
+            // If clicking the same workspace, deselect it
+            setSelectedWorkspace(null);
+            fetchChats();
+        } else {
+            // Select the workspace and load its chats
+            setSelectedWorkspace(workspaceId);
+            fetchChats(workspaceId);
+        }
         setExpandedWorkspace(prev => prev === workspaceId ? null : workspaceId);
     };
 
@@ -261,19 +284,25 @@ export function SideMenu({
                 if (!response.ok) {
                     throw new Error('Failed to fetch chats');
                 }
-                const data = await response.json() as ChatData[];
+                const result = await response.json() as ApiResponse<ChatApiData[]>;
+
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to fetch chats');
+                }
 
                 // Formatear los chats
-                const formattedChats = data.map((chat) => ({
-                    ...chat,
-                    lastMessageAt: new Date(chat.lastMessageAt),
-                    messages: []
+                const formattedChats = (result.data || []).map((chat) => ({
+                    id: chat.id,
+                    title: chat.title,
+                    lastMessageAt: new Date(chat.lastMessageAt || Date.now()),
+                    messages: [],
+                    workspaceId: chat.workspaceId || undefined
                 }));
 
                 setChats(formattedChats);
                 // Cargar mensajes para cada chat
                 // const chatsWithMessages = await Promise.all(
-                //     data.map(async (chat) => {
+                //     formattedChats.map(async (chat) => {
                 //         try {
                 //             const messagesResponse = await fetch(`/api/chats/${chat.id}/messages`);
                 //             if (messagesResponse.ok) {
@@ -295,8 +324,7 @@ export function SideMenu({
                 //         }
                 //     })
                 // );
-
-                // No seleccionamos ningún chat por defecto
+                // setChats(chatsWithMessages);
             } catch (error) {
                 console.error('Error loading chats:', error);
             }
@@ -304,18 +332,58 @@ export function SideMenu({
         loadInitialChats();
     }, []);
 
-    const fetchChats = async () => {
+    const fetchChats = async (workspaceId?: string | null) => {
         try {
-            const response = await fetch('/api/chats');
-            const data = await response.json() as ChatData[];
-            const formattedChats = data.map((chat) => ({
-                ...chat,
-                lastMessageAt: new Date(chat.lastMessageAt),
-                messages: []
+            const url = workspaceId 
+                ? `/api/chats?workspaceId=${workspaceId}`
+                : '/api/chats';
+                
+            const response = await fetch(url);
+            const result = await response.json() as ApiResponse<ChatApiData[]>;
+
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to fetch chats');
+            }
+
+            // Formatear los chats
+            const formattedChats = (result.data || []).map((chat) => ({
+                id: chat.id,
+                title: chat.title,
+                lastMessageAt: new Date(chat.lastMessageAt || Date.now()),
+                messages: [],
+                workspaceId: chat.workspaceId || undefined
             }));
+
             setChats(formattedChats);
+            // Cargar mensajes para cada chat
+            // const chatsWithMessages = await Promise.all(
+            //     formattedChats.map(async (chat) => {
+            //         try {
+            //             const messagesResponse = await fetch(`/api/chats/${chat.id}/messages`);
+            //             if (messagesResponse.ok) {
+            //                 const messages = await messagesResponse.json();
+            //                 if (Array.isArray(messages)) {
+            //                     return {
+            //                         ...chat,
+            //                         messages: messages.map(msg => ({
+            //                             ...msg,
+            //                             createdAt: new Date(msg.createdAt)
+            //                         }))
+            //                     };
+            //                 }
+            //             }
+            //             return chat;
+            //         } catch (error) {
+            //             console.error(`Error loading messages for chat ${chat.id}:`, error);
+            //             return chat;
+            //         }
+            //     })
+            // );
+            // setChats(chatsWithMessages);
         } catch (error) {
             console.error('Error loading chats:', error);
+            // Optionally show an error message to the user
+            // setError('Failed to load chats. Please try again.');
         }
     };
 
@@ -327,7 +395,8 @@ export function SideMenu({
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    title: title || 'Nuevo Chat'
+                    title: title || 'Nuevo Chat',
+                    workspaceId: selectedWorkspace || undefined
                 })
             });
 
@@ -335,14 +404,15 @@ export function SideMenu({
                 throw new Error('Error al crear el chat');
             }
 
-            const data = await response.json() as { success: boolean; chat: ChatData };
+            const result = await response.json() as ApiResponse<ChatData>;
 
-            if (data.success && data.chat) {
+            if (result.success && result.data) {
                 const newChat: LocalChatData = {
-                    id: data.chat.id,
-                    title: data.chat.title,
-                    lastMessageAt: new Date(data.chat.lastMessageAt),
-                    messages: []
+                    id: result.data.id,
+                    title: result.data.title,
+                    lastMessageAt: new Date(result.data.lastMessageAt || Date.now()),
+                    messages: [],
+                    workspaceId: result.data.workspaceId
                 };
 
                 setChats(prevChats => [...prevChats, newChat]);
@@ -380,15 +450,19 @@ export function SideMenu({
                 throw new Error('Error al actualizar el título del chat');
             }
 
-            const data = await response.json() as { success: boolean; chat: ChatData };
+            const result = await response.json() as ApiResponse<ChatData>;
 
-            if (data.success) {
+            if (result.success && result.data) {
                 setChats(prevChats => prevChats.map(chat =>
-                    chat.id === chatId ? { ...chat, title: newTitle } : chat
+                    chat.id === chatId ? { 
+                        ...chat, 
+                        title: newTitle,
+                        lastMessageAt: new Date(result.data!.lastMessageAt || Date.now()) 
+                    } : chat
                 ));
                 await fetchChats(); // Actualizar la lista completa de chats
             } else {
-                throw new Error('Error al actualizar el título del chat');
+                throw new Error(result.error || 'Error al actualizar el título del chat');
             }
         } catch (error) {
             console.error('Error al actualizar el título del chat:', error);
@@ -400,43 +474,47 @@ export function SideMenu({
         try {
             // Obtener detalles del chat
             const chatResponse = await fetch(`/api/chats/${chatId}`);
-            const chatData = await chatResponse.json() as ChatData | { error: string };
+            const chatResult = await chatResponse.json() as ApiResponse<ChatData>;
 
-            if ('error' in chatData) {
-                console.error('Error en la respuesta de la API:', chatData.error);
+            if (!chatResult.success || !chatResult.data) {
+                console.error('Error en la respuesta de la API:', chatResult.error || 'Datos de chat no válidos');
                 return;
             }
 
             // Obtener todos los mensajes del chat
             const messagesResponse = await fetch(`/api/chats/${chatId}/messages`);
-            const messagesData = await messagesResponse.json();
+            const messagesResult = await messagesResponse.json() as ApiResponse<ChatMessage[]>;
 
-            // Verificar que los mensajes sean un array válido
-            if (!Array.isArray(messagesData)) {
-                console.error('Error: Los mensajes no son un array válido');
+            // Verificar si messagesResult es exitoso y tiene datos
+            if (!messagesResult.success) {
+                console.error('Error al cargar mensajes:', messagesResult.error);
                 return;
             }
 
-            // Procesar y formatear los mensajes
-            const formattedMessages = messagesData.map((msg: ChatMessage) => ({
+            const messages = messagesResult.data || [];
+
+            // Formatear los mensajes
+            const formattedMessages: LocalMessage[] = messages.map((msg) => ({
                 id: msg.id,
                 role: msg.role,
                 content: msg.content,
                 createdAt: new Date(msg.createdAt),
-                parts: msg.parts || []
-            })) as LocalMessage[];
+                parts: (msg as any).parts || []
+            }));
 
-            const chat: LocalChatData = {
-                id: chatData.id,
-                title: chatData.title,
-                lastMessageAt: new Date(chatData.lastMessageAt),
-                messages: formattedMessages
+            // Actualizar el estado local con los mensajes
+            const updatedChat: LocalChatData = {
+                id: chatResult.data.id,
+                title: chatResult.data.title,
+                lastMessageAt: new Date(chatResult.data.lastMessageAt || Date.now()),
+                messages: formattedMessages,
+                workspaceId: chatResult.data.workspaceId
             };
 
             // Actualizar el estado local de los chats
             setChats(prevChats =>
                 prevChats.map(prevChat =>
-                    prevChat.id === chatId ? { ...prevChat, messages: formattedMessages } : prevChat
+                    prevChat.id === chatId ? { ...prevChat, ...updatedChat } : prevChat
                 )
             );
 
@@ -520,9 +598,23 @@ export function SideMenu({
                         <div className="flex flex-col h-full">
                             {/* Cabecera */}
                             <div className="flex items-center justify-between p-4 border-b border-neutral-200 dark:border-neutral-700">
-                                <h2 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
-                                    {isStatic ? 'Espacios de trabajo' : 'Espacios de trabajo'}
-                                </h2>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-lg font-bold bg-gradient-to-r from-[#F48120] to-purple-500 bg-clip-text text-transparent">
+                                        {selectedWorkspace ? 'Espacio actual' : 'Espacios de trabajo'}
+                                    </h2>
+                                    {selectedWorkspace && (
+                                        <button 
+                                            onClick={() => {
+                                                setSelectedWorkspace(null);
+                                                fetchChats();
+                                            }}
+                                            className="text-xs text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+                                            title="Ver todos los chats"
+                                        >
+                                            (ver todos)
+                                        </button>
+                                    )}
+                                </div>
                                 <div className="flex items-center gap-2 mr-2">
                                     <div className="relative group">
                                         <Button
@@ -599,7 +691,9 @@ export function SideMenu({
                                                             className="text-lg" 
                                                             dangerouslySetInnerHTML={{ __html: workspace.emoji }}
                                                         />
-                                                        <span className="truncate">{workspace.title}</span>
+                                                        <span className={`truncate ${selectedWorkspace === workspace.id ? 'font-semibold text-[#F48120]' : ''}`}>
+                                                            {workspace.title}
+                                                        </span>
                                                     </div>
                                                     <svg
                                                         className={`w-4 h-4 text-neutral-500 transition-transform ${

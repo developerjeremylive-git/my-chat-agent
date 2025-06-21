@@ -18,6 +18,7 @@ export interface ChatData {
   title: string;
   messages: ChatMessage[];
   lastMessageAt: Date;
+  workspaceId?: string; // Optional workspace ID to associate chat with a workspace
 }
 
 export interface LocalMessage extends Omit<Message, 'parts'>, ChatMessage {
