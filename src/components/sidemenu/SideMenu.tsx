@@ -263,10 +263,21 @@ export function SideMenu({
         try {
             const response = await fetch(`/api/workspaces/${workspaceToDelete.id}`, {
                 method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             });
 
+            interface DeleteResponse {
+                success: boolean;
+                error?: string;
+                message?: string;
+            }
+
+            const result: DeleteResponse = await response.json();
+
             if (!response.ok) {
-                throw new Error('Failed to delete workspace');
+                throw new Error(result.error || 'Failed to delete workspace');
             }
 
             // Update local state
@@ -282,7 +293,10 @@ export function SideMenu({
             }
         } catch (error) {
             console.error('Error deleting workspace:', error);
-            showNotification('Error al eliminar el espacio de trabajo', 5000);
+            showNotification(
+                `Error al eliminar el espacio de trabajo: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+                5000
+            );
         } finally {
             setShowDeleteDialog(false);
             setWorkspaceToDelete(null);
