@@ -63,33 +63,59 @@ const notificationStyles = {
 export const Notification = ({ message, duration = 5000, onClose, type = 'info' }: NotificationProps) => {
   const [progress, setProgress] = useState(100);
   const [isVisible, setIsVisible] = useState(true);
-  const [isHovered, setIsHovered] = useState(false);
+  const [startTime] = useState(Date.now());
+  const [timeRemaining, setTimeRemaining] = useState(duration);
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
+  const [isPaused, setIsPaused] = useState(false);
+  const [pausedAt, setPausedAt] = useState<number | null>(null);
+  const [pausedProgress, setPausedProgress] = useState(100);
   const [shouldClose, setShouldClose] = useState(false);
-  const animationDuration = duration / 1000; // Convert to seconds for Framer Motion
 
   // Handle the progress bar animation and auto-close
   useEffect(() => {
-    if (isHovered) return;
+    if (duration <= 0) return;
 
-    // Start progress bar animation with faster updates
-    const totalSteps = 100; // Number of steps for the animation
-    const stepDuration = 20; // Time between steps in ms (smaller = faster)
-    const progressDecrement = 100 / (duration / stepDuration);
+    const updateProgress = () => {
+      const now = Date.now();
+      const elapsed = now - lastUpdate;
+      
+      if (!isPaused) {
+        setTimeRemaining(prev => {
+          const newTimeRemaining = Math.max(0, prev - elapsed);
+          const newProgress = (newTimeRemaining / duration) * 100;
+          setProgress(newProgress);
+          
+          if (newTimeRemaining <= 0) {
+            setIsVisible(false);
+            setTimeout(onClose, 200); // Wait for exit animation
+            return 0;
+          }
+          
+          return newTimeRemaining;
+        });
+      }
+      
+      setLastUpdate(now);
+      animationFrameId = requestAnimationFrame(updateProgress);
+    };
+
+    let animationFrameId = requestAnimationFrame(updateProgress);
     
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        const newProgress = prev - progressDecrement;
-        if (newProgress <= 0) {
-          clearInterval(interval);
-          setShouldClose(true);
-          return 0;
-        }
-        return newProgress;
-      });
-    }, stepDuration);
-
-    return () => clearInterval(interval);
-  }, [duration, isHovered]);
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [duration, onClose, isPaused, lastUpdate]);
+  
+  const handleMouseEnter = () => {
+    setIsPaused(true);
+    setPausedProgress(progress);
+  };
+  
+  const handleMouseLeave = () => {
+    setIsPaused(false);
+    setLastUpdate(Date.now());
+    setTimeRemaining((duration * progress) / 100);
+  };
 
   // Handle the close animation when progress reaches 0
   useEffect(() => {
@@ -119,6 +145,8 @@ export const Notification = ({ message, duration = 5000, onClose, type = 'info' 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
             className={`${notificationStyles[type].bg} ${notificationStyles[type].border} rounded-lg shadow-lg overflow-hidden`}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
             <div className="p-4">
               <div className="flex items-start">
@@ -150,9 +178,9 @@ export const Notification = ({ message, duration = 5000, onClose, type = 'info' 
             <div className={`${notificationStyles[type].progressBg} h-1 w-full overflow-hidden`}>
               <motion.div
                 initial={{ width: '100%' }}
-                animate={{ width: `${progress}%` }}
+                animate={{ width: `${isPaused ? pausedProgress : progress}%` }}
                 transition={{ 
-                  duration: 0.02, // Much faster animation
+                  duration: isPaused ? 0 : 0.02, // Pause animation when hovered
                   ease: 'linear'
                 }}
                 className={`h-full ${notificationStyles[type].progressBar} transition-[width] duration-75 ease-linear`}
