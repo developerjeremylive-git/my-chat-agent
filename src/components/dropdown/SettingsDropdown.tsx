@@ -391,7 +391,7 @@ export const SettingsDropdown = ({
                           <h4 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">Prompt del Sistema</h4>
 
                           <div className="px-2 py-2 space-y-2">
-                            <div className="space-y-2">
+                            {/* <div className="space-y-2">
                               <div className="flex flex-col sm:flex-row gap-2 w-full">
                                 <div className="relative w-full" ref={dropdownRef}>
                                   <button
@@ -501,9 +501,6 @@ export const SettingsDropdown = ({
                                                     </button>
                                                   </div>
                                                 </div>
-                                                {/* <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                                                {prompt.content}
-                                              </p> */}
                                               </div>
                                             ))
                                           ) : (
@@ -529,7 +526,6 @@ export const SettingsDropdown = ({
                                 </div>
                               </div>
 
-                              {/* Vista previa del prompt actual */}
                               <div className="relative">
                                 <div
                                   className="text-sm p-4 pr-12 bg-white/50 dark:bg-neutral-800/50 rounded-lg border border-dashed border-gray-200 dark:border-neutral-700 cursor-pointer transition-colors hover:bg-white/70 dark:hover:bg-neutral-800/70 active:bg-white/90 dark:active:bg-neutral-800/90 min-h-[80px]"
@@ -548,7 +544,7 @@ export const SettingsDropdown = ({
                                       WebkitBoxOrient: 'vertical',
                                       overflow: 'hidden',
                                       textOverflow: 'ellipsis',
-                                      maxHeight: '4.5em' /* 3 lines * 1.5 line-height */
+                                      maxHeight: '4.5em' 
                                     }}
                                   >
                                     {systemPrompt || 'Haz clic para editar el prompt del sistema...'}
@@ -565,7 +561,7 @@ export const SettingsDropdown = ({
                                   <NotePencil size={18} weight="duotone" className="text-[#F48120]" />
                                 </button>
                               </div>
-                            </div>
+                            </div> */}
 
                             {/* Modals */}
                             {createPortal(
