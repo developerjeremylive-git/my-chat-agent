@@ -348,7 +348,171 @@ app.get('/api/model', async (c) => {
 });
 
 // Middleware CORS
-// Endpoints para la gestión de chats
+// Workspace API Endpoints
+// Get all workspaces
+app.get('/api/workspaces', async (c) => {
+  try {
+    const result = await c.env.DB.prepare(
+      'SELECT * FROM workspaces ORDER BY updated_at DESC'
+    ).all();
+
+    if (!result || !result.results) {
+      return c.json({ success: true, data: [] });
+    }
+
+    return c.json({ success: true, data: result.results });
+  } catch (error) {
+    console.error('Error fetching workspaces:', error);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to fetch workspaces',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
+
+// Create a new workspace
+app.post('/api/workspaces', async (c) => {
+  try {
+    const { title, emoji, emoji_color, description, instructions } = await c.req.json();
+    
+    if (!title || !emoji) {
+      return c.json({ 
+        success: false, 
+        error: 'Title and emoji are required' 
+      }, 400);
+    }
+
+    const id = generateId();
+    const now = new Date().toISOString();
+    
+    await c.env.DB.prepare(
+      'INSERT INTO workspaces (id, title, emoji, emoji_color, description, instructions, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(
+      id, 
+      title, 
+      emoji, 
+      emoji_color || null, 
+      description || null, 
+      instructions || null,
+      now,
+      now
+    ).run();
+
+    const newWorkspace = {
+      id,
+      title,
+      emoji,
+      emoji_color: emoji_color || null,
+      description: description || null,
+      instructions: instructions || null,
+      created_at: now,
+      updated_at: now
+    };
+
+    return c.json({ success: true, data: newWorkspace }, 201);
+  } catch (error) {
+    console.error('Error creating workspace:', error);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to create workspace',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
+
+// Update a workspace
+app.put('/api/workspaces/:id', async (c) => {
+  try {
+    const workspaceId = c.req.param('id');
+    const { title, emoji, emoji_color, description, instructions } = await c.req.json();
+    
+    if (!workspaceId) {
+      return c.json({ success: false, error: 'Workspace ID is required' }, 400);
+    }
+
+    // Check if workspace exists
+    const existingWorkspace = await c.env.DB.prepare(
+      'SELECT * FROM workspaces WHERE id = ?'
+    ).bind(workspaceId).first();
+
+    if (!existingWorkspace) {
+      return c.json({ success: false, error: 'Workspace not found' }, 404);
+    }
+
+    const now = new Date().toISOString();
+    
+    await c.env.DB.prepare(
+      'UPDATE workspaces SET title = ?, emoji = ?, emoji_color = ?, description = ?, instructions = ?, updated_at = ? WHERE id = ?'
+    ).bind(
+      title || existingWorkspace.title,
+      emoji || existingWorkspace.emoji,
+      emoji_color !== undefined ? emoji_color : existingWorkspace.emoji_color,
+      description !== undefined ? description : existingWorkspace.description,
+      instructions !== undefined ? instructions : existingWorkspace.instructions,
+      now,
+      workspaceId
+    ).run();
+
+    const updatedWorkspace = {
+      ...existingWorkspace,
+      title: title || existingWorkspace.title,
+      emoji: emoji || existingWorkspace.emoji,
+      emoji_color: emoji_color !== undefined ? emoji_color : existingWorkspace.emoji_color,
+      description: description !== undefined ? description : existingWorkspace.description,
+      instructions: instructions !== undefined ? instructions : existingWorkspace.instructions,
+      updated_at: now
+    };
+
+    return c.json({ success: true, data: updatedWorkspace });
+  } catch (error) {
+    console.error('Error updating workspace:', error);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to update workspace',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
+
+// Delete a workspace
+app.delete('/api/workspaces/:id', async (c) => {
+  try {
+    const workspaceId = c.req.param('id');
+    
+    if (!workspaceId) {
+      return c.json({ success: false, error: 'Workspace ID is required' }, 400);
+    }
+
+    // Check if workspace exists
+    const existingWorkspace = await c.env.DB.prepare(
+      'SELECT * FROM workspaces WHERE id = ?'
+    ).bind(workspaceId).first();
+
+    if (!existingWorkspace) {
+      return c.json({ success: false, error: 'Workspace not found' }, 404);
+    }
+
+    // Start a transaction to ensure data consistency
+    await c.env.DB.batch([
+      // First, update chats to remove the workspace reference
+      c.env.DB.prepare('UPDATE chats SET workspace_id = NULL WHERE workspace_id = ?').bind(workspaceId),
+      // Then delete the workspace
+      c.env.DB.prepare('DELETE FROM workspaces WHERE id = ?').bind(workspaceId)
+    ]);
+
+    return c.json({ success: true, message: 'Workspace deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting workspace:', error);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to delete workspace',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
+
+// Chat API Endpoints
 // Get all chats or filter by workspace_id if provided
 app.get('/api/chats', async (c) => {
   try {
@@ -1129,6 +1293,19 @@ export class Chat extends AIChatAgent<Env> {
     PRIMARY KEY (user_id, chat_id),
       FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
     )
+  `
+
+  private readonly CREATE_WORKSPACES_TABLE = `
+    CREATE TABLE IF NOT EXISTS workspaces (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      emoji TEXT NOT NULL,
+      emoji_color TEXT,
+      description TEXT,
+      instructions TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
   `;
 
   private readonly CREATE_CHATS_TABLE = `
@@ -1210,33 +1387,19 @@ export class Chat extends AIChatAgent<Env> {
         return;
       }
 
-      // Crear la tabla chats primero
-      await this.db.prepare(this.CREATE_CHATS_TABLE).run();
-      console.log('Chats table created successfully');
-
-      // Verificar que la tabla chats se creó correctamente
-      const chatsExist = await this.db.prepare(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='chats'"
-      ).first<{ name: string }>();
-      if (!chatsExist) {
-        throw new Error('Failed to create chats table');
-      }
-
-      // Crear la tabla messages después de verificar que chats existe
-      await this.db.prepare(this.CREATE_MESSAGES_TABLE).run();
-      console.log('Messages table created successfully');
-
-      // Crear la tabla step_counters
-      await this.db.prepare(this.CREATE_STEP_COUNTERS_TABLE).run();
-      console.log('Step counters table created successfully');
-
-      // Verificar que ambas tablas se crearon correctamente
-      const finalTablesExist = await this.verifyTables();
-      if (!finalTablesExist) {
-        throw new Error('Failed to verify table creation');
-      }
-
-      console.log('Database tables initialized and verified successfully');
+      // Create all tables in a single transaction
+      await this.db.batch([
+        // Create workspaces table first since chats references it
+        this.db.prepare(this.CREATE_WORKSPACES_TABLE),
+        // Create chats table with foreign key to workspaces
+        this.db.prepare(this.CREATE_CHATS_TABLE),
+        // Create messages table with foreign key to chats
+        this.db.prepare(this.CREATE_MESSAGES_TABLE),
+        // Create step_counters table with foreign key to chats
+        this.db.prepare(this.CREATE_STEP_COUNTERS_TABLE)
+      ]);
+      
+      console.log('All database tables initialized successfully');
     } catch (error) {
       console.error('Error initializing database tables:', error);
       throw new Error(`Failed to initialize database tables: ${error instanceof Error ? error.message : 'Unknown error'}`);
