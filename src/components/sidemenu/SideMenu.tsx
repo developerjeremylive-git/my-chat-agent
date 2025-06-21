@@ -305,7 +305,7 @@ export function SideMenu({
         setShowWorkspaceModal(false);
     };
 
-    const { showSuccess, showError, showDeletion } = useNotification();
+    const { showSuccess, showError, showDeletion, showInfo } = useNotification();
 
     const handleDeleteWorkspace = async (workspace: Workspace) => {
         // Close the menu if it's not static (floating state)
@@ -373,17 +373,54 @@ export function SideMenu({
         }
     };
 
-    const toggleWorkspace = (workspaceId: string) => {
+    const toggleWorkspace = async (workspaceId: string) => {
         if (selectedWorkspace === workspaceId) {
-            // If clicking the same workspace, deselect it
+            // Si se hace clic en el mismo espacio de trabajo, deseleccionarlo
             setSelectedWorkspace(null);
-            fetchChats();
-        } else {
-            // Select the workspace and load its chats
-            setSelectedWorkspace(workspaceId);
-            fetchChats(workspaceId);
+            await fetchChats();
+            setExpandedWorkspace(prev => prev === workspaceId ? null : workspaceId);
+            return;
         }
-        setExpandedWorkspace(prev => prev === workspaceId ? null : workspaceId);
+
+        // Seleccionar el espacio de trabajo y cargar sus chats
+        setSelectedWorkspace(workspaceId);
+        
+        try {
+            const url = `/api/chats?workspaceId=${workspaceId}`;
+            const response = await fetch(url);
+            const result = await response.json() as ApiResponse<ChatApiData[]>;
+
+            if (!result.success) {
+                throw new Error(result.error || 'Error al cargar los chats');
+            }
+
+            // Formatear los chats
+            const formattedChats = (result.data || []).map((chat) => ({
+                id: chat.id,
+                title: chat.title,
+                lastMessageAt: new Date(chat.lastMessageAt || Date()),
+                messages: [],
+                workspaceId: chat.workspaceId || undefined
+            }));
+
+            setChats(formattedChats);
+            setExpandedWorkspace(prev => prev === workspaceId ? null : workspaceId);
+
+            // Si hay chats, seleccionar el más reciente
+            if (formattedChats.length > 0) {
+                // Ordenar por lastMessageAt de más reciente a más antiguo
+                const sortedChats = [...formattedChats].sort((a, b) => 
+                    b.lastMessageAt.getTime() - a.lastMessageAt.getTime()
+                );
+                onChatSelect(sortedChats[0].id);
+            } else {
+                // Mostrar notificación si no hay chats
+                showInfo('Este espacio de trabajo no tiene chats creados', 3000);
+            }
+        } catch (error) {
+            console.error('Error al cargar los chats del espacio de trabajo:', error);
+            showError('Error al cargar los chats del espacio de trabajo', 3000);
+        }
     };
 
     // Close dropdown when clicking outside
