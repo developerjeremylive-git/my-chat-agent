@@ -308,6 +308,10 @@ export function SideMenu({
     const { showSuccess, showError, showDeletion } = useNotification();
 
     const handleDeleteWorkspace = async (workspace: Workspace) => {
+        // Close the menu if it's not static (floating state)
+        if (!isStatic) {
+            onClose();
+        }
         setWorkspaceToDelete(workspace);
         setShowDeleteDialog(true);
     };
