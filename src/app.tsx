@@ -10,6 +10,7 @@ import type { tools } from "./tools";
 import { AIConfigProvider, useAIConfig } from "@/contexts/AIConfigContext";
 import { ModelProvider, useModel } from "@/contexts/ModelContext";
 import { ChatProvider } from "@/contexts/ChatContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import "@/styles/markdown.css";
 import { ModelSelect } from "@/components/model/ModelSelect";
 import { MessageView } from "@/components/message/MessageView";
@@ -2014,13 +2015,15 @@ function ChatComponent() {
 
 export default function Chat() {
   return (
-    <ChatProvider>
-      <AIConfigProvider>
-        <ModelProvider>
-          <ChatComponent />
-        </ModelProvider>
-      </AIConfigProvider>
-    </ChatProvider>
+    <NotificationProvider>
+      <ChatProvider>
+        <AIConfigProvider>
+          <ModelProvider>
+            <ChatComponent />
+          </ModelProvider>
+        </AIConfigProvider>
+      </ChatProvider>
+    </NotificationProvider>
   );
 }
 

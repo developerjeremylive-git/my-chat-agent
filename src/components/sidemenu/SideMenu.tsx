@@ -19,6 +19,7 @@ interface ChatApiData {
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { WorkspaceModal } from '@/components/workspace/WorkspaceModal';
+import { useNotification } from '@/contexts/NotificationContext';
 
 import type { ChatData, LocalMessage, LocalChatData, ChatMessage } from '@/types/chat';
 import type { Workspace } from '@/lib/types/workspace';
@@ -246,8 +247,33 @@ export function SideMenu({
         setShowWorkspaceModal(false);
     };
 
-    const handleDeleteWorkspace = (workspaceId: string) => {
-        setWorkspaces(prev => prev.filter(w => w.id !== workspaceId));
+    const { showNotification } = useNotification();
+
+    const handleDeleteWorkspace = async (workspaceId: string) => {
+        try {
+            const response = await fetch(`/api/workspaces/${workspaceId}`, {
+                method: 'DELETE',
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to delete workspace');
+            }
+            
+            // Update local state
+            setWorkspaces(prev => prev.filter(w => w.id !== workspaceId));
+            
+            // Show success notification
+            showNotification('Los chats se han movido a TODOS los chats', 5000);
+            
+            // If the deleted workspace was selected, clear the selection
+            if (selectedWorkspace === workspaceId) {
+                setSelectedWorkspace(null);
+                fetchChats();
+            }
+        } catch (error) {
+            console.error('Error deleting workspace:', error);
+            showNotification('Error al eliminar el espacio de trabajo', 5000);
+        }
     };
 
     const toggleWorkspace = (workspaceId: string) => {
