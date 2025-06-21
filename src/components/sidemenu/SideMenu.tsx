@@ -20,6 +20,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { WorkspaceModal } from '@/components/workspace/WorkspaceModal';
 import { useNotification } from '@/contexts/NotificationContext';
+import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 
 import type { ChatData, LocalMessage, LocalChatData, ChatMessage } from '@/types/chat';
 import type { Workspace } from '@/lib/types/workspace';
@@ -179,13 +180,15 @@ export function SideMenu({
     const [showNewChatModal, setShowNewChatModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [newChatTitle, setNewChatTitle] = useState('Nuevo Chat');
-    
+
     // Workspace state
     const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
     const [selectedWorkspace, setSelectedWorkspace] = useState<string | null>(null);
     const [expandedWorkspace, setExpandedWorkspace] = useState<string | null>(null);
     const [workspaceToEdit, setWorkspaceToEdit] = useState<Workspace | null>(null);
-    const [showWorkspaceModal, setShowWorkspaceModal] = useState<boolean>(false);
+    const [showWorkspaceModal, setShowWorkspaceModal] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [workspaceToDelete, setWorkspaceToDelete] = useState<Workspace | null>(null);
 
     // Load workspaces from localStorage on mount
     useEffect(() => {
@@ -235,11 +238,11 @@ export function SideMenu({
         instructions: string;
     }) => {
         if (!workspaceToEdit) return;
-        
-        setWorkspaces(prev => 
-            prev.map(w => 
-                w.id === workspaceToEdit.id 
-                    ? { ...w, ...data, updatedAt: new Date() } 
+
+        setWorkspaces(prev =>
+            prev.map(w =>
+                w.id === workspaceToEdit.id
+                    ? { ...w, ...data, updatedAt: new Date() }
                     : w
             )
         );
@@ -249,30 +252,40 @@ export function SideMenu({
 
     const { showNotification } = useNotification();
 
-    const handleDeleteWorkspace = async (workspaceId: string) => {
+    const handleDeleteWorkspace = async (workspace: Workspace) => {
+        setWorkspaceToDelete(workspace);
+        setShowDeleteDialog(true);
+    };
+
+    const confirmDeleteWorkspace = async () => {
+        if (!workspaceToDelete) return;
+
         try {
-            const response = await fetch(`/api/workspaces/${workspaceId}`, {
+            const response = await fetch(`/api/workspaces/${workspaceToDelete.id}`, {
                 method: 'DELETE',
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to delete workspace');
             }
-            
+
             // Update local state
-            setWorkspaces(prev => prev.filter(w => w.id !== workspaceId));
-            
+            setWorkspaces(prev => prev.filter(w => w.id !== workspaceToDelete.id));
+
             // Show success notification
             showNotification('Los chats se han movido a TODOS los chats', 5000);
-            
+
             // If the deleted workspace was selected, clear the selection
-            if (selectedWorkspace === workspaceId) {
+            if (selectedWorkspace === workspaceToDelete.id) {
                 setSelectedWorkspace(null);
                 fetchChats();
             }
         } catch (error) {
             console.error('Error deleting workspace:', error);
             showNotification('Error al eliminar el espacio de trabajo', 5000);
+        } finally {
+            setShowDeleteDialog(false);
+            setWorkspaceToDelete(null);
         }
     };
 
@@ -360,10 +373,10 @@ export function SideMenu({
 
     const fetchChats = async (workspaceId?: string | null) => {
         try {
-            const url = workspaceId 
+            const url = workspaceId
                 ? `/api/chats?workspaceId=${workspaceId}`
                 : '/api/chats';
-                
+
             const response = await fetch(url);
             const result = await response.json() as ApiResponse<ChatApiData[]>;
 
@@ -417,9 +430,9 @@ export function SideMenu({
         try {
             // Si no hay workspace seleccionado, se envía null explícitamente
             const workspaceId = selectedWorkspace || null;
-            
+
             console.log('Creating chat with:', { title, workspaceId });
-            
+
             const response = await fetch('/api/chats', {
                 method: 'POST',
                 headers: {
@@ -433,7 +446,7 @@ export function SideMenu({
 
             const responseText = await response.text();
             let result;
-            
+
             try {
                 result = responseText ? JSON.parse(responseText) : null;
                 console.log('API Response:', result);
@@ -443,9 +456,9 @@ export function SideMenu({
             }
 
             if (!response.ok) {
-                const errorMessage = result?.error || 
-                                  result?.message || 
-                                  `Error ${response.status}: ${response.statusText}`;
+                const errorMessage = result?.error ||
+                    result?.message ||
+                    `Error ${response.status}: ${response.statusText}`;
                 throw new Error(errorMessage);
             }
 
@@ -459,7 +472,7 @@ export function SideMenu({
             }
 
             const chatData = result.data || result.chat || result;
-            
+
             if (!chatData || !chatData.id) {
                 console.error('Datos de chat inválidos en la respuesta:', chatData);
                 throw new Error('Datos de chat inválidos en la respuesta del servidor');
@@ -474,7 +487,7 @@ export function SideMenu({
             };
 
             console.log('New chat created:', newChat);
-            
+
             setChats(prevChats => [...prevChats, newChat]);
             await fetchChats(workspaceId); // Actualizar la lista de chats con el workspaceId actual
             onNewChat(); // Cerrar el menú lateral
@@ -511,10 +524,10 @@ export function SideMenu({
 
             if (result.success && result.data) {
                 setChats(prevChats => prevChats.map(chat =>
-                    chat.id === chatId ? { 
-                        ...chat, 
+                    chat.id === chatId ? {
+                        ...chat,
                         title: newTitle,
-                        lastMessageAt: new Date(result.data!.lastMessageAt || Date.now()) 
+                        lastMessageAt: new Date(result.data!.lastMessageAt || Date.now())
                     } : chat
                 ));
                 await fetchChats(); // Actualizar la lista completa de chats
@@ -660,7 +673,7 @@ export function SideMenu({
                                         {selectedWorkspace ? 'Espacio actual' : 'Espacios de trabajo'}
                                     </h2>
                                     {selectedWorkspace && (
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 setSelectedWorkspace(null);
                                                 fetchChats();
@@ -737,15 +750,14 @@ export function SideMenu({
                                             <div key={workspace.id} className="rounded-lg overflow-hidden">
                                                 <button
                                                     onClick={() => toggleWorkspace(workspace.id)}
-                                                    className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium ${
-                                                        expandedWorkspace === workspace.id 
-                                                            ? 'bg-neutral-100 dark:bg-neutral-800' 
+                                                    className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium ${expandedWorkspace === workspace.id
+                                                            ? 'bg-neutral-100 dark:bg-neutral-800'
                                                             : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
-                                                    } transition-colors`}
+                                                        } transition-colors`}
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        <span 
-                                                            className="text-lg" 
+                                                        <span
+                                                            className="text-lg"
                                                             dangerouslySetInnerHTML={{ __html: workspace.emoji }}
                                                         />
                                                         <span className={`truncate ${selectedWorkspace === workspace.id ? 'font-semibold text-[#F48120]' : ''}`}>
@@ -753,9 +765,8 @@ export function SideMenu({
                                                         </span>
                                                     </div>
                                                     <svg
-                                                        className={`w-4 h-4 text-neutral-500 transition-transform ${
-                                                            expandedWorkspace === workspace.id ? 'rotate-180' : ''
-                                                        }`}
+                                                        className={`w-4 h-4 text-neutral-500 transition-transform ${expandedWorkspace === workspace.id ? 'rotate-180' : ''
+                                                            }`}
                                                         fill="none"
                                                         viewBox="0 0 24 24"
                                                         stroke="currentColor"
@@ -763,7 +774,7 @@ export function SideMenu({
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                                     </svg>
                                                 </button>
-                                                
+
                                                 {expandedWorkspace === workspace.id && (
                                                     <div className="pl-11 pr-2 py-1 bg-neutral-50 dark:bg-neutral-800/30">
                                                         {workspace.description && (
@@ -790,9 +801,7 @@ export function SideMenu({
                                                                 <button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
-                                                                        if (window.confirm(`¿Estás seguro de que quieres eliminar el espacio "${workspace.title}"?`)) {
-                                                                            handleDeleteWorkspace(workspace.id);
-                                                                        }
+                                                                        handleDeleteWorkspace(workspace);
                                                                     }}
                                                                     className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
                                                                     title="Eliminar espacio"
@@ -939,7 +948,7 @@ export function SideMenu({
                                                                 Editar título
                                                             </button>
                                                             <button
-                                                                onClick={() =>{ setChatToDelete(chat); onClose();}}
+                                                                onClick={() => { setChatToDelete(chat); onClose(); }}
                                                                 className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 flex items-center"
                                                             >
                                                                 <Trash weight="duotone" className="w-4 h-4 mr-2" />
@@ -1042,6 +1051,21 @@ export function SideMenu({
                     </div>
                 </div>
             )}
+            
+            {/* Workspace Delete Confirmation Dialog */}
+            <ConfirmationDialog
+                isOpen={showDeleteDialog}
+                onClose={() => {
+                    setShowDeleteDialog(false);
+                    setWorkspaceToDelete(null);
+                }}
+                onConfirm={confirmDeleteWorkspace}
+                title={workspaceToDelete ? `¿Eliminar espacio "${workspaceToDelete.title}"?` : '¿Eliminar espacio?'}
+                message="¿Estás seguro de que quieres eliminar este espacio? Los chats no se eliminarán, pero se moverán a la sección 'TODOS los chats'."
+                confirmText="Eliminar"
+                cancelText="Cancelar"
+                isDanger={true}
+            />
         </AnimatePresence>
     );
-}
+};
