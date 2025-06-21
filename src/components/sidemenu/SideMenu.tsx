@@ -316,6 +316,12 @@ export function SideMenu({
         if (!workspaceToDelete) return;
 
         try {
+            // First, check if the workspace has any chats
+            const chatsResponse = await fetch(`/api/chats?workspaceId=${workspaceToDelete.id}`);
+            const chatsResult = await chatsResponse.json() as ApiResponse<ChatApiData[]>;
+            const hasChats = chatsResult.data && chatsResult.data.length > 0;
+
+            // Then proceed with workspace deletion
             const response = await fetch(`/api/workspaces/${workspaceToDelete.id}`, {
                 method: 'DELETE',
                 headers: {
@@ -335,11 +341,16 @@ export function SideMenu({
                 throw new Error(result.error || 'Failed to delete workspace');
             }
 
+
             // Update local state
             setWorkspaces(prev => prev.filter(w => w.id !== workspaceToDelete.id));
 
-            // Show deletion notification with the new deletion type
-            showDeletion('Los chats se han movido al listado de "Chats Recientes"', 2000);
+            // Show appropriate notification based on whether there were chats
+            if (hasChats) {
+                showDeletion('Los chats se han movido al listado de "Chats Recientes"', 2000);
+            } else {
+                showDeletion('Espacio de trabajo eliminado correctamente', 2000);
+            }
 
             // If the deleted workspace was selected, clear the selection
             if (selectedWorkspace === workspaceToDelete.id) {
