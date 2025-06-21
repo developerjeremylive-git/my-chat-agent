@@ -613,10 +613,23 @@ app.get('/api/chats/:id', async (c) => {
       'SELECT * FROM messages WHERE chat_id = ? ORDER BY created_at ASC'
     ).bind(chatId).all();
 
-    // Combine chat data with messages
+    // Get workspace info if workspace_id exists
+    let workspace = null;
+    if (chat.workspace_id) {
+      workspace = await c.env.DB.prepare(
+        'SELECT id, title, instructions FROM workspaces WHERE id = ?'
+      ).bind(chat.workspace_id).first();
+    }
+
+    // Combine chat data with messages and workspace info
     const chatWithMessages = {
       ...chat,
-      messages: messages.results || []
+      messages: messages.results || [],
+      workspace: workspace ? {
+        id: workspace.id,
+        title: workspace.title,
+        instructions: workspace.instructions
+      } : null
     };
 
     // Notify all active WebSocket connections about the chat selection

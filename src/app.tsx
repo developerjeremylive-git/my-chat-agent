@@ -1200,53 +1200,6 @@ function ChatComponent() {
                                         />
                                       </div>
                                     </div>
-                                    <div
-                                      id={`message-${m.id}-${i}`}
-                                      className="markdown-content"
-                                    >
-                                      <div className="text-sm">
-                                        {document.getElementById(`message-${m.id}-${i}`)?.classList.contains('markdown-view') ? (
-                                          <ReactMarkdown
-                                            components={{
-                                              code({node, inline, className, children, ...props}: any) {
-                                                const match = /language-(\w+)/.exec(className || '');
-                                                return !inline && match ? (
-                                                  <SyntaxHighlighter
-                                                    style={vscDarkPlus}
-                                                    language={match[1]}
-                                                    PreTag="div"
-                                                    {...props}
-                                                  >
-                                                    {String(children).replace(/\n$/, '')}
-                                                  </SyntaxHighlighter>
-                                                ) : (
-                                                  <code className={className} {...props}>
-                                                    {children}
-                                                  </code>
-                                                );
-                                              },
-                                              h1: ({node, ...props}) => <h1 className="text-2xl font-bold my-4" {...props} />,
-                                              h2: ({node, ...props}) => <h2 className="text-xl font-bold my-3" {...props} />,
-                                              h3: ({node, ...props}) => <h3 className="text-lg font-bold my-2" {...props} />,
-                                              p: ({node, ...props}) => <p className="my-2" {...props} />,
-                                              ul: ({node, ...props}) => <ul className="list-disc list-inside my-2" {...props} />,
-                                              ol: ({node, ...props}) => <ol className="list-decimal list-inside my-2" {...props} />,
-                                              li: ({node, ...props}) => <li className="my-1" {...props} />,
-                                              blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 pl-4 my-2 italic" {...props} />,
-                                              em: ({node, ...props}) => <em className="italic" {...props} />,
-                                              strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
-                                              a: ({node, ...props}) => <a className="text-blue-500 hover:underline" {...props} />
-                                            }}
-                                          >
-                                            {part.text.replace(/^scheduled message: /, "")}
-                                          </ReactMarkdown>
-                                        ) : (
-                                          <p className="whitespace-pre-wrap">
-                                            {part.text.replace(/^scheduled message: /, "")}
-                                          </p>
-                                        )}
-                                      </div>
-                                    </div>
                                   </Card>
                                   <p
                                     className={`text-xs text-muted-foreground mt-1 ${isUser ? "text-right" : "text-left"
@@ -1761,23 +1714,45 @@ function ChatComponent() {
                 <div className="flex flex-row items-stretch gap-3 p-3 w-full">
                   {/* Input Form */}
                   <form
-                    onSubmit={(e) => {
+                    onSubmit={async (e) => {
                       e.preventDefault();
-                      const updateConfigs = async () => {
-                        try {
-                          await fetch('/api/assistant', {
-                            method: 'POST',
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ maxStepsTemp: stepMax, prompt: inputText, modelTemp: selectedModel, selectedChatId: selectedChatId }),
-                          });
-                          handleAgentSubmit(e);
-                        } catch (error) {
-                          console.error('Error al actualizar configuraciones:', error);
+                      try {
+                        // Get the current chat to check for workspace instructions
+                        let workspaceInstructions = '';
+                        if (selectedChatId) {
+                          const response = await fetch(`/api/chats/${selectedChatId}`);
+                          if (response.ok) {
+                            interface ChatResponse {
+                              workspace?: {
+                                instructions?: string;
+                              };
+                            }
+                            const chatData = await response.json() as ChatResponse;
+                            if (chatData.workspace?.instructions) {
+                              workspaceInstructions = chatData.workspace.instructions;
+                            }
+                          }
                         }
-                      };
-                      updateConfigs();
+
+                        // Update configurations with the selected model and prompt
+                        await fetch('/api/assistant', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({ 
+                            maxStepsTemp: stepMax, 
+                            prompt: workspaceInstructions ? `${workspaceInstructions}` : inputText, 
+                            modelTemp: selectedModel, 
+                            selectedChatId: selectedChatId 
+                          }),
+                        });
+                        
+                        // Submit the form to the agent
+                        handleAgentSubmit(e);
+                      } catch (error) {
+                        console.error('Error al actualizar configuraciones:', error);
+                      }
                     }}
                     className="flex-1 min-w-0"
                   >
