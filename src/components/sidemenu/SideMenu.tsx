@@ -189,8 +189,20 @@ export function SideMenu({
     const [workspaceToEdit, setWorkspaceToEdit] = useState<Workspace | null>(null);
     const [workspaceToDelete, setWorkspaceToDelete] = useState<Workspace | null>(null);
     const [showWorkspaceModal, setShowWorkspaceModal] = useState(false);
+  const [templateInstructions, setTemplateInstructions] = useState('');
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [systemPrompt, setSystemPrompt] = useState('');
+
+    const handleNewWorkspace = (instructions = '') => {
+        setWorkspaceToEdit(null);
+        setSystemPrompt('');
+        setTemplateInstructions(instructions);
+        setShowWorkspaceModal(true);
+    };
+
+    const handleTemplateSelect = (template: { id: string; instructions: string }) => {
+        handleNewWorkspace(template.instructions);
+    };
 
     // Handle system prompt from OIAICreator
     useEffect(() => {
@@ -198,8 +210,7 @@ export function SideMenu({
             // Get the system prompt from localStorage or any other source
             const prompt = localStorage.getItem('systemPrompt') || '';
             setSystemPrompt(prompt);
-            setWorkspaceToEdit(null);
-            setShowWorkspaceModal(true);
+            handleNewWorkspace();
         };
 
         window.addEventListener('openSystemPrompt', handleSystemPrompt as EventListener);
@@ -886,9 +897,15 @@ export function SideMenu({
                                     setShowWorkspaceModal(false);
                                     setWorkspaceToEdit(null);
                                     setSystemPrompt('');
+                                    setTemplateInstructions('');
                                 }}
                                 onSubmit={workspaceToEdit ? handleUpdateWorkspace : handleCreateWorkspace}
-                                initialData={workspaceToEdit}
+                                initialData={workspaceToEdit ? {
+                                    ...workspaceToEdit,
+                                    instructions: templateInstructions || workspaceToEdit.instructions || ''
+                                } : {
+                                    instructions: templateInstructions
+                                }}
                                 systemPrompt={systemPrompt}
                             />
                             
@@ -907,7 +924,7 @@ export function SideMenu({
                             />
 
                             {/* Navigation Section */}
-                            <NavigationSection />
+                            <NavigationSection onTemplateSelect={handleTemplateSelect} />
 
                             {/* Chats Section */}
                             <div className="border-b border-neutral-200 dark:border-neutral-700 p-4">

@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { TemplatesBrowser } from './TemplatesBrowser';
 import { LayoutTemplate, Plus } from 'lucide-react';
 
-export const NavigationSection: React.FC = () => {
+interface NavigationSectionProps {
+  onTemplateSelect?: (template: { id: string; instructions: string }) => void;
+}
+
+export const NavigationSection: React.FC<NavigationSectionProps> = ({ onTemplateSelect }) => {
   const [showTemplates, setShowTemplates] = useState(false);
 
   return (
@@ -22,7 +26,10 @@ export const NavigationSection: React.FC = () => {
       </div>
 
       {showTemplates && (
-        <TemplatesBrowser onClose={() => setShowTemplates(false)} />
+        <TemplatesBrowser 
+          onClose={() => setShowTemplates(false)}
+          onTemplateSelect={onTemplateSelect}
+        />
       )}
     </>
   );

@@ -6,6 +6,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 
 interface TemplatesBrowserProps {
   onClose: () => void;
+  onTemplateSelect?: (template: { id: string; instructions: string }) => void;
 }
 
 const categoryLabels: Record<string, string> = {
@@ -19,7 +20,7 @@ const categoryLabels: Record<string, string> = {
   'education': 'Educación'
 };
 
-export const TemplatesBrowser: React.FC<TemplatesBrowserProps> = ({ onClose }) => {
+export const TemplatesBrowser: React.FC<TemplatesBrowserProps> = ({ onClose, onTemplateSelect }) => {
   const [activeCategory, setActiveCategory] = useState<typeof TEMPLATE_CATEGORIES[number]>('all');
 
   const filteredTemplates = activeCategory === 'all'
@@ -75,8 +76,12 @@ export const TemplatesBrowser: React.FC<TemplatesBrowserProps> = ({ onClose }) =
                     key={template.id}
                     template={template}
                     onClick={() => {
-                      // Handle template selection
-                      console.log('Selected template:', template.id);
+                      if (onTemplateSelect) {
+                        onTemplateSelect({
+                          id: template.id,
+                          instructions: template.description
+                        });
+                      }
                       onClose();
                     }}
                   />
