@@ -222,7 +222,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({ template, onClick })
       className={cn(
         'bg-neutral-800 rounded-lg p-4 cursor-pointer transition-all hover:bg-neutral-700',
         'border border-neutral-700 hover:border-neutral-600',
-        'flex flex-col h-full'
+        'flex flex-col h-full min-h-[180px] max-h-[220px] w-full'
       )}
       onClick={onClick}
     >
@@ -236,7 +236,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({ template, onClick })
         </div>
         <h3 className="text-white font-medium text-sm">{template.title}</h3>
       </div>
-      <p className="text-neutral-400 text-sm flex-grow">
+      <p className="text-neutral-400 text-sm flex-grow overflow-y-auto max-h-[60px] pr-1 custom-scrollbar">
         {template.description}
       </p>
       <div className="mt-3 flex flex-wrap gap-1">
