@@ -17,7 +17,6 @@ interface NotificationContextType {
   showInfo: (message: string, duration?: number) => void;
   showWarning: (message: string, duration?: number) => void;
   showDeletion: (message: string, duration?: number) => void;
-  clearAllNotifications: () => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -49,10 +48,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
-  const clearAllNotifications = () => {
-    setNotifications([]);
-  };
-
   return (
     <NotificationContext.Provider value={{ 
       showNotification,
@@ -60,8 +55,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       showError,
       showInfo,
       showWarning,
-      showDeletion,
-      clearAllNotifications,
+      showDeletion
     }}>
       {children}
       <div className="fixed top-0 right-0 z-50 flex flex-col space-y-2 p-4">

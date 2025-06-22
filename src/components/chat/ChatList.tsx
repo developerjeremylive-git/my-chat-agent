@@ -3,7 +3,6 @@ import { useChat } from '@/contexts/ChatContext';
 import { useNotification } from '@/contexts/NotificationContext';
 import { Button } from '@/components/button/Button';
 import { formatDistanceToNow } from 'date-fns';
-import { SuccessAnimation } from '@/components/ui/SuccessAnimation';
 import { es } from 'date-fns/locale';
 import { ChatText, Plus, Trash, PencilSimple } from '@phosphor-icons/react';
 import type { Chat } from '@/contexts/ChatContext';
@@ -12,8 +11,7 @@ export function ChatList() {
   const { chats, currentChat, createChat, selectChat, deleteChat, updateChat } = useChat();
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState('');
-  const { showError, showSuccess, clearAllNotifications } = useNotification();
-  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const { showSuccess, showError } = useNotification();
 
   interface ErrorResponse {
     error?: string;
@@ -76,10 +74,6 @@ export function ChatList() {
           lastMessageAt: new Date(result.data.lastMessageAt || Date.now())
         };
         updateChat(chatId, updatedChat);
-        // Clear all existing notifications
-        clearAllNotifications();
-        // Show success animation
-        setShowSuccessAnimation(true);
       } else if (result.error) {
         throw new Error(result.error);
       }
@@ -103,11 +97,6 @@ export function ChatList() {
   };
 
   return (
-    <>
-      <SuccessAnimation 
-        isVisible={showSuccessAnimation} 
-        onComplete={() => setShowSuccessAnimation(false)} 
-      />
     <div className="space-y-4">
       <div className="flex items-center justify-between px-4">
         <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Mis Chats</h2>
@@ -207,6 +196,5 @@ export function ChatList() {
         )}
       </div>
     </div>
-    </>
   );
 }
