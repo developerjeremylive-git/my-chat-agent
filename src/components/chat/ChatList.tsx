@@ -11,7 +11,7 @@ export function ChatList() {
   const { chats, currentChat, createChat, selectChat, deleteChat, updateChat } = useChat();
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState('');
-  const { showSuccess, showError } = useNotification();
+  const { showTitleUpdate, showError } = useNotification();
 
   interface ErrorResponse {
     error?: string;
@@ -74,7 +74,7 @@ export function ChatList() {
           lastMessageAt: new Date(result.data.lastMessageAt || Date.now())
         };
         updateChat(chatId, updatedChat);
-        showSuccess('Título actualizado correctamente');
+        showTitleUpdate('Título del chat actualizado');
       } else if (result.error) {
         throw new Error(result.error);
       }

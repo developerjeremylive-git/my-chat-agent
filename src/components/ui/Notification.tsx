@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
-import { CheckCircle, Warning, Info, X, Trash, XCircle } from '@phosphor-icons/react';
+import { CheckCircle, Warning, Info, X, Trash, XCircle, PencilSimple } from '@phosphor-icons/react';
 
-export type NotificationType = 'success' | 'error' | 'info' | 'warning' | 'deletion';
+export type NotificationType = 'success' | 'error' | 'info' | 'warning' | 'deletion' | 'titleUpdate';
 
 interface NotificationProps {
   message: string;
@@ -57,6 +57,15 @@ const notificationStyles = {
     iconColor: 'text-orange-600 dark:text-orange-300',
     progressBg: 'bg-orange-200 dark:bg-orange-700',
     progressBar: 'bg-orange-600 dark:bg-orange-300',
+  },
+  titleUpdate: {
+    bg: 'bg-purple-100 dark:bg-purple-800',
+    border: 'border-purple-200 dark:border-purple-700',
+    text: 'text-purple-900 dark:text-white',
+    icon: PencilSimple,
+    iconColor: 'text-purple-600 dark:text-purple-300',
+    progressBg: 'bg-purple-200 dark:bg-purple-700',
+    progressBar: 'bg-purple-600 dark:bg-purple-300',
   },
 } as const;
 
