@@ -318,8 +318,12 @@ export function SideMenu({
             setWorkspaces(prev => [...prev, newWorkspace]);
             setShowWorkspaceModal(false);
             
+            // Automatically select the newly created workspace
+            setSelectedWorkspace(newWorkspace.id);
+            await fetchChats(newWorkspace.id);
+            
             // Show success notification
-            showSuccess('Espacio de trabajo creado exitosamente', 3000);
+            showSuccess('Espacio de trabajo creado y seleccionado', 3000);
             
         } catch (error) {
             console.error('Error creating workspace:', error);
