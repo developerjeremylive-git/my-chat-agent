@@ -28,22 +28,24 @@ export const TemplatesBrowser: React.FC<TemplatesBrowserProps> = ({ onClose }) =
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-75 flex items-center justify-center p-4">
-      <div className="bg-neutral-900 rounded-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-        <div className="p-6 border-b border-neutral-800 flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-white">Plantillas de navegación</h2>
-            <p className="text-neutral-400 mt-1">Comienza rápidamente con estas plantillas populares</p>
+      <div className="bg-neutral-900 rounded-xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden">
+        <div className="p-6 border-b border-neutral-800 flex-shrink-0">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold text-white">Plantillas de navegación</h2>
+              <p className="text-neutral-400 mt-1">Comienza rápidamente con estas plantillas populares</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-neutral-400 hover:text-white p-2 -mt-2 -mr-2 rounded-full hover:bg-neutral-800 transition-colors"
+              aria-label="Cerrar"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="text-neutral-400 hover:text-white p-2 rounded-full hover:bg-neutral-800 transition-colors"
-            aria-label="Cerrar"
-          >
-            <XMarkIcon className="h-6 w-6" />
-          </button>
         </div>
         
-        <div className="overflow-hidden flex flex-1">
+        <div className="flex flex-1 min-h-0">
           {/* Categories Sidebar */}
           <div className="w-48 border-r border-neutral-800 bg-neutral-900 p-4 overflow-y-auto">
             <div className="space-y-1">
@@ -65,25 +67,27 @@ export const TemplatesBrowser: React.FC<TemplatesBrowserProps> = ({ onClose }) =
           </div>
           
           {/* Templates Grid */}
-          <div className="flex-1 p-6 overflow-y-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredTemplates.map((template) => (
-                <TemplateCard
-                  key={template.id}
-                  template={template}
-                  onClick={() => {
-                    // Handle template selection
-                    console.log('Selected template:', template.id);
-                    onClose();
-                  }}
-                />
-              ))}
-              
-              {filteredTemplates.length === 0 && (
-                <div className="col-span-full text-center py-12">
-                  <p className="text-neutral-400">No hay plantillas disponibles en esta categoría.</p>
-                </div>
-              )}
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredTemplates.map((template) => (
+                  <TemplateCard
+                    key={template.id}
+                    template={template}
+                    onClick={() => {
+                      // Handle template selection
+                      console.log('Selected template:', template.id);
+                      onClose();
+                    }}
+                  />
+                ))}
+                
+                {filteredTemplates.length === 0 && (
+                  <div className="col-span-full text-center py-12">
+                    <p className="text-neutral-400">No hay plantillas disponibles en esta categoría.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
