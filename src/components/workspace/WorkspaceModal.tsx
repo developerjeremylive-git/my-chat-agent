@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, FolderPlus, Check, Sparkle, MagicWand } from '@phosphor-icons/react';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 
-interface WorkspaceFormData {
+export interface WorkspaceFormData {
   title: string;
   emoji: string;
   emojiColor?: string;

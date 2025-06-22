@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { TemplatesBrowser } from './TemplatesBrowser';
+import { TemplatesBrowser, type TemplateSelection } from './TemplatesBrowser';
 import { LayoutTemplate, Plus } from 'lucide-react';
 
 interface NavigationSectionProps {
-  onTemplateSelect?: (template: { id: string; instructions: string }) => void;
+  onTemplateSelect?: (template: TemplateSelection) => void;
 }
 
 export const NavigationSection: React.FC<NavigationSectionProps> = ({ onTemplateSelect }) => {

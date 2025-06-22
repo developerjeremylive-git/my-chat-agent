@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
-import type { Template } from '@/types/templates';
+import type { Template as TemplateType } from '@/types/templates';
+
+export type Template = TemplateType;
 import { TEMPLATE_CATEGORIES, TEMPLATES } from '@/types/templates';
 import { TemplateCard } from './TemplateCard';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
+export interface TemplateSelection {
+  id: string;
+  title: string;
+  description: string;
+  instructions: string;
+}
+
 interface TemplatesBrowserProps {
   onClose: () => void;
-  onTemplateSelect?: (template: { id: string; instructions: string }) => void;
+  onTemplateSelect?: (template: TemplateSelection) => void;
 }
 
 const categoryLabels: Record<string, string> = {
@@ -23,9 +32,12 @@ const categoryLabels: Record<string, string> = {
 export const TemplatesBrowser: React.FC<TemplatesBrowserProps> = ({ onClose, onTemplateSelect }) => {
   const [activeCategory, setActiveCategory] = useState<typeof TEMPLATE_CATEGORIES[number]>('all');
 
-  const filteredTemplates = activeCategory === 'all'
+  const filteredTemplates = (activeCategory === 'all'
     ? TEMPLATES
-    : TEMPLATES.filter(template => template.categories.includes(activeCategory));
+    : TEMPLATES.filter(template => template.categories.includes(activeCategory))).map(template => ({
+      ...template,
+      content: template.description // Use description as content for now
+    }));
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-75 flex items-center justify-center p-4">
@@ -77,9 +89,12 @@ export const TemplatesBrowser: React.FC<TemplatesBrowserProps> = ({ onClose, onT
                     template={template}
                     onClick={() => {
                       if (onTemplateSelect) {
+                        const category = template.categories[0] ? categoryLabels[template.categories[0]] || template.categories[0] : 'General';
                         onTemplateSelect({
                           id: template.id,
-                          instructions: template.description
+                          title: template.title,
+                          description: `Plantilla de ${category}`, // More descriptive
+                          instructions: template.description // Keep the full description as instructions
                         });
                       }
                       onClose();

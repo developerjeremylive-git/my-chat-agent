@@ -18,7 +18,14 @@ interface ChatApiData {
 }
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { WorkspaceModal } from '@/components/workspace/WorkspaceModal';
+import { WorkspaceModal, type WorkspaceFormData } from '@/components/workspace/WorkspaceModal';
+
+interface TemplateSelection {
+  id: string;
+  title: string;
+  description: string;
+  instructions: string;
+}
 import { useNotification } from '@/contexts/NotificationContext';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { NavigationSection } from '@/components/navigation/NavigationSection';
@@ -193,15 +200,27 @@ export function SideMenu({
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [systemPrompt, setSystemPrompt] = useState('');
 
-    const handleNewWorkspace = (instructions = '') => {
+    const [templateData, setTemplateData] = useState<Partial<WorkspaceFormData>>({});
+
+    const handleNewWorkspace = (template?: TemplateSelection) => {
         setWorkspaceToEdit(null);
         setSystemPrompt('');
-        setTemplateInstructions(instructions);
+        
+        if (template) {
+            setTemplateData({
+                title: template.title,
+                description: template.description,
+                instructions: template.instructions
+            });
+        } else {
+            setTemplateData({});
+        }
+        
         setShowWorkspaceModal(true);
     };
 
-    const handleTemplateSelect = (template: { id: string; instructions: string }) => {
-        handleNewWorkspace(template.instructions);
+    const handleTemplateSelect = (template: TemplateSelection) => {
+        handleNewWorkspace(template);
     };
 
     // Handle system prompt from OIAICreator
@@ -900,12 +919,11 @@ export function SideMenu({
                                     setTemplateInstructions('');
                                 }}
                                 onSubmit={workspaceToEdit ? handleUpdateWorkspace : handleCreateWorkspace}
-                                initialData={workspaceToEdit ? {
-                                    ...workspaceToEdit,
-                                    instructions: templateInstructions || workspaceToEdit.instructions || ''
-                                } : {
-                                    instructions: templateInstructions
-                                }}
+                                initialData={
+                                    workspaceToEdit 
+                                    ? { ...workspaceToEdit }
+                                    : { ...templateData }
+                                }
                                 systemPrompt={systemPrompt}
                             />
                             
