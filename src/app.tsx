@@ -357,9 +357,23 @@ function ChatComponent() {
   // Efecto para cerrar el menú de configuración cuando se abre la barra lateral
   useEffect(() => {
     if (isSidebarOpen) {
-      setShowSettingsMenu(false);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
     }
   }, [isSidebarOpen]);
+
+  // Listen for openSideMenu event
+  useEffect(() => {
+    const handleOpenSideMenu = () => {
+      setIsSideMenuOpen(true);
+    };
+
+    window.addEventListener('openSideMenu', handleOpenSideMenu);
+    return () => {
+      window.removeEventListener('openSideMenu', handleOpenSideMenu);
+    };
+  }, []);
 
   // Save menu static state to localStorage when it changes
   useEffect(() => {

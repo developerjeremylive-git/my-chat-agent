@@ -470,6 +470,11 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-70 flex items-center justify-center">
           <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-4xl mx-auto my-8 max-h-[85vh] overflow-hidden relative transform transition-all duration-300 scale-100 opacity-100">
             <OIAICreator
+              onOpenSideMenu={() => {
+                // This will trigger the side menu to open
+                const event = new CustomEvent('openSideMenu');
+                window.dispatchEvent(event);
+              }}
               onCopyContent={(content) => {
                 setOiaiContent(content);
                 

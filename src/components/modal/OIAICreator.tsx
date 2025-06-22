@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/button/Button';
 import { Card } from '@/components/card/Card';
 import { OIAISectionSelector } from './OIAISectionSelector';
@@ -99,9 +99,10 @@ const steps: Step[] = [
 
 interface OIAICreatorProps {
   onCopyContent?: (content: string) => void;
+  onOpenSideMenu?: () => void;
 }
 
-export const OIAICreator = ({ onCopyContent, onClose }: OIAICreatorProps & { onClose?: () => void } = {}) => {
+export const OIAICreator = ({ onCopyContent, onOpenSideMenu, onClose }: OIAICreatorProps & { onClose?: () => void } = {}) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedProfession, setSelectedProfession] = useState<Profession | null>(null);
   const [customOIAI, setCustomOIAI] = useState<OIAISection | null>(null);
@@ -112,6 +113,13 @@ export const OIAICreator = ({ onCopyContent, onClose }: OIAICreatorProps & { onC
 
   const [isInputModalOpen, setIsInputModalOpen] = useState(false);
   const [copiedContent, setCopiedContent] = useState('');
+
+  // Function to open the side menu if it's not already open
+  const ensureSideMenuIsOpen = useCallback(() => {
+    if (onOpenSideMenu) {
+      onOpenSideMenu();
+    }
+  }, [onOpenSideMenu]);
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -580,6 +588,8 @@ export const OIAICreator = ({ onCopyContent, onClose }: OIAICreatorProps & { onC
                   const event = new CustomEvent('openSystemPrompt');
                   window.dispatchEvent(event);
                   
+                  // Ensure side menu is open before closing the popup
+                  ensureSideMenuIsOpen();
                   // Close the popup
                   if (onClose) onClose();
                 }
