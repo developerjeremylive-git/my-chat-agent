@@ -21,6 +21,7 @@ import { es } from 'date-fns/locale';
 import { WorkspaceModal } from '@/components/workspace/WorkspaceModal';
 import { useNotification } from '@/contexts/NotificationContext';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
+import { NavigationSection } from '@/components/navigation/NavigationSection';
 
 import type { ChatData, LocalMessage, LocalChatData, ChatMessage } from '@/types/chat';
 import type { Workspace } from '@/lib/types/workspace';
@@ -904,6 +905,9 @@ export function SideMenu({
                                 cancelText="Cancelar"
                                 isDanger={true}
                             />
+
+                            {/* Navigation Section */}
+                            <NavigationSection />
 
                             {/* Chats Section */}
                             <div className="border-b border-neutral-200 dark:border-neutral-700 p-4">
