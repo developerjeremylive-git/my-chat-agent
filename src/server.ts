@@ -706,84 +706,48 @@ app.post('/api/chats', async (c) => {
   }
 });
 
-app.put('/api/chats/:id/title', async (c) => {
-  const chatId = c.req.param('id');
-  const { title } = await c.req.json();
 
-  try {
-    // Update the chat title in the database
-    const result = await c.env.DB.prepare(
-      'UPDATE chats SET title = ? WHERE id = ? RETURNING *'
-    )
-      .bind(title, chatId)
-      .first();
-
-    if (!result) {
-      return c.json({ error: 'Chat no encontrado' }, 404);
-    }
-
-    // Update the in-memory chats array if it exists
-    const chatIndex = chats.findIndex(chat => chat.id === chatId);
-    if (chatIndex !== -1) {
-      chats[chatIndex].title = title;
-    }
-
-    return c.json({
-      success: true,
-      data: {
-        id: result.id,
-        title: result.title,
-        lastMessageAt: result.last_message_at,
-        messages: []
-      }
-    });
-  } catch (error) {
-    console.error('Error updating chat title:', error);
-    return c.json({
-      success: false,
-      error: 'Error al actualizar el título del chat',
-      details: error instanceof Error ? error.message : 'Error desconocido'
-    }, 500);
-  }
-});
-
-// Update chat title
 app.put('/api/chats/:id/title', async (c) => {
   try {
     const chatId = c.req.param('id');
     const { title } = await c.req.json();
 
     if (!title || typeof title !== 'string') {
-      return c.json({ success: false, error: 'Title is required' }, 400);
+      return c.json({ success: false, error: 'Título no válido' }, 400);
     }
 
-    // Update the chat title in the database
+    // Actualizar el título en la base de datos
     const result = await c.env.DB.prepare(
-      'UPDATE chats SET title = ?, last_message_at = datetime("now") WHERE id = ? RETURNING *'
-    ).bind(title, chatId).first();
+      'UPDATE chats SET title = ?, last_message_at = ? WHERE id = ? RETURNING *'
+    ).bind(
+      title,
+      new Date().toISOString(),
+      chatId
+    ).first();
 
     if (!result) {
-      return c.json({ success: false, error: 'Chat not found' }, 404);
+      return c.json({ success: false, error: 'Chat no encontrado' }, 404);
     }
 
-    return c.json({
-      success: true,
+    // Notificar a los clientes WebSocket sobre la actualización
+    broadcastToRoom(chatId, {
+      type: 'chat_updated',
+      chat: result
+    });
+
+    return c.json({ 
+      success: true, 
       data: {
-        id: result.id,
-        title: result.title,
+        ...result,
         lastMessageAt: result.last_message_at
-      }
+      } 
     });
   } catch (error) {
-    console.error('Error updating chat title:', error);
-    return c.json(
-      { success: false, error: 'Failed to update chat title' },
-      { status: 500 }
-    );
+    console.error('Error al actualizar el título del chat:', error);
+    return c.json({ success: false, error: 'Error al actualizar el título del chat' }, 500);
   }
 });
 
-// Delete chat
 app.delete('/api/chats/:id', async (c) => {
   const chatId = c.req.param('id');
 

@@ -36,9 +36,7 @@ export function ChatList() {
 
     try {
       const chatToUpdate = chats.find(c => c.id === chatId);
-      if (!chatToUpdate) {
-        throw new Error('Chat no encontrado');
-      }
+      if (!chatToUpdate) return;
 
       const response = await fetch(`/api/chats/${chatId}/title`, {
         method: 'PUT',
@@ -46,30 +44,39 @@ export function ChatList() {
         body: JSON.stringify({ title: newTitle })
       });
 
-      const result = await response.json() as UpdateTitleResponse;
-      
       if (!response.ok) {
-        throw new Error(
-          (result as any)?.error || 
-          'No se pudo actualizar el título. Por favor, inténtalo de nuevo.'
-        );
+        let errorMessage = 'No se pudo actualizar el título. Por favor, inténtalo de nuevo.';
+        
+        try {
+          // Try to parse the error response as JSON
+          const errorData = await response.json() as ErrorResponse | string;
+          
+          if (typeof errorData === 'object' && errorData !== null) {
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } else if (typeof errorData === 'string') {
+            errorMessage = errorData;
+          }
+        } catch (e) {
+          // If JSON parsing fails, use the status text
+          errorMessage = response.statusText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
       }
+      
+      const result = await response.json() as UpdateTitleResponse;
       
       if (result.success && result.data) {
         // Update local state with the new title and all required Chat properties
         const updatedChat: Chat = {
           ...chatToUpdate,
-          title: result.data.title,
+          title: result.data.title || newTitle,
           lastMessageAt: new Date(result.data.lastMessageAt || Date.now())
         };
-        
-        // Update the chat in the context
         updateChat(chatId, updatedChat);
-        
-        // Show success notification
         showSuccess('Título actualizado correctamente');
-      } else {
-        throw new Error(result.error || 'Error al actualizar el título');
+      } else if (result.error) {
+        throw new Error(result.error);
       }
     } catch (error) {
       console.error('Error updating title:', error);
@@ -84,9 +91,6 @@ export function ChatList() {
       if (originalChat) {
         setNewTitle(originalChat.title);
       }
-      
-      // Re-throw the error to prevent the form from being submitted
-      throw error;
     } finally {
       setEditingChatId(null);
       setNewTitle('');
@@ -136,10 +140,7 @@ export function ChatList() {
                     onChange={(e) => setNewTitle(e.target.value)}
                     onBlur={() => handleUpdateTitle(chat.id)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleUpdateTitle(chat.id);
-                      }
+                      if (e.key === 'Enter') handleUpdateTitle(chat.id);
                       if (e.key === 'Escape') setEditingChatId(null);
                     }}
                     autoFocus
