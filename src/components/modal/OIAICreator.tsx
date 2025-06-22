@@ -579,6 +579,9 @@ export const OIAICreator = ({ onCopyContent, onClose }: OIAICreatorProps & { onC
                   // Dispatch the event
                   const event = new CustomEvent('openSystemPrompt');
                   window.dispatchEvent(event);
+                  
+                  // Close the popup
+                  if (onClose) onClose();
                 }
               }}
               disabled={!customOIAI?.formato.length || customOIAI.formato.length === 0}
