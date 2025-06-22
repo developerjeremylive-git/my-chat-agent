@@ -388,8 +388,6 @@ export const SettingsDropdown = ({
                         {/* {hasMessages && ( */}
                         <div className="px-2 py-2">
 
-                          <h4 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">Prompt del Sistema</h4>
-
                           <div className="px-2 py-2 space-y-2">
                             {/* <div className="space-y-2">
                               <div className="flex flex-col sm:flex-row gap-2 w-full">
@@ -782,8 +780,14 @@ export const SettingsDropdown = ({
                             )}
                           </div>
 
+                          <h4 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">Prompt del Sistema</h4>
+
                           <motion.button
-                            onClick={() => handleMenuItemClick(toggleSidebar)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSidebar();
+                              setIsOpen(false);
+                            }}
                             className="flex w-full items-center justify-between px-4 py-3 rounded-xl bg-white dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600/50 hover:border-[#F48120]/30 dark:hover:border-purple-500/50 transition-colors"
                             variants={menuItemVariants}
                             custom={isMobile ? 1 : 0}
@@ -791,7 +795,6 @@ export const SettingsDropdown = ({
                             animate="open"
                           >
                             <UserCirclePlus size={18} weight="duotone" className="mr-3 text-[#F48120]" />
-                            {/* {isSidebarOpen ? 'Personaliza tu Asistente IA' : 'Personaliza tu Asistente IA'} */}
                             Personaliza tus prompts
                           </motion.button>
                         </div>
@@ -806,8 +809,10 @@ export const SettingsDropdown = ({
                           <h4 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2 mt-2">Configuración de IA</h4>
 
                           <motion.button
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               handleAISettingsClick();
+                              setIsOpen(false);
                               // controls.start('closed').then(() => {
                               //   setTimeout(() => setIsOpen(false), 150);
                               // });
