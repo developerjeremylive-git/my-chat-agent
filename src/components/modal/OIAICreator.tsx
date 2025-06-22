@@ -564,9 +564,22 @@ export const OIAICreator = ({ onCopyContent, onClose }: OIAICreatorProps & { onC
           {currentStep === 4 && (
             <Button
               onClick={() => {
-                handleCopyContent();
-                const event = new CustomEvent('openSystemPrompt');
-                window.dispatchEvent(event);
+                // Generate the system prompt from customOIAI
+                if (customOIAI) {
+                  const systemPrompt = [
+                    `Persona: ${customOIAI.persona}`,
+                    `\nTareas:\n${customOIAI.tarea.map(t => `• ${t}`).join('\n')}`,
+                    `\nContexto:\n${customOIAI.contexto.map(c => `• ${c}`).join('\n')}`,
+                    `\nFormato de respuesta:\n${customOIAI.formato.map(f => `• ${f}`).join('\n')}`
+                  ].join('\n');
+                  
+                  // Save to localStorage
+                  localStorage.setItem('systemPrompt', systemPrompt);
+                  
+                  // Dispatch the event
+                  const event = new CustomEvent('openSystemPrompt');
+                  window.dispatchEvent(event);
+                }
               }}
               disabled={!customOIAI?.formato.length || customOIAI.formato.length === 0}
               className="flex-1 md:flex-none transform transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 bg-gradient-to-r from-[#F48120] to-purple-500 hover:from-purple-500 hover:to-[#F48120] text-white shadow-md hover:shadow-lg dark:shadow-[#F48120]/20 text-sm md:text-base py-2 md:py-3"

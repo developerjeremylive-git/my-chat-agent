@@ -186,11 +186,55 @@ export function SideMenu({
     const [selectedWorkspace, setSelectedWorkspace] = useState<string | null>(null);
     const [expandedWorkspace, setExpandedWorkspace] = useState<string | null>(null);
     const [workspaceToEdit, setWorkspaceToEdit] = useState<Workspace | null>(null);
+    const [workspaceToDelete, setWorkspaceToDelete] = useState<Workspace | null>(null);
     const [showWorkspaceModal, setShowWorkspaceModal] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [workspaceToDelete, setWorkspaceToDelete] = useState<Workspace | null>(null);
+    const [systemPrompt, setSystemPrompt] = useState('');
 
-    // Load workspaces from localStorage on mount
+    // Handle system prompt from OIAICreator
+    useEffect(() => {
+        const handleSystemPrompt = async () => {
+            // Get the system prompt from localStorage or any other source
+            const prompt = localStorage.getItem('systemPrompt') || '';
+            setSystemPrompt(prompt);
+            setWorkspaceToEdit(null);
+            setShowWorkspaceModal(true);
+        };
+
+        window.addEventListener('openSystemPrompt', handleSystemPrompt as EventListener);
+        return () => {
+            window.removeEventListener('openSystemPrompt', handleSystemPrompt as EventListener);
+        };
+    }, []);
+    
+    const { showNotification } = useNotification();
+    
+    const deleteWorkspace = async () => {
+        if (!workspaceToDelete) return;
+        
+        try {
+            // Remove the workspace from the list
+            const updatedWorkspaces = workspaces.filter(w => w.id !== workspaceToDelete.id);
+            setWorkspaces(updatedWorkspaces);
+            localStorage.setItem('workspaces', JSON.stringify(updatedWorkspaces));
+            
+            // If the deleted workspace was selected, clear the selection
+            if (selectedWorkspace === workspaceToDelete.id) {
+                setSelectedWorkspace(null);
+                localStorage.removeItem('selectedWorkspace');
+            }
+            
+            showNotification('Espacio eliminado correctamente', 3000, 'success');
+        } catch (error) {
+            console.error('Error deleting workspace:', error);
+            showNotification('Error al eliminar el espacio', 5000, 'error');
+        } finally {
+            setShowDeleteDialog(false);
+            setWorkspaceToDelete(null);
+        }
+    };
+
+    // Load workspaces when component mounts
     useEffect(() => {
         const savedWorkspaces = localStorage.getItem('workspaces');
         if (savedWorkspaces) {
@@ -728,29 +772,24 @@ export function SideMenu({
 
     const handleDeleteChat = async (chatId: string) => {
         try {
-            // Delete from the server
-            const response = await fetch(`/api/chats/${chatId}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete chat');
-            }
-
-            // Update local state
+            // Remove the chat from the list
             const updatedChats = chats.filter(chat => chat.id !== chatId);
             setChats(updatedChats);
-
-            // If the deleted chat was selected, clear the selection and create a new chat
+            
+            // If the deleted chat was selected, clear the selection
             if (selectedChatId === chatId) {
-                onNewChat();
-                // createChat();
+                onChatSelect('');
             }
+            
+            // Remove from localStorage
+            const savedChats = JSON.parse(localStorage.getItem('chats') || '[]');
+            const updatedSavedChats = savedChats.filter((chat: any) => chat.id !== chatId);
+            localStorage.setItem('chats', JSON.stringify(updatedSavedChats));
+            
+            showNotification('Chat eliminado correctamente', 3000, 'success');
         } catch (error) {
             console.error('Error deleting chat:', error);
-            alert('Error al eliminar el chat. Por favor, inténtalo de nuevo.');
-        } finally {
-            setChatToDelete(null);
+            showNotification('Error al eliminar el chat', 5000, 'error');
         }
     };
 
@@ -841,9 +880,25 @@ export function SideMenu({
                                 onClose={() => {
                                     setShowWorkspaceModal(false);
                                     setWorkspaceToEdit(null);
+                                    setSystemPrompt('');
                                 }}
                                 onSubmit={workspaceToEdit ? handleUpdateWorkspace : handleCreateWorkspace}
                                 initialData={workspaceToEdit}
+                                systemPrompt={systemPrompt}
+                            />
+                            
+                            <ConfirmationDialog
+                                isOpen={showDeleteDialog}
+                                onClose={() => {
+                                    setShowDeleteDialog(false);
+                                    setWorkspaceToDelete(null);
+                                }}
+                                onConfirm={deleteWorkspace}
+                                title="Eliminar espacio"
+                                message={`¿Estás seguro de que deseas eliminar el espacio "${workspaceToDelete?.title}"? Esta acción no se puede deshacer.`}
+                                confirmText="Eliminar"
+                                cancelText="Cancelar"
+                                isDanger={true}
                             />
 
                             {/* Chats Section */}

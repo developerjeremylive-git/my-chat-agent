@@ -16,6 +16,7 @@ interface WorkspaceModalProps {
   onClose: () => void;
   onSubmit: (data: WorkspaceFormData) => void;
   initialData?: Partial<WorkspaceFormData> | null;
+  systemPrompt?: string;
 }
 
 export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
@@ -23,6 +24,7 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
   onClose,
   onSubmit,
   initialData,
+  systemPrompt = ''
 }) => {
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
@@ -55,18 +57,18 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
     }));
   };
 
-  // Reset form when opening/closing
+  // Update form data when opening/closing or when systemPrompt changes
   useEffect(() => {
     if (isOpen) {
-      setFormData({
+      setFormData(prev => ({
         title: initialData?.title || '',
         emoji: initialData?.emoji || '📁',
         emojiColor: initialData?.emojiColor || '',
         description: initialData?.description || '',
-        instructions: initialData?.instructions || '',
-      });
+        instructions: initialData?.instructions || systemPrompt || prev.instructions,
+      }));
     }
-  }, [isOpen, initialData]);
+  }, [isOpen, initialData, systemPrompt]);
 
   // Close emoji picker when clicking outside
   useEffect(() => {
