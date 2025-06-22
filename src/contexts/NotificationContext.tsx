@@ -17,7 +17,6 @@ interface NotificationContextType {
   showInfo: (message: string, duration?: number) => void;
   showWarning: (message: string, duration?: number) => void;
   showDeletion: (message: string, duration?: number) => void;
-  showTitleUpdate: (message: string, duration?: number) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -44,9 +43,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
   const showDeletion = (message: string, duration = 5000) => 
     showNotification(message, duration, 'deletion');
-    
-  const showTitleUpdate = (message: string, duration = 3000) =>
-    showNotification(message, duration, 'titleUpdate');
 
   const removeNotification = (id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
@@ -59,8 +55,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       showError,
       showInfo,
       showWarning,
-      showDeletion,
-      showTitleUpdate
+      showDeletion
     }}>
       {children}
       <div className="fixed top-0 right-0 z-50 flex flex-col space-y-2 p-4">
