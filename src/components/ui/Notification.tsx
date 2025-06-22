@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
-import { CheckCircle, Warning, Info, X, Trash } from '@phosphor-icons/react';
+import { CheckCircle, Warning, Info, X, Trash, XCircle } from '@phosphor-icons/react';
 
 export type NotificationType = 'success' | 'error' | 'info' | 'warning' | 'deletion';
 
@@ -23,13 +23,13 @@ const notificationStyles = {
     progressBar: 'bg-green-600 dark:bg-green-300',
   },
   error: {
-    bg: 'bg-red-100 dark:bg-red-800',
-    border: 'border-red-200 dark:border-red-700',
-    text: 'text-red-900 dark:text-white',
-    icon: Warning,
-    iconColor: 'text-red-600 dark:text-red-300',
-    progressBg: 'bg-red-200 dark:bg-red-700',
-    progressBar: 'bg-red-600 dark:bg-red-300',
+    bg: 'bg-red-50 dark:bg-red-900/80',
+    border: 'border-red-200 dark:border-red-800',
+    text: 'text-red-800 dark:text-red-100',
+    icon: XCircle,
+    iconColor: 'text-red-500 dark:text-red-300',
+    progressBg: 'bg-red-100 dark:bg-red-800/50',
+    progressBar: 'bg-red-500 dark:bg-red-400',
   },
   info: {
     bg: 'bg-blue-100 dark:bg-blue-800',

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef  } from 'react';
 
-interface Chat {
+export interface Chat {
   id: string;
   title: string;
   messages: Message[];
