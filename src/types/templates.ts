@@ -171,5 +171,26 @@ export const TEMPLATES: Template[] = [
     description: 'Organiza tu próximo viaje con itinerarios personalizados, presupuesto y recomendaciones locales.',
     icon: 'airplane',
     categories: ['life']
+  },
+  {
+    id: 'habit-tracker',
+    title: 'Seguimiento de Hábitos',
+    description: 'Establece, da seguimiento y mejora tus hábitos diarios y rutinas.',
+    icon: 'check-circle',
+    categories: ['life']
+  },
+  {
+    id: 'mindfulness',
+    title: 'Guía de Meditación',
+    description: 'Sesiones guiadas de meditación y atención plena para reducir el estrés.',
+    icon: 'moon',
+    categories: ['life']
+  },
+  {
+    id: 'book-summaries',
+    title: 'Resúmenes de Libros',
+    description: 'Obtén resúmenes detallados de libros de no ficción populares.',
+    icon: 'book-open',
+    categories: ['life', 'education']
   }
 ];
