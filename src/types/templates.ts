@@ -71,7 +71,7 @@ export const TEMPLATES: Template[] = [
     icon: 'academic-cap',
     categories: ['education']
   },
-  
+
   // Technology Templates
   {
     id: 'code-explainer',
@@ -94,7 +94,7 @@ export const TEMPLATES: Template[] = [
     icon: 'document-text',
     categories: ['technology']
   },
-  
+
   // Finance Templates
   {
     id: 'expense-tracker',
@@ -110,7 +110,7 @@ export const TEMPLATES: Template[] = [
     icon: 'chart-bar',
     categories: ['finance']
   },
-  
+
   // Sales & Marketing Templates
   {
     id: 'email-campaign',
@@ -133,7 +133,7 @@ export const TEMPLATES: Template[] = [
     icon: 'magnifying-glass',
     categories: ['sales-marketing']
   },
-  
+
   // People & Ops Templates
   {
     id: 'meeting-notes',
@@ -149,7 +149,7 @@ export const TEMPLATES: Template[] = [
     icon: 'flag',
     categories: ['people-ops']
   },
-  
+
   // Life Templates
   {
     id: 'meal-planner',
@@ -192,5 +192,124 @@ export const TEMPLATES: Template[] = [
     description: 'Obtén resúmenes detallados de libros de no ficción populares.',
     icon: 'book-open',
     categories: ['life', 'education']
+  },
+  // Nuevas plantillas para Tecnología
+  {
+    id: 'cloud-migration',
+    title: 'Asistente de Migración a la Nube',
+    description: 'Planifica y ejecuta migraciones seguras a la nube con estrategias personalizadas.',
+    icon: 'server',
+    categories: ['technology']
+  },
+  {
+    id: 'code-review',
+    title: 'Asistente de Revisión de Código',
+    description: 'Analiza y mejora la calidad del código con revisiones automatizadas.',
+    icon: 'code',
+    categories: ['technology']
+  },
+  {
+    id: 'data-pipeline',
+    title: 'Diseñador de Pipelines de Datos',
+    description: 'Crea y optimiza flujos de trabajo de procesamiento de datos.',
+    icon: 'database',
+    categories: ['technology']
+  },
+  {
+    id: 'devops-helper',
+    title: 'Asistente de DevOps',
+    description: 'Automatiza tareas de integración y despliegue continuo.',
+    icon: 'refresh',
+    categories: ['technology']
+  },
+
+  // Nuevas plantillas para Finanzas
+  {
+    id: 'tax-optimizer',
+    title: 'Optimizador de Impuestos',
+    description: 'Encuentra deducciones fiscales y optimiza tu declaración de impuestos.',
+    icon: 'receipt-tax',
+    categories: ['finance']
+  },
+  {
+    id: 'investment-portfolio',
+    title: 'Analizador de Cartera de Inversión',
+    description: 'Evalúa y optimiza tu cartera de inversiones con análisis de riesgo y rendimiento.',
+    icon: 'trending-up',
+    categories: ['finance']
+  },
+  {
+    id: 'budget-planner',
+    title: 'Planificador de Presupuesto',
+    description: 'Crea y da seguimiento a presupuestos personales o empresariales.',
+    icon: 'calculator',
+    categories: ['finance']
+  },
+  {
+    id: 'financial-reports',
+    title: 'Generador de Reportes Financieros',
+    description: 'Crea reportes financieros profesionales con análisis detallados.',
+    icon: 'presentation-chart-bar',
+    categories: ['finance']
+  },
+
+  // Nuevas plantillas para Ventas y Marketing
+  {
+    id: 'sales-funnel',
+    title: 'Analizador de Embudo de Ventas',
+    description: 'Optimiza cada etapa de tu embudo de conversión.',
+    icon: 'funnel',
+    categories: ['sales-marketing']
+  },
+  {
+    id: 'customer-segmentation',
+    title: 'Segmentación de Clientes',
+    description: 'Identifica y clasifica a tus clientes para estrategias de marketing personalizadas.',
+    icon: 'user-group',
+    categories: ['sales-marketing']
+  },
+  {
+    id: 'social-media-analytics',
+    title: 'Analítica de Redes Sociales',
+    description: 'Mide y mejora el rendimiento de tus publicaciones en redes sociales.',
+    icon: 'share',
+    categories: ['sales-marketing']
+  },
+  {
+    id: 'email-analytics',
+    title: 'Analítica de Correos Electrónicos',
+    description: 'Mide el rendimiento de tus campañas de email marketing.',
+    icon: 'envelope',
+    categories: ['sales-marketing']
+  },
+
+  // Nuevas plantillas para Personas y Operaciones
+  {
+    id: 'employee-onboarding',
+    title: 'Plan de Incorporación de Empleados',
+    description: 'Automatiza y mejora el proceso de onboarding de nuevos empleados.',
+    icon: 'user-add',
+    categories: ['people-ops']
+  },
+  {
+    id: 'performance-reviews',
+    title: 'Evaluaciones de Desempeño',
+    description: 'Crea y gestiona evaluaciones de desempeño para tu equipo.',
+    icon: 'star',
+    categories: ['people-ops']
+  },
+  {
+    id: 'team-retrospective',
+    title: 'Retrospectiva de Equipo',
+    description: 'Facilita sesiones de retrospectiva efectivas para equipos ágiles.',
+    icon: 'refresh',
+    categories: ['people-ops']
+  },
+  {
+    id: 'compliance-tracker',
+    title: 'Seguimiento de Cumplimiento',
+    description: 'Gestiona y da seguimiento al cumplimiento de políticas y regulaciones.',
+    icon: 'shield-check',
+    categories: ['people-ops']
   }
 ];
