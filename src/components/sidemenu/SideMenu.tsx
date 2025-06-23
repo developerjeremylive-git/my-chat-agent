@@ -853,7 +853,7 @@ export function SideMenu({
             // No cerrar el menú aquí, ya que puede provocar que se vuelva a abrir
             // El menú se manejará desde el nivel superior
             
-            showNotification('Chat eliminado correctamente', 3000, 'success');
+            showNotification('Chat eliminado correctamente', 3000, 'error');
         } catch (error) {
             console.error('Error deleting chat:', error);
             showNotification(
