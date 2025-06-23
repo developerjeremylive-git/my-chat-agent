@@ -1111,6 +1111,9 @@ export function SideMenu({
                                             e.stopPropagation();
                                             setShowNewChatModal(true);
                                             setNewChatTitle('Nuevo Chat');
+                                            if(!isStatic){
+                                                onClose();
+                                            }
                                         }}
                                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
                                         text-neutral-700 dark:text-neutral-300
