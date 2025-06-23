@@ -1203,7 +1203,9 @@ export function SideMenu({
                                                                     e.stopPropagation();
                                                                     setEditingChat(chat);
                                                                     setShowEditModal(true);
-                                                                    onClose();
+                                                                    if(!isStatic){
+                                                                        onClose();
+                                                                    }
                                                                 }}
                                                                 className="w-full text-left px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 flex items-center"
                                                             >
@@ -1247,6 +1249,7 @@ export function SideMenu({
                     }}
                     onSave={async (newTitle) => {
                         await updateChatTitle(editingChat.id, newTitle);
+                        showSuccess('Título del chat actualizado correctamente');
                         setShowEditModal(false);
                         setEditingChat(null);
                     }}
