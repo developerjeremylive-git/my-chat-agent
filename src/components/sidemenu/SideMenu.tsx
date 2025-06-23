@@ -849,10 +849,8 @@ export function SideMenu({
             // Close the delete confirmation dialog
             setChatToDelete(null);
             
-            // Only close the side menu if it's in floating mode
-            if (!isStatic) {
-                onClose();
-            }
+            // No cerrar el menú aquí, ya que puede provocar que se vuelva a abrir
+            // El menú se manejará desde el nivel superior
             
             showNotification('Chat eliminado correctamente', 3000, 'success');
         } catch (error) {
@@ -1210,8 +1208,13 @@ export function SideMenu({
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    setChatToDelete(chat);
-                                                                    setEditingChat(null);
+                                                                    if (!isStatic) {
+                                                                        onClose();
+                                                                    }
+                                                                    setTimeout(() => {
+                                                                        setChatToDelete(chat);
+                                                                        setEditingChat(null);
+                                                                    }, 100);
                                                                 }}
                                                                 className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center"
                                                             >
