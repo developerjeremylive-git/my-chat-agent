@@ -1093,7 +1093,11 @@ export function SideMenu({
                                 {/* Acciones principales */}
                                 <div className="space-y-2">
                                     <button
-                                        onClick={() => createChat()}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowNewChatModal(true);
+                                            setNewChatTitle('Nuevo Chat');
+                                        }}
                                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg
                                         text-neutral-700 dark:text-neutral-300
                                         hover:bg-gradient-to-r hover:from-[#F48120]/10 hover:to-purple-500/10
@@ -1284,13 +1288,17 @@ export function SideMenu({
 
             {/* New Chat Modal */}
             {showNewChatModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-70">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-70" onClick={(e) => {
+                    e.stopPropagation();
+                    setShowNewChatModal(false);
+                }}>
                     <div className="bg-white dark:bg-neutral-800 rounded-xl p-6 w-96">
                         <h3 className="text-lg font-semibold mb-4">Nuevo Chat</h3>
                         <form onSubmit={(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
                             handleCreateChat(newChatTitle);
-                        }}>
+                        }} onClick={(e) => e.stopPropagation()}>
                             <input
                                 type="text"
                                 value={newChatTitle}
