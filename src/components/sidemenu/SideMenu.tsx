@@ -129,6 +129,7 @@ export function SideMenu({
     onClearHistory,
     selectedChatId
 }: SideMenuProps) {
+    const { deleteChat: deleteChatFromContext } = useChat();
     // Toggle body class when menu is static
     useEffect(() => {
         if (isStatic) {
@@ -807,24 +808,63 @@ export function SideMenu({
 
     const handleDeleteChat = async (chatId: string) => {
         try {
-            // Remove the chat from the list
-            const updatedChats = chats.filter(chat => chat.id !== chatId);
-            setChats(updatedChats);
+            // First, delete the chat from the database
+            const response = await fetch(`/api/chats/${chatId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({})) as { error?: string };
+                throw new Error(errorData?.error || 'Failed to delete chat from server');
+            }
+
+            // Notify ChatContext about the deletion
+            if (deleteChatFromContext) {
+                deleteChatFromContext(chatId);
+            }
+
+            // Clear the selected chat ID in localStorage to prevent auto-selection
+            localStorage.removeItem('selectedChatId');
             
             // If the deleted chat was selected, clear the selection
-            if (selectedChatId === chatId) {
+            const wasSelected = selectedChatId === chatId;
+            if (wasSelected) {
                 onChatSelect('');
+                // Clear any pending chat selection in the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
+
+            // Remove from local state
+            const updatedChats = chats.filter(chat => chat.id !== chatId);
+            setChats(updatedChats);
             
             // Remove from localStorage
             const savedChats = JSON.parse(localStorage.getItem('chats') || '[]');
             const updatedSavedChats = savedChats.filter((chat: any) => chat.id !== chatId);
             localStorage.setItem('chats', JSON.stringify(updatedSavedChats));
             
+            // Close the delete confirmation dialog
+            setChatToDelete(null);
+            
+            // Only close the side menu if it's in floating mode
+            if (!isStatic) {
+                onClose();
+            }
+            
             showNotification('Chat eliminado correctamente', 3000, 'success');
         } catch (error) {
             console.error('Error deleting chat:', error);
-            showNotification('Error al eliminar el chat', 5000, 'error');
+            showNotification(
+                error instanceof Error ? error.message : 'Error al eliminar el chat', 
+                5000, 
+                'error'
+            );
+            
+            // Refresh chats to restore the deleted chat that wasn't actually deleted
+            fetchChats(selectedWorkspace);
         }
     };
 
@@ -1156,7 +1196,8 @@ export function SideMenu({
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
                                                             <button
-                                                                onClick={() => {
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
                                                                     setEditingChat(chat);
                                                                     setShowEditModal(true);
                                                                     onClose();
@@ -1167,8 +1208,12 @@ export function SideMenu({
                                                                 Editar título
                                                             </button>
                                                             <button
-                                                                onClick={() => { setChatToDelete(chat); onClose(); }}
-                                                                className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-neutral-100 dark:hover:bg-neutral-700/50 flex items-center"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setChatToDelete(chat);
+                                                                    setEditingChat(null);
+                                                                }}
+                                                                className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center"
                                                             >
                                                                 <Trash weight="duotone" className="w-4 h-4 mr-2" />
                                                                 Eliminar chat
