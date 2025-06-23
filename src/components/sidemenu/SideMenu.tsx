@@ -399,35 +399,47 @@ export function SideMenu({
     const confirmDeleteWorkspace = async () => {
         if (!workspaceToDelete) return;
 
+        // Check if we're in local development
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
         try {
-            // First, check if the workspace has any chats
-            const chatsResponse = await fetch(`/api/chats?workspaceId=${workspaceToDelete.id}`);
-            const chatsResult = await chatsResponse.json() as ApiResponse<ChatApiData[]>;
-            const hasChats = chatsResult.data && chatsResult.data.length > 0;
+            let hasChats = false;
+            
+            if (!isLocal) {
+                // In production, check if the workspace has any chats
+                const chatsResponse = await fetch(`/api/chats?workspaceId=${workspaceToDelete.id}`);
+                const chatsResult = await chatsResponse.json() as ApiResponse<ChatApiData[]>;
+                hasChats = !!(chatsResult.data && chatsResult.data.length > 0);
 
-            // Then proceed with workspace deletion
-            const response = await fetch(`/api/workspaces/${workspaceToDelete.id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+                // Delete workspace via API in production
+                const response = await fetch(`/api/workspaces/${workspaceToDelete.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
 
-            interface DeleteResponse {
-                success: boolean;
-                error?: string;
-                message?: string;
+                const result = await response.json() as { error?: string };
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to delete workspace');
+                }
+            } else {
+                // In local development, just update local storage
+                const updatedWorkspaces = workspaces.filter(w => w.id !== workspaceToDelete.id);
+                localStorage.setItem('workspaces', JSON.stringify(updatedWorkspaces));
+                
+                // Check if any chats exist in local storage
+                const savedChats = localStorage.getItem('chats');
+                if (savedChats) {
+                    const chats = JSON.parse(savedChats);
+                    hasChats = chats.some((chat: any) => chat.workspaceId === workspaceToDelete.id);
+                }
+                
+                // Update state
+                setWorkspaces(updatedWorkspaces);
             }
 
-            const result: DeleteResponse = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.error || 'Failed to delete workspace');
-            }
-
-
-            // Update local state
-            setWorkspaces(prev => prev.filter(w => w.id !== workspaceToDelete.id));
 
             // Show appropriate notification based on whether there were chats
             if (hasChats) {
@@ -439,6 +451,7 @@ export function SideMenu({
             // If the deleted workspace was selected, clear the selection
             if (selectedWorkspace === workspaceToDelete.id) {
                 setSelectedWorkspace(null);
+                localStorage.removeItem('selectedWorkspace');
                 fetchChats();
             }
         } catch (error) {
