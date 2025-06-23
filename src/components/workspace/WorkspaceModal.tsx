@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, FolderPlus, Check, Sparkle, MagicWand } from '@phosphor-icons/react';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { useNotification } from '@/contexts/NotificationContext';
 
 export interface WorkspaceFormData {
   title: string;
@@ -37,6 +38,7 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const emojiButtonRef = useRef<HTMLButtonElement>(null);
+  const { showSuccess } = useNotification();
 
   const instructionExamples = [
     'Responde siempre en un tono profesional y técnico. Sé conciso pero completo en tus explicaciones. Si no estás seguro de algo, admítelo en lugar de especular.',
@@ -121,6 +123,7 @@ export const WorkspaceModal: React.FC<WorkspaceModalProps> = ({
         description: formData.description.trim(),
         instructions: formData.instructions.trim(),
       });
+      showSuccess(`Espacio "${formData.title.trim()}" ${initialData ? 'actualizado' : 'creado'} exitosamente`);
       onClose();
     } catch (error) {
       console.error('Error submitting workspace:', error);
