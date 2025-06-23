@@ -690,12 +690,13 @@ export function SideMenu({
             console.log('New chat created:', newChat);
 
             setChats(prevChats => [...prevChats, newChat]);
-            await fetchChats(workspaceId); // Actualizar la lista de chats con el workspaceId actual
-            onNewChat(); // Cerrar el menú lateral
-            selectChat(newChat.id); // Seleccionar el nuevo chat
+            await fetchChats(workspaceId); // Update chat list with current workspaceId
+            onNewChat(); // Close the side menu
+            selectChat(newChat.id); // Select the new chat
+            showSuccess('Chat creado exitosamente', 3000); // Show success notification
         } catch (error) {
             console.error('Error al crear el chat:', error);
-            alert(error instanceof Error ? error.message : 'Error al crear el chat');
+            showError(error instanceof Error ? error.message : 'Error al crear el chat', 5000);
         } finally {
             setShowNewChatModal(false);
             setNewChatTitle('Nuevo Chat');
