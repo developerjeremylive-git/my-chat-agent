@@ -2,10 +2,9 @@ import { cn } from "@/lib/utils";
 import { CaretDown, Check, X } from "@phosphor-icons/react";
 import { useState, useEffect, useRef } from 'react';
 import { useMediaQuery } from 'react-responsive';
+import type { BrowserType } from "@/types/api";
 
-export type BrowserType = 'browserbase' | 'rendering';
-
-export interface BrowserOption {
+interface BrowserOption {
   id: BrowserType;
   name: string;
   description: string;
@@ -14,9 +13,9 @@ export interface BrowserOption {
 
 interface BrowserSelectorProps {
   selectedBrowser: BrowserType;
-  onBrowserChange: (browserId: BrowserType) => void;
-  className?: string;
+  onBrowserChange: (browser: BrowserType) => void;
   isLoading?: boolean;
+  className?: string;
 }
 
 export const browserOptions: BrowserOption[] = [
@@ -59,8 +58,8 @@ export function BrowserSelector({
     };
   }, []);
 
-  const handleSelect = (browserId: BrowserType) => {
-    onBrowserChange(browserId);
+  const handleSelect = (browser: BrowserType) => {
+    onBrowserChange(browser);
     setIsOpen(false);
   };
 

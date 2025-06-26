@@ -80,7 +80,7 @@ import { Modal } from "./components/modal/Modal";
 import { Input } from "./components/input/Input";
 import { InputSystemPrompt } from "./components/input/InputSystemPrompt";
 import { BrowserSelector, browserOptions } from "./components/browser/BrowserSelector";
-import type { BrowserType } from "./components/browser/BrowserSelector";
+import type { BrowserType } from "@/types/api";
 
 // Helper function to update browser configuration
 async function updateBrowserConfig(chatId: string, browser: BrowserType) {
