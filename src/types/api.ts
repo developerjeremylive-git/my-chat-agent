@@ -14,5 +14,14 @@ export interface ChatMessage {
 }
 
 export interface FormattedChatMessage extends Omit<ChatMessage, 'createdAt'> {
+  role?: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: string;
+  isUser: boolean;
+  isVisible: boolean;
   createdAt: Date;
+  metadata?: {
+    browser?: string;
+    [key: string]: any;
+  };
 }

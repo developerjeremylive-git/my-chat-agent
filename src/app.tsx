@@ -79,6 +79,42 @@ import { AgentDashboard } from "./components/agent/AgentDashboard";
 import { Modal } from "./components/modal/Modal";
 import { Input } from "./components/input/Input";
 import { InputSystemPrompt } from "./components/input/InputSystemPrompt";
+import { BrowserSelector, browserOptions } from "./components/browser/BrowserSelector";
+import type { BrowserType } from "./components/browser/BrowserSelector";
+
+// Helper function to update browser configuration
+async function updateBrowserConfig(chatId: string, browser: BrowserType) {
+  try {
+    const response = await fetch('/api/browser-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chatId, browser }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update browser configuration');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating browser config:', error);
+    throw error;
+  }
+}
+
+// Helper function to get browser configuration
+async function getBrowserConfig(chatId: string): Promise<{ browser: BrowserType } | null> {
+  try {
+    const response = await fetch(`/api/browser-config?chatId=${chatId}`);
+    if (!response.ok) {
+      if (response.status === 404) return null;
+      throw new Error('Failed to fetch browser configuration');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching browser config:', error);
+    return null;
+  }
+}
 import { GeminiConfigModal } from "./components/modal/GeminiConfigModal";
 import { ListHeart } from "@phosphor-icons/react/dist/ssr";
 import type { ChatMessage, FormattedChatMessage, APIResponse } from "./types/api";
@@ -104,6 +140,13 @@ function ChatComponent() {
   const [currentMessages, setCurrentMessages] = useState<FormattedChatMessage[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [browserConfig, setBrowserConfig] = useState<{
+    selected: BrowserType;
+    isLoading: boolean;
+  }>({
+    selected: 'browserbase',
+    isLoading: false
+  });
 
   const { selectChat, currentChat, updateChat, chats } = useChat();
   const [isCreatingNewChat, setIsCreatingNewChat] = useState(false);
@@ -127,7 +170,7 @@ function ChatComponent() {
 
             // If chat already has messages, update state directly
             if (firstChat.messages && firstChat.messages.length > 0) {
-              setCurrentMessages(firstChat.messages);
+              setCurrentMessages(firstChat.messages as FormattedChatMessage[]);
 
               // Update chat in context
               if (updateChat) {
@@ -154,6 +197,66 @@ function ChatComponent() {
 
     autoSelectChat();
   }, [chats, selectedChatId]);
+
+  // Load browser configuration when chat changes
+  useEffect(() => {
+    const loadBrowserConfig = async () => {
+      if (!selectedChatId) return;
+      
+      try {
+        setBrowserConfig(prev => ({ ...prev, isLoading: true }));
+        const config = await getBrowserConfig(selectedChatId);
+        if (config?.browser) {
+          setBrowserConfig(prev => ({ ...prev, selected: config.browser }));
+        } else {
+          // Set default browser if no config exists
+          setBrowserConfig(prev => ({ ...prev, selected: 'browserbase' }));
+        }
+      } catch (error) {
+        console.error('Error loading browser config:', error);
+      } finally {
+        setBrowserConfig(prev => ({ ...prev, isLoading: false }));
+      }
+    };
+
+    loadBrowserConfig();
+  }, [selectedChatId]);
+
+  const handleBrowserChange = async (browser: BrowserType) => {
+    if (!selectedChatId) return;
+    
+    try {
+      setBrowserConfig(prev => ({ ...prev, isLoading: true }));
+      
+      // Update local state optimistically
+      setBrowserConfig(prev => ({ ...prev, selected: browser }));
+      
+      // Update the backend
+      await updateBrowserConfig(selectedChatId, browser);
+      
+      // Add a system message to inform about the browser change
+      const systemMessage: FormattedChatMessage = {
+        id: `browser-change-${Date.now()}`,
+        role: 'system',
+        content: `Browser changed to ${browser}`,
+        timestamp: new Date().toISOString(),
+        isUser: false,
+        isVisible: true,
+        createdAt: new Date()
+      };
+      
+      setCurrentMessages(prev => [...prev, systemMessage]);
+    } catch (error) {
+      console.error('Error updating browser config:', error);
+      // Revert on error
+      const config = await getBrowserConfig(selectedChatId);
+      if (config?.browser) {
+        setBrowserConfig(prev => ({ ...prev, selected: config.browser }));
+      }
+    } finally {
+      setBrowserConfig(prev => ({ ...prev, isLoading: false }));
+    }
+  };
 
   const handleChatSelect = async (chatId: string) => {
     try {
@@ -251,30 +354,39 @@ function ChatComponent() {
 
           // Then set the new messages
           const formattedMessages = chatMessages.map(msg => {
-            // Ensure parts is properly typed
-            const parts = msg.parts || [];
-            const messageParts = parts.length > 0
-              ? parts
-              : [{ type: 'text' as const, text: msg.content }];
-
-            return {
+            // Create a properly formatted message with all required fields
+            const formattedMsg: FormattedChatMessage = {
               id: msg.id,
-              role: msg.role,
-              content: msg.content,
-              parts: messageParts,
-              // Add createdAt with current date if not present
+              role: msg.role || 'assistant',
+              content: msg.content || '',
+              timestamp: ('createdAt' in msg && msg.createdAt)
+                ? new Date(msg.createdAt).toISOString()
+                : new Date().toISOString(),
+              isUser: msg.role === 'user',
+              isVisible: true,
               createdAt: 'createdAt' in msg && msg.createdAt
                 ? new Date(msg.createdAt)
-                : new Date()
+                : new Date(),
+              // Include any additional properties from the original message
+              ...('parts' in msg ? { parts: msg.parts } : {})
             };
+            return formattedMsg;
           });
 
           console.log('Formatted messages for setMessages:', formattedMessages);
 
-          // Update agent's messages
-          setMessages(formattedMessages as Message[]);
+          // Format messages to match the expected Message type
+          const agentMessages: Message[] = chatMessages.map(msg => ({
+            id: msg.id,
+            role: msg.role as 'user' | 'assistant',
+            content: msg.content,
+            createdAt: msg.createdAt instanceof Date ? msg.createdAt : new Date(msg.createdAt)
+          }));
 
-          // Update UI state
+          // Update agent's messages
+          setMessages(agentMessages);
+
+          // Update UI state with properly formatted messages
           setCurrentMessages(formattedMessages);
 
           console.log('Agent messages set successfully');
@@ -404,6 +516,7 @@ function ChatComponent() {
   const [showAgentInterface, setShowAgentInterface] = useState(false);
   const [showToolsInterface, setShowToolsInterface] = useState(false);
   const [inputText, setInputText] = useState('');
+  const [selectedBrowser, setSelectedBrowser] = useState(browserOptions[0].id);
 
   // Interfaz para la respuesta de la API
   interface SystemPromptResponse {
@@ -484,7 +597,7 @@ function ChatComponent() {
         ...msg,
         createdAt: new Date(msg.createdAt)
       }));
-      setCurrentMessages(formattedMessages);
+      setCurrentMessages(formattedMessages as FormattedChatMessage[]);
     };
 
     window.addEventListener('initialChatLoaded', handleInitialChatLoaded as EventListener);
@@ -582,6 +695,24 @@ function ChatComponent() {
     agent,
     maxSteps: stepMax,
   });
+
+  // Handle form submission with browser context
+  const handleSubmitWithBrowser = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!agentInput.trim()) return;
+    
+    // Add browser context to the message
+    const messageWithContext = {
+      content: agentInput,
+      metadata: {
+        browser: selectedBrowser,
+        timestamp: new Date().toISOString()
+      }
+    };
+    
+    // Call the original handleSubmit
+    handleAgentSubmit(e, { data: messageWithContext });
+  };
 
 
   // Scroll to bottom on mount and when messages change
@@ -1877,7 +2008,11 @@ function ChatComponent() {
                         {/* Buttons row below input */}
                         <div className="relative z-10 flex items-center justify-between px-3 pb-3 pt-1">
                           <div className="flex items-center gap-2">
-                            {/* Left side buttons can be added here in the future */}
+                            {/* Browser Selector */}
+                            <BrowserSelector 
+                              selectedBrowser={selectedBrowser}
+                              onBrowserChange={setSelectedBrowser}
+                            />
                           </div>
                           <div className="flex items-center gap-2">
                             {/* Model Select */}
