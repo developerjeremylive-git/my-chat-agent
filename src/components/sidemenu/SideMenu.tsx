@@ -21,10 +21,10 @@ import { es } from 'date-fns/locale';
 import { WorkspaceModal, type WorkspaceFormData } from '@/components/workspace/WorkspaceModal';
 
 interface TemplateSelection {
-  id: string;
-  title: string;
-  description: string;
-  instructions: string;
+    id: string;
+    title: string;
+    description: string;
+    instructions: string;
 }
 import { useNotification } from '@/contexts/NotificationContext';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
@@ -32,6 +32,7 @@ import { NavigationSection } from '@/components/navigation/NavigationSection';
 
 import type { ChatData, LocalMessage, LocalChatData, ChatMessage } from '@/types/chat';
 import type { Workspace } from '@/lib/types/workspace';
+import { cn } from '@/lib/utils';
 
 interface EditTitleModalProps {
     isOpen: boolean;
@@ -197,7 +198,7 @@ export function SideMenu({
     const [workspaceToEdit, setWorkspaceToEdit] = useState<Workspace | null>(null);
     const [workspaceToDelete, setWorkspaceToDelete] = useState<Workspace | null>(null);
     const [showWorkspaceModal, setShowWorkspaceModal] = useState(false);
-  const [templateInstructions, setTemplateInstructions] = useState('');
+    const [templateInstructions, setTemplateInstructions] = useState('');
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [systemPrompt, setSystemPrompt] = useState('');
 
@@ -206,7 +207,7 @@ export function SideMenu({
     const handleNewWorkspace = (template?: TemplateSelection) => {
         setWorkspaceToEdit(null);
         setSystemPrompt('');
-        
+
         if (template) {
             setTemplateData({
                 title: template.title,
@@ -216,7 +217,7 @@ export function SideMenu({
         } else {
             setTemplateData({});
         }
-        
+
         setShowWorkspaceModal(true);
     };
 
@@ -238,24 +239,24 @@ export function SideMenu({
             window.removeEventListener('openSystemPrompt', handleSystemPrompt as EventListener);
         };
     }, []);
-    
+
     const { showNotification } = useNotification();
-    
+
     const deleteWorkspace = async () => {
         if (!workspaceToDelete) return;
-        
+
         try {
             // Remove the workspace from the list
             const updatedWorkspaces = workspaces.filter(w => w.id !== workspaceToDelete.id);
             setWorkspaces(updatedWorkspaces);
             localStorage.setItem('workspaces', JSON.stringify(updatedWorkspaces));
-            
+
             // If the deleted workspace was selected, clear the selection
             if (selectedWorkspace === workspaceToDelete.id) {
                 setSelectedWorkspace(null);
                 localStorage.removeItem('selectedWorkspace');
             }
-            
+
             showNotification('Espacio eliminado correctamente', 3000, 'success');
         } catch (error) {
             console.error('Error deleting workspace:', error);
@@ -349,14 +350,14 @@ export function SideMenu({
             // Update local state
             setWorkspaces(prev => [...prev, newWorkspace]);
             setShowWorkspaceModal(false);
-            
+
             // Automatically select the newly created workspace
             setSelectedWorkspace(newWorkspace.id);
             await fetchChats(newWorkspace.id);
-            
+
             // Show success notification
             showSuccess('Espacio de trabajo creado y seleccionado', 3000);
-            
+
         } catch (error) {
             console.error('Error creating workspace:', error);
             showError(
@@ -404,7 +405,7 @@ export function SideMenu({
 
         try {
             let hasChats = false;
-            
+
             if (!isLocal) {
                 // In production, check if the workspace has any chats
                 const chatsResponse = await fetch(`/api/chats?workspaceId=${workspaceToDelete.id}`);
@@ -428,14 +429,14 @@ export function SideMenu({
                 // In local development, just update local storage
                 const updatedWorkspaces = workspaces.filter(w => w.id !== workspaceToDelete.id);
                 localStorage.setItem('workspaces', JSON.stringify(updatedWorkspaces));
-                
+
                 // Check if any chats exist in local storage
                 const savedChats = localStorage.getItem('chats');
                 if (savedChats) {
                     const chats = JSON.parse(savedChats);
                     hasChats = chats.some((chat: any) => chat.workspaceId === workspaceToDelete.id);
                 }
-                
+
                 // Update state
                 setWorkspaces(updatedWorkspaces);
             }
@@ -477,7 +478,7 @@ export function SideMenu({
 
         // Seleccionar el espacio de trabajo y cargar sus chats
         setSelectedWorkspace(workspaceId);
-        
+
         try {
             const url = `/api/chats?workspaceId=${workspaceId}`;
             const response = await fetch(url);
@@ -502,7 +503,7 @@ export function SideMenu({
             // Si hay chats, seleccionar el más reciente
             if (formattedChats.length > 0) {
                 // Ordenar por lastMessageAt de más reciente a más antiguo
-                const sortedChats = [...formattedChats].sort((a, b) => 
+                const sortedChats = [...formattedChats].sort((a, b) =>
                     b.lastMessageAt.getTime() - a.lastMessageAt.getTime()
                 );
                 onChatSelect(sortedChats[0].id);
@@ -842,7 +843,7 @@ export function SideMenu({
 
             // Clear the selected chat ID in localStorage to prevent auto-selection
             localStorage.removeItem('selectedChatId');
-            
+
             // If the deleted chat was selected, clear the selection
             const wasSelected = selectedChatId === chatId;
             if (wasSelected) {
@@ -854,27 +855,27 @@ export function SideMenu({
             // Remove from local state
             const updatedChats = chats.filter(chat => chat.id !== chatId);
             setChats(updatedChats);
-            
+
             // Remove from localStorage
             const savedChats = JSON.parse(localStorage.getItem('chats') || '[]');
             const updatedSavedChats = savedChats.filter((chat: any) => chat.id !== chatId);
             localStorage.setItem('chats', JSON.stringify(updatedSavedChats));
-            
+
             // Close the delete confirmation dialog
             setChatToDelete(null);
-            
+
             // No cerrar el menú aquí, ya que puede provocar que se vuelva a abrir
             // El menú se manejará desde el nivel superior
-            
+
             showNotification('Chat eliminado correctamente', 3000, 'error');
         } catch (error) {
             console.error('Error deleting chat:', error);
             showNotification(
-                error instanceof Error ? error.message : 'Error al eliminar el chat', 
-                5000, 
+                error instanceof Error ? error.message : 'Error al eliminar el chat',
+                5000,
                 'error'
             );
-            
+
             // Refresh chats to restore the deleted chat that wasn't actually deleted
             fetchChats(selectedWorkspace);
         }
@@ -972,13 +973,13 @@ export function SideMenu({
                                 }}
                                 onSubmit={workspaceToEdit ? handleUpdateWorkspace : handleCreateWorkspace}
                                 initialData={
-                                    workspaceToEdit 
-                                    ? { ...workspaceToEdit }
-                                    : { ...templateData }
+                                    workspaceToEdit
+                                        ? { ...workspaceToEdit }
+                                        : { ...templateData }
                                 }
                                 systemPrompt={systemPrompt}
                             />
-                            
+
                             <ConfirmationDialog
                                 isOpen={showDeleteDialog}
                                 onClose={() => {
@@ -992,6 +993,36 @@ export function SideMenu({
                                 cancelText="Cancelar"
                                 isDanger={true}
                             />
+
+                            {/* Fireplexity Chat Button */}
+                            <div className="px-1 py-0.5">
+                                <a
+                                    href="/fireplexity"
+                                    className={cn(
+                                        'group w-full flex items-center gap-3 px-3 py-2.5 sm:py-2.5 rounded-xl',
+                                        'text-sm sm:text-[0.9375rem] font-medium transition-all duration-200',
+                                        'text-neutral-700 hover:text-[#F48120] dark:text-neutral-300 dark:hover:text-orange-400',
+                                        'hover:bg-gradient-to-r hover:from-[#F48120]/5 hover:to-purple-500/5',
+                                        'active:scale-[0.98] transform transition-transform',
+                                        'focus:outline-none focus:ring-2 focus:ring-[#F48120]/30',
+                                        'dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10',
+                                        'no-underline'
+                                    )}
+                                >
+                                    <div className={cn(
+                                        'p-1.5 rounded-lg',
+                                        'bg-gradient-to-br from-[#F48120] to-purple-500',
+                                        'group-hover:shadow-md group-hover:shadow-[#F48120]/20',
+                                        'transform transition-transform group-hover:scale-110',
+                                        'flex-shrink-0'
+                                    )}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <span className="truncate">Chat Fireplexity</span>
+                                </a>
+                            </div>
 
                             {/* Navigation Section */}
                             <NavigationSection onTemplateSelect={handleTemplateSelect} />
@@ -1022,8 +1053,8 @@ export function SideMenu({
                                                 <button
                                                     onClick={() => toggleWorkspace(workspace.id)}
                                                     className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium ${expandedWorkspace === workspace.id
-                                                            ? 'bg-neutral-100 dark:bg-neutral-800'
-                                                            : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
+                                                        ? 'bg-neutral-100 dark:bg-neutral-800'
+                                                        : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
                                                         } transition-colors`}
                                                 >
                                                     <div className="flex items-center gap-2">
@@ -1111,7 +1142,7 @@ export function SideMenu({
                                             e.stopPropagation();
                                             setShowNewChatModal(true);
                                             setNewChatTitle('Nuevo Chat');
-                                            if(!isStatic){
+                                            if (!isStatic) {
                                                 onClose();
                                             }
                                         }}
@@ -1219,7 +1250,7 @@ export function SideMenu({
                                                                     e.stopPropagation();
                                                                     setEditingChat(chat);
                                                                     setShowEditModal(true);
-                                                                    if(!isStatic){
+                                                                    if (!isStatic) {
                                                                         onClose();
                                                                     }
                                                                 }}
@@ -1346,7 +1377,7 @@ export function SideMenu({
                     </div>
                 </div>
             )}
-            
+
             {/* Workspace Delete Confirmation Dialog */}
             <ConfirmationDialog
                 isOpen={showDeleteDialog}
