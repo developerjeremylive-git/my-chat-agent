@@ -2012,6 +2012,7 @@ function ChatComponent() {
                             <BrowserSelector 
                               selectedBrowser={selectedBrowser}
                               onBrowserChange={setSelectedBrowser}
+                              chatId={currentChat?.id || ''}
                             />
                           </div>
                           <div className="flex items-center gap-2">

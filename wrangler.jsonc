@@ -38,7 +38,7 @@
   "kv_namespaces": [
     {
       "binding": "MODEL_CONFIG",
-      "id": "8a6552293bb845b38cdcfb687c7fe846",  // This will be filled in after creating the KV namespace
+      "id": "8a6552293bb845b38cdcfb687c7fe846",
       "preview_id": ""  // Optional: For preview environments
     }
   ]

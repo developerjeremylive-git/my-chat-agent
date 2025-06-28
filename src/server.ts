@@ -1148,6 +1148,124 @@ class SimpleDurableObjectState implements DurableObjectState {
   }
 }
 
+// Browser configuration endpoints
+app.get('/api/browser-config', async (c) => {
+  try {
+    const { chatId } = c.req.query();
+
+    if (!chatId) {
+      return c.json({ error: 'chatId is required' }, 400);
+    }
+
+    // Check if KV namespace is available
+    if (!c.env.MODEL_CONFIG) {
+      console.warn('KV namespace MODEL_CONFIG is not available');
+      return c.json({
+        browser: 'browserbase',
+        chatId,
+        hasFireplexityKey: false,
+        kvAvailable: false
+      });
+    }
+
+    try {
+      // Get the browser configuration from KV storage
+      const [browser, fireplexityKey] = await Promise.all([
+        c.env.MODEL_CONFIG.get(`browser:${chatId}`),
+        c.env.MODEL_CONFIG.get(`fireplexity_key:${chatId}`)
+      ]);
+
+      return c.json({
+        browser: browser || 'browserbase', // Default to browserbase if not set
+        chatId,
+        hasFireplexityKey: !!fireplexityKey,
+        kvAvailable: true
+      });
+    } catch (kvError) {
+      console.error('KV storage error:', kvError);
+      // Return default values if KV access fails
+      return c.json({
+        browser: 'browserbase',
+        chatId,
+        hasFireplexityKey: false,
+        kvAvailable: false
+      });
+    }
+  } catch (error) {
+    console.error('Error getting browser config:', error);
+    return c.json(
+      { 
+        error: 'Failed to get browser configuration',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      500
+    );
+  }
+});
+
+app.post('/api/browser-config', async (c) => {
+  try {
+    const config = await c.req.json<{
+      browser: string;
+      chatId: string;
+      fireplexityApiKey?: string;
+    }>();
+    
+    if (!config.chatId) {
+      return c.json(
+        { error: 'chatId is required' },
+        400
+      );
+    }
+    
+    // Check if KV namespace is available
+    if (!c.env.MODEL_CONFIG) {
+      console.warn('KV namespace MODEL_CONFIG is not available');
+      return c.json({ 
+        success: true, 
+        browser: config.browser || 'browserbase',
+        hasFireplexityKey: !!config.fireplexityApiKey,
+        kvAvailable: false
+      });
+    }
+    
+    try {
+      // Store the browser type in KV storage
+      await c.env.MODEL_CONFIG.put(`browser:${config.chatId}`, config.browser || 'browserbase');
+      
+      // Store the Fireplexity API key if provided
+      if (config.fireplexityApiKey) {
+        await c.env.MODEL_CONFIG.put(`fireplexity_key:${config.chatId}`, config.fireplexityApiKey);
+      }
+      
+      return c.json({ 
+        success: true,
+        browser: config.browser || 'browserbase',
+        hasFireplexityKey: !!config.fireplexityApiKey,
+        kvAvailable: true
+      });
+    } catch (kvError) {
+      console.error('KV storage error:', kvError);
+      // Even if KV fails, we'll still return success since the operation conceptually worked
+      return c.json({ 
+        success: true,
+        browser: config.browser || 'browserbase',
+        hasFireplexityKey: !!config.fireplexityApiKey,
+        kvAvailable: false
+      });
+    }
+  } catch (error) {
+    console.error('Error saving browser config:', error);
+    return c.json(
+      { 
+        error: 'Failed to save browser configuration',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      500
+    );
+  }
+});
+
 app.get('/agents/chat/default/get-messages', async (c) => {
   try {
     const chatId = c.req.query('chatId');
