@@ -26,7 +26,7 @@ export function FireplexitySearch({ handleSubmit, input, handleInputChange, isLo
         <Button
           type="submit"
           disabled={isLoading || !input.trim()}
-          variant="orange"
+          variant="default"
           className="absolute right-2 rounded-lg"
         >
           {isLoading ? (
