@@ -5,13 +5,12 @@ import { Send, Loader2, User, Sparkles, FileText, Plus, Copy, RefreshCw, Check, 
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { SearchResult } from './types'
+import type { SearchResult } from './types'
 import { type Message } from 'ai'
 import { CharacterCounter } from './character-counter'
-import Image from 'next/image'
 import { MarkdownRenderer } from './markdown-renderer'
 import { StockChart } from './stock-chart'
+import { Textarea } from '@headlessui/react'
 
 interface MessageData {
   sources: SearchResult[]
@@ -191,7 +190,7 @@ export function FireplexityChatInterface({ messages, sources, followUpQuestions,
                                     {messageSources.slice(5, 10).map((result, idx) => (
                                       <div key={idx} className="w-5 h-5 bg-white dark:bg-zinc-700 rounded-full flex items-center justify-center overflow-hidden border border-gray-200 dark:border-gray-600">
                                         {result.favicon ? (
-                                          <Image
+                                          <img
                                             src={result.favicon}
                                             alt=""
                                             width={16}
@@ -220,7 +219,7 @@ export function FireplexityChatInterface({ messages, sources, followUpQuestions,
                                   <div className="flex items-center gap-2">
                                     <div className="w-5 h-5 bg-white dark:bg-zinc-700 rounded-full flex items-center justify-center overflow-hidden border border-gray-200 dark:border-gray-600">
                                       {result.favicon ? (
-                                        <Image
+                                        <img
                                           src={result.favicon}
                                           alt=""
                                           width={16}
@@ -314,7 +313,7 @@ export function FireplexityChatInterface({ messages, sources, followUpQuestions,
                         {sources.slice(5, 10).map((result, idx) => (
                           <div key={idx} className="w-5 h-5 bg-white dark:bg-zinc-700 rounded-full flex items-center justify-center overflow-hidden border border-gray-200 dark:border-gray-600">
                             {result.favicon ? (
-                              <Image
+                              <img
                                 src={result.favicon}
                                 alt=""
                                 width={16}
@@ -343,7 +342,7 @@ export function FireplexityChatInterface({ messages, sources, followUpQuestions,
                       <div className="flex items-center gap-2">
                         <div className="w-5 h-5 bg-white dark:bg-zinc-700 rounded-full flex items-center justify-center overflow-hidden border border-gray-200 dark:border-gray-600">
                           {result.favicon ? (
-                            <Image
+                            <img
                               src={result.favicon}
                               alt=""
                               width={16}
@@ -430,7 +429,7 @@ export function FireplexityChatInterface({ messages, sources, followUpQuestions,
               <Button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                variant="orange"
+                variant="default"
                 size="icon"
                 className="rounded-full"
               >
