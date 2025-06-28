@@ -1,18 +1,15 @@
 'use client'
 
-import dynamic from 'next/dynamic'
+import { Suspense, lazy, useState, useEffect } from 'react'
 
-// Dynamically import TradingView widget to avoid SSR issues
-const TradingViewWidget = dynamic(
-  () => import('@/components/trading-view-widget'),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-[300px] rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-gray-50 dark:bg-zinc-900">
-        <p className="text-sm text-gray-500 dark:text-gray-400">Loading chart...</p>
-      </div>
-    )
-  }
+// Lazy load the TradingView widget
+const TradingViewWidget = lazy(() => import('@/components/trading-view-widget'))
+
+// Loading component
+const LoadingFallback = () => (
+  <div className="w-full h-[300px] rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-gray-50 dark:bg-zinc-900">
+    <p className="text-sm text-gray-500 dark:text-gray-400">Loading chart...</p>
+  </div>
 )
 
 interface StockChartProps {
@@ -33,9 +30,21 @@ export function StockChart({ ticker, theme = 'light' }: StockChartProps) {
     // Still render the widget even if validation fails - let TradingView handle it
   }
 
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  if (!isClient) {
+    return <LoadingFallback />
+  }
+
   return (
     <div className="mb-6 w-full">
-      <TradingViewWidget symbol={ticker} theme={theme} />
+      <Suspense fallback={<LoadingFallback />}>
+        <TradingViewWidget symbol={ticker} theme={theme} />
+      </Suspense>
     </div>
   )
 }
