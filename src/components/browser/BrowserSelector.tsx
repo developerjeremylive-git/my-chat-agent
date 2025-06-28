@@ -63,7 +63,6 @@ export function BrowserSelector({
   const [isLoadingKey, setIsLoadingKey] = useState(false);
   const [apiKey, setApiKey] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false);
-  const [showApiKeySection, setShowApiKeySection] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery({ maxWidth: 640 });
   
@@ -313,24 +312,7 @@ export function BrowserSelector({
         initialApiKey={apiKey}
       />
       
-      <div className="flex items-center mt-2 gap-2">
-        {selectedBrowser === 'rendering' && (
-          <>
-            <input
-              type="checkbox"
-              id="showApiKeySection"
-              checked={showApiKeySection}
-              onChange={(e) => setShowApiKeySection(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="showApiKeySection" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Configure API Key
-            </label>
-          </>
-        )}
-      </div>
-      
-      {selectedBrowser === 'rendering' && showApiKeySection && (
+      {selectedBrowser === 'rendering' && (
         <div className="mt-2">
           <ApiKeyInput 
             chatId={chatId || ''}
