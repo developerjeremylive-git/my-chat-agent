@@ -80,6 +80,8 @@ import { Modal } from "./components/modal/Modal";
 import { Input } from "./components/input/Input";
 import { InputSystemPrompt } from "./components/input/InputSystemPrompt";
 import { BrowserSelector, browserOptions } from "./components/browser/BrowserSelector";
+import { FireplexityChatInterface } from "./components/fireplexity/FireplexityChatInterface";
+import { FireplexitySearch } from "./components/fireplexity/FireplexitySearch";
 import type { BrowserType } from "@/types/api";
 
 // Helper function to update browser configuration
