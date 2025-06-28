@@ -576,6 +576,36 @@ export function Sidebar({ isOpen, onClose, theme, onThemeChange, onPromptSelect 
             '[-ms-overflow-style:none] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full'
           )}>
             <div className="flex flex-col h-full space-y-3 sm:space-y-4">
+              {/* Fireplexity Chat Button */}
+              <div className="px-1 py-0.5">
+                <a
+                  href="/fireplexity"
+                  className={cn(
+                    'group w-full flex items-center gap-3 px-3 py-2.5 sm:py-2.5 rounded-xl',
+                    'text-sm sm:text-[0.9375rem] font-medium transition-all duration-200',
+                    'text-neutral-700 hover:text-[#F48120] dark:text-neutral-300 dark:hover:text-orange-400',
+                    'hover:bg-gradient-to-r hover:from-[#F48120]/5 hover:to-purple-500/5',
+                    'active:scale-[0.98] transform transition-transform',
+                    'focus:outline-none focus:ring-2 focus:ring-[#F48120]/30',
+                    'dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10',
+                    'no-underline'
+                  )}
+                >
+                  <div className={cn(
+                    'p-1.5 rounded-lg',
+                    'bg-gradient-to-br from-[#F48120] to-purple-500',
+                    'group-hover:shadow-md group-hover:shadow-[#F48120]/20',
+                    'transform transition-transform group-hover:scale-110',
+                    'flex-shrink-0'
+                  )}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                  </div>
+                  <span className="truncate">Chat Fireplexity</span>
+                </a>
+              </div>
+
               {/* Sección de Prompts del Sistema */}
               <div className="px-1 py-0.5">
                 <button
