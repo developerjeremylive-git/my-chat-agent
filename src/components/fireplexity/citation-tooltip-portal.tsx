@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { SearchResult } from './types'
+import type { SearchResult } from './types'
 import { FaviconImage } from './favicon-image'
 import { useCitationTooltip } from './use-citation-tooltip'
 

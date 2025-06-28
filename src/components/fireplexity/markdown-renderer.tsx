@@ -4,7 +4,7 @@ import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { CitationTooltip } from './citation-tooltip-portal'
-import { SearchResult } from './types'
+import type { SearchResult } from './types'
 
 interface MarkdownRendererProps {
   content: string

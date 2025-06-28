@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { SearchResult } from './types'
+import type { SearchResult } from './types'
 
 export function useCitationTooltip(sources: SearchResult[]) {
   const [visible, setVisible] = useState(false)
