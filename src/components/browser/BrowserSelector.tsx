@@ -200,7 +200,8 @@ export function BrowserSelector({
             "inline-flex items-center justify-between w-full transition-all duration-200",
             "hover:opacity-80 focus:outline-none",
             "bg-transparent py-2 px-3 h-auto min-h-9 text-sm sm:text-base",
-            "text-left"
+            "text-left",
+            selectedBrowser === 'rendering' && apiKey ? "ring-2 ring-purple-500 rounded-md" : ""
           )}
           id="browser-selector"
           aria-expanded={isOpen}
@@ -312,20 +313,7 @@ export function BrowserSelector({
         initialApiKey={apiKey}
       />
       
-      {selectedBrowser === 'rendering' && (
-        <div className="mt-2">
-          <ApiKeyInput 
-            chatId={chatId || ''}
-            currentBrowser={selectedBrowser}
-            onApiKeySaved={(hasKey: boolean) => {
-              if (hasKey) {
-                // Update the local state to reflect that the key is saved
-                setApiKey(apiKey || '');
-              }
-            }}
-          />
-        </div>
-      )}
+
     </div>
   );
 }
