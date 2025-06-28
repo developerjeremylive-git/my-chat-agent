@@ -48,6 +48,7 @@ interface SideMenuProps {
     isOpen: boolean;
     isStatic: boolean;
     onSetStatic: (isStatic: boolean) => void;
+    onFireplexityClick?: () => void;
     onClose: () => void;
     onChatSelect: (chatId: string) => void;
     onNewChat: () => void;
@@ -128,6 +129,7 @@ export function SideMenu({
     onOpenSettings,
     onOpenTools,
     onClearHistory,
+    onFireplexityClick,
     selectedChatId
 }: SideMenuProps) {
     const { deleteChat: deleteChatFromContext } = useChat();
@@ -996,8 +998,11 @@ export function SideMenu({
 
                             {/* Fireplexity Chat Button */}
                             <div className="px-1 py-0.5">
-                                <a
-                                    href="/fireplexity"
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onFireplexityClick?.();
+                                    }}
                                     className={cn(
                                         'group w-full flex items-center gap-3 px-3 py-2.5 sm:py-2.5 rounded-xl',
                                         'text-sm sm:text-[0.9375rem] font-medium transition-all duration-200',
@@ -1006,7 +1011,8 @@ export function SideMenu({
                                         'active:scale-[0.98] transform transition-transform',
                                         'focus:outline-none focus:ring-2 focus:ring-[#F48120]/30',
                                         'dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10',
-                                        'no-underline'
+                                        'no-underline',
+                                        'w-full text-left'
                                     )}
                                 >
                                     <div className={cn(
@@ -1021,7 +1027,7 @@ export function SideMenu({
                                         </svg>
                                     </div>
                                     <span className="truncate">Chat Fireplexity</span>
-                                </a>
+                                </button>
                             </div>
 
                             {/* Navigation Section */}
@@ -1197,9 +1203,9 @@ export function SideMenu({
                                 <div className="space-y-2">
                                     <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 px-2">Chats Recientes</h3>
                                     <div className="space-y-1">
-                                        {chats.map((chat) => (
+                                        {chats.filter(chat => chat && chat.id).map((chat, index) => (
                                             <div
-                                                key={chat.id}
+                                                key={`chat-${chat.id}-${index}`}
                                                 className={`group relative flex items-center justify-between p-3 cursor-pointer
                                                     hover:bg-gradient-to-r hover:from-[#F48120]/5 hover:to-purple-500/5
                                                     dark:hover:from-[#F48120]/5 dark:hover:to-purple-500/5

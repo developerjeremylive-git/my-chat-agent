@@ -1,8 +1,10 @@
-import { useEffect, useState, useRef, useCallback, use } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useAgent } from "agents/react";
 import { useAgentChat } from "agents/ai-react";
 import { cn } from '@/lib/utils';
 import type { Message } from "@ai-sdk/react";
+import { FireplexityChatInterface } from "@/components/fireplexity/FireplexityChatInterface";
+import { useChat as useAIChat } from 'ai/react';
 import { APPROVAL } from "./shared";
 import { transformAPIMessagesToAgentMessages } from "@/utils/messageUtils";
 import { useChat } from "@/contexts/ChatContext";
@@ -80,7 +82,6 @@ import { Modal } from "./components/modal/Modal";
 import { Input } from "./components/input/Input";
 import { InputSystemPrompt } from "./components/input/InputSystemPrompt";
 import { BrowserSelector, browserOptions } from "./components/browser/BrowserSelector";
-import { FireplexityChatInterface } from "./components/fireplexity/FireplexityChatInterface";
 import { FireplexitySearch } from "./components/fireplexity/FireplexitySearch";
 import type { BrowserType } from "@/types/api";
 
@@ -142,6 +143,7 @@ function ChatComponent() {
   const [currentMessages, setCurrentMessages] = useState<FormattedChatMessage[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [showFireplexityChat, setShowFireplexityChat] = useState(false);
   const [browserConfig, setBrowserConfig] = useState<{
     selected: BrowserType;
     isLoading: boolean;
@@ -858,13 +860,14 @@ function ChatComponent() {
             isOpen={true}
             isStatic={true}
             onSetStatic={setIsMenuStatic}
-            onClose={() => setIsMenuStatic(false)}
-            onOpenSettings={() => setShowSettingsMenu(true)}
+            onClose={() => {}}
+            onOpenSettings={() => setIsSettingsOpen(true)}
             onOpenTools={() => setShowToolsInterface(true)}
-            onClearHistory={() => setShowClearDialog(true)}
+            onClearHistory={clearHistory}
             onChatSelect={handleChatSelect}
             onNewChat={handleNewChat}
             selectedChatId={selectedChatId}
+            onFireplexityClick={() => setShowFireplexityChat(prev => !prev)}
           />
         </div>
       )}
@@ -880,7 +883,39 @@ function ChatComponent() {
           onChatSelect={handleChatSelect}
           onNewChat={handleNewChat}
           selectedChatId={selectedChatId}
+          onFireplexityClick={() => setShowFireplexityChat(prev => !prev)}
         />
+      )}
+
+      {/* Fireplexity Chat Interface */}
+      {showFireplexityChat && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 z-40">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-center p-2 border-b border-neutral-200 dark:border-neutral-700">
+              <h3 className="font-medium text-neutral-800 dark:text-neutral-200">Fireplexity Chat</h3>
+              <button 
+                onClick={() => setShowFireplexityChat(false)}
+                className="p-1 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                aria-label="Cerrar chat"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="h-96 overflow-y-auto">
+              <FireplexityChatInterface
+                messages={[]}
+                sources={[]}
+                followUpQuestions={[]}
+                searchStatus="idle"
+                isLoading={false}
+                input=""
+                handleInputChange={() => {}}
+                handleSubmit={() => {}}
+                messageData={new Map()}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Settings Menu Portal */}

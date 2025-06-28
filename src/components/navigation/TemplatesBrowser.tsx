@@ -83,9 +83,9 @@ export const TemplatesBrowser: React.FC<TemplatesBrowserProps> = ({ onClose, onT
           <div className="flex-1 overflow-y-auto">
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredTemplates.map((template) => (
+                {filteredTemplates.map((template, index) => (
                   <TemplateCard
-                    key={template.id}
+                    key={`${template.id}-${index}`}
                     template={template}
                     onClick={() => {
                       if (onTemplateSelect) {
