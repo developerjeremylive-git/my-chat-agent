@@ -1002,6 +1002,7 @@ export function SideMenu({
                                     onClick={(e) => {
                                         e.preventDefault();
                                         onFireplexityClick?.();
+                                        onClose();
                                     }}
                                     className={cn(
                                         'group w-full flex items-center gap-3 px-3 py-2.5 sm:py-2.5 rounded-xl',
