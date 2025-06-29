@@ -5,6 +5,16 @@ import { Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 
+const PulsingDot = () => (
+  <span 
+    className="inline-block w-2 h-2 ml-2 rounded-full bg-purple-500 animate-pulse"
+    style={{
+      boxShadow: '0 0 0 0 rgba(168, 85, 247, 0.7)',
+      animation: 'pulse 2s infinite'
+    }}
+  />
+);
+
 type BrowserType = 'firefox' | 'chrome' | 'rendering';
 
 import { ApiKeyModal } from './ApiKeyModal';
@@ -23,6 +33,7 @@ interface BrowserSelectorProps {
   className?: string;
   isLoading?: boolean;
   chatId?: string;
+  isFireplexityOpen?: boolean;
 }
 
 export const browserOptions: BrowserOption[] = [
@@ -51,7 +62,8 @@ export function BrowserSelector({
   onBrowserChange, 
   className,
   isLoading = false,
-  chatId
+  chatId,
+  isFireplexityOpen = false
 }: BrowserSelectorProps) {
   // Asegurarse de que onBrowserChange sea una función
   const handleBrowserChange = useCallback((browser: BrowserType) => {
@@ -211,8 +223,9 @@ export function BrowserSelector({
         >
           <div className="flex items-center space-x-2">
             {selectedOption.icon || <Globe className="h-4 w-4" />}
-            <span className="font-medium">
+            <span className="font-medium flex items-center">
               {selectedOption.name}
+              {selectedBrowser === 'rendering' && isFireplexityOpen && <PulsingDot />}
             </span>
           </div>
           {isLoading || isLoadingKey ? (

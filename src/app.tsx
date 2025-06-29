@@ -2069,6 +2069,7 @@ function ChatComponent() {
                               selectedBrowser={selectedBrowser}
                               onBrowserChange={setSelectedBrowser}
                               chatId={currentChat?.id || ''}
+                              isFireplexityOpen={showFireplexityChat}
                             />
                           </div>
                           <div className="flex items-center gap-2">
