@@ -1018,18 +1018,7 @@ export function SideMenu({
                                 >
                                     <div className={cn(
                                         'p-1.5 rounded-lg',
-                                        'bg-gradient-to-br from-[#F48120] to-purple-500',
-                                        'group-hover:shadow-md group-hover:shadow-[#F48120]/20',
-                                        'transform transition-transform group-hover:scale-110',
-                                        'flex-shrink-0'
-                                    )}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                                        </svg>
                                     </div>
-                                    <span className="truncate">Chat Fireplexity</span>
-                                </button>
-                            </div>
 
                             {/* Navigation Section */}
                             <NavigationSection onTemplateSelect={handleTemplateSelect} />
@@ -1075,21 +1064,27 @@ export function SideMenu({
                                                     </div>
                                                     <svg
                                                         className={`w-4 h-4 text-neutral-500 transition-transform ${expandedWorkspace === workspace.id ? 'rotate-180' : ''
-                                                            }`}
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        stroke="currentColor"
-                                                    >
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                    </svg>
-                                                </button>
-
-                                                {expandedWorkspace === workspace.id && (
+                                    <div className={cn(
+                                        'p-1.5 rounded-lg',
+                                        'bg-gradient-to-br from-[#F48120] to-purple-500',
+                                        'group-hover:shadow-md group-hover:shadow-[#F48120]/20',
+                                        'transform transition-transform group-hover:scale-110',
+                                        'flex-shrink-0',
+                                        'flex items-center justify-center w-8 h-8'
+                                    )}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            <line x1="11" y1="8" x2="11" y2="14"></line>
+                                            <line x1="8" y1="11" x2="14" y2="11"></line>
+                                        </svg>
+                                    </div>             {expandedWorkspace === workspace.id && (
                                                     <div className="pl-11 pr-2 py-1 bg-neutral-50 dark:bg-neutral-800/30">
                                                         {workspace.description && (
                                                             <div className="text-xs text-neutral-500 dark:text-neutral-400 mb-2 line-clamp-2">
                                                                 {workspace.description}
                                                             </div>
+{{ ... }}
                                                         )}
                                                         <div className="flex justify-between items-center text-xs text-neutral-500 dark:text-neutral-400">
                                                             <span>

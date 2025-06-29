@@ -1005,7 +1005,7 @@ function ChatComponent() {
         <div className="fixed top-16 left-0 right-0 bottom-0 bg-white dark:bg-neutral-900 z-30 flex flex-col">
           <div className="border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
             <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-              <h3 className="font-medium text-neutral-800 dark:text-neutral-200 text-lg">Fireplexity Chat</h3>
+              <h3 className="font-medium text-neutral-800 dark:text-neutral-200 text-lg">Búsqueda Profunda</h3>
               <button
                 onClick={() => setShowFireplexityChat(false)}
                 className="p-1.5 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
@@ -2012,69 +2012,75 @@ function ChatComponent() {
                 </div>
               </div>
             )} */}
-            {/* Main input area - always visible */}
-            <div className={`relative bg-gradient-to-t from-white/95 via-white/90 to-transparent dark:from-neutral-900/95 dark:via-neutral-900/90 dark:to-transparent backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/50`}>
-              {/* Decorative top border */}
-              {/* <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div> */}
+            {/* Main input area - conditionally rendered */}
+            {(!showFireplexityChat || selectedBrowser !== 'rendering') && (
+              <div className="relative bg-gradient-to-t from-white/95 via-white/90 to-transparent dark:from-neutral-900/95 dark:via-neutral-900/90 dark:to-transparent backdrop-blur-xl border-t border-neutral-200/50 dark:border-neutral-700/50">
+                {/* Decorative top border */}
+                {/* <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-[#F48120] to-purple-500 rounded-full opacity-60"></div> */}
 
-              <div className="flex flex-row items-stretch gap-3 p-3 w-full">
-                {/* Input Form */}
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    try {
-                      // Get the current chat to check for workspace instructions
-                      let workspaceInstructions = '';
-                      if (selectedChatId) {
-                        const response = await fetch(`/api/chats/${selectedChatId}`);
-                        if (response.ok) {
-                          interface ChatResponse {
-                            workspace?: {
-                              instructions?: string;
-                            };
-                          }
-                          const chatData = await response.json() as ChatResponse;
-                          if (chatData.workspace?.instructions) {
-                            workspaceInstructions = chatData.workspace.instructions;
+                <div className="flex flex-row items-stretch gap-3 p-3 w-full">
+                  {/* Input Form */}
+                  <form
+                    onSubmit={async (e) => {
+                      // if (showFireplexityChat && selectedBrowser === 'rendering') {
+                      //   e.preventDefault();
+                      //   return;
+                      // }
+                      e.preventDefault();
+                      try {
+                        // Get the current chat to check for workspace instructions
+                        let workspaceInstructions = '';
+                        if (selectedChatId) {
+                          const response = await fetch(`/api/chats/${selectedChatId}`);
+                          if (response.ok) {
+                            interface ChatResponse {
+                              workspace?: {
+                                instructions?: string;
+                              };
+                            }
+                            const chatData = await response.json() as ChatResponse;
+                            if (chatData.workspace?.instructions) {
+                              workspaceInstructions = chatData.workspace.instructions;
+                            }
                           }
                         }
-                      }
 
-                      // Update configurations with the selected model and prompt
-                      await fetch('/api/assistant', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                          maxStepsTemp: stepMax,
-                          prompt: workspaceInstructions ? `${workspaceInstructions}` : inputText,
-                          modelTemp: selectedModel,
-                          selectedChatId: selectedChatId
-                        }),
-                      });
+                        // Update configurations with the selected model and prompt
+                        await fetch('/api/assistant', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            maxStepsTemp: stepMax,
+                            prompt: workspaceInstructions ? `${workspaceInstructions}` : inputText,
+                            modelTemp: selectedModel,
+                            selectedChatId: selectedChatId
+                          }),
+                        });
 
-                      // Submit the form to the agent
-                      // Check if Fireplexity chat is active and rendering browser is selected
-                      if (showFireplexityChat && selectedBrowser === 'rendering') {
-                        // If Fireplexity chat is active with rendering browser (purple border/dot), use Fireplexity logic
-                        handleFireplexitySubmit(e);
-                      } else {
-                        // Otherwise, use the regular agent submit
+                        // Submit the form to the agent
+                        // Check if Fireplexity chat is active and rendering browser is selected
+                        // if (showFireplexityChat && selectedBrowser === 'rendering') {
+                        //   // If Fireplexity chat is active with rendering browser (purple border/dot), use Fireplexity logic
+                        //   handleFireplexitySubmit(e);
+                        // } else {
+                        //   // Otherwise, use the regular agent submit
+                        //   handleAgentSubmit(e);
+                        // }
                         handleAgentSubmit(e);
+                      } catch (error) {
+                        console.error('Error al actualizar configuraciones:', error);
                       }
-                    } catch (error) {
-                      console.error('Error al actualizar configuraciones:', error);
-                    }
-                  }}
-                  className="flex-1 min-w-0"
-                >
-                  <div className="relative group max-w-4xl mx-auto w-full">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
+                    }}
+                    className="flex-1 min-w-0"
+                  >
+                    <div className="relative group max-w-4xl mx-auto w-full">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-[#F48120]/20 to-purple-500/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-500"></div>
 
-                    {/* <div className="relative"> */}
-                    {/* Mobile toggle button */}
-                    {/* <div className="w-full text-center md:hidden z-20">
+                      {/* <div className="relative"> */}
+                      {/* Mobile toggle button */}
+                      {/* <div className="w-full text-center md:hidden z-20">
                           <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
                             <Button
                               variant="ghost"
@@ -2106,8 +2112,8 @@ function ChatComponent() {
                           </Tooltip>
                         </div> */}
 
-                    {/* Desktop toggle button */}
-                    {/* <div className="hidden md:flex justify-center w-full z-20">
+                      {/* Desktop toggle button */}
+                      {/* <div className="hidden md:flex justify-center w-full z-20">
                           <Tooltip content={systemPrompt ? "Minimizar" : "Maximizar"}>
                             <Button
                               variant="ghost"
@@ -2139,25 +2145,25 @@ function ChatComponent() {
                           </Tooltip>
                         </div>
                       </div> */}
-                    <div className="relative bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
-                      {/* <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div> */}
+                      <div className="relative bg-gradient-to-r from-white via-neutral-50 to-white dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-900 rounded-2xl border border-neutral-200/50 dark:border-neutral-700/50 group-hover:border-[#F48120]/30 dark:group-hover:border-[#F48120]/30 group-focus-within:border-[#F48120]/50 dark:group-focus-within:border-[#F48120]/50 shadow-lg group-hover:shadow-xl group-focus-within:shadow-xl transition-all duration-300">
+                        {/* <div className="absolute inset-0 bg-gradient-to-r from-[#F48120]/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 rounded-2xl"></div> */}
 
-                      {/* Input field */}
-                      <div className="relative z-10 p-3">
-                        <Input
-                          disabled={pendingToolCallConfirmation}
-                          placeholder={pendingToolCallConfirmation
-                            ? "Por favor responde a la confirmación de herramienta arriba..."
-                            : "✨ Escribe tu consulta aquí..."}
-                          className="w-full bg-transparent border-0 focus:ring-0 text-base lg:text-lg placeholder:text-neutral-400 dark:placeholder:text-neutral-500 font-medium px-2"
-                          value={agentInput}
-                          onChange={handleAgentInputChange}
-                          onValueChange={undefined}
-                          onClick={() => { setSystemPrompt(false); }}
-                        />
-                      </div>
-                      {/* Attachment button */}
-                      {/* <Tooltip content="Adjuntar archivo">
+                        {/* Input field */}
+                        <div className="relative z-10 p-3">
+                          <Input
+                            disabled={pendingToolCallConfirmation}
+                            placeholder={pendingToolCallConfirmation
+                              ? "Por favor responde a la confirmación de herramienta arriba..."
+                              : "✨ Escribe tu consulta aquí..."}
+                            className="w-full bg-transparent border-0 focus:ring-0 text-base lg:text-lg placeholder:text-neutral-400 dark:placeholder:text-neutral-500 font-medium px-2"
+                            value={agentInput}
+                            onChange={handleAgentInputChange}
+                            onValueChange={undefined}
+                            onClick={() => { setSystemPrompt(false); }}
+                          />
+                        </div>
+                        {/* Attachment button */}
+                        {/* <Tooltip content="Adjuntar archivo">
                               <Button
                                 type="button"
                                 variant="ghost"
@@ -2173,65 +2179,65 @@ function ChatComponent() {
                                 <Paperclip size={16} className="relative z-10 text-neutral-500 group-hover:text-[#F48120] dark:group-hover:text-[#F48120] transition-colors duration-300" weight="bold" />
                               </Button>
                             </Tooltip> */}
-                      {/* Buttons row below input */}
-                      <div className="relative z-10 flex items-center justify-between px-3 pb-3 pt-1">
-                        <div className="flex items-center gap-2">
-                          {/* Browser Selector */}
-                          <BrowserSelector
-                            selectedBrowser={selectedBrowser}
-                            onBrowserChange={setSelectedBrowser}
-                            chatId={currentChat?.id || ''}
-                            isFireplexityOpen={showFireplexityChat}
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {/* Model Select */}
-                          <div className="w-40">
-                            <ModelSelect />
+                        {/* Buttons row below input */}
+                        <div className="relative z-10 flex items-center justify-between px-3 pb-3 pt-1">
+                          <div className="flex items-center gap-2">
+                            {/* Browser Selector */}
+                            <BrowserSelector
+                              selectedBrowser={selectedBrowser}
+                              onBrowserChange={setSelectedBrowser}
+                              chatId={currentChat?.id || ''}
+                              isFireplexityOpen={showFireplexityChat}
+                            />
                           </div>
-                          {/* Send button */}
-                          <button
-                            type="submit"
-                            disabled={pendingToolCallConfirmation || !agentInput.trim()}
-                            onClick={async (e) => {
-                              try {
-                                if (!user) {
-                                  e.preventDefault();
-                                  setIsLoginOpen(true);
-                                  return;
-                                }
+                          <div className="flex items-center gap-2">
+                            {/* Model Select */}
+                            <div className="w-40">
+                              <ModelSelect />
+                            </div>
+                            {/* Send button */}
+                            <button
+                              type="submit"
+                              disabled={pendingToolCallConfirmation || !agentInput.trim()}
+                              onClick={async (e) => {
+                                try {
+                                  if (!user) {
+                                    e.preventDefault();
+                                    setIsLoginOpen(true);
+                                    return;
+                                  }
 
-                                // If there's no current chat, create a new one before submitting
-                                if (!currentChat) {
-                                  e.preventDefault();
-                                  const response = await fetch('/api/chats', {
-                                    method: 'POST',
-                                    headers: {
-                                      'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                      title: agentInput.substring(0, 30) || 'Nuevo Chat',
-                                    }),
-                                  });
+                                  // If there's no current chat, create a new one before submitting
+                                  if (!currentChat) {
+                                    e.preventDefault();
+                                    const response = await fetch('/api/chats', {
+                                      method: 'POST',
+                                      headers: {
+                                        'Content-Type': 'application/json',
+                                      },
+                                      body: JSON.stringify({
+                                        title: agentInput.substring(0, 30) || 'Nuevo Chat',
+                                      }),
+                                    });
 
-                                  if (response.ok) {
-                                    const newChat = await response.json() as ChatResponse;
-                                    selectChat(newChat.id);
-                                    setSelectedChatId(newChat.id);
+                                    if (response.ok) {
+                                      const newChat = await response.json() as ChatResponse;
+                                      selectChat(newChat.id);
+                                      setSelectedChatId(newChat.id);
 
-                                    // Submit the form after creating the chat
-                                    const form = e.currentTarget.closest('form');
-                                    if (form) {
-                                      form.requestSubmit();
+                                      // Submit the form after creating the chat
+                                      const form = e.currentTarget.closest('form');
+                                      if (form) {
+                                        form.requestSubmit();
+                                      }
                                     }
                                   }
-                                }
 
-                              } catch (error) {
-                                console.error('Error al procesar la solicitud:', error);
-                              }
-                            }}
-                            className={`relative w-10 h-10 rounded-full p-0 flex items-center justify-center 
+                                } catch (error) {
+                                  console.error('Error al procesar la solicitud:', error);
+                                }
+                              }}
+                              className={`relative w-10 h-10 rounded-full p-0 flex items-center justify-center 
                                 bg-gradient-to-br from-[#F48120] to-purple-500 
                                 hover:from-[#ff8f2d] hover:to-purple-600
                                 active:from-[#e6731a] active:to-purple-700
@@ -2241,47 +2247,46 @@ function ChatComponent() {
                                 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
                                 group overflow-hidden
                                 ${pendingToolCallConfirmation ? 'animate-pulse' : ''}`}
-                          >
-                            {/* Animated background gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 rounded-full"></div>
+                            >
+                              {/* Animated background gradient */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity duration-200 rounded-full"></div>
 
-                            {/* Main icon container */}
-                            <div className={`relative z-10 w-5 h-5 flex items-center justify-center transition-all duration-200 transform 
+                              {/* Main icon container */}
+                              <div className={`relative z-10 w-5 h-5 flex items-center justify-center transition-all duration-200 transform 
                                 ${!pendingToolCallConfirmation ? 'group-hover:scale-110' : 'animate-spin'}`}>
-                              {/* Icon with animation */}
-                              {pendingToolCallConfirmation ? (
-                                <div className="relative w-5 h-5">
-                                  {/* Outer rotating circle */}
-                                  <div className="absolute inset-0 rounded-full border-2 border-t-transparent border-r-transparent border-l-white/80 border-b-white/80 animate-spin"></div>
-                                  {/* Pulsing dot */}
-                                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
-                                  {/* Inner gradient circle */}
-                                  <div className="absolute inset-0.5 rounded-full bg-gradient-to-br from-white/90 to-white/60 animate-pulse"></div>
-                                </div>
-                              ) : (
-                                <PaperPlaneRight
-                                  size={16}
-                                  weight="fill"
-                                  className="text-white transition-all duration-200 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-0.5 group-active:-translate-y-0.5"
-                                />
-                              )}
-                            </div>
+                                {/* Icon with animation */}
+                                {pendingToolCallConfirmation ? (
+                                  <div className="relative w-5 h-5">
+                                    {/* Outer rotating circle */}
+                                    <div className="absolute inset-0 rounded-full border-2 border-t-transparent border-r-transparent border-l-white/80 border-b-white/80 animate-spin"></div>
+                                    {/* Pulsing dot */}
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-white rounded-full animate-ping"></div>
+                                    {/* Inner gradient circle */}
+                                    <div className="absolute inset-0.5 rounded-full bg-gradient-to-br from-white/90 to-white/60 animate-pulse"></div>
+                                  </div>
+                                ) : (
+                                  <PaperPlaneRight
+                                    size={16}
+                                    weight="fill"
+                                    className="text-white transition-all duration-200 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-0.5 group-active:-translate-y-0.5"
+                                  />
+                                )}
+                              </div>
 
-                            {/* Ripple effect on click */}
-                            <div className="absolute inset-0 rounded-full opacity-0 group-active:opacity-40 group-active:bg-white transition-opacity duration-300"></div>
+                              {/* Ripple effect on click */}
+                              <div className="absolute inset-0 rounded-full opacity-0 group-active:opacity-40 group-active:bg-white transition-opacity duration-300"></div>
 
-                            {/* Subtle pulse effect */}
-                            <div className="absolute inset-0 rounded-full border border-white/10 group-hover:border-white/20 transition-all duration-300"></div>
-                          </button>
+                              {/* Subtle pulse effect */}
+                              <div className="absolute inset-0 rounded-full border border-white/10 group-hover:border-white/20 transition-all duration-300"></div>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
-            </div>
-
+            )}
           </div>
         </div>
       </div>

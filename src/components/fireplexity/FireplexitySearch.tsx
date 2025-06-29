@@ -19,7 +19,7 @@ export function FireplexitySearch({ handleSubmit, input, handleInputChange, isLo
           type="text"
           value={input}
           onChange={handleInputChange}
-          placeholder="Ask anything..."
+          placeholder="Pregunta algo..."
           className="pr-24 h-14 text-lg rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-zinc-800 transition-colors"
           disabled={isLoading}
         />
