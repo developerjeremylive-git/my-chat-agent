@@ -203,6 +203,7 @@ export function SideMenu({
     const [templateInstructions, setTemplateInstructions] = useState('');
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [systemPrompt, setSystemPrompt] = useState('');
+    const [isFireplexityActive, setIsFireplexityActive] = useState(false);
 
     const [templateData, setTemplateData] = useState<Partial<WorkspaceFormData>>({});
 
@@ -822,7 +823,6 @@ export function SideMenu({
         }
     };
 
-
     const handleDeleteChat = async (chatId: string) => {
         try {
             // First, delete the chat from the database
@@ -880,6 +880,22 @@ export function SideMenu({
 
             // Refresh chats to restore the deleted chat that wasn't actually deleted
             fetchChats(selectedWorkspace);
+        }
+    };
+
+    const handleChatSelect = (chatId: string) => {
+        onChatSelect(chatId);
+        if (!isStatic) {
+            onClose();
+        }
+        setIsFireplexityActive(false);
+    };
+
+    const handleFireplexityClick = () => {
+        onFireplexityClick?.();
+        setIsFireplexityActive(prev => !prev);
+        if (!isStatic) {
+            onClose();
         }
     };
 
@@ -1001,19 +1017,22 @@ export function SideMenu({
                                 <button
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        onFireplexityClick?.();
-                                        onClose();
+                                        handleFireplexityClick();
                                     }}
                                     className={cn(
                                         'group w-full flex items-center gap-3 px-3 py-2.5 sm:py-2.5 rounded-xl',
                                         'text-sm sm:text-[0.9375rem] font-medium transition-all duration-200',
-                                        'text-neutral-700 hover:text-[#F48120] dark:text-neutral-300 dark:hover:text-orange-400',
-                                        'hover:bg-gradient-to-r hover:from-[#F48120]/5 hover:to-purple-500/5',
+                                        isFireplexityActive
+                                            ? 'text-[#F48120] dark:text-orange-400 bg-gradient-to-r from-[#F48120]/10 to-purple-500/10'
+                                            : 'text-neutral-700 hover:text-[#F48120] dark:text-neutral-300 dark:hover:text-orange-400',
+                                        isFireplexityActive
+                                            ? 'shadow-sm shadow-[#F48120]/10'
+                                            : 'hover:bg-gradient-to-r hover:from-[#F48120]/5 hover:to-purple-500/5 dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10',
                                         'active:scale-[0.98] transform transition-transform',
                                         'focus:outline-none focus:ring-2 focus:ring-[#F48120]/30',
-                                        'dark:hover:from-[#F48120]/10 dark:hover:to-purple-500/10',
                                         'no-underline',
-                                        'w-full text-left'
+                                        'w-full text-left',
+                                        'transition-colors duration-200'
                                     )}
                                 >
                                     <div className={cn(
