@@ -1003,6 +1003,18 @@ function ChatComponent() {
       {/* Fireplexity Chat Interface */}
       {showFireplexityChat && (
         <div className="fixed top-16 left-0 right-0 bottom-0 bg-white dark:bg-neutral-900 z-30 flex flex-col">
+          <div className="border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
+            <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+              <h3 className="font-medium text-neutral-800 dark:text-neutral-200 text-lg">Fireplexity Chat</h3>
+              <button
+                onClick={() => setShowFireplexityChat(false)}
+                className="p-1.5 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                aria-label="Cerrar chat"
+              >
+                <X size={20} className="text-neutral-600 dark:text-neutral-300" />
+              </button>
+            </div>
+          </div>
           <div className="flex-1 overflow-hidden">
             <FireplexityChatInterface
               messages={fpMessages}
@@ -1025,55 +1037,6 @@ function ChatComponent() {
                 handleInputChange={handleFireplexityInputChange}
                 isLoading={fpIsLoading}
               />
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Fireplexity Chat Interface */}
-      {showFireplexityChat && (
-        <div className="fixed top-16 left-0 right-0 bottom-0 bg-white dark:bg-neutral-900 z-30 flex flex-col">
-          <div className="border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
-            <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-              <h3 className="font-medium text-neutral-800 dark:text-neutral-200 text-lg">Fireplexity Chat</h3>
-              <button
-                onClick={() => setShowFireplexityChat(false)}
-                className="p-1.5 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-                aria-label="Cerrar chat"
-              >
-                <X size={20} className="text-neutral-600 dark:text-neutral-300" />
-              </button>
-            </div>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <div className="h-full max-w-4xl mx-auto w-full flex flex-col">
-              <div className="flex-1 overflow-y-auto p-4">
-                <div className="space-y-4">
-                  <div className="flex justify-start">
-                    <div className="bg-neutral-100 dark:bg-neutral-800 rounded-2xl px-4 py-3 max-w-3xl">
-                      <p className="text-neutral-800 dark:text-neutral-200">¡Hola! Soy tu asistente de Fireplexity. ¿En qué puedo ayudarte hoy?</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="border-t border-neutral-200 dark:border-neutral-700 p-4">
-                <div className="max-w-3xl mx-auto">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Escribe tu mensaje..."
-                      className="w-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-full py-3 px-5 pr-12 focus:outline-none focus:ring-2 focus:ring-[#F48120] focus:border-transparent text-neutral-800 dark:text-neutral-200 placeholder-neutral-500 dark:placeholder-neutral-400"
-                    />
-                    <button
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#F48120] text-white p-2 rounded-full hover:bg-[#e67300] transition-colors"
-                      aria-label="Enviar mensaje"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
