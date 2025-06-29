@@ -1017,15 +1017,53 @@ export function SideMenu({
                                     )}
                                 >
                                     <div className={cn(
-                                        'p-1.5 rounded-lg',
+                                        'p-1.5 rounded-lg relative',
                                         'bg-gradient-to-br from-[#F48120] to-purple-500',
                                         'group-hover:shadow-md group-hover:shadow-[#F48120]/20',
                                         'transform transition-transform group-hover:scale-110',
-                                        'flex-shrink-0'
+                                        'flex-shrink-0',
+                                        'overflow-visible'
                                     )}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                                            <circle cx="11" cy="11" r="8"></circle>
-                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white relative z-10">
+                                            {/* Círculo exterior de la lupa */}
+                                            <circle cx="11" cy="11" r="8" className="group-hover:scale-110 transition-transform duration-300" />
+                                            
+                                            {/* Efecto de ondas concéntricas */}
+                                            <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                <circle 
+                                                    cx="11" 
+                                                    cy="11" 
+                                                    r="6" 
+                                                    className="animate-ping-slow" 
+                                                    style={{
+                                                        animationDelay: '0.2s',
+                                                        stroke: 'currentColor',
+                                                        strokeWidth: '1',
+                                                        opacity: '0.7'
+                                                    }} 
+                                                />
+                                                <circle 
+                                                    cx="11" 
+                                                    cy="11" 
+                                                    r="4" 
+                                                    className="animate-ping-slow" 
+                                                    style={{
+                                                        animationDelay: '0.4s',
+                                                        stroke: 'currentColor',
+                                                        strokeWidth: '1',
+                                                        opacity: '0.5'
+                                                    }} 
+                                                />
+                                            </g>
+                                            
+                                            {/* Mango de la lupa */}
+                                            <line 
+                                                x1="21" 
+                                                y1="21" 
+                                                x2="16.65" 
+                                                y2="16.65" 
+                                                className="group-hover:translate-x-0.5 group-hover:translate-y-0.5 transition-transform duration-300" 
+                                            />
                                         </svg>
                                     </div>
                                     <span className="truncate">Búsqueda Profunda</span>
