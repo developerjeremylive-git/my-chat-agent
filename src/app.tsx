@@ -4,6 +4,8 @@ import { useAgentChat } from "agents/ai-react";
 import { cn } from '@/lib/utils';
 import type { Message } from "@ai-sdk/react";
 import { FireplexityChatInterface } from "@/components/fireplexity/FireplexityChatInterface";
+import { FireplexitySearch } from "@/components/fireplexity/FireplexitySearch";
+import type { SearchResult } from "@/components/fireplexity/types";
 import { useChat as useAIChat } from 'ai/react';
 import { APPROVAL } from "./shared";
 import { transformAPIMessagesToAgentMessages } from "@/utils/messageUtils";
@@ -82,7 +84,7 @@ import { Modal } from "./components/modal/Modal";
 import { Input } from "./components/input/Input";
 import { InputSystemPrompt } from "./components/input/InputSystemPrompt";
 import { BrowserSelector, browserOptions } from "./components/browser/BrowserSelector";
-import { FireplexitySearch } from "./components/fireplexity/FireplexitySearch";
+
 import type { BrowserType } from "@/types/api";
 
 // Helper function to update browser configuration
@@ -144,6 +146,117 @@ function ChatComponent() {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [showFireplexityChat, setShowFireplexityChat] = useState(false);
+
+  /* --------------------------- Fireplexity state --------------------------- */
+  const [fpMessages, setFpMessages] = useState<Message[]>([]);
+  const [fpSources, setFpSources] = useState<SearchResult[]>([]);
+  const [fpFollowUpQuestions, setFpFollowUpQuestions] = useState<string[]>([]);
+  const [fpSearchStatus, setFpSearchStatus] = useState<string>('');
+  const [fpIsLoading, setFpIsLoading] = useState<boolean>(false);
+  const [fpInput, setFpInput] = useState<string>('');
+  const [fpMessageData, setFpMessageData] = useState<Map<number, { sources: SearchResult[]; followUpQuestions: string[]; ticker?: string }>>(new Map());
+  const [fpCurrentTicker, setFpCurrentTicker] = useState<string | null>(null);
+  const fpAbortControllerRef = useRef<AbortController | null>(null);
+
+  /* --------------------------- Fireplexity helpers --------------------------- */
+  const handleFireplexityInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFpInput(e.target.value);
+  }, []);
+
+  const uuidv4 = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  };
+
+  const handleFireplexitySubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!fpInput.trim() || fpIsLoading) return;
+
+    // Cancel any ongoing request
+    if (fpAbortControllerRef.current) {
+      fpAbortControllerRef.current.abort();
+    }
+    fpAbortControllerRef.current = new AbortController();
+
+    const userMessage: Message = {
+      id: uuidv4(),
+      role: 'user',
+      content: fpInput,
+      createdAt: new Date(),
+    };
+    setFpMessages(prev => [...prev, userMessage]);
+    setFpInput('');
+    setFpIsLoading(true);
+    setFpSearchStatus('Buscando información...');
+
+    try {
+      const response = await fetch('/api/fireplexity/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: fpInput }),
+        signal: fpAbortControllerRef.current?.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error('Error en la búsqueda');
+      }
+
+      const data: {
+        answer?: string;
+        sources?: SearchResult[];
+        followUpQuestions?: string[];
+        ticker?: string;
+      } = await response.json();
+
+      const messageIdNum = Date.now();
+
+      const botMessage: Message = {
+        id: messageIdNum.toString(),
+        role: 'assistant',
+        content: data.answer || 'No se pudo obtener una respuesta.',
+        createdAt: new Date(),
+      };
+
+      const newSources = Array.isArray(data.sources) ? data.sources : [];
+      const newFollowUps = Array.isArray(data.followUpQuestions) ? data.followUpQuestions : [];
+
+      // Update chat states
+      setFpMessages(prev => [...prev, botMessage]);
+      setFpSources(newSources);
+      setFpFollowUpQuestions(newFollowUps);
+
+      setFpMessageData(prev => {
+        const newMap = new Map(prev);
+        newMap.set(messageIdNum, {
+          sources: newSources,
+          followUpQuestions: newFollowUps,
+          ticker: data.ticker,
+        });
+        return newMap;
+      });
+
+      if (data.ticker && typeof data.ticker === 'string') {
+        setFpCurrentTicker(data.ticker);
+      }
+
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
+        console.error('Fireplexity error:', error);
+        const errorMsg: Message = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: 'Lo siento, hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo más tarde.',
+          createdAt: new Date(),
+        };
+        setFpMessages(prev => [...prev, errorMsg]);
+      }
+    } finally {
+      setFpIsLoading(false);
+      setFpSearchStatus('');
+    }
+  }, [fpInput, fpIsLoading, fpMessageData]);
   const [browserConfig, setBrowserConfig] = useState<{
     selected: BrowserType;
     isLoading: boolean;
@@ -887,6 +1000,35 @@ function ChatComponent() {
         />
       )}
 
+      {/* Fireplexity Chat Interface */}
+      {showFireplexityChat && (
+        <div className="fixed top-16 left-0 right-0 bottom-0 bg-white dark:bg-neutral-900 z-30 flex flex-col">
+          <div className="flex-1 overflow-hidden">
+            <FireplexityChatInterface
+              messages={fpMessages}
+              sources={fpSources}
+              followUpQuestions={fpFollowUpQuestions}
+              searchStatus={fpSearchStatus}
+              isLoading={fpIsLoading}
+              input={fpInput}
+              handleInputChange={handleFireplexityInputChange}
+              handleSubmit={handleFireplexitySubmit}
+              messageData={fpMessageData}
+              currentTicker={fpCurrentTicker}
+            />
+          </div>
+          <div className="border-t border-neutral-200 dark:border-neutral-700 p-4 bg-white dark:bg-neutral-900">
+            <div className="max-w-4xl mx-auto">
+              <FireplexitySearch
+                handleSubmit={handleFireplexitySubmit}
+                input={fpInput}
+                handleInputChange={handleFireplexityInputChange}
+                isLoading={fpIsLoading}
+              />
+            </div>
+          </div>
+        </div>
+      )}
       {/* Fireplexity Chat Interface */}
       {showFireplexityChat && (
         <div className="fixed top-16 left-0 right-0 bottom-0 bg-white dark:bg-neutral-900 z-30 flex flex-col">
